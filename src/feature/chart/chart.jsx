@@ -8,9 +8,10 @@ import {
   LineStyle,
   createSeriesMarkers,
 } from "lightweight-charts";
-import { calcSMA, calcEMA, calcBB, calcMACD } from "./indicators";
+import { calcEMA, calcMACD } from "../../untils/indicators";
+import { addBollingerBands } from "./bollingerBand";
 
-export default function TradingChart({ candles, signals }) {
+export default function TradingChart({ candles, signals, infoHeight = 0 }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -34,6 +35,19 @@ export default function TradingChart({ candles, signals }) {
     });
     candleSeries.setData(candles);
 
+    //Bollinger Band
+    const bb = addBollingerBands(
+      chart,
+      containerRef.current,
+      candles,
+      signals,
+      {
+        buyFillColor: "rgba(38,166,154,0.18)",
+        sellFillColor: "rgba(239,83,80,0.18)",
+      },
+    );
+
+    // MA20
     const ma20 = chart.addSeries(LineSeries, {
       color: "#ff9800",
       lineWidth: 2,
@@ -46,8 +60,9 @@ export default function TradingChart({ candles, signals }) {
       signals.map((s) => ({
         time: s.time,
         position: s.type === "buy" ? "belowBar" : "aboveBar",
-        color: s.type === "buy" ? "#1a6ef7" : "#e03131",
+        color: s.type === "buy" ? "#1565C0" : "#C2185B",
         shape: s.type === "buy" ? "arrowUp" : "arrowDown",
+        size: 1,
         text: `${s.type === "buy" ? "MUA" : "BÁN"} ${s.price}`,
       })),
     );
@@ -70,8 +85,18 @@ export default function TradingChart({ candles, signals }) {
     macdSignal.setData(macd.signal);
 
     chart.timeScale().fitContent();
-    return () => chart.remove();
+    chart.timeScale().applyOptions({ barSpacing: 5 });
+
+    return () => {
+      bb.cleanup();
+      chart.remove();
+    };
   }, [candles, signals]);
 
-  return <div ref={containerRef} style={{ width: "100%", height: 600 }} />;
+  return (
+    <div
+      ref={containerRef}
+      style={{ position: "relative", width: "100%", height: 600 }}
+    />
+  );
 }

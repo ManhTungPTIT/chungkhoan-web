@@ -21,12 +21,16 @@ export function calcSMA(candles, period) {
   return result;
 }
 
+// Hàm tính Bollinger Bands
 export function calcBB(candles, period = 20, stdDev = 2) {
-  const upper = [], middle = [], lower = [];
+  const upper = [],
+    middle = [],
+    lower = [];
   for (let i = period - 1; i < candles.length; i++) {
     const slice = candles.slice(i - period + 1, i + 1);
     const avg = slice.reduce((sum, c) => sum + c.close, 0) / period;
-    const variance = slice.reduce((sum, c) => sum + (c.close - avg) ** 2, 0) / period;
+    const variance =
+      slice.reduce((sum, c) => sum + (c.close - avg) ** 2, 0) / period;
     const sd = Math.sqrt(variance);
     upper.push({ time: candles[i].time, value: avg + stdDev * sd });
     middle.push({ time: candles[i].time, value: avg });
@@ -37,7 +41,10 @@ export function calcBB(candles, period = 20, stdDev = 2) {
 
 // EMA có gắn timestamp — result[j] ánh xạ tới candles[period-1+j]
 export function calcEMA(candles, period) {
-  return emaOf(candles.map((c) => c.close), period).map((value, j) => ({
+  return emaOf(
+    candles.map((c) => c.close),
+    period,
+  ).map((value, j) => ({
     time: candles[period - 1 + j].time,
     value,
   }));
@@ -51,17 +58,18 @@ export function calcMACD(candles) {
   const ema12 = emaOf(closes, 12);
   const ema26 = emaOf(closes, 26);
 
-  if (ema26.length === 0)
-    return { macdLine: [], signal: [], histogram: [] };
+  if (ema26.length === 0) return { macdLine: [], signal: [], histogram: [] };
 
   const macdLine = ema26.map((e26, j) => ({
     time: candles[25 + j].time,
     value: ema12[j + 14] - e26,
   }));
 
-  const sigValues = emaOf(macdLine.map((m) => m.value), 9);
-  if (sigValues.length === 0)
-    return { macdLine, signal: [], histogram: [] };
+  const sigValues = emaOf(
+    macdLine.map((m) => m.value),
+    9,
+  );
+  if (sigValues.length === 0) return { macdLine, signal: [], histogram: [] };
 
   const signal = [];
   const histogram = [];
@@ -93,16 +101,16 @@ export function generateSignals(candles) {
   const signals = [];
 
   for (let i = 34; i < candles.length; i++) {
-    const close     = candles[i].close;
+    const close = candles[i].close;
     const closePrev = candles[i - 1].close;
 
-    const ma20Cur  = ma20[i - 19].value;
+    const ma20Cur = ma20[i - 19].value;
     const ma20Prev = ma20[i - 20].value;
 
-    const macdCur  = macdLine[i - 25].value;
+    const macdCur = macdLine[i - 25].value;
     const macdPrev = macdLine[i - 26].value;
 
-    const sigCur  = signal[i - 33].value;
+    const sigCur = signal[i - 33].value;
     const sigPrev = signal[i - 34].value;
 
     // MUA: giá trên MA20 VÀ MACD cắt lên Signal
