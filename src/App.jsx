@@ -14,7 +14,7 @@ export default function App() {
   useEffect(() => {
     const fetchCandles = () => {
       axios
-        .get("http://localhost:8000/intraday", {
+        .get(`${import.meta.env.VITE_PYTHON_API_URL}/intraday`, {
           params: { symbol: chanelCode || "ACB" },
         })
         .then((response) => {
@@ -40,11 +40,13 @@ export default function App() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8000/vn100")
+      .get(`${import.meta.env.VITE_PYTHON_API_URL}/vn100`)
       .then((response) => {
         setDataPanel(Object.values(response.data.data));
       })
-      .catch((error) => {});
+      .catch((error) => {
+        console.error(error);
+      });
   }, []);
 
   const signals = generateSignals(candles);
