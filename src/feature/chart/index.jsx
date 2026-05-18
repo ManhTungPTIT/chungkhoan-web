@@ -1,51 +1,18 @@
 import "./index.scss";
-import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import TradingChart from "../chart/layouts/chart";
 import { generateSignals } from "./untils/indicators";
 import Panel from "../chart/layouts/panel";
+import { useIntraday } from "./hooks/useIntraday";
+import { useVn100 } from "./hooks/useVn100";
+import axios from "axios";
+
 function TradingView() {
-  const [candles, setCandles] = useState([]);
   const [openPanel, setOpenPanel] = useState(false);
-  const [dataPanel, setDataPanel] = useState([]);
   const [chanelCode, setChaneCode] = useState("VNINDEX");
 
-  useEffect(() => {
-    const fetchCandles = () => {
-      axios
-        .get("http://localhost:8000/intraday", {
-          params: { symbol: chanelCode || "VNINDEX" },
-        })
-        .then((response) => {
-          console.log(response.data.data);
-          const res = Object.values(response.data.data);
-          const arr = res.map((item) => ({
-            ...item,
-            open: Number(item.open),
-            high: Number(item.high),
-            low: Number(item.low),
-            close: Number(item.close),
-          }));
-          setCandles(arr);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    };
-
-    fetchCandles();
-    const interval = setInterval(fetchCandles, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [chanelCode]);
-
-  useEffect(() => {
-    axios
-      .get("http://localhost:8000/vn100")
-      .then((response) => {
-        setDataPanel(Object.values(response.data.data));
-      })
-      .catch((error) => {});
-  }, []);
+  const { data: candles = [] } = useIntraday(chanelCode);
+  const { data: dataPanel = [] } = useVn100();
 
   const signals = generateSignals(candles);
   const infoRef = useRef(null);

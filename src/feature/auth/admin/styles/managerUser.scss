@@ -6,7 +6,7 @@
   width: calc(100% - 0.5rem);
   .managerUser_card {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     .card {
       background-color: rgba(245, 244, 237);
@@ -44,6 +44,7 @@
   }
   input {
     width: 100%;
+    box-sizing: border-box;
     padding-left: 5px;
     cursor: auto;
     margin: 0.2rem 0;
