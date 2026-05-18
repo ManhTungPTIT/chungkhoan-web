@@ -1,0 +1,21 @@
+.information {
+  padding-left: 5rem;
+}
+
+.panel {
+  cursor: pointer;
+  border-radius: 5px;
+  flex-shrink: 0;
+  writing-mode: vertical-rl;
+  transform: rotate(360deg);
+  padding: 12px 8px;
+  border: 1px solid var(--border);
+  &.hideButton {
+    color: rgb(63, 81, 181);
+    background-color: transparent;
+  }
+  &.showButton {
+    color: white;
+    background-color: rgb(63, 81, 181);
+  }
+}

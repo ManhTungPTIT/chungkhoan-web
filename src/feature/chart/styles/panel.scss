@@ -1,17 +1,43 @@
 table {
   width: 20vw;
+
   thead {
+    display: block;
     tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
       th {
         color: white;
         background-color: rgb(7, 104, 159);
-        margin-left: 1px;
       }
     }
   }
+
   tbody {
+    display: block;
+    height: calc(100vh - 37px);
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: transparent;
+      border-radius: 3px;
+      transition: background-color 0.3s;
+    }
+    &:hover::-webkit-scrollbar-thumb,
+    &.is-scrolling::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.35);
+    }
+
     tr {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
       text-transform: uppercase;
+
       .code {
         color: rgb(7, 104, 159);
         background-color: transparent;

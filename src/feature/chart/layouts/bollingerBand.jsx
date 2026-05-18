@@ -1,5 +1,5 @@
-import { LineSeries, LineStyle } from "lightweight-charts";
-import { calcBB } from "../../untils/indicators";
+import { LineSeries } from "lightweight-charts";
+import { calcBB } from "../untils/indicators";
 
 export function addBollingerBands(
   chart,
@@ -11,9 +11,9 @@ export function addBollingerBands(
   const {
     period = 20,
     multiplier = 2,
-    upperColor = "rgba(239,83,80,0.7)",
-    middleColor = "rgba(150,150,150,0.5)",
-    lowerColor = "rgba(38,166,154,0.7)",
+    upperColor = "rgb(58,113,252)", //duong phia tren
+    // middleColor = "rgba(150,150,150,0.5)",
+    lowerColor = "rgb(58,113,252)", //duong phia duoi
     lineWidth = 1,
     // ✅ Thêm 2 màu mới thay fillColor cũ
     buyFillColor = "rgba(38,166,154,0.15)", // xanh — vùng MUA→BÁN
@@ -25,7 +25,7 @@ export function addBollingerBands(
   const base = {
     lineWidth,
     priceLineVisible: false,
-    lastValueVisible: false,
+    lastValueVisible: true,
     crosshairMarkerVisible: false,
   };
 
@@ -34,12 +34,6 @@ export function addBollingerBands(
     color: upperColor,
   });
   upperSeries.setData(bb.upper);
-  const middleSeries = chart.addSeries(LineSeries, {
-    ...base,
-    color: middleColor,
-    lineStyle: LineStyle.Dashed,
-  });
-  middleSeries.setData(bb.middle);
   const lowerSeries = chart.addSeries(LineSeries, {
     ...base,
     color: lowerColor,
@@ -61,7 +55,7 @@ export function addBollingerBands(
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, w, h);
 
-    // 1. Build toàn bộ points (giống code cũ)
+    // 1. Build toàn bộ points
     const points = [];
     const len = Math.min(bb.upper.length, bb.lower.length);
     for (let i = 0; i < len; i++) {
@@ -137,5 +131,5 @@ export function addBollingerBands(
     canvas.remove();
   };
 
-  return { upperSeries, middleSeries, lowerSeries, cleanup, drawFill };
+  return { upperSeries, lowerSeries, cleanup, drawFill };
 }

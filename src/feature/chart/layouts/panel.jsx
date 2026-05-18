@@ -1,6 +1,18 @@
-import "./panel.scss";
+import { useRef, useCallback } from "react";
+import "../styles/panel.scss";
 
 function Panel({ dataPanel = [], onSelectSymbol }) {
+  const tbodyRef = useRef(null);
+  const timerRef = useRef(null);
+
+  const handleScroll = useCallback(() => {
+    const el = tbodyRef.current;
+    if (!el) return;
+    el.classList.add("is-scrolling");
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => el.classList.remove("is-scrolling"), 800);
+  }, []);
+
   return (
     <table>
       <thead>
@@ -11,7 +23,7 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
           <th>(%)</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody ref={tbodyRef} onScroll={handleScroll}>
         {dataPanel.map((item, index) => {
           const isPositive = Number(item.change_pct) >= 0;
           return (

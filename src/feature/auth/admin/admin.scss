@@ -1,0 +1,82 @@
+.admin_container {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+
+  .admin_header {
+    height: 13vh;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: white;
+    img {
+      border-radius: 50%;
+      width: 3rem;
+      height: 3rem;
+      margin: 1rem;
+    }
+    button {
+      cursor: pointer;
+      color: rgb(7, 104, 159);
+      background-color: transparent;
+      text-transform: uppercase;
+      font-weight: 800;
+      font-size: 1rem;
+      border: none;
+    }
+  }
+  .admin_body {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    .sidebar {
+      flex: 1;
+      background-color: rgb(7, 104, 159);
+      .sidebar_item {
+        width: 100%;
+        height: 5rem;
+        display: flex;
+        padding-left: 2rem;
+        align-items: center;
+        flex-direction: row;
+        gap: 10px;
+        position: relative;
+        cursor: pointer;
+        color: rgb(146, 185, 212);
+        text-transform: uppercase;
+      }
+      .sidebar_item::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: white;
+        opacity: 0;
+        transition: 0.3s;
+        pointer-events: none;
+        width: 85%;
+        height: 70%;
+        border-radius: 5px;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .sidebar_item:hover {
+        color: white;
+      }
+      .sidebar_item:hover::after {
+        opacity: 0.1;
+      }
+    }
+    .container {
+      flex: 4;
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+}

@@ -8,7 +8,7 @@ import {
   LineStyle,
   createSeriesMarkers,
 } from "lightweight-charts";
-import { calcEMA, calcMACD } from "../../untils/indicators";
+import { calcEMA, calcMACD } from "../untils/indicators";
 import { addBollingerBands } from "./bollingerBand";
 
 export default function TradingChart({ candles, signals, infoHeight = 0 }) {
@@ -96,7 +96,7 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
   return (
     <div
       ref={containerRef}
-      style={{ position: "relative", width: "100%", height: 600 }}
+      style={{ position: "relative", width: "100%", height: `calc(100vh - ${infoHeight}px)` }}
     />
   );
 }
