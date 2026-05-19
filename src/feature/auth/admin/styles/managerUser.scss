@@ -70,8 +70,213 @@
           padding: 0.5rem 0.2rem;
           font-weight: 500;
           color: black;
+          button {
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            border: 1px solid rgb(7, 104, 159);
+            border-radius: 5px;
+            width: 5.5rem;
+            height: 2rem;
+            background-color: transparent;
+            cursor: pointer;
+            text-align: center;
+          }
+          button:hover {
+            background-color: rgb(7, 104, 159);
+            color: white;
+          }
         }
       }
+    }
+  }
+}
+
+// ─── Modal ────────────────────────────────────────────────
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+}
+
+.user-modal {
+  position: relative;
+  background: #f5f4ed;
+  border-radius: 16px;
+  width: 30vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem 1.25rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+
+  .modal-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: #888;
+    display: flex;
+    align-items: center;
+    &:hover {
+      color: #333;
+    }
+  }
+
+  .modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding-bottom: 0.5rem;
+    .modal-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #111;
+    }
+    .modal-code {
+      font-size: 0.8rem;
+      color: #888;
+    }
+  }
+
+  .modal-section {
+    background: white;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+
+    .modal-section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 0.15rem;
+    }
+
+    .modal-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #333;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 0.4rem;
+      &:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+      strong {
+        font-weight: 700;
+      }
+    }
+
+    .modal-packages {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+
+      .pkg-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 0.5rem 0.25rem;
+        text-align: center;
+        cursor: pointer;
+        background: white;
+        transition: border-color 0.2s;
+        .pkg-num {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: #333;
+        }
+        .pkg-unit {
+          font-size: 0.7rem;
+          color: #888;
+        }
+        &.active {
+          border-color: rgb(7, 104, 159);
+          background: #eff6ff;
+          .pkg-num {
+            color: rgb(7, 104, 159);
+          }
+          .pkg-unit {
+            color: rgb(7, 104, 159);
+          }
+        }
+      }
+    }
+
+    .modal-action-btn {
+      width: 100%;
+      padding: 0.55rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: white;
+      &.lock {
+        border: 1.5px solid #f59e0b;
+        color: #92400e;
+        &:hover { background: #fffbeb; }
+        &.active {
+          background: #f59e0b;
+          color: white;
+        }
+      }
+      &.delete {
+        border: 1.5px solid #ef4444;
+        color: #991b1b;
+        &:hover { background: #fef2f2; }
+        &.active {
+          background: #ef4444;
+          color: white;
+        }
+      }
+    }
+  }
+
+  .modal-footer {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.25rem;
+
+    button {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+
+    .modal-footer-cancel {
+      background: #f3f4f6;
+      color: #444;
+      &:hover { background: #e5e7eb; }
+    }
+
+    .modal-footer-save {
+      background: rgb(7, 104, 159);
+      color: white;
+      &:hover { background: rgb(5, 85, 130); }
     }
   }
 }
