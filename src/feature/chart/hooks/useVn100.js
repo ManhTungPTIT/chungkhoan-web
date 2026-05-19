@@ -6,11 +6,13 @@ const fetchVn100 = async () => {
     `${import.meta.env.VITE_PYTHON_API_URL}/vn100`,
   );
 
-  return Object.values(data.data).map((item) => ({
-    ...item,
-    price: Number(item.price),
-    change_pct: Number(item.change_pct),
-  }));
+  return Object.values(data.data)
+    .map((item) => ({
+      ...item,
+      price: Number(item.price),
+      change_pct: Number(item.change_pct),
+    }))
+    .sort((a, b) => b.change_pct - a.change_pct);
 };
 
 export function useVn100() {
