@@ -13,11 +13,14 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-axiosAdmin.interceptors.request.use((config) => {
-  const token = getAccessToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+axiosAdmin.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
 
 axiosAdmin.interceptors.response.use(
   (response) => response,
