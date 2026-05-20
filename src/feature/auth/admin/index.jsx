@@ -1,9 +1,10 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
-import "./admin.scss";
+import { Outlet, Link } from 'react-router-dom';
+import './admin.scss';
+import { LoginAdminService } from './services/loginAdminService';
 
 function Admin() {
-  const navigate = useNavigate();
-  const handleLogOut = () => navigate("/admin");
+  const { logout } = LoginAdminService();
+
   return (
     <div className="admin_container">
       <div className="admin_header">
@@ -11,7 +12,7 @@ function Admin() {
           src="https://images.pexels.com/photos/18101841/pexels-photo-18101841.jpeg"
           alt="Anh"
         />
-        <button onClick={() => handleLogOut()}>Logout</button>
+        <button onClick={logout}>Logout</button>
       </div>
       <div className="admin_body">
         <div className="sidebar">
@@ -22,7 +23,7 @@ function Admin() {
               viewBox="0 0 24 24"
               strokeWidth="1.5"
               stroke="currentColor"
-              style={{ width: "1.5rem", height: "1.5rem" }}
+              style={{ width: '1.5rem', height: '1.5rem' }}
             >
               <path
                 strokeLinecap="round"
