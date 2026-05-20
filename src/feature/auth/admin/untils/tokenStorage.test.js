@@ -14,9 +14,13 @@ describe('tokenStorage', () => {
     expect(getAccessToken()).toBeNull();
   });
 
+  it('getRefreshToken returns null when nothing stored', () => {
+    expect(getRefreshToken()).toBeNull();
+  });
+
   it('setAccessToken stores accessToken', () => {
     setAccessToken('abc');
-    expect(localStorage.getItem('accessToken')).toBe('abc');
+    expect(getAccessToken()).toBe('abc');
   });
 
   it('getAccessToken reads stored accessToken', () => {
