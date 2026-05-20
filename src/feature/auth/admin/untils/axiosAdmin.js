@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAccessToken, getRefreshToken, setAccessToken, clearTokens } from './tokenStorage';
+import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens } from './tokenStorage';
 
 const axiosAdmin = axios.create({
   baseURL: import.meta.env.VITE_BACK_API_URL,
@@ -25,11 +25,10 @@ axiosAdmin.interceptors.request.use(
 axiosAdmin.interceptors.response.use(
   (response) => response,
   async (error) => {
-    const original = error.config;
-
-    if (error.response?.status !== 401 || original._retry) {
+    if (!error.config || error.response?.status !== 401 || error.config._retry) {
       return Promise.reject(error);
     }
+    const original = error.config;
 
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
@@ -44,11 +43,13 @@ axiosAdmin.interceptors.response.use(
     isRefreshing = true;
 
     try {
+      const baseUrl = (import.meta.env.VITE_BACK_API_URL || '').replace(/\/$/, '');
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACK_API_URL}/api/auth/refresh`,
+        `${baseUrl}/api/auth/refresh`,
         { refreshToken: getRefreshToken() },
       );
       setAccessToken(data.accessToken);
+      if (data.refreshToken) setRefreshToken(data.refreshToken);
       processQueue(null, data.accessToken);
       original.headers.Authorization = `Bearer ${data.accessToken}`;
       return axiosAdmin(original);

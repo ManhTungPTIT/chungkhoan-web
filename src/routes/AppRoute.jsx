@@ -13,9 +13,9 @@ function AppRoute() {
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route element={<PrivateRoute />}>
-        <Route path="/admin" element={<Admin />}>
-          <Route path="user" element={<ManagerUser />} />
-          <Route path="kyc" element={<KycAdmin />} />
+        <Route element={<Admin />}>
+          <Route path="/admin/user" element={<ManagerUser />} />
+          <Route path="/admin/kyc" element={<KycAdmin />} />
         </Route>
       </Route>
     </Routes>

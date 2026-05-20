@@ -3,6 +3,7 @@ import {
   getAccessToken,
   getRefreshToken,
   setAccessToken,
+  setRefreshToken,
   setTokens,
   clearTokens,
 } from './tokenStorage';
@@ -21,6 +22,11 @@ describe('tokenStorage', () => {
   it('setAccessToken stores accessToken', () => {
     setAccessToken('abc');
     expect(getAccessToken()).toBe('abc');
+  });
+
+  it('setRefreshToken stores refreshToken', () => {
+    setRefreshToken('xyz');
+    expect(getRefreshToken()).toBe('xyz');
   });
 
   it('getAccessToken reads stored accessToken', () => {
