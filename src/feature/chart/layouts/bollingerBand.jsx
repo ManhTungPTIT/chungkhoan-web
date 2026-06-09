@@ -11,9 +11,9 @@ export function addBollingerBands(
   const {
     period = 20,
     multiplier = 2,
-    upperColor = "rgb(58,113,252)", //duong phia tren
+    upperColor = "rgba(255,255,255,0.7)", //duong phia tren
     // middleColor = "rgba(150,150,150,0.5)",
-    lowerColor = "rgb(58,113,252)", //duong phia duoi
+    lowerColor = "rgba(255,255,255,0.7)", //duong phia duoi
     lineWidth = 1,
     // ✅ Thêm 2 màu mới thay fillColor cũ
     buyFillColor = "rgba(38,166,154,0.15)", // xanh — vùng MUA→BÁN

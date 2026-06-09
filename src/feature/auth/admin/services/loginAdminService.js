@@ -1,5 +1,5 @@
-import loginAdminHook from '../hooks/loginAdminHook';
-import { setTokens, clearTokens } from '../untils/tokenStorage';
+import loginAdminHook from "../hooks/loginAdminHook";
+import { setTokens, clearTokens } from "../untils/tokenStorage";
 
 export function LoginAdminService() {
   const login = async (data) => {
@@ -12,7 +12,7 @@ export function LoginAdminService() {
 
   const logout = () => {
     clearTokens();
-    window.location.href = '/admin/login';
+    window.location.href = "/admin/login";
   };
 
   return { login, logout };

@@ -1,8 +1,10 @@
-import { use, useState } from "react";
+import { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IoCloseCircle } from "react-icons/io5";
 import "../styles/login.scss";
 import { useNavigate } from "react-router-dom";
+
+import { LoginAdminService } from "../services/loginAdminService";
 
 export default function AdminLogin() {
   const [account, setAccount] = useState("");
@@ -10,24 +12,30 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
+  const { login } = LoginAdminService();
+
   const navigate = useNavigate();
 
   const validate = () => {
     const newErrors = {};
-    if (!account.trim()) newErrors.account = true;
-    if (!password.trim()) newErrors.password = true;
+    if (!account.trim()) newErrors.account = "Error";
+    if (!password.trim()) newErrors.password = "Error";
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
-    // e.preventDefault();
-    // const newErrors = validate();
-    // setErrors(newErrors);
-    // if (Object.keys(newErrors).length > 0) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newErrors = validate();
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
 
-    // // Simulate wrong credentials
-    // setShowPopup(true);
-    navigate("/admin/user");
+    try {
+      console.log("vao");
+      await login({ username: account.trim(), password: password.trim() });
+      navigate("/admin/user");
+    } catch {
+      setShowPopup(true);
+    }
   };
 
   return (

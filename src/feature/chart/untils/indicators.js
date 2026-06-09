@@ -87,46 +87,26 @@ export function calcMACD(candles) {
   return { macdLine, signal, histogram };
 }
 
-/**
- * Tự động tính tín hiệu mua/bán theo công thức:
- *
- * MUA : close > MA20  VÀ  MACD cắt lên trên Signal
- * BÁN : close cắt xuống dưới MA20  VÀ  MACD cắt xuống dưới Signal
- *
- * Cần ít nhất 35 nến để có đủ dữ liệu.
- */
+// MUA: close > MA20 VÀ MACD > Signal(9)
+// BÁN: còn lại
+// Cần ít nhất 34 nến (signal bắt đầu tại candles[33]).
 export function generateSignals(candles) {
   const ma20 = calcEMA(candles, 20);
   const { macdLine, signal } = calcMACD(candles);
   const signals = [];
 
-  for (let i = 34; i < candles.length; i++) {
+  for (let i = 33; i < candles.length; i++) {
     const close = candles[i].close;
-    const closePrev = candles[i - 1].close;
+    const ma20Val = ma20[i - 19].value;
+    const macdVal = macdLine[i - 25].value;
+    const sigVal = signal[i - 33].value;
 
-    const ma20Cur = ma20[i - 19].value;
-    const ma20Prev = ma20[i - 20].value;
-
-    const macdCur = macdLine[i - 25].value;
-    const macdPrev = macdLine[i - 26].value;
-
-    const sigCur = signal[i - 33].value;
-    const sigPrev = signal[i - 34].value;
-
-    // MUA: giá trên MA20 VÀ MACD cắt lên Signal
-    if (close > ma20Cur && macdPrev <= sigPrev && macdCur > sigCur) {
-      signals.push({ time: candles[i].time, type: "buy", price: close });
-    }
-
-    // BÁN: giá cắt xuống dưới MA20 VÀ MACD cắt xuống Signal
-    if (
-      closePrev >= ma20Prev &&
-      close < ma20Cur &&
-      macdPrev >= sigPrev &&
-      macdCur < sigCur
-    ) {
-      signals.push({ time: candles[i].time, type: "sell", price: close });
-    }
+    const isBuy = close > ma20Val && macdVal > sigVal;
+    signals.push({
+      time: candles[i].time,
+      type: isBuy ? "buy" : "sell",
+      price: close,
+    });
   }
 
   return signals;

@@ -49,10 +49,24 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
 
     // MA20
     const ma20 = chart.addSeries(LineSeries, {
-      color: "#ff9800",
+      color: "purple",
       lineWidth: 2,
     });
     ma20.setData(calcEMA(candles, 20));
+
+    //MA10
+    const ma10 = chart.addSeries(LineSeries, {
+      color: "blue",
+      lineWidth: 2,
+    });
+    ma10.setData(calcEMA(candles, 10));
+
+    //ma50
+    const ma50 = chart.addSeries(LineSeries, {
+      color: "red",
+      lineWidth: 2,
+    });
+    ma50.setData(calcEMA(candles, 50));
 
     // Tín hiệu mua/bán
     createSeriesMarkers(
@@ -96,7 +110,11 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
   return (
     <div
       ref={containerRef}
-      style={{ position: "relative", width: "100%", height: `calc(100vh - ${infoHeight}px)` }}
+      style={{
+        position: "relative",
+        width: "100%",
+        height: `calc(100vh - ${infoHeight}px)`,
+      }}
     />
   );
 }

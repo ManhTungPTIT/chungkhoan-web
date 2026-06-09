@@ -176,8 +176,7 @@ function TradingView() {
               textTransform: "uppercase",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "flex-start",
-              alignItems: "start",
+              alignItems: "end",
               margin: "0",
             }}
           >

@@ -1,5 +1,11 @@
-import axios from 'axios';
-import { getAccessToken, getRefreshToken, setAccessToken, setRefreshToken, clearTokens } from './tokenStorage';
+import axios from "axios";
+import {
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken,
+  setRefreshToken,
+  clearTokens,
+} from "./tokenStorage";
 
 const axiosAdmin = axios.create({
   baseURL: import.meta.env.VITE_BACK_API_URL,
@@ -13,8 +19,10 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+//gan header  header `Authorization: Bearer <accessToken>`
 axiosAdmin.interceptors.request.use(
   (config) => {
+    console.log("Add header");
     const token = getAccessToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
@@ -22,10 +30,15 @@ axiosAdmin.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+//xu ly 401
 axiosAdmin.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (!error.config || error.response?.status !== 401 || error.config._retry) {
+    if (
+      !error.config ||
+      error.response?.status !== 401 ||
+      error.config._retry
+    ) {
       return Promise.reject(error);
     }
     const original = error.config;
@@ -43,11 +56,13 @@ axiosAdmin.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const baseUrl = (import.meta.env.VITE_BACK_API_URL || '').replace(/\/$/, '');
-      const { data } = await axios.post(
-        `${baseUrl}/api/auth/refresh`,
-        { refreshToken: getRefreshToken() },
+      const baseUrl = (import.meta.env.VITE_BACK_API_URL || "").replace(
+        /\/$/,
+        "",
       );
+      const { data } = await axios.post(`${baseUrl}/api/auth/refresh`, {
+        refreshToken: getRefreshToken(),
+      });
       setAccessToken(data.accessToken);
       if (data.refreshToken) setRefreshToken(data.refreshToken);
       processQueue(null, data.accessToken);
@@ -56,7 +71,7 @@ axiosAdmin.interceptors.response.use(
     } catch (err) {
       processQueue(err, null);
       clearTokens();
-      window.location.href = '/admin/login';
+      window.location.href = "/admin/login";
       return Promise.reject(err);
     } finally {
       isRefreshing = false;
