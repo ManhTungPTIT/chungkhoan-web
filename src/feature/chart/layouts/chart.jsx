@@ -5,10 +5,9 @@ import {
   LineSeries,
   CandlestickSeries,
   HistogramSeries,
-  LineStyle,
   createSeriesMarkers,
 } from "lightweight-charts";
-import { calcEMA, calcMACD } from "../untils/indicators";
+import { calcEMA, calcMCDX } from "../untils/indicators";
 import { addBollingerBands } from "./bollingerBand";
 
 export default function TradingChart({ candles, signals, infoHeight = 0 }) {
@@ -19,6 +18,9 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
     const chart = createChart(containerRef.current, {
       autoSize: true,
       layout: { background: { color: "#fff" }, textColor: "#555" },
+      // Giữ nguyên thứ tự vẽ khi hover — nếu không, cột nền xanh MCDX (value 20)
+      // sẽ bị kéo lên trên cùng và che mất cột đỏ/vàng
+      hoveredSeriesOnTop: false,
       crosshair: { mode: CrosshairMode.Normal },
       rightPriceScale: { borderVisible: false },
       grid: {
@@ -77,26 +79,26 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
         color: s.type === "buy" ? "#1565C0" : "#C2185B",
         shape: s.type === "buy" ? "arrowUp" : "arrowDown",
         size: 1,
-        text: `${s.type === "buy" ? "MUA" : "BÁN"} ${s.price}`,
+        text: `${s.type === "buy" ? "XANH" : "ĐỎ"} ${s.price}`,
       })),
     );
 
-    // MACD(12,26,9) — pane 1
-    const macd = calcMACD(candles);
-    const macdHist = chart.addSeries(HistogramSeries, {}, 1);
-    macdHist.setData(macd.histogram);
-    const macdLine = chart.addSeries(
+    // MCDX — pane 1, thang 0–20: nền xanh 20 → Hot Money vàng → Banker đỏ/cam
+    // Các histogram đều vẽ từ 0, series sau đè lên series trước
+    const mcdx = calcMCDX(candles);
+    const mcdxRetail = chart.addSeries(HistogramSeries, {}, 1);
+    mcdxRetail.setData(mcdx.retail);
+    const mcdxHot = chart.addSeries(HistogramSeries, {}, 1);
+    mcdxHot.setData(mcdx.hotMoney);
+    const mcdxBanker = chart.addSeries(HistogramSeries, {}, 1);
+    mcdxBanker.setData(mcdx.banker);
+    // Đường Cá Mập (EMA của Banker)
+    const mcdxShark = chart.addSeries(
       LineSeries,
-      { color: "#2962ff", lineWidth: 1 },
+      { color: "#1E88E5", lineWidth: 2 },
       1,
     );
-    macdLine.setData(macd.macdLine);
-    const macdSignal = chart.addSeries(
-      LineSeries,
-      { color: "#ff6d00", lineWidth: 1, lineStyle: LineStyle.Dashed },
-      1,
-    );
-    macdSignal.setData(macd.signal);
+    mcdxShark.setData(mcdx.sharkLine);
 
     chart.timeScale().fitContent();
     chart.timeScale().applyOptions({ barSpacing: 5 });

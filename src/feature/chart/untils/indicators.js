@@ -87,26 +87,144 @@ export function calcMACD(candles) {
   return { macdLine, signal, histogram };
 }
 
-// MUA: close > MA20 VÀ MACD > Signal(9)
-// BÁN: còn lại
-// Cần ít nhất 34 nến (signal bắt đầu tại candles[33]).
+// RSI theo Wilder — result[j] ánh xạ tới candles[period + j]
+export function calcRSI(candles, period) {
+  if (candles.length <= period) return [];
+  const closes = candles.map((c) => c.close);
+  const rsiVal = (g, l) => (l === 0 ? 100 : 100 - 100 / (1 + g / l));
+
+  let gain = 0,
+    loss = 0;
+  for (let i = 1; i <= period; i++) {
+    const d = closes[i] - closes[i - 1];
+    if (d >= 0) gain += d;
+    else loss -= d;
+  }
+  let avgGain = gain / period;
+  let avgLoss = loss / period;
+
+  const out = [{ time: candles[period].time, value: rsiVal(avgGain, avgLoss) }];
+  for (let i = period + 1; i < closes.length; i++) {
+    const d = closes[i] - closes[i - 1];
+    avgGain = (avgGain * (period - 1) + Math.max(d, 0)) / period;
+    avgLoss = (avgLoss * (period - 1) + Math.max(-d, 0)) / period;
+    out.push({ time: candles[i].time, value: rsiVal(avgGain, avgLoss) });
+  }
+  return out;
+}
+
+/**
+ * MCDX (Banker Fund) — thang cố định 0–20, cột luôn đầy tới 20:
+ *   Retail   : nền xanh lá cố định 20 (phần còn lại sau khi vàng/đỏ đè lên)
+ *   HotMoney : RSI(40) quy về 0–20 — cột vàng, vẽ đè lên nền xanh
+ *   Banker   : RSI(50) quy về 0–20 — cột đỏ, vẽ đè trên cùng;
+ *              chuyển CAM khi Banker giảm so với nến trước
+ *   SharkLine: EMA(sharkPeriod) của Banker — đường "Cá Mập" xanh dương
+ * Mỗi RSI chỉ tính phần vượt trên 50: (rsi - 50) / 50 * 20, kẹp 0–20.
+ */
+export function calcMCDX(
+  candles,
+  bankerPeriod = 50,
+  hotPeriod = 40,
+  sharkPeriod = 10,
+) {
+  const start = Math.max(bankerPeriod, hotPeriod);
+  if (candles.length <= start)
+    return { banker: [], hotMoney: [], retail: [], sharkLine: [] };
+
+  const scale = (rsi) => Math.min(20, Math.max(0, ((rsi - 50) / 50) * 20));
+  const bankerRSI = calcRSI(candles, bankerPeriod);
+  const hotRSI = calcRSI(candles, hotPeriod);
+
+  const banker = [],
+    hotMoney = [],
+    retail = [],
+    bankerValues = [];
+  let prevB = -1;
+  for (let i = start; i < candles.length; i++) {
+    const b = scale(bankerRSI[i - bankerPeriod].value);
+    const h = scale(hotRSI[i - hotPeriod].value);
+    const time = candles[i].time;
+    retail.push({ time, value: 20, color: "#43A047" });
+    hotMoney.push({ time, value: h, color: "#FDD835" });
+    banker.push({ time, value: b, color: b >= prevB ? "#E53935" : "#FB8C00" });
+    bankerValues.push(b);
+    prevB = b;
+  }
+
+  // Đường Cá Mập — EMA của sức mạnh Banker
+  const sharkLine = emaOf(bankerValues, sharkPeriod).map((value, j) => ({
+    time: candles[start + sharkPeriod - 1 + j].time,
+    value,
+  }));
+
+  return { banker, hotMoney, retail, sharkLine };
+}
+
+// Chuyển time của nến thành chuỗi ngày dễ đọc
+// Hỗ trợ: UNIX giây (number), BusinessDay {year, month, day}, hoặc chuỗi sẵn có
+function toDateString(time) {
+  const pad = (n) => String(n).padStart(2, "0");
+  if (typeof time === "number") {
+    const d = new Date(time * 1000);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  if (typeof time === "object" && time !== null) {
+    return `${time.year}-${pad(time.month)}-${pad(time.day)}`;
+  }
+  return String(time);
+}
+
+/**
+ * Tự động tính tín hiệu mua/bán theo công thức:
+ *
+ * MUA : close > MA20  VÀ  MACD cắt lên trên Signal
+ * BÁN : close cắt xuống dưới MA20  VÀ  MACD cắt xuống dưới Signal
+ *
+ * Cần ít nhất 35 nến để có đủ dữ liệu.
+ */
 export function generateSignals(candles) {
   const ma20 = calcEMA(candles, 20);
   const { macdLine, signal } = calcMACD(candles);
   const signals = [];
 
-  for (let i = 33; i < candles.length; i++) {
+  for (let i = 34; i < candles.length; i++) {
     const close = candles[i].close;
-    const ma20Val = ma20[i - 19].value;
-    const macdVal = macdLine[i - 25].value;
-    const sigVal = signal[i - 33].value;
+    const closePrev = candles[i - 1].close;
 
-    const isBuy = close > ma20Val && macdVal > sigVal;
-    signals.push({
-      time: candles[i].time,
-      type: isBuy ? "buy" : "sell",
-      price: close,
-    });
+    const ma20Cur = ma20[i - 19].value;
+    const ma20Prev = ma20[i - 20].value;
+
+    const macdCur = macdLine[i - 25].value;
+    const macdPrev = macdLine[i - 26].value;
+
+    const sigCur = signal[i - 33].value;
+    const sigPrev = signal[i - 34].value;
+
+    // MUA: giá trên MA20 VÀ MACD cắt lên Signal
+    if (close > ma20Cur && macdPrev <= sigPrev && macdCur > sigCur) {
+      signals.push({
+        time: candles[i].time,
+        date: toDateString(candles[i].time),
+        type: "buy",
+        price: close,
+      });
+    }
+
+    // BÁN: giá cắt xuống dưới MA20 VÀ MACD cắt xuống Signal
+    if (
+      closePrev >= ma20Prev &&
+      close < ma20Cur &&
+      macdPrev >= sigPrev &&
+      macdCur < sigCur
+    ) {
+      signals.push({
+        time: candles[i].time,
+        date: toDateString(candles[i].time),
+        type: "sell",
+        price: close,
+      });
+    }
   }
 
   return signals;

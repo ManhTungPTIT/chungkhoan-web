@@ -22,6 +22,8 @@ import { useIntraday } from "./hooks/useIntraday";
 import { useVn100 } from "./hooks/useVn100";
 import axios from "axios";
 
+const COLOR_CODE_BUY = { action: "Xanh", color: "blue" };
+const COLOR_CODE_SELL = { action: "Đỏ", color: "red" };
 function TradingView() {
   const [openPanel, setOpenPanel] = useState(false);
   const [chanelCode, setChaneCode] = useState("VNINDEX");
@@ -34,6 +36,7 @@ function TradingView() {
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
 
+  console.log("candles", candles);
   useEffect(() => {
     if (!infoRef.current) return;
     const ro = new ResizeObserver(() => {
@@ -42,6 +45,24 @@ function TradingView() {
     ro.observe(infoRef.current);
     return () => ro.disconnect();
   }, []);
+
+  const today = new Date();
+
+  const day = String(today.getDate()).padStart(2, "0");
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const year = today.getFullYear();
+
+  const dayCurrent = `${day}/${month}/${year}`;
+
+  //Lay gia va ngay tai diem signal cuoi cung (co the chua co khi data dang tai)
+  const lastSignal = signals.length > 0 ? signals[signals.length - 1] : null;
+  const priceChange = lastSignal ? lastSignal.price : "--";
+  const dayChange = lastSignal ? lastSignal.date : "--";
+  const COLORCODE =
+    lastSignal && lastSignal.type === "buy" ? COLOR_CODE_BUY : COLOR_CODE_SELL;
+
+  const priceCurrent =
+    candles.length > 0 ? candles[candles.length - 1].close : "--";
 
   return (
     <div className="main">
@@ -185,20 +206,32 @@ function TradingView() {
               Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
               <p style={{ color: "red" }}> Đỏ ra</p>
             </div>
-            <div style={{ display: "flex", gap: "2rem", fontSize: "0.8rem" }}>
-              <p style={{ color: "blue" }}>Mua quanh giá: 140 </p>
-              <p style={{ color: "purple " }}>Ngày mua: 03/04/2026</p>
+            <div style={{ display: "flex", gap: "1rem", fontSize: "0.8rem" }}>
+              <p style={{ color: COLORCODE.color }}>
+                Giá chuyển {COLORCODE.action}: {priceChange}
+              </p>
+              <p style={{ color: COLORCODE.color }}>
+                Ngày chuyển {COLORCODE.action}: {dayChange}
+              </p>
             </div>
 
-            <p style={{ color: "blue", fontSize: "0.8rem" }}>
-              (Kết quả: Đã lãi 62.92% | Đã nắm giữ +23 phiên)
-            </p>
+            <div
+              style={{
+                color: "#B36AAA",
+                fontSize: "0.8rem",
+                display: "flex",
+                gap: "1rem",
+              }}
+            >
+              <p>Giá hiện tại: {priceCurrent}</p>
+              <p>Ngày HIỆN TẠI: {dayCurrent}</p>
+            </div>
 
-            <div style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}>
+            {/* <div style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}>
               <p style={{ color: "red" }}>Giá chốt lãi/Cắt lỗ: 198.3</p>
               <p>Mục tiêu dự kiến: 168 | 196 | 252</p>
-            </div>
-            <h2
+            </div> */}
+            {/* <h2
               style={{
                 color: "purple ",
                 marginBottom: "0",
@@ -209,7 +242,7 @@ function TradingView() {
             </h2>
             <p style={{ color: "green ", fontSize: "0.6rem" }}>
               Khuyến nghị: Vùng xanh, tiếp tục nắm giữ
-            </p>
+            </p> */}
           </div>
           <TradingChart
             candles={candles}
