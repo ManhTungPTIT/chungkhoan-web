@@ -11,34 +11,6 @@ export function emaOf(values, period) {
   return out;
 }
 
-export function calcSMA(candles, period) {
-  const result = [];
-  for (let i = period - 1; i < candles.length; i++) {
-    const slice = candles.slice(i - period + 1, i + 1);
-    const avg = slice.reduce((sum, c) => sum + c.close, 0) / period;
-    result.push({ time: candles[i].time, value: avg });
-  }
-  return result;
-}
-
-// Hàm tính Bollinger Bands
-export function calcBB(candles, period = 20, stdDev = 2) {
-  const upper = [],
-    middle = [],
-    lower = [];
-  for (let i = period - 1; i < candles.length; i++) {
-    const slice = candles.slice(i - period + 1, i + 1);
-    const avg = slice.reduce((sum, c) => sum + c.close, 0) / period;
-    const variance =
-      slice.reduce((sum, c) => sum + (c.close - avg) ** 2, 0) / period;
-    const sd = Math.sqrt(variance);
-    upper.push({ time: candles[i].time, value: avg + stdDev * sd });
-    middle.push({ time: candles[i].time, value: avg });
-    lower.push({ time: candles[i].time, value: avg - stdDev * sd });
-  }
-  return { upper, middle, lower };
-}
-
 // EMA có gắn timestamp — result[j] ánh xạ tới candles[period-1+j]
 export function calcEMA(candles, period) {
   return emaOf(
@@ -111,54 +83,6 @@ export function calcRSI(candles, period) {
     out.push({ time: candles[i].time, value: rsiVal(avgGain, avgLoss) });
   }
   return out;
-}
-
-/**
- * MCDX (Banker Fund) — thang cố định 0–20, cột luôn đầy tới 20:
- *   Retail   : nền xanh lá cố định 20 (phần còn lại sau khi vàng/đỏ đè lên)
- *   HotMoney : RSI(40) quy về 0–20 — cột vàng, vẽ đè lên nền xanh
- *   Banker   : RSI(50) quy về 0–20 — cột đỏ, vẽ đè trên cùng;
- *              chuyển CAM khi Banker giảm so với nến trước
- *   SharkLine: EMA(sharkPeriod) của Banker — đường "Cá Mập" xanh dương
- * Mỗi RSI chỉ tính phần vượt trên 50: (rsi - 50) / 50 * 20, kẹp 0–20.
- */
-export function calcMCDX(
-  candles,
-  bankerPeriod = 50,
-  hotPeriod = 40,
-  sharkPeriod = 10,
-) {
-  const start = Math.max(bankerPeriod, hotPeriod);
-  if (candles.length <= start)
-    return { banker: [], hotMoney: [], retail: [], sharkLine: [] };
-
-  const scale = (rsi) => Math.min(20, Math.max(0, ((rsi - 50) / 50) * 20));
-  const bankerRSI = calcRSI(candles, bankerPeriod);
-  const hotRSI = calcRSI(candles, hotPeriod);
-
-  const banker = [],
-    hotMoney = [],
-    retail = [],
-    bankerValues = [];
-  let prevB = -1;
-  for (let i = start; i < candles.length; i++) {
-    const b = scale(bankerRSI[i - bankerPeriod].value);
-    const h = scale(hotRSI[i - hotPeriod].value);
-    const time = candles[i].time;
-    retail.push({ time, value: 20, color: "#43A047" });
-    hotMoney.push({ time, value: h, color: "#FDD835" });
-    banker.push({ time, value: b, color: b >= prevB ? "#E53935" : "#FB8C00" });
-    bankerValues.push(b);
-    prevB = b;
-  }
-
-  // Đường Cá Mập — EMA của sức mạnh Banker
-  const sharkLine = emaOf(bankerValues, sharkPeriod).map((value, j) => ({
-    time: candles[start + sharkPeriod - 1 + j].time,
-    value,
-  }));
-
-  return { banker, hotMoney, retail, sharkLine };
 }
 
 // Chuyển time của nến thành chuỗi ngày dễ đọc
