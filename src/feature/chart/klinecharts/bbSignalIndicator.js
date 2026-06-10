@@ -75,7 +75,11 @@ registerIndicator({
       seg = [];
     };
 
-    for (let i = visibleRange.from; i < visibleRange.to; i++) {
+    // Dùng realFrom/realTo (kẹp biên) để fill phủ cả nến chỉ hiển thị một phần ở mép,
+    // khớp với phạm vi thư viện vẽ 2 đường band
+    const from = Math.max(0, visibleRange.realFrom ?? visibleRange.from);
+    const to = Math.min(result.length, visibleRange.realTo ?? visibleRange.to);
+    for (let i = from; i < to; i++) {
       const data = result[i];
       const kline = kLineDataList[i];
       if (!data || data.upper == null || !kline) {
