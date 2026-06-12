@@ -73,9 +73,11 @@ registerIndicator({
       type: "bar",
       baseValue: 0,
       // đỏ khi tăng/đi ngang, cam khi giảm so với nến trước (khớp bản cũ)
+      // current.indicatorData cũng có thể undefined khi dataList rỗng
       styles: ({ prev, current }) => ({
         color:
           prev.indicatorData?.banker != null &&
+          current.indicatorData?.banker != null &&
           current.indicatorData.banker < prev.indicatorData.banker
             ? "#FB8C00"
             : "#E53935",

@@ -41,12 +41,21 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
     chart.applyNewData(dataList);
 
     // EMA built-in 10/20/50 — thư viện tự tính, đè lên pane nến
+    // styles.lines THAY THẾ toàn bộ default (không merge sâu) — phải đủ
+    // style/smooth/size/dashedValue, thiếu dashedValue sẽ crash khi zoom
+    // (thư viện đọc dashedValue[0] lúc gộp các đoạn line)
     chart.createIndicator(
       {
         name: "EMA",
         calcParams: [10, 20, 50],
         styles: {
-          lines: [{ color: "blue" }, { color: "purple" }, { color: "red" }],
+          lines: ["blue", "purple", "red"].map((color) => ({
+            style: "solid",
+            smooth: false,
+            size: 1,
+            dashedValue: [2, 2],
+            color,
+          })),
         },
       },
       true,

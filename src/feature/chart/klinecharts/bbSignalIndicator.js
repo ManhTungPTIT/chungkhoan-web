@@ -42,10 +42,24 @@ registerIndicator({
     { key: "upper", title: "UP: ", type: "line" },
     { key: "lower", title: "DN: ", type: "line" },
   ],
+  // styles.lines THAY THẾ toàn bộ default (không merge sâu) — phải đủ
+  // style/smooth/size/dashedValue, thiếu dashedValue sẽ crash khi zoom
   styles: {
     lines: [
-      { color: "rgba(255,255,255,0.7)", size: 1 },
-      { color: "rgba(255,255,255,0.7)", size: 1 },
+      {
+        style: "solid",
+        smooth: false,
+        size: 1,
+        dashedValue: [2, 2],
+        color: "rgba(255,255,255,0.7)",
+      },
+      {
+        style: "solid",
+        smooth: false,
+        size: 1,
+        dashedValue: [2, 2],
+        color: "rgba(255,255,255,0.7)",
+      },
     ],
   },
   calc: (dataList, { calcParams }) =>

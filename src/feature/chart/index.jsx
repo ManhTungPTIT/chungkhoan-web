@@ -24,6 +24,19 @@ import axios from "axios";
 
 const COLOR_CODE_BUY = { action: "Xanh", color: "blue" };
 const COLOR_CODE_SELL = { action: "Đỏ", color: "red" };
+
+// Nhận Date hoặc chuỗi ngày ("2026-02-23 07:00"); giá trị không parse được
+// (vd "--" khi chưa có signal) trả về nguyên văn thay vì crash render
+const convertDay = (value) => {
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
+};
+
 function TradingView() {
   const [openPanel, setOpenPanel] = useState(false);
   const [chanelCode, setChaneCode] = useState("VNINDEX");
@@ -48,16 +61,17 @@ function TradingView() {
 
   const today = new Date();
 
-  const day = String(today.getDate()).padStart(2, "0");
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const year = today.getFullYear();
+  // const day = String(today.getDate()).padStart(2, "0");
+  // const month = String(today.getMonth() + 1).padStart(2, "0");
+  // const year = today.getFullYear();
 
-  const dayCurrent = `${day}/${month}/${year}`;
+  const dayCurrent = convertDay(today);
 
   //Lay gia va ngay tai diem signal cuoi cung (co the chua co khi data dang tai)
   const lastSignal = signals.length > 0 ? signals[signals.length - 1] : null;
   const priceChange = lastSignal ? lastSignal.price : "--";
   const dayChange = lastSignal ? lastSignal.date : "--";
+  const dayChangeConvert = convertDay(dayChange);
   const COLORCODE =
     lastSignal && lastSignal.type === "buy" ? COLOR_CODE_BUY : COLOR_CODE_SELL;
 
@@ -206,19 +220,19 @@ function TradingView() {
               Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
               <p style={{ color: "red" }}> Đỏ ra</p>
             </div>
-            <div style={{ display: "flex", gap: "1rem", fontSize: "0.8rem" }}>
+            <div style={{ display: "flex", gap: "1rem", fontSize: "0.5rem" }}>
               <p style={{ color: COLORCODE.color }}>
                 Giá chuyển {COLORCODE.action}: {priceChange}
               </p>
               <p style={{ color: COLORCODE.color }}>
-                Ngày chuyển {COLORCODE.action}: {dayChange}
+                Ngày chuyển {COLORCODE.action}: {dayChangeConvert}
               </p>
             </div>
 
             <div
               style={{
                 color: "#B36AAA",
-                fontSize: "0.8rem",
+                fontSize: "0.5rem",
                 display: "flex",
                 gap: "1rem",
               }}
