@@ -20,7 +20,7 @@ export function normalizeCandle(item) {
 
 const fetchIntraday = async (symbol) => {
   const { data } = await axios.get(
-    `${import.meta.env.VITE_PYTHON_API_URL}/api/python/intraday`,
+    `${import.meta.env.VITE_PYTHON_API_URL}/intraday`,
     {
       params: { symbol },
     },
