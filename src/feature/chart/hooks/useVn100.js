@@ -3,8 +3,9 @@ import axios from "axios";
 
 const fetchVn100 = async () => {
   const { data } = await axios.get(
-    `${import.meta.env.VITE_PYTHON_API_URL}/vn100`,
+    `${import.meta.env.VITE_PYTHON_API_URL}/api/python/vn100`,
   );
+  console.log(data);
 
   return Object.values(data.data)
     .map((item) => ({

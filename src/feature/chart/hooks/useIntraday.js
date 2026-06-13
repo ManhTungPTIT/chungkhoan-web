@@ -20,7 +20,7 @@ export function normalizeCandle(item) {
 
 const fetchIntraday = async (symbol) => {
   const { data } = await axios.get(
-    `${import.meta.env.VITE_PYTHON_API_URL}/intraday`,
+    `${import.meta.env.VITE_PYTHON_API_URL}/api/python/intraday`,
     {
       params: { symbol },
     },
@@ -33,7 +33,7 @@ export function useIntraday(symbol = "VNINDEX") {
   return useQuery({
     queryKey: ["intraday", symbol],
     queryFn: () => fetchIntraday(symbol),
-    refetchInterval:  60 * 1000,
+    refetchInterval: 60 * 1000,
     staleTime: 2 * 60 * 1000, //thoi gian du cho data coi nhu la moi
   });
 }

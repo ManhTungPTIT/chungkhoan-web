@@ -1,77 +1,88 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
 import { calcMCDXValues } from "../mcdxIndicator";
-import { calcRSI, emaOf } from "../../untils/indicators";
 
-// 80 nến deterministic, đủ vượt start=50 và shark (59)
-const candles = Array.from({ length: 80 }, (_, i) => ({
-  time: 1700000000 + i * 60,
-  close: 100 + 10 * Math.sin(i / 5) + (i % 7),
-}));
+// Dữ liệu dao động mạnh (sóng + nhiễu) — giống chỉ số thật, đủ để RSV
+// chạm cả hai biên 0 và 100. 320 nến: vượt warmup banker(50)+smooth(3).
+const candles = Array.from({ length: 320 }, (_, i) => {
+  const close = 1700 + Math.sin(i / 18) * 120 + Math.sin(i / 6) * 30 + (i % 5);
+  return { time: 1700000000 + i * 60, high: close + 7, low: close - 7, close };
+});
 
-// Reference: copy verbatim từ calcMCDX cũ (untils/indicators.js trước migration)
-function legacyMCDX(candles, bankerPeriod = 50, hotPeriod = 40, sharkPeriod = 10) {
-  const start = Math.max(bankerPeriod, hotPeriod);
-  if (candles.length <= start)
-    return { banker: [], hotMoney: [], retail: [], sharkLine: [] };
-
-  const scale = (rsi) => Math.min(20, Math.max(0, ((rsi - 50) / 50) * 20));
-  const bankerRSI = calcRSI(candles, bankerPeriod);
-  const hotRSI = calcRSI(candles, hotPeriod);
-
-  const banker = [],
-    hotMoney = [],
-    retail = [],
-    bankerValues = [];
-  let prevB = -1;
-  for (let i = start; i < candles.length; i++) {
-    const b = scale(bankerRSI[i - bankerPeriod].value);
-    const h = scale(hotRSI[i - hotPeriod].value);
-    const time = candles[i].time;
-    retail.push({ time, value: 20, color: "#43A047" });
-    hotMoney.push({ time, value: h, color: "#FDD835" });
-    banker.push({ time, value: b, color: b >= prevB ? "#E53935" : "#FB8C00" });
-    bankerValues.push(b);
-    prevB = b;
-  }
-
-  const sharkLine = emaOf(bankerValues, sharkPeriod).map((value, j) => ({
-    time: candles[start + sharkPeriod - 1 + j].time,
-    value,
-  }));
-
-  return { banker, hotMoney, retail, sharkLine };
+// Reference RSV(stochastic) + SMA(3), quy về thang 0..20 — khớp công thức mới.
+function refScaled(period, smooth = 3) {
+  const rsv = candles.map((c, i) => {
+    if (i < period - 1) return null;
+    let h = -Infinity,
+      l = Infinity;
+    for (let j = i - period + 1; j <= i; j++) {
+      h = Math.max(h, candles[j].high);
+      l = Math.min(l, candles[j].low);
+    }
+    return h === l ? 50 : ((c.close - l) / (h - l)) * 100;
+  });
+  return rsv.map((_, i) => {
+    if (i < period - 1 + (smooth - 1)) return null;
+    let s = 0;
+    for (let j = i - smooth + 1; j <= i; j++) s += rsv[j];
+    return Math.min(20, Math.max(0, s / smooth / 5));
+  });
 }
 
-describe("calcMCDXValues", () => {
-  const out = calcMCDXValues(candles, 50, 40, 10);
-  const legacy = legacyMCDX(candles, 50, 40, 10);
+describe("calcMCDXValues (RSV-based)", () => {
+  const out = calcMCDXValues(candles, 50, 21, 10);
 
-  it("thẳng hàng với dataList: {} cho 50 nến đầu", () => {
-    expect(out).toHaveLength(80);
+  it("thẳng hàng với dataList: {} trước khi đủ dữ liệu", () => {
+    expect(out).toHaveLength(320);
     expect(out[0]).toEqual({});
-    expect(out[49]).toEqual({});
-    expect(out[50].banker).toBeDefined();
+    // banker=50 + smooth(3) → giá trị đầu tiên ở index 51
+    expect(out[50]).toEqual({});
+    expect(out[51].banker).toBeDefined();
   });
 
-  it("banker/hot/retail khớp bản legacy", () => {
-    for (let i = 50; i < 80; i++) {
-      expect(out[i].retail).toBe(20);
-      expect(out[i].banker).toBeCloseTo(legacy.banker[i - 50].value, 10);
-      expect(out[i].hot).toBeCloseTo(legacy.hotMoney[i - 50].value, 10);
-    }
-  });
-
-  it("đường Cá Mập bắt đầu từ nến 59 và khớp legacy", () => {
-    expect(out[58].shark).toBeUndefined();
-    legacy.sharkLine.forEach((s, j) => {
-      expect(out[59 + j].shark).toBeCloseTo(s.value, 10);
+  it("retail luôn = 20 (nền xanh cố định)", () => {
+    out.forEach((r) => {
+      if (r.retail != null) expect(r.retail).toBe(20);
     });
   });
 
+  it("mọi giá trị nằm trong thang 0..20", () => {
+    out.forEach((r) => {
+      ["hot", "banker", "shark"].forEach((k) => {
+        if (r[k] != null) {
+          expect(r[k]).toBeGreaterThanOrEqual(0);
+          expect(r[k]).toBeLessThanOrEqual(20);
+        }
+      });
+    });
+  });
+
+  it("hot/banker khớp công thức RSV tham chiếu", () => {
+    const hotRef = refScaled(21);
+    const bankRef = refScaled(50);
+    for (let i = 51; i < 320; i++) {
+      expect(out[i].hot).toBeCloseTo(hotRef[i], 10);
+      expect(out[i].banker).toBeCloseTo(bankRef[i], 10);
+    }
+  });
+
+  // Regression: bug cũ (Wilder RSI - 50) nén hot xuống dải ~0..9 và ~60%
+  // số cột gần 0 nên nền xanh phủ kín. RSV phải trải đủ tới gần 20.
+  it("hot trải đủ thang — đỉnh vượt 14 (không bị nén như bug cũ)", () => {
+    const hot = out.map((r) => r.hot).filter((v) => v != null);
+    expect(Math.max(...hot)).toBeGreaterThan(14);
+    const nearZero = hot.filter((v) => v < 2).length / hot.length;
+    expect(nearZero).toBeLessThan(0.4);
+  });
+
+  it("đường Cá Mập = EMA(banker) bắt đầu sau warmup banker", () => {
+    // banker bắt đầu ở 51, EMA(10) → shark đầu tiên ở 51 + 10 - 1 = 60
+    expect(out[59].shark).toBeUndefined();
+    expect(out[60].shark).toBeDefined();
+  });
+
   it("trả toàn {} khi không đủ dữ liệu", () => {
-    const out2 = calcMCDXValues(candles.slice(0, 50), 50, 40, 10);
-    expect(out2).toHaveLength(50);
+    const out2 = calcMCDXValues(candles.slice(0, 50), 50, 21, 10);
     expect(out2.every((v) => Object.keys(v).length === 0)).toBe(true);
   });
 });

@@ -3,8 +3,8 @@
 import { registerIndicator } from "klinecharts/dist/index.esm.js";
 
 const NEUTRAL_FILL = "rgba(180,180,220,0.08)"; // trước signal đầu tiên
-const BUY_FILL = "rgba(38,166,154,0.18)"; // từ signal MUA
-const SELL_FILL = "rgba(239,83,80,0.18)"; // từ signal BÁN
+const BUY_FILL = "rgba(154, 250, 152,0.8)"; // từ signal MUA
+const SELL_FILL = "rgba(253, 228, 224,0.8)"; // từ signal BÁN
 
 // Calc thuần — export riêng để unit test không cần chart/DOM.
 // Trả mảng thẳng hàng với dataList: {} khi chưa đủ period, ngược lại { upper, lower }.
@@ -72,6 +72,12 @@ registerIndicator({
     );
     const result = indicator.result;
 
+    // Vẽ fill XUỐNG DƯỚI nến: nến/lưới/EMA đã vẽ trước trên cùng canvas, nên
+    // "destination-over" đặt mây vào phần canvas còn trống (phía sau nến).
+    // restore trước khi return → 2 đường band (figures) vẫn vẽ đè lên trên.
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-over";
+
     // Gom các nến visible liên tiếp cùng màu thành 1 polygon
     let seg = [];
     let segColor = null;
@@ -116,6 +122,7 @@ registerIndicator({
     }
     flush();
 
+    ctx.restore();
     return false;
   },
 });

@@ -49,7 +49,7 @@ function TradingView() {
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
 
-  console.log("candles", candles);
+  console.log("candles", dataPanel);
   useEffect(() => {
     if (!infoRef.current) return;
     const ro = new ResizeObserver(() => {
