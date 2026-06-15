@@ -99,73 +99,55 @@ function toDateString(time) {
   return String(time);
 }
 
-// Cửa sổ xác nhận: hai lần cắt (giá↔MA20 và MACD↔Signal) được coi là
-// cùng một tín hiệu nếu xảy ra cách nhau tối đa SIGNAL_WINDOW nến.
-const SIGNAL_WINDOW = 3;
-
 /**
- * Tự động tính tín hiệu mua/bán theo nguyên tắc "đúng khoảnh khắc cắt":
+ * Tự động tính tín hiệu mua/bán bằng máy trạng thái flat/long.
  *
- * MUA : giá CẮT LÊN MA20  VÀ  MACD CẮT LÊN Signal  (trong cửa sổ SIGNAL_WINDOW nến)
- * BÁN : giá CẮT XUỐNG MA20 VÀ  MACD CẮT XUỐNG Signal (trong cửa sổ SIGNAL_WINDOW nến)
+ * Bắt đầu ở trạng thái flat (đang ngoài). Tại mỗi nến k (k >= 34, đủ dữ
+ * liệu Signal của MACD):
+ *   flat → BUY  khi  close > MA20  VÀ  MACD > Signal   → chuyển sang long
+ *   long → SELL khi  close < MA20                       → chuyển sang flat
  *
- * Tín hiệu phát ra tại cây nến mà sự kiện cắt thứ hai hoàn tất.
- * Cần ít nhất 35 nến để có đủ dữ liệu.
+ * Máy trạng thái đảm bảo tín hiệu xen kẽ buy → sell → buy, không bỏ sót
+ * lệnh ra. Cần ít nhất 35 nến để vòng lặp chạy (k bắt đầu tại 34).
+ *
+ * Ánh xạ index (như calcEMA/calcMACD sản xuất):
+ *   ma20[k-19].value     = MA20 tại nến k
+ *   macdLine[k-25].value = MACD tại nến k
+ *   signal[k-33].value   = Signal tại nến k
  */
 export function generateSignals(candles) {
   const ma20 = calcEMA(candles, 20);
   const { macdLine, signal } = calcMACD(candles);
   const signals = [];
 
-  // Các hàm phát hiện sự kiện cắt tại nến k (chỉ hợp lệ khi k >= 34)
-  const priceCrossUp = (k) =>
-    candles[k - 1].close <= ma20[k - 20].value &&
-    candles[k].close > ma20[k - 19].value;
-  const priceCrossDown = (k) =>
-    candles[k - 1].close >= ma20[k - 20].value &&
-    candles[k].close < ma20[k - 19].value;
-  const macdCrossUp = (k) =>
-    macdLine[k - 26].value <= signal[k - 34].value &&
-    macdLine[k - 25].value > signal[k - 33].value;
-  const macdCrossDown = (k) =>
-    macdLine[k - 26].value >= signal[k - 34].value &&
-    macdLine[k - 25].value < signal[k - 33].value;
-
-  // true nếu sự kiện fn xảy ra trong cửa sổ [i-SIGNAL_WINDOW, i]
-  const inWindow = (fn, i) => {
-    for (let k = Math.max(34, i - SIGNAL_WINDOW); k <= i; k++) {
-      if (fn(k)) return true;
-    }
-    return false;
-  };
+  let inLong = false;
 
   for (let i = 34; i < candles.length; i++) {
-    // MUA: cả hai lần cắt LÊN nằm trong cửa sổ, phát tại nến hoàn tất cặp
-    if (
-      inWindow(priceCrossUp, i) &&
-      inWindow(macdCrossUp, i) &&
-      (priceCrossUp(i) || macdCrossUp(i))
-    ) {
-      signals.push({
-        time: candles[i].time,
-        date: toDateString(candles[i].time),
-        type: "buy",
-        price: candles[i].close,
-      });
-    }
+    const closePrice = candles[i].close;
+    const ma = ma20[i - 19].value;
 
-    // BÁN: cả hai lần cắt XUỐNG nằm trong cửa sổ, phát tại nến hoàn tất cặp
-    if (
-      inWindow(priceCrossDown, i) &&
-      inWindow(macdCrossDown, i) &&
-      (priceCrossDown(i) || macdCrossDown(i))
-    ) {
+    if (!inLong) {
+      // Vào lệnh: giá trên MA20 VÀ MACD > Signal
+      const macd = macdLine[i - 25].value;
+      const sig = signal[i - 33].value;
+      if (closePrice > ma && macd > sig) {
+        signals.push({
+          time: candles[i].time,
+          date: toDateString(candles[i].time),
+          type: "buy",
+          price: closePrice,
+        });
+        inLong = true;
+      }
+    } else if (closePrice < ma) {
+      // Ra lệnh: giá thủng MA20
       signals.push({
         time: candles[i].time,
         date: toDateString(candles[i].time),
         type: "sell",
-        price: candles[i].close,
+        price: closePrice,
       });
+      inLong = false;
     }
   }
 
