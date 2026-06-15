@@ -25,6 +25,10 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
           upWickColor: "#26a69a",
           downWickColor: "#ef5350",
         },
+        tooltip: { showRule: "none" }, // ẩn dòng Time, Open, High, Low, Close, Volume
+      },
+      indicator: {
+        tooltip: { showRule: "none" }, // ẩn dòng EMA(10,20,50), BOLL(20,2)...
       },
     });
 

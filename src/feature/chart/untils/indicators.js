@@ -126,10 +126,12 @@ export function generateSignals(candles) {
     const closePrice = candles[i].close;
     const ma = ma20[i - 19].value;
 
+    const macd = macdLine[i - 25].value;
+    const sig = signal[i - 33].value;
+
     if (!inLong) {
       // Vào lệnh: giá trên MA20 VÀ MACD > Signal
-      const macd = macdLine[i - 25].value;
-      const sig = signal[i - 33].value;
+      
       if (closePrice > ma && macd > sig) {
         signals.push({
           time: candles[i].time,
@@ -139,7 +141,7 @@ export function generateSignals(candles) {
         });
         inLong = true;
       }
-    } else if (closePrice < ma) {
+    } else if (closePrice < ma && macd < sig) {
       // Ra lệnh: giá thủng MA20
       signals.push({
         time: candles[i].time,

@@ -61,10 +61,6 @@ function TradingView() {
 
   const today = new Date();
 
-  // const day = String(today.getDate()).padStart(2, "0");
-  // const month = String(today.getMonth() + 1).padStart(2, "0");
-  // const year = today.getFullYear();
-
   const dayCurrent = convertDay(today);
 
   //Lay gia va ngay tai diem signal cuoi cung (co the chua co khi data dang tai)
@@ -220,7 +216,7 @@ function TradingView() {
               Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
               <p style={{ color: "red" }}> Đỏ ra</p>
             </div>
-            <div style={{ display: "flex", gap: "1rem", fontSize: "0.5rem" }}>
+            <div style={{ display: "flex", gap: "1rem", fontSize: "1rem" }}>
               <p style={{ color: COLORCODE.color }}>
                 Giá chuyển {COLORCODE.action}: {priceChange}
               </p>
