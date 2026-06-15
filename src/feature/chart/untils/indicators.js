@@ -107,6 +107,10 @@ function toDateString(time) {
  *   flat → BUY  khi  close > MA20  VÀ  MACD > Signal   → chuyển sang long
  *   long → SELL khi  close < MA20                       → chuyển sang flat
  *
+ * Điều kiện vào/ra dùng giá ĐÓNG CỬA (close). Riêng `price` đính kèm để
+ * HIỂN THỊ lấy giá thấp nhất của nến cho BUY (neo marker ở đáy) và giá cao
+ * nhất cho SELL (neo marker ở đỉnh) — không ảnh hưởng logic phát tín hiệu.
+ *
  * Máy trạng thái đảm bảo tín hiệu xen kẽ buy → sell → buy, không bỏ sót
  * lệnh ra. Cần ít nhất 35 nến để vòng lặp chạy (k bắt đầu tại 34).
  *
@@ -137,7 +141,7 @@ export function generateSignals(candles) {
           time: candles[i].time,
           date: toDateString(candles[i].time),
           type: "buy",
-          price: closePrice,
+          price: candles[i].low, // hiển thị: neo marker ở giá thấp nhất của nến
         });
         inLong = true;
       }
@@ -147,7 +151,7 @@ export function generateSignals(candles) {
         time: candles[i].time,
         date: toDateString(candles[i].time),
         type: "sell",
-        price: closePrice,
+        price: candles[i].high, // hiển thị: neo marker ở giá cao nhất của nến
       });
       inLong = false;
     }

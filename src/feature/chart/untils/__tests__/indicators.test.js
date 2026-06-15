@@ -34,24 +34,30 @@ describe("generateSignals", () => {
     }
   });
 
-  it("mỗi tín hiệu thỏa đúng luật trạng thái tại nến của nó", () => {
+  it("luật logic dùng close; price hiển thị là low (buy) / high (sell)", () => {
     const signals = generateSignals(oscillating);
 
-    // Dựng map time -> giá trị MA20 / MACD / Signal bằng chính helper sản xuất.
+    // Map time -> nến và -> giá trị MA20 / MACD / Signal (do chính helper sản xuất).
+    const candleByTime = new Map(oscillating.map((c) => [c.time, c]));
     const maMap = new Map(calcEMA(oscillating, 20).map((p) => [p.time, p.value]));
     const { macdLine, signal } = calcMACD(oscillating);
     const macdMap = new Map(macdLine.map((p) => [p.time, p.value]));
     const sigMap = new Map(signal.map((p) => [p.time, p.value]));
 
     for (const s of signals) {
+      const candle = candleByTime.get(s.time);
       const ma = maMap.get(s.time);
       if (s.type === "buy") {
-        // Vào: giá trên MA20 VÀ MACD > Signal
-        expect(s.price).toBeGreaterThan(ma);
+        // Logic (dùng close): giá đóng cửa trên MA20 VÀ MACD > Signal
+        expect(candle.close).toBeGreaterThan(ma);
         expect(macdMap.get(s.time)).toBeGreaterThan(sigMap.get(s.time));
+        // Hiển thị: price là giá thấp nhất của nến
+        expect(s.price).toBe(candle.low);
       } else {
-        // Ra: giá thủng MA20
-        expect(s.price).toBeLessThan(ma);
+        // Logic (dùng close): giá đóng cửa thủng MA20
+        expect(candle.close).toBeLessThan(ma);
+        // Hiển thị: price là giá cao nhất của nến
+        expect(s.price).toBe(candle.high);
       }
     }
   });
