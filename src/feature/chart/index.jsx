@@ -37,6 +37,27 @@ const convertDay = (value) => {
   return `${day}/${month}/${year}`;
 };
 
+// Đếm số phiên giao dịch từ ngày giá chuyển tín hiệu đến hôm nay.
+// Tính cả hai mốc đầu/cuối; bỏ qua thứ Bảy (6) và Chủ Nhật (0) vì
+// thị trường nghỉ. Trả về "--" nếu ngày không hợp lệ (chưa có signal).
+const countTradingSessions = (from, to) => {
+  const start = from instanceof Date ? from : new Date(from);
+  const end = to instanceof Date ? to : new Date(to);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "--";
+
+  // Chuẩn hoá về 00:00 để đếm theo ngày, không phụ thuộc giờ
+  const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  const last = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+
+  let count = 0;
+  while (cur <= last) {
+    const dow = cur.getDay(); // 0 = Chủ Nhật, 6 = thứ Bảy
+    if (dow !== 0 && dow !== 6) count++;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count;
+};
+
 function TradingView() {
   const [openPanel, setOpenPanel] = useState(false);
   const [chanelCode, setChaneCode] = useState("VNINDEX");
@@ -73,6 +94,10 @@ function TradingView() {
 
   const priceCurrent =
     candles.length > 0 ? candles[candles.length - 1].close : "--";
+  
+  //Goi y nam giu
+  const pricePct = (((priceCurrent - priceChange) / priceChange) * 100).toFixed(2) + "%";
+  const dayCount = countTradingSessions(dayChange, today);
 
   return (
     <div className="main">
@@ -224,35 +249,36 @@ function TradingView() {
                 Ngày chuyển {COLORCODE.action}: {dayChangeConvert}
               </p>
             </div>
+             <div
+                  style={{
+                    color: "#B36AAA",
+                    fontSize: "0.7rem",
+                    display: "flex",
+                    gap: "1rem",
+                  }}
+                >
+                  <p>Giá hiện tại: {priceCurrent}</p>
+                  <p>Ngày HIỆN TẠI: {dayCurrent}</p>
+                </div>
 
-            <div
-              style={{
-                color: "#B36AAA",
-                fontSize: "0.5rem",
-                display: "flex",
-                gap: "1rem",
-              }}
-            >
-              <p>Giá hiện tại: {priceCurrent}</p>
-              <p>Ngày HIỆN TẠI: {dayCurrent}</p>
-            </div>
+            {COLORCODE.action === "Xanh" ? (
+              <div>
 
-            {/* <div style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}>
-              <p style={{ color: "red" }}>Giá chốt lãi/Cắt lỗ: 198.3</p>
-              <p>Mục tiêu dự kiến: 168 | 196 | 252</p>
-            </div> */}
-            {/* <h2
-              style={{
-                color: "purple ",
-                marginBottom: "0",
-                fontSize: "0.8rem",
-              }}
-            >
-              Giá hiện tại 228.1
-            </h2>
-            <p style={{ color: "green ", fontSize: "0.6rem" }}>
-              Khuyến nghị: Vùng xanh, tiếp tục nắm giữ
-            </p> */}
+                <div
+                  style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}
+                >
+                  <p style={{ color: "red" }}>Giá chốt lãi/Cắt lỗ: 198.3</p>
+                  <p>Mục tiêu dự kiến: 168 | 196 | 252</p>
+                </div>
+                <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
+                  (Đã Tăng {pricePct} | Vùng Xanh, nắm giữ {dayCount} phiên)
+                </p>
+              </div>
+            ) : (
+              <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
+                  (Tránh Giảm {pricePct} | Vùng Đỏ đã đứng ngoài {dayCount} phiên)
+                </p>
+            )}
           </div>
           <TradingChart
             candles={candles}
