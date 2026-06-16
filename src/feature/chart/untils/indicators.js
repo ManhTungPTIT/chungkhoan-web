@@ -141,6 +141,7 @@ export function generateSignals(candles) {
           time: candles[i].time,
           date: toDateString(candles[i].time),
           type: "buy",
+          priceTarget: closePrice,
           price: candles[i].low, // hiển thị: neo marker ở giá thấp nhất của nến
         });
         inLong = true;

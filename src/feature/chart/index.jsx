@@ -90,6 +90,7 @@ function TradingView() {
   //Lay gia va ngay tai diem signal cuoi cung (co the chua co khi data dang tai)
   const lastSignal = signals.length > 0 ? signals[signals.length - 1] : null;
   const priceChange = lastSignal ? lastSignal.price : "--";
+  const priceTarget = lastSignal ? lastSignal.priceTarget : "--";
   const dayChange = lastSignal ? lastSignal.date : "--";
   const dayChangeConvert = convertDay(dayChange);
   const COLORCODE =
@@ -101,6 +102,9 @@ function TradingView() {
   //Goi y nam giu
   const pricePct = (((priceCurrent - priceChange) / priceChange) * 100).toFixed(2) + "%";
   const dayCount = countTradingSessions(dayChange, today);
+  const target1 = priceChange * 1.2;
+  const target2 = priceChange * 1.4;
+  const target3 = priceChange * 1.8;
 
   return (
     <div className="main">
@@ -270,8 +274,8 @@ function TradingView() {
                 <div
                   style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}
                 >
-                  <p style={{ color: "red" }}>Giá chốt lãi/Cắt lỗ: 198.3</p>
-                  <p>Mục tiêu dự kiến: 168 | 196 | 252</p>
+                  <p style={{ color: "red" }}>Giá chốt lãi/Cắt lỗ: {priceTarget}</p>
+                  <p>Mục tiêu dự kiến: {target1} | {target2} | {target3}</p>
                 </div>
                 <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
                   (Đã Tăng {pricePct} | Vùng Xanh, nắm giữ {dayCount} phiên)
