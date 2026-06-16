@@ -61,7 +61,10 @@ const countTradingSessions = (from, to) => {
 function TradingView() {
   const [openPanel, setOpenPanel] = useState(false);
   const [chanelCode, setChaneCode] = useState("VNINDEX");
-  const [showSidebar, setShowSidebar] = useState(false);
+  // Mobile: sidebar thu gọn sẵn để chart chiếm trọn màn; desktop mở sẵn
+  const [showSidebar, setShowSidebar] = useState(
+    typeof window !== "undefined" && window.innerWidth <= 768,
+  );
 
   const { data: candles = [] } = useIntraday(chanelCode);
   const { data: dataPanel = [] } = useVn100();
@@ -209,7 +212,7 @@ function TradingView() {
           position: "relative",
           display: "flex",
           alignItems: "flex-start",
-          height: "100vh",
+          height: "100dvh",
           overflow: "hidden",
           flex: 1,
           minWidth: 0,

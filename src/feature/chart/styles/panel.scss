@@ -1,5 +1,6 @@
 table {
-  width: 20vw;
+  // Sàn 150px để 4 cột không bị bóp; trần 260px tránh quá rộng trên desktop
+  width: clamp(150px, 20vw, 260px);
 
   thead {
     display: block;
@@ -73,7 +74,7 @@ table {
 
   tbody {
     display: block;
-    height: calc(100vh - 37px);
+    height: calc(100dvh - 37px);
     overflow-y: scroll;
 
     &::-webkit-scrollbar {
@@ -94,6 +95,7 @@ table {
       width: 100%;
       table-layout: fixed;
       text-transform: uppercase;
+      font-size: 0.85rem;
 
       .code {
         color: rgb(7, 104, 159);
@@ -116,6 +118,21 @@ table {
       .percent_sell {
         color: rgb(255, 74, 104);
       }
+    }
+  }
+}
+
+// ===== Mobile (<=768px) =====
+// Nới panel rộng hơn để cột không bị hẹp, đồng thời giảm cỡ chữ vừa vặn
+@media (max-width: 768px) {
+  table {
+    width: 46vw;
+
+    thead tr th {
+      font-size: 0.78rem;
+    }
+    tbody tr {
+      font-size: 0.72rem;
     }
   }
 }

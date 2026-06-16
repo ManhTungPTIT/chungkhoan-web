@@ -23,7 +23,7 @@
   position: relative;
   display: flex;
   flex-direction: row;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
 }
 .mainSidebar {
@@ -188,5 +188,30 @@
   &.visible {
     opacity: 1;
     pointer-events: auto;
+  }
+}
+
+// ===== Mobile (<=768px) =====
+@media (max-width: 768px) {
+  // Sidebar trượt ĐÈ lên chart (overlay) thay vì đẩy layout co hẹp chart
+  .mainSidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    z-index: 300;
+    box-shadow: 2px 0 14px rgba(0, 0, 0, 0.35);
+  }
+
+  // Panel thông tin: cho xuống dòng, bớt đệm phải, thu nhỏ tiêu đề
+  .information {
+    padding-right: 0.5rem;
+
+    > div {
+      flex-wrap: wrap;
+    }
+    h1 {
+      font-size: 1.3rem;
+    }
   }
 }

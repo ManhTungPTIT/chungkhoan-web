@@ -99,7 +99,7 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
       ref={containerRef}
       style={{
         width: "100%",
-        height: `calc(100vh - ${infoHeight}px)`,
+        height: `calc(100dvh - ${infoHeight}px)`,
         background: "#fff",
       }}
     />
