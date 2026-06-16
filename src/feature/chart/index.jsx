@@ -102,9 +102,9 @@ function TradingView() {
   //Goi y nam giu
   const pricePct = (((priceCurrent - priceChange) / priceChange) * 100).toFixed(2) + "%";
   const dayCount = countTradingSessions(dayChange, today);
-  const target1 = priceChange * 1.2;
-  const target2 = priceChange * 1.4;
-  const target3 = priceChange * 1.8;
+  const target1 = (priceChange * 1.2).toFixed(2);
+  const target2 = (priceChange * 1.4).toFixed(2);
+  const target3 = (priceChange * 1.8).toFixed(2);
 
   return (
     <div className="main">
@@ -274,7 +274,7 @@ function TradingView() {
                 <div
                   style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}
                 >
-                  <p style={{ color: "red" }}>Giá chốt lãi/Cắt lỗ: {priceTarget}</p>
+                  <p style={{ color: COLORCODE.color }}>Giá chốt lãi/Cắt lỗ: {priceTarget}</p>
                   <p>Mục tiêu dự kiến: {target1} | {target2} | {target3}</p>
                 </div>
                 <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
