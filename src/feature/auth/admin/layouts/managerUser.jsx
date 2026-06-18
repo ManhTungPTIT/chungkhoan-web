@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaRegEye } from "react-icons/fa6";
 import { FaLock, FaTrashAlt } from "react-icons/fa";
 import { BsCalendarEvent } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 import { MdAccessTime } from "react-icons/md";
 import "../styles/managerUser.scss";
+import axiosAdmin from "../untils/axiosAdmin";
+
+// Lấy { total, online, offline } từ BE (đi qua interceptor refresh của axiosAdmin)
+async function fetchUserStats() {
+  const { data } = await axiosAdmin.get("/api/user/stats");
+  return data;
+}
 
 // ─── Avatar ───────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -223,6 +230,19 @@ export default function ManagerUser() {
   const [activeTab, setActiveTab] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState("");
+  const [stats, setStats] = useState({ total: 0, online: 0, offline: 0 });
+
+  useEffect(() => {
+    let active = true;
+    fetchUserStats()
+      .then((data) => active && setStats(data))
+      .catch(() => {}); // 401 đã được interceptor xử lý; lỗi khác thì giữ 0
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const fmt = (n) => Number(n ?? 0).toLocaleString("en-US");
 
   const listTabs = [
     { id: 1, label: "Danh sách", cnt: "20" },
@@ -235,9 +255,9 @@ export default function ManagerUser() {
   return (
     <div className="managerUser">
       <div className="managerUser_card">
-        <Card label="Tổng khách hàng" value="11,200" icon="👥" color="blue" />
-        <Card label="Hoạt động" value="11,000" icon="✓" color="green" />
-        <Card label="Khóa" value="100" icon="✕" color="red" />
+        <Card label="Tổng người dùng" value={fmt(stats.total)} icon="👥" color="blue" />
+        <Card label="Đang online" value={fmt(stats.online)} icon="✓" color="green" />
+        <Card label="Offline" value={fmt(stats.offline)} icon="✕" color="red" />
       </div>
       <Tab item={listTabs} active={activeTab} onChange={setActiveTab} />
       <input

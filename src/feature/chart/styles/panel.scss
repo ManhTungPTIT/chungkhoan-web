@@ -74,7 +74,6 @@ table {
 
   tbody {
     display: block;
-    height: calc(100dvh - 37px);
     overflow-y: scroll;
 
     &::-webkit-scrollbar {

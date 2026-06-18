@@ -1,26 +1,12 @@
 import "./index.scss";
 import { useState, useEffect, useRef } from "react";
-import { MdStackedLineChart } from "react-icons/md";
-import { GiHamburgerMenu } from "react-icons/gi";
-import { FaUserCircle } from "react-icons/fa";
-import { TiHomeOutline } from "react-icons/ti";
-import { LuArrowUpNarrowWide } from "react-icons/lu";
-import { BsFunnel } from "react-icons/bs";
-import { FaRegStar } from "react-icons/fa";
-import { FaArrowRight } from "react-icons/fa6";
-import { FaArrowUp } from "react-icons/fa";
-import { MdPhoneForwarded } from "react-icons/md";
-import { FaQ, FaQuestion } from "react-icons/fa6";
-import { PiSlidersHorizontal } from "react-icons/pi";
-import { IoBookOutline } from "react-icons/io5";
-import { FiDollarSign } from "react-icons/fi";
-import { IoLogOutOutline } from "react-icons/io5";
 import TradingChart from "../chart/layouts/chart";
 import { generateSignals } from "./untils/indicators";
 import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
 import { useVn100 } from "./hooks/useVn100";
-import axios from "axios";
+
+
 
 const COLOR_CODE_BUY = { action: "Xanh", color: "blue" };
 const COLOR_CODE_SELL = { action: "Đỏ", color: "red" };
@@ -61,10 +47,6 @@ const countTradingSessions = (from, to) => {
 function TradingView() {
   const [openPanel, setOpenPanel] = useState(false);
   const [chanelCode, setChaneCode] = useState("VNINDEX");
-  // Mobile: sidebar thu gọn sẵn để chart chiếm trọn màn; desktop mở sẵn
-  const [showSidebar, setShowSidebar] = useState(
-    typeof window !== "undefined" && window.innerWidth <= 768,
-  );
 
   const { data: candles = [] } = useIntraday(chanelCode);
   const { data: dataPanel = [] } = useVn100();
@@ -84,7 +66,6 @@ function TradingView() {
   }, []);
 
   const today = new Date();
-
   const dayCurrent = convertDay(today);
 
   //Lay gia va ngay tai diem signal cuoi cung (co the chua co khi data dang tai)
@@ -107,122 +88,18 @@ function TradingView() {
   const target3 = (priceChange * 1.8).toFixed(2);
 
   return (
-    <div className="main">
-      <button
-        className={`showSidebar${showSidebar ? " visible" : ""}`}
-        onClick={() => setShowSidebar(!showSidebar)}
-      >
-        <FaArrowRight />
-      </button>
-      <div className={`mainSidebar${showSidebar ? " hidden" : ""}`}>
-        <div className="ms-header">
-          <div>
-            <MdStackedLineChart /> Future R
-          </div>
-          <button onClick={() => setShowSidebar(!showSidebar)}>
-            <GiHamburgerMenu />
-          </button>
-        </div>
-        <div className="ms-auth">
-          <a>
-            <div className="ms-auth-avatar">
-              <FaUserCircle style={{ width: "1.5rem", height: "1.5rem" }} />
-            </div>
-            <span>0133456798</span>
-            <button>
-              <IoLogOutOutline />
-            </button>
-          </a>
-        </div>
-        <div className="ms-body">
-          <ul className="ms-body-navbar">
-            <li className="navbar-item text-redirect">
-              <a>
-                <TiHomeOutline />
-                <span>Trang chủ</span>
-              </a>
-            </li>
-            <li className="navbar-item">
-              <span>Chứng khoán cơ sở</span>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <LuArrowUpNarrowWide />
-                <span>Future R Đánh T+</span>
-              </a>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <FaArrowUp />
-                <span>Future R Đánh Trend</span>
-              </a>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <BsFunnel />
-                <span>Bộ lọc cổ phiếu</span>
-              </a>
-            </li>
-            <li className="navbar-item">
-              <span>Chứng khoán phái sinh</span>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <PiSlidersHorizontal />
-                <span>Future R 1 Min</span>
-              </a>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <FaRegStar />
-                <span>Future R Trend 1M</span>
-              </a>
-            </li>
-            <li className="navbar-item">
-              <span>Thông tin</span>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <FaQuestion />
-                <span>Giới thiệu</span>
-              </a>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <FiDollarSign />
-                <span>Bảng giá</span>
-              </a>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <MdPhoneForwarded />
-                <span>Liên hệ</span>
-              </a>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <IoBookOutline />
-                <span>Hướng dẫn</span>
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div className="ms-footer">
-          <b>Nền tảng số cho Môi giới chứng khoán</b>
-        </div>
-      </div>
-      <div
-        style={{
-          position: "relative",
-          display: "flex",
-          alignItems: "flex-start",
-          height: "100dvh",
-          overflow: "hidden",
-          flex: 1,
-          minWidth: 0,
-          marginLeft: "0.1rem",
-        }}
-      >
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "flex-start",
+        height: "100dvh",
+        overflow: "hidden",
+        flex: 1,
+        minWidth: 0,
+        marginLeft: "0.1rem",
+      }}
+    >
         <div
           style={{
             position: "relative",
@@ -298,7 +175,6 @@ function TradingView() {
           onSelectSymbol={(symbol) => setChaneCode(symbol)}
         />
       </div>
-    </div>
   );
 }
 

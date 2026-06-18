@@ -110,6 +110,22 @@
   }
 }
 
+.auth-switch {
+  text-align: center;
+  margin: 1.25rem 0 0;
+  font-size: 0.85rem;
+  color: #666;
+
+  a {
+    color: rgb(7, 104, 159);
+    font-weight: 600;
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 .popup-overlay {
   position: fixed;
   inset: 0;
@@ -133,6 +149,10 @@
     font-size: 3rem;
     color: #e53935;
     margin-bottom: 0.5rem;
+
+    &.success {
+      color: #2e7d32;
+    }
   }
 
   h3 {

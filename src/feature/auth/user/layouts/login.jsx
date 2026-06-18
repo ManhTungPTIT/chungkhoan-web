@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { IoCloseCircle } from "react-icons/io5";
-import "../styles/login.scss";
-import { useNavigate } from "react-router-dom";
+// Dùng lại SCSS của trang đăng nhập admin để giao diện giống hệt
+import "../../admin/styles/login.scss";
+import { Link, useNavigate } from "react-router-dom";
 
-import { LoginAdminService } from "../services/loginAdminService";
+import { LoginUserService } from "../services/loginUserService";
 
-export default function AdminLogin() {
+export default function UserLogin() {
   const [account, setAccount] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
-  const { login } = LoginAdminService();
+  const { login } = LoginUserService();
 
   const navigate = useNavigate();
 
@@ -30,8 +31,8 @@ export default function AdminLogin() {
     if (Object.keys(newErrors).length > 0) return;
 
     try {
-      await login({ username: account.trim(), password: password.trim() });
-      navigate("/admin/user");
+      await login({ email: account.trim(), password: password.trim() });
+      navigate("/");
     } catch {
       setShowPopup(true);
     }
@@ -44,7 +45,7 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="field-group">
-            <label>Số điện thoại / Email</label>
+            <label>Email</label>
             <input
               className={errors.account ? "error" : ""}
               type="text"
@@ -91,6 +92,10 @@ export default function AdminLogin() {
             Đăng nhập
           </button>
         </form>
+
+        <p className="auth-switch">
+          Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
+        </p>
       </div>
 
       {showPopup && (

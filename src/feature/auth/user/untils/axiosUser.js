@@ -5,9 +5,11 @@ import {
   setAccessToken,
   setRefreshToken,
   clearTokens,
-} from "./tokenStorage";
+} from "../../admin/untils/tokenStorage";
 
-const axiosAdmin = axios.create({
+// Cùng backend auth với admin (VITE_BACK_API_URL); khác ở chỗ phiên hết hạn
+// thì đưa người dùng về /login thay vì /admin/login.
+const axiosUser = axios.create({
   baseURL: import.meta.env.VITE_BACK_API_URL,
 });
 
@@ -19,8 +21,8 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-//gan header  header `Authorization: Bearer <accessToken>`
-axiosAdmin.interceptors.request.use(
+// Gắn header `Authorization: Bearer <accessToken>`
+axiosUser.interceptors.request.use(
   (config) => {
     const token = getAccessToken();
     if (token) config.headers.Authorization = `Bearer ${token}`;
@@ -29,8 +31,8 @@ axiosAdmin.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-//xu ly 401
-axiosAdmin.interceptors.response.use(
+// Xử lý 401: thử refresh token, thất bại thì xoá token và về /login
+axiosUser.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (
@@ -47,7 +49,7 @@ axiosAdmin.interceptors.response.use(
         failedQueue.push({ resolve, reject });
       }).then((token) => {
         original.headers.Authorization = `Bearer ${token}`;
-        return axiosAdmin(original);
+        return axiosUser(original);
       });
     }
 
@@ -66,11 +68,11 @@ axiosAdmin.interceptors.response.use(
       if (data.refreshToken) setRefreshToken(data.refreshToken);
       processQueue(null, data.accessToken);
       original.headers.Authorization = `Bearer ${data.accessToken}`;
-      return axiosAdmin(original);
+      return axiosUser(original);
     } catch (err) {
       processQueue(err, null);
       clearTokens();
-      window.location.href = "/admin/login";
+      window.location.href = "/login";
       return Promise.reject(err);
     } finally {
       isRefreshing = false;
@@ -78,4 +80,4 @@ axiosAdmin.interceptors.response.use(
   },
 );
 
-export default axiosAdmin;
+export default axiosUser;
