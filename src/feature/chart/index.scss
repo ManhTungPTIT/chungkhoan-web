@@ -221,3 +221,14 @@
     }
   }
 }
+.container_panel{
+  transition: width 0.3s ease;
+  .btPanel{
+    cursor: pointer;
+    background-color: transparent;
+    color: #B3BBE2;
+    border:  1px solid var(--border);;
+    border-radius: 5px;
+    font-size: 0.8rem;
+  }
+}

@@ -1,5 +1,6 @@
 import "./index.scss";
 import { useState, useEffect, useRef } from "react";
+import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
 import { generateSignals } from "./untils/indicators";
 import Panel from "../chart/layouts/panel";
@@ -170,10 +171,22 @@ function TradingView() {
             infoHeight={infoHeight}
           />
         </div>
-        <Panel
-          dataPanel={dataPanel}
-          onSelectSymbol={(symbol) => setChaneCode(symbol)}
-        />
+        <div className="container_panel">
+
+          <button className="btPanel" onClick={() => setOpenPanel(!openPanel)} >
+          <PiFunnel />
+            Bộ lọc
+          </button>
+          {
+            openPanel ? (
+              <Panel
+            dataPanel={dataPanel}
+            onSelectSymbol={(symbol) => setChaneCode(symbol)}
+          />
+            ) :""
+          }
+        </div>
+        
       </div>
   );
 }
