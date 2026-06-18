@@ -21,12 +21,12 @@ function AppRoute() {
       <Route path="/register" element={<UserRegister />} />
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/login" element={<AdminLogin />} />
-      {/* <Route element={<PrivateRoute />}> */}
+      <Route element={<PrivateRoute requiredRole="admin" />}>
         <Route element={<Admin />}>
           <Route path="/admin/user" element={<ManagerUser />} />
           <Route path="/admin/kyc" element={<KycAdmin />} />
         </Route>
-      {/* </Route> */}
+      </Route>
     </Routes>
   );
 }

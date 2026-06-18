@@ -1,35 +1,45 @@
-import { useEffect, useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { getAccessToken } from '../feature/auth/admin/untils/tokenStorage';
-import axiosAdmin from '../feature/auth/admin/untils/axiosAdmin';
+import { useEffect, useState } from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { getAccessToken } from "../feature/auth/admin/untils/tokenStorage";
+import axiosClient from "../feature/auth/untils/axiosClient";
 
-// Xác thực phiên bằng cách gọi endpoint protected /api/auth/me:
-//   - access token còn hạn        → 200 → cho vào
-//   - access hết hạn, refresh OK   → interceptor tự refresh + retry → 200 → cho vào
-//   - refresh cũng hết hạn         → interceptor clearTokens + redirect /admin/login;
-//                                    ở đây cũng trả về unauthed làm phương án dự phòng
-export default function PrivateRoute() {
-  // 'checking' | 'authed' | 'unauthed'
+// Validate the session via the protected /api/auth/me endpoint:
+//   access valid                  → 200 → allow
+//   access expired, refresh OK     → interceptor refreshes + retries → 200 → allow
+//   refresh expired/reused         → interceptor clears + redirects; we also fall
+//                                    back to unauthed here
+export default function PrivateRoute({ requiredRole }) {
   const [status, setStatus] = useState(() =>
-    getAccessToken() ? 'checking' : 'unauthed',
+    getAccessToken() ? "checking" : "unauthed",
   );
 
   useEffect(() => {
-    if (status !== 'checking') return;
+    if (status !== "checking") return;
     let active = true;
 
-    axiosAdmin
-      .get('/api/auth/me')
-      .then(() => active && setStatus('authed'))
-      .catch(() => active && setStatus('unauthed'));
+    axiosClient
+      .get("/api/auth/me")
+      .then((res) => {
+        if (!active) return;
+        const role = res.data?.admin?.role;
+        if (requiredRole && role !== requiredRole) {
+          setStatus("forbidden");
+        } else {
+          setStatus("authed");
+        }
+      })
+      .catch(() => active && setStatus("unauthed"));
 
     return () => {
       active = false;
     };
-  }, [status]);
+  }, [status, requiredRole]);
 
-  if (status === 'checking') {
-    return <div style={{ padding: '2rem' }}>Đang kiểm tra phiên đăng nhập…</div>;
+  if (status === "checking") {
+    return <div style={{ padding: "2rem" }}>Đang kiểm tra phiên đăng nhập…</div>;
   }
-  return status === 'authed' ? <Outlet /> : <Navigate to="/admin/login" replace />;
+  if (status === "authed") return <Outlet />;
+
+  const loginPath = requiredRole === "admin" ? "/admin/login" : "/login";
+  return <Navigate to={loginPath} replace />;
 }
