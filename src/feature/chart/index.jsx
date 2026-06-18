@@ -1,5 +1,6 @@
 import "./index.scss";
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
 import { generateSignals } from "./untils/indicators";
@@ -47,7 +48,12 @@ const countTradingSessions = (from, to) => {
 
 function TradingView() {
   const [openPanel, setOpenPanel] = useState(false);
-  const [chanelCode, setChaneCode] = useState("VNINDEX");
+  // Cho phép mở thẳng một mã qua /?symbol=XXX (vd click từ bản đồ nhiệt);
+  // không có param thì giữ mặc định VNINDEX.
+  const [searchParams] = useSearchParams();
+  const [chanelCode, setChaneCode] = useState(
+    () => searchParams.get("symbol")?.toUpperCase() || "VNINDEX",
+  );
 
   const { data: candles = [] } = useIntraday(chanelCode);
   const { data: dataPanel = [] } = useVn100();
@@ -173,18 +179,16 @@ function TradingView() {
         </div>
         <div className="container_panel">
 
-          <button className="btPanel" onClick={() => setOpenPanel(!openPanel)} >
+          <button className="btPanel" onClick={() => setOpenPanel((v) => !v)} >
           <PiFunnel />
             Bộ lọc
           </button>
-          {
-            openPanel ? (
-              <Panel
-            dataPanel={dataPanel}
-            onSelectSymbol={(symbol) => setChaneCode(symbol)}
-          />
-            ) :""
-          }
+          <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
+            <Panel
+              dataPanel={dataPanel}
+              onSelectSymbol={(symbol) => setChaneCode(symbol)}
+            />
+          </div>
         </div>
         
       </div>

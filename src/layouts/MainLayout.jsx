@@ -6,6 +6,8 @@ import { FaUserCircle } from "react-icons/fa";
 import { TiHomeOutline } from "react-icons/ti";
 import { LuArrowUpNarrowWide } from "react-icons/lu";
 import { BsFunnel } from "react-icons/bs";
+import { MdGridView } from "react-icons/md";
+import { BsBullseye } from "react-icons/bs";
 import { FaRegStar } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa6";
 import { FaArrowUp } from "react-icons/fa";
@@ -69,12 +71,6 @@ function MainLayout() {
                 <span>Future R Đánh T+</span>
               </a>
             </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <FaArrowUp />
-                <span>Future R Đánh Trend</span>
-              </a>
-            </li>
             <li
               className="navbar-item text-redirect"
               onClick={() => navigate("/chart/filter")}
@@ -82,6 +78,24 @@ function MainLayout() {
               <a>
                 <BsFunnel />
                 <span>Bộ lọc cổ phiếu</span>
+              </a>
+            </li>
+            <li
+              className="navbar-item text-redirect"
+              onClick={() => navigate("/chart/heatmap")}
+            >
+              <a>
+                <MdGridView />
+                <span>Bản đồ nhiệt</span>
+              </a>
+            </li>
+            <li
+              className="navbar-item text-redirect"
+              onClick={() => navigate("/chart/power")}
+            >
+              <a>
+                <BsBullseye />
+                <span>Vòng tròn quyền lực</span>
               </a>
             </li>
             <li className="navbar-item">

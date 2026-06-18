@@ -222,13 +222,32 @@
   }
 }
 .container_panel{
-  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   .btPanel{
     cursor: pointer;
     background-color: transparent;
     color: #B3BBE2;
-    border:  1px solid var(--border);;
+    border:  1px solid var(--border);
     border-radius: 5px;
     font-size: 0.8rem;
+  }
+  // Trượt ẩn/hiện: luôn render, animate width 0 <-> width thật của panel.
+  // overflow:hidden để bảng bên trong bị cắt gọn trong lúc trượt.
+  .panel-slide{
+    overflow: hidden;
+    width: 0;
+    transition: width 0.3s ease;
+    &.is-open{
+      width: clamp(150px, 20vw, 260px);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  // Khớp với panel.scss: bảng rộng 46vw trên mobile
+  .container_panel .panel-slide.is-open{
+    width: 46vw;
   }
 }

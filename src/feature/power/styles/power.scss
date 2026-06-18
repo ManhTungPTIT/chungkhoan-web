@@ -1,0 +1,43 @@
+.power-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.power-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 0.8rem;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+
+  .power-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  i {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+}
+
+.power-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+.power-state {
+  padding: 2rem;
+  color: var(--text);
+}

@@ -1,0 +1,26 @@
+.heatmap-page {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.heatmap-title {
+  margin: 0 0 0.5rem;
+  color: var(--text);
+  font-size: 1.1rem;
+}
+
+.heatmap-chart {
+  flex: 1;
+  min-height: 0;
+}
+
+.heatmap-state {
+  padding: 2rem;
+  color: var(--text);
+}
