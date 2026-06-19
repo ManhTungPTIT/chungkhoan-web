@@ -1,17 +1,50 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FaRegEye } from "react-icons/fa6";
-import { FaLock, FaTrashAlt } from "react-icons/fa";
+import { FaLock, FaLockOpen, FaTrashAlt } from "react-icons/fa";
 import { BsCalendarEvent } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 import { MdAccessTime } from "react-icons/md";
 import "../styles/managerUser.scss";
 import axiosAdmin from "../untils/axiosAdmin";
+import {
+  getPendingUsers,
+  approveUser,
+  rejectUser,
+} from "../services/pendingUser";
+import {
+  getUsers,
+  lockUser,
+  unlockUser,
+  deleteUser,
+  setPackage,
+} from "../services/adminUsers";
 
 // Lấy { total, online, offline } từ BE (đi qua interceptor refresh của axiosAdmin)
 async function fetchUserStats() {
   const { data } = await axiosAdmin.get("/api/user/stats");
   return data;
 }
+
+// ─── Helpers ──────────────────────────────────────────────
+const initialsOf = (name) =>
+  (name || "?")
+    .trim()
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("vi-VN") : "—");
+
+const avatarIdx = (name) =>
+  ((name || "?").charCodeAt(0) % AVATAR_COLORS.length) + 1;
+
+const isExpired = (expiresAt) =>
+  !!expiresAt && new Date(expiresAt).getTime() < Date.now();
+
+const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+const isExpiringSoon = (u) =>
+  !!u.expiresAt && new Date(u.expiresAt).getTime() - Date.now() <= SEVEN_DAYS;
 
 // ─── Avatar ───────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -37,13 +70,19 @@ function Avatar({ init, idx, size = 30 }) {
 }
 
 // ─── Status badge ─────────────────────────────────────────
-function Status({ status }) {
-  const s =
-    status === 1
-      ? { bg: "#dcfce7", c: "#166534", border: "#bbf7d0", label: "Hoạt động" }
-      : status === 2
-        ? { bg: "#fff7ed", c: "#9a3412", border: "#fed7aa", label: "Khóa" }
-        : { bg: "#f3f4f6", c: "#6b7280", border: "#e5e7eb", label: "Không hoạt động" };
+const STATUS_META = {
+  active: { bg: "#dcfce7", c: "#166534", border: "#bbf7d0", label: "Hoạt động" },
+  locked: { bg: "#fff7ed", c: "#9a3412", border: "#fed7aa", label: "Khóa" },
+  pending: { bg: "#eff6ff", c: "#1d4ed8", border: "#bfdbfe", label: "Chờ duyệt" },
+  rejected: { bg: "#fef2f2", c: "#991b1b", border: "#fecaca", label: "Từ chối" },
+  expired: { bg: "#f3f4f6", c: "#6b7280", border: "#e5e7eb", label: "Hết hạn" },
+};
+
+function Status({ status, expiresAt }) {
+  const key = status === "active" && isExpired(expiresAt) ? "expired" : status;
+  const s = STATUS_META[key] || {
+    bg: "#f3f4f6", c: "#6b7280", border: "#e5e7eb", label: status || "—",
+  };
   return (
     <span style={{
       display: "inline-block", padding: "2px 10px", borderRadius: 20,
@@ -64,30 +103,26 @@ const PACKAGES = [
 ];
 
 // ─── User Modal ───────────────────────────────────────────
-function UserModal({ user, onClose }) {
-  const initial = user.name.trim().split(" ").map(w => w[0]).join("").toUpperCase();
-
+function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onSetPackage }) {
   const [selectedPkg, setSelectedPkg] = useState(90);
-  const [activeAction, setActiveAction] = useState(null);
+  const locked = user.status === "locked";
 
-  const toggleAction = (key) =>
-    setActiveAction((prev) => (prev === key ? null : key));
+  const handleOverlayClick = () => onClose();
 
-  const handleOverlayClick = () => {
-    setActiveAction(null);
-    onClose();
+  const handleDelete = () => {
+    if (window.confirm(`Xóa tài khoản "${user.fullName}"?`)) onDelete();
   };
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="user-modal" onClick={e => e.stopPropagation()}>
+      <div className="user-modal" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}><IoClose /></button>
 
         {/* Header */}
         <div className="modal-header">
-          <Avatar init={initial} idx={user.status} size={64} />
-          <div className="modal-name">{user.name}</div>
-          <div className="modal-code">{user.code}</div>
+          <Avatar init={initialsOf(user.fullName)} idx={avatarIdx(user.fullName)} size={64} />
+          <div className="modal-name">{user.fullName}</div>
+          <div className="modal-code">{user.email || user.phoneNumber || "—"}</div>
         </div>
 
         {/* Thông tin */}
@@ -95,19 +130,19 @@ function UserModal({ user, onClose }) {
           <div className="modal-section-title">Thông tin</div>
           <div className="modal-info-row">
             <span>Trạng thái</span>
-            <Status status={user.status} />
+            <Status status={user.status} expiresAt={user.expiresAt} />
           </div>
           <div className="modal-info-row">
             <span>Ngày tạo</span>
-            <span>{user.date}</span>
+            <span>{fmtDate(user.createdAt)}</span>
           </div>
           <div className="modal-info-row">
-            <span>Lần cuối đăng nhập</span>
-            <span>Hôm nay, 14:02</span>
+            <span>Lần cuối hoạt động</span>
+            <span>{fmtDate(user.lastActive)}</span>
           </div>
           <div className="modal-info-row">
-            <span><MdAccessTime style={{ verticalAlign: "middle" }} /> Thời gian dùng</span>
-            <strong>3h 55m</strong>
+            <span><MdAccessTime style={{ verticalAlign: "middle" }} /> Hết hạn</span>
+            <strong>{user.expiresAt ? fmtDate(user.expiresAt) : "Không giới hạn"}</strong>
           </div>
         </div>
 
@@ -118,7 +153,7 @@ function UserModal({ user, onClose }) {
             Chọn gói thời hạn
           </div>
           <div className="modal-packages">
-            {PACKAGES.map(pkg => (
+            {PACKAGES.map((pkg) => (
               <div
                 key={pkg.id}
                 className={`pkg-card${selectedPkg === pkg.id ? " active" : ""}`}
@@ -135,14 +170,17 @@ function UserModal({ user, onClose }) {
         <div className="modal-section">
           <div className="modal-section-title">Thao tác tài khoản</div>
           <button
-            className={`modal-action-btn lock${activeAction === "lock" ? " active" : ""}`}
-            onClick={() => toggleAction("lock")}
+            className="modal-action-btn lock"
+            disabled={busy}
+            onClick={locked ? onUnlock : onLock}
           >
-            <FaLock /> Khóa tài khoản
+            {locked ? <FaLockOpen /> : <FaLock />}{" "}
+            {locked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
           </button>
           <button
-            className={`modal-action-btn delete${activeAction === "delete" ? " active" : ""}`}
-            onClick={() => toggleAction("delete")}
+            className="modal-action-btn delete"
+            disabled={busy}
+            onClick={handleDelete}
           >
             <FaTrashAlt /> Xóa tài khoản
           </button>
@@ -151,7 +189,13 @@ function UserModal({ user, onClose }) {
         {/* Footer */}
         <div className="modal-footer">
           <button className="modal-footer-cancel" onClick={onClose}>Hủy</button>
-          <button className="modal-footer-save">Lưu</button>
+          <button
+            className="modal-footer-save"
+            disabled={busy}
+            onClick={() => onSetPackage(selectedPkg)}
+          >
+            Lưu gói {selectedPkg} ngày
+          </button>
         </div>
       </div>
     </div>
@@ -172,7 +216,7 @@ function Card({ label, value, icon, color }) {
 function Tab({ item, active, onChange }) {
   return (
     <div className="tab">
-      {item.map(tab => (
+      {item.map((tab) => (
         <button key={tab.id} className={active === tab.id ? "activeTab" : "btTab"}
           onClick={() => onChange(tab.id)}>
           {tab.label} ({tab.cnt})
@@ -182,55 +226,100 @@ function Tab({ item, active, onChange }) {
   );
 }
 
-// ─── DataTable ────────────────────────────────────────────
-function DataTable({ columns, data, onAction }) {
+// ─── UsersTable (dữ liệu thật) ────────────────────────────
+function UsersTable({ users, onAction, emptyText }) {
+  if (users.length === 0) {
+    return <p className="pending-empty">{emptyText}</p>;
+  }
   return (
     <table>
       <thead>
-        <tr>{columns.map((col, i) => <th key={i}>{col}</th>)}</tr>
+        <tr>
+          <th>Khách hàng</th>
+          <th>Email / SĐT</th>
+          <th>Trạng thái</th>
+          <th>Hết hạn</th>
+          <th>Thao tác</th>
+        </tr>
       </thead>
       <tbody>
-        {data.map((row, i) => {
-          const initial = row.name.trim().split(" ").map(w => w[0]).join("").toUpperCase();
-          return (
-            <tr key={i}>
-              <td style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-                <Avatar init={initial} idx={row.status} />
-                {row.name}
-              </td>
-              <td><Status status={row.status} /></td>
-              <td>{row.date}</td>
-              <td>
-                <button onClick={() => onAction(row)}>
-                  <FaRegEye /> Thao tác
-                </button>
-              </td>
-            </tr>
-          );
-        })}
+        {users.map((u) => (
+          <tr key={u.id}>
+            <td style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+              <Avatar init={initialsOf(u.fullName)} idx={avatarIdx(u.fullName)} />
+              {u.fullName}
+            </td>
+            <td>{u.email || u.phoneNumber || "—"}</td>
+            <td><Status status={u.status} expiresAt={u.expiresAt} /></td>
+            <td>{u.expiresAt ? fmtDate(u.expiresAt) : "Không giới hạn"}</td>
+            <td>
+              <button onClick={() => onAction(u)}>
+                <FaRegEye /> Thao tác
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+// ─── PendingUsersTable (tài khoản chờ duyệt) ──────────────
+function PendingUsersTable({ users, busyId, onApprove, onReject }) {
+  if (users.length === 0) {
+    return <p className="pending-empty">Không có tài khoản nào chờ duyệt.</p>;
+  }
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Khách hàng</th>
+          <th>Email / Số điện thoại</th>
+          <th>Ngày đăng ký</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {users.map((u) => (
+          <tr key={u.id}>
+            <td style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+              <Avatar init={initialsOf(u.fullName)} idx={avatarIdx(u.fullName)} />
+              {u.fullName}
+            </td>
+            <td>{u.email || u.phoneNumber || "—"}</td>
+            <td>{fmtDate(u.createdAt)}</td>
+            <td style={{ display: "flex", gap: "0.4rem" }}>
+              <button
+                className="pending-approve"
+                disabled={busyId === u.id}
+                onClick={() => onApprove(u.id)}
+              >
+                Duyệt
+              </button>
+              <button
+                className="pending-reject"
+                disabled={busyId === u.id}
+                onClick={() => onReject(u.id)}
+              >
+                Từ chối
+              </button>
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );
 }
 
 // ─── ManagerUser ──────────────────────────────────────────
-const DATA = [
-  { id: 1, name: "Nguyễn Văn A", code: "KH001", status: 1, date: "15/05/2026" },
-  { id: 2, name: "Nguyễn Văn B", code: "KH002", status: 2, date: "16/05/2026" },
-  { id: 3, name: "Nguyễn Văn C", code: "KH003", status: 3, date: "17/05/2026" },
-  { id: 4, name: "Phạm Thị Hương", code: "KH004", status: 2, date: "15/05/2026" },
-  { id: 5, name: "Mặc Đăng Khoa", code: "KH012", status: 1, date: "11/05/2026" },
-  { id: 6, name: "Châu Việt Cường", code: "KH103", status: 3, date: "17/05/2026" },
-  { id: 7, name: "Nguyễn Văn Liêm", code: "KH001", status: 1, date: "15/05/2026" },
-  { id: 8, name: "Trương Tấn Dũng", code: "KH022", status: 1, date: "16/05/2026" },
-  { id: 9, name: "Phạm Hùng", code: "KH113", status: 3, date: "09/05/2026" },
-];
-
 export default function ManagerUser() {
   const [activeTab, setActiveTab] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState("");
   const [stats, setStats] = useState({ total: 0, online: 0, offline: 0 });
+  const [users, setUsers] = useState([]);
+  const [pending, setPending] = useState([]);
+  const [busyId, setBusyId] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -242,15 +331,85 @@ export default function ManagerUser() {
     };
   }, []);
 
+  const loadUsers = useCallback(() => {
+    getUsers()
+      .then(setUsers)
+      .catch(() => setUsers([]));
+  }, []);
+
+  const loadPending = useCallback(() => {
+    getPendingUsers()
+      .then(setPending)
+      .catch(() => setPending([]));
+  }, []);
+
+  useEffect(() => {
+    loadUsers();
+    loadPending();
+  }, [loadUsers, loadPending]);
+
+  // ── Duyệt / từ chối (tab Tài khoản mới)
+  const handleApprove = async (id) => {
+    setBusyId(id);
+    try {
+      await approveUser(id);
+      loadPending();
+      loadUsers();
+    } catch {
+      /* interceptor xử lý 401; lỗi khác bỏ qua */
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleReject = async (id) => {
+    setBusyId(id);
+    try {
+      await rejectUser(id);
+      loadPending();
+      loadUsers();
+    } catch {
+      /* interceptor xử lý 401; lỗi khác bỏ qua */
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  // ── Thao tác trong modal (khóa/mở/xóa/gói) — gọi API rồi refetch + đóng
+  const actOnUser = async (fn) => {
+    if (!selectedUser) return;
+    setBusyId(selectedUser.id);
+    try {
+      await fn(selectedUser.id);
+      loadUsers();
+      setSelectedUser(null);
+    } catch {
+      /* interceptor xử lý 401; lỗi khác bỏ qua */
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const fmt = (n) => Number(n ?? 0).toLocaleString("en-US");
 
+  const lockedUsers = users.filter((u) => u.status === "locked");
+  const expiringUsers = users.filter(isExpiringSoon);
+  const q = search.trim().toLowerCase();
+  const searchedUsers = users.filter((u) => {
+    if (!q) return true;
+    return (
+      (u.fullName || "").toLowerCase().includes(q) ||
+      (u.email || "").toLowerCase().includes(q) ||
+      (u.phoneNumber || "").toLowerCase().includes(q)
+    );
+  });
+
   const listTabs = [
-    { id: 1, label: "Danh sách", cnt: "20" },
-    { id: 2, label: "Tài khoản mới", cnt: "5" },
-    { id: 3, label: "Tài khoản khóa", cnt: "4" },
-    { id: 4, label: "Nâng hạn mức", cnt: "5" },
+    { id: 1, label: "Danh sách", cnt: String(users.length) },
+    { id: 2, label: "Tài khoản mới", cnt: String(pending.length) },
+    { id: 3, label: "Tài khoản khóa", cnt: String(lockedUsers.length) },
+    { id: 4, label: "Nâng hạn mức", cnt: String(expiringUsers.length) },
   ];
-  const columns = ["Khách hàng", "Trạng thái", "Ngày tạo tài khoản", "Thao tác"];
 
   return (
     <div className="managerUser">
@@ -260,23 +419,57 @@ export default function ManagerUser() {
         <Card label="Offline" value={fmt(stats.offline)} icon="✕" color="red" />
       </div>
       <Tab item={listTabs} active={activeTab} onChange={setActiveTab} />
-      <input
-        placeholder="Tìm theo tên, mã KH..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      <DataTable
-        columns={columns}
-        data={DATA.filter((u) => {
-          const q = search.trim().toLowerCase();
-          if (!q) return true;
-          return u.name.toLowerCase().includes(q) || u.code.toLowerCase().includes(q);
-        })}
-        onAction={setSelectedUser}
-      />
+
+      {activeTab === 1 && (
+        <>
+          <input
+            placeholder="Tìm theo tên, email, số điện thoại..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <UsersTable
+            users={searchedUsers}
+            onAction={setSelectedUser}
+            emptyText="Chưa có người dùng nào."
+          />
+        </>
+      )}
+
+      {activeTab === 2 && (
+        <PendingUsersTable
+          users={pending}
+          busyId={busyId}
+          onApprove={handleApprove}
+          onReject={handleReject}
+        />
+      )}
+
+      {activeTab === 3 && (
+        <UsersTable
+          users={lockedUsers}
+          onAction={setSelectedUser}
+          emptyText="Không có tài khoản bị khóa."
+        />
+      )}
+
+      {activeTab === 4 && (
+        <UsersTable
+          users={expiringUsers}
+          onAction={setSelectedUser}
+          emptyText="Không có tài khoản sắp hết hạn."
+        />
+      )}
 
       {selectedUser && (
-        <UserModal user={selectedUser} onClose={() => setSelectedUser(null)} />
+        <UserModal
+          user={selectedUser}
+          busy={busyId === selectedUser.id}
+          onClose={() => setSelectedUser(null)}
+          onLock={() => actOnUser(lockUser)}
+          onUnlock={() => actOnUser(unlockUser)}
+          onDelete={() => actOnUser(deleteUser)}
+          onSetPackage={(days) => actOnUser((id) => setPackage(id, days))}
+        />
       )}
     </div>
   );

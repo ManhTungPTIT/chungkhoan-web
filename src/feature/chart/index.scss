@@ -226,12 +226,51 @@
   flex-direction: column;
   align-items: flex-start;
   .btPanel{
+    display: inline-flex;            // bố cục nằm ngang: icon | gạch | chữ
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.25rem 0.5rem;
     cursor: pointer;
-    background-color: transparent;
-    color: #B3BBE2;
-    border:  1px solid var(--border);
-    border-radius: 5px;
-    font-size: 0.8rem;
+    border-radius: 14px;
+    // Viền gradient: nền trắng (padding-box) + gradient ở border-box
+    border: 2px solid transparent;
+    background:
+      linear-gradient(#fff, #fff) padding-box,
+      linear-gradient(135deg, #3b82f6, #8b3df5) border-box;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+   
+    &:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(99, 102, 241, 0.35);
+    }
+    &:active{ transform: translateY(0); }
+
+    .btPanel__icon{
+      width: 1.35rem;
+      height: 1.35rem;
+      fill: url(#funnelGrad);         // dùng gradient đã định nghĩa trong JSX
+    }
+
+    .btPanel__divider{
+      width: 1px;
+      align-self: stretch;
+      margin: 0.1rem 0;
+      background: linear-gradient(#3b82f6, #8b3df5);
+      opacity: 0.45;
+    }
+
+    .btPanel__text{
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 0.95rem; // Chữ gradient
+      background: linear-gradient(135deg, #3b82f6, #8b3df5);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
   }
   // Trượt ẩn/hiện: luôn render, animate width 0 <-> width thật của panel.
   // overflow:hidden để bảng bên trong bị cắt gọn trong lúc trượt.

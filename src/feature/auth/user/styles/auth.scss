@@ -1,0 +1,403 @@
+// ===== Trang auth (đăng nhập / đăng ký) kiểu LEOSTOCK =====
+// Tông navy đậm + nhấn vàng gold. Cột trái: ảnh hero làm nền.
+// Cột phải: card tối có tab.
+
+$navy-900: #060c1a;
+$navy-800: #0b1326;
+$navy-700: #111c38;
+$gold-1: #f5d77a;
+$gold-2: #e0a92e;
+$text-1: #e7ebf6;
+$text-muted: #8d98b5;
+$line: rgba(255, 255, 255, 0.1);
+
+.auth-page {
+  display: flex;
+  min-height: 100dvh;
+  background: $navy-900;
+  color: $text-1;
+  font-family: sans-serif;
+  overflow: hidden;
+}
+
+// ---------- Cột trái: hero ----------
+.auth-hero {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  // Ảnh nền (lưu vào public/auth-hero.jpg). Thiếu file thì chỉ hiện gradient.
+  background:
+    
+    url("../../../../assets/auth-hero.jpg") center / cover no-repeat,
+    $navy-800;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem 2.5rem;
+
+  .auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    .auth-brand__mark {
+      font-size: 2rem;
+      color: $gold-2;
+      line-height: 1;
+    }
+    .auth-brand__name {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      span {
+        background: linear-gradient(135deg, $gold-1, $gold-2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+    .auth-brand__sub {
+      display: block;
+      font-size: 0.6rem;
+      letter-spacing: 0.18em;
+      color: $text-muted;
+      text-transform: uppercase;
+    }
+  }
+
+  .auth-tagline {
+    h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .auth-tagline__big {
+      margin: 0.4rem 0;
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, $gold-1, $gold-2);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  .auth-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.6rem;
+    .auth-feature {
+      max-width: 7rem;
+      .auth-feature__icon {
+        font-size: 1.3rem;
+        color: $gold-2;
+      }
+      b {
+        display: block;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-top: 0.3rem;
+      }
+      span {
+        font-size: 0.66rem;
+        color: $text-muted;
+      }
+    }
+  }
+}
+
+// ---------- Cột phải: card ----------
+.auth-panel {
+  flex: 0 0 30rem;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(180deg, $navy-800, $navy-900);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 25rem;
+
+  .auth-tabs {
+    display: flex;
+    gap: 1.5rem;
+    border-bottom: 1px solid $line;
+    margin-bottom: 1.5rem;
+    button {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: $text-muted;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.75rem 0;
+      cursor: pointer;
+      position: relative;
+      &.is-active {
+        color: $text-1;
+        &::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: -1px;
+          height: 3px;
+          border-radius: 3px 3px 0 0;
+          background: linear-gradient(90deg, $gold-1, $gold-2);
+        }
+      }
+    }
+  }
+
+  .auth-welcome {
+    margin: 0 0 0.2rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+  }
+  .auth-welcome-sub {
+    margin: 0 0 1.3rem;
+    font-size: 0.85rem;
+    color: $text-muted;
+  }
+
+  .field-group {
+    margin-bottom: 0.9rem;
+    label {
+      display: block;
+      font-size: 0.78rem;
+      color: $text-muted;
+      margin-bottom: 0.35rem;
+    }
+  }
+
+  // Ô nhập có icon trái + (tuỳ chọn) nút mắt phải
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid $line;
+    border-radius: 10px;
+    padding: 0 0.8rem;
+    transition: border-color 0.15s ease;
+    &:focus-within {
+      border-color: $gold-2;
+    }
+    &.error {
+      border-color: #ff5d73;
+    }
+    .input-icon {
+      color: $text-muted;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    input {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: $text-1;
+      font-size: 0.9rem;
+      padding: 0.7rem 0;
+      &::placeholder {
+        color: rgba(141, 152, 181, 0.7);
+      }
+      // Ghi đè nền sáng mặc định khi trình duyệt autofill (tài khoản đã lưu):
+      // trì hoãn cực lâu việc tô nền => ô giữ nền trong suốt theo theme tối.
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus,
+      &:-webkit-autofill:active {
+        -webkit-text-fill-color: $text-1;
+        caret-color: $text-1;
+        transition: background-color 9999s ease-in-out 0s;
+      }
+    }
+    .toggle-pw {
+      background: transparent;
+      border: none;
+      color: $text-muted;
+      cursor: pointer;
+      display: flex;
+      padding: 0;
+      font-size: 1rem;
+    }
+  }
+
+  .error-msg {
+    display: block;
+    color: #ff5d73;
+    font-size: 0.72rem;
+    margin-top: 0.3rem;
+  }
+
+  .auth-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0.4rem 0 1.1rem;
+    font-size: 0.82rem;
+    label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: $text-muted;
+      cursor: pointer;
+      input {
+        accent-color: $gold-2;
+      }
+    }
+    .auth-link {
+      color: $gold-2;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.82rem;
+    }
+  }
+
+  .submit-btn {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    padding: 0.85rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #3a2a00;
+    cursor: pointer;
+    background: linear-gradient(135deg, $gold-1, $gold-2);
+    box-shadow: 0 8px 20px rgba(224, 169, 46, 0.3);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(224, 169, 46, 0.42);
+    }
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  // Social login (chỉ UI)
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: $text-muted;
+    font-size: 0.78rem;
+    margin: 1.2rem 0;
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: $line;
+    }
+  }
+  .auth-social {
+    display: flex;
+    gap: 0.6rem;
+    button {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid $line;
+      border-radius: 10px;
+      color: $text-1;
+      font-size: 0.82rem;
+      padding: 0.6rem 0;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+      svg {
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .auth-switch {
+    margin: 1.3rem 0 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: $text-muted;
+    button {
+      background: none;
+      border: none;
+      color: $gold-2;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// ---------- Responsive: ẩn hero, chỉ còn card ----------
+@media (max-width: 900px) {
+  .auth-hero {
+    display: none;
+  }
+  .auth-panel {
+    flex: 1;
+  }
+}
+
+// ---------- Popup thông báo (giữ tông tối) ----------
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.popup {
+  background: $navy-700;
+  border: 1px solid $line;
+  border-radius: 14px;
+  padding: 1.6rem;
+  width: min(22rem, 90vw);
+  text-align: center;
+  color: $text-1;
+  .popup-icon {
+    font-size: 2.6rem;
+    color: #ff5d73;
+    &.success {
+      color: #36c98b;
+    }
+  }
+  h3 {
+    margin: 0.6rem 0 0.4rem;
+  }
+  p {
+    margin: 0 0 1.1rem;
+    font-size: 0.88rem;
+    color: $text-muted;
+  }
+  button {
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.4rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #3a2a00;
+    background: linear-gradient(135deg, $gold-1, $gold-2);
+  }
+}

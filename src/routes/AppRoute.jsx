@@ -5,8 +5,7 @@ import ManagerUser from '../feature/auth/admin/layouts/managerUser';
 import KycAdmin from '../feature/auth/admin/layouts/KycAdmin_1';
 import TradingView from '../feature/chart/index';
 import AdminLogin from '../feature/auth/admin/layouts/login';
-import UserLogin from '../feature/auth/user/layouts/login';
-import UserRegister from '../feature/auth/user/layouts/register';
+import AuthPage from '../feature/auth/user/layouts/AuthPage';
 import PrivateRoute from './PrivateRoute';
 import FilterStock from '../feature/stock/layouts/filterStock'
 import MainLayout from '../layouts/MainLayout';
@@ -43,8 +42,8 @@ function AppRoute() {
           }
         />
       </Route>
-      <Route path="/login" element={<UserLogin />} />
-      <Route path="/register" element={<UserRegister />} />
+      <Route path="/login" element={<AuthPage initialTab="login" />} />
+      <Route path="/register" element={<AuthPage initialTab="register" />} />
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route element={<PrivateRoute requiredRole="admin" />}>

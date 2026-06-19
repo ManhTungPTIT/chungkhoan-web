@@ -3,9 +3,9 @@ import axiosClient from "../../untils/axiosClient";
 import { setTokens, clearTokens } from "../../admin/untils/tokenStorage";
 
 export function LoginUserService() {
-  const login = async (data) => {
+  const login = async (data, remember = true) => {
     const response = await loginUserHook(data);
-    setTokens({ accessToken: response.data.accessToken });
+    setTokens({ accessToken: response.data.accessToken, remember });
   };
 
   const logout = async () => {

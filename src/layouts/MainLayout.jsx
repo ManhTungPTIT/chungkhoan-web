@@ -17,14 +17,23 @@ import { PiSlidersHorizontal } from "react-icons/pi";
 import { IoBookOutline } from "react-icons/io5";
 import { FiDollarSign } from "react-icons/fi";
 import { IoLogOutOutline } from "react-icons/io5";
+import { LoginUserService } from "../feature/auth/user/services/loginUserService";
 import "../feature/chart/index.scss";
 
 function MainLayout() {
   const navigate = useNavigate();
+  const { logout } = LoginUserService();
   // Mobile: sidebar thu gọn sẵn để nội dung chiếm trọn màn; desktop mở sẵn
   const [showSidebar, setShowSidebar] = useState(
     typeof window !== "undefined" && window.innerWidth <= 768,
   );
+
+  // Đăng xuất: thu hồi refresh token ở BE + xoá token cục bộ rồi về /login.
+  // Best-effort — service tự xoá token & chuyển trang kể cả khi API lỗi.
+  const handleLogout = () => {
+    navigate('/login')
+    logout();
+  };
 
   return (
     <div className="main">
@@ -49,7 +58,7 @@ function MainLayout() {
               <FaUserCircle style={{ width: "1.5rem", height: "1.5rem" }} />
             </div>
             <span>0133456798</span>
-            <button>
+            <button onClick={handleLogout}>
               <IoLogOutOutline />
             </button>
           </a>
