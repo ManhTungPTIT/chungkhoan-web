@@ -29,7 +29,7 @@ function MainLayout() {
   );
 
   const data = JSON.parse(localStorage.getItem("auth-storage"));
-  console.log(data.state.user.fullName)
+  
   // Đăng xuất: thu hồi refresh token ở BE + xoá token cục bộ rồi về /login.
   // Best-effort — service tự xoá token & chuyển trang kể cả khi API lỗi.
   const handleLogout = () => {
@@ -62,7 +62,7 @@ function MainLayout() {
               onClick={() => navigate("/info")}
             >
               <FaUserCircle style={{ width: "1.5rem", height: "1.5rem" }} />
-            <span>{data.state.user.fullName}</span>
+            <span>{data?.state?.user?.fullName || "Nguyen Van A"}</span>
             </div>
             <button onClick={handleLogout}>
               <IoLogOutOutline />
