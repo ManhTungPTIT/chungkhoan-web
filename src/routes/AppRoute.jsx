@@ -6,6 +6,7 @@ import KycAdmin from '../feature/auth/admin/layouts/KycAdmin_1';
 import TradingView from '../feature/chart/index';
 import AdminLogin from '../feature/auth/admin/layouts/login';
 import AuthPage from '../feature/auth/user/layouts/AuthPage';
+import AuthImage from '../feature/auth/user/layouts/AuthImage';
 import PrivateRoute from './PrivateRoute';
 import FilterStock from '../feature/stock/layouts/filterStock'
 import InfoUser from '../feature/auth/user/layouts/InfoUser';

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { init, dispose } from "klinecharts/dist/index.esm.js";
 import "../klinecharts/bbSignalIndicator";
 import "../klinecharts/mcdxIndicator";
@@ -6,7 +6,7 @@ import "../klinecharts/signalMarkerOverlay";
 
 // Toàn bộ chỉ báo built-in của KLineChart v9.
 // pane: "candle_pane" = vẽ đè lên nến; "sub" = khung riêng bên dưới.
-const ALL_INDICATORS = [
+export const ALL_INDICATORS = [
   // --- Vẽ đè lên nến ---
   { name: "MA", label: "MA — Trung bình động", pane: "candle_pane" },
   { name: "EMA", label: "EMA — TB động luỹ thừa", pane: "candle_pane" },
@@ -70,21 +70,14 @@ function addIndicator(chart, name) {
   }
 }
 
-export default function TradingChart({ candles, signals, infoHeight = 0 }) {
+// activeKey: chuỗi tên chỉ báo đang bật (do TradingView truyền xuống).
+export default function TradingChart({
+  candles,
+  signals,
+  infoHeight = 0,
+  activeKey = "",
+}) {
   const containerRef = useRef(null);
-  const [open, setOpen] = useState(false);
-  // EMA bật sẵn như trước; còn lại tắt
-  const [active, setActive] = useState({ EMA: true });
-
-  // Khoá deps ổn định: danh sách chỉ báo đang bật, sắp xếp + nối chuỗi
-  const activeKey = useMemo(
-    () =>
-      Object.keys(active)
-        .filter((k) => active[k])
-        .sort()
-        .join(","),
-    [active],
-  );
 
   useEffect(() => {
     const container = containerRef.current;
@@ -158,86 +151,17 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
     };
   }, [candles, signals, activeKey]);
 
-  const toggle = (name) => setActive((p) => ({ ...p, [name]: !p[name] }));
-
   return (
     <div
+      ref={containerRef}
       style={{
-        position: "relative",
         width: "100%",
         height: `calc(100dvh - ${infoHeight}px)`,
+        background: "#fff",
+        // Để cử chỉ chạm (pinch-zoom / kéo) đi vào chart thay vì bị trình duyệt
+        // mobile xử lý thành zoom/cuộn trang → mới zoom được trên điện thoại.
+        touchAction: "none",
       }}
-    >
-      {/* Bộ chọn chỉ báo — đẩy lên ngang hàng với panel info phía trên (đối xứng) */}
-      <div
-        style={{
-          position: "absolute",
-          top: `calc(20dvh - ${infoHeight}px)`,
-          left: 8,
-          zIndex: 10,
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-            padding: "4px 10px",
-            fontSize: "0.8rem",
-            border: "1px solid var(--border, #d6dae3)",
-            borderRadius: 6,
-            background: "#fff",
-            cursor: "pointer",
-          }}
-        >
-          Chỉ báo ▾
-        </button>
-        {open && (
-          <div
-            style={{
-              marginTop: 4,
-              padding: "6px 4px",
-              minWidth: 200,
-              maxHeight: "60dvh",
-              overflowY: "auto",
-              background: "#fff",
-              border: "1px solid #e6e8ef",
-              borderRadius: 8,
-              boxShadow: "0 6px 18px rgba(16,24,40,0.12)",
-            }}
-          >
-            {ALL_INDICATORS.map((ind) => (
-              <label
-                key={ind.name}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "5px 10px",
-                  fontSize: "0.82rem",
-                  cursor: "pointer",
-                  borderRadius: 6,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={!!active[ind.name]}
-                  onChange={() => toggle(ind.name)}
-                />
-                {ind.label}
-              </label>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div
-        ref={containerRef}
-        style={{ width: "100%", height: "100%", background: "#fff" }}
-      />
-    </div>
+    />
   );
 }

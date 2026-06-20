@@ -18,6 +18,9 @@ $line: rgba(255, 255, 255, 0.1);
   color: $text-1;
   font-family: sans-serif;
   overflow: hidden;
+  background:
+    url("../../../../assets/auth-hero.jpg") center / 100% 100% no-repeat,
+    $navy-800;
 }
 
 // ---------- Cột trái: hero ----------
@@ -26,9 +29,9 @@ $line: rgba(255, 255, 255, 0.1);
   flex: 1;
   min-width: 0;
   // Cảnh nền phủ kín cột trái
-  background:
-    url("../../../../assets/auth-hero.jpg") center / 100% 100% no-repeat,
-    $navy-800;
+  // background:
+  //   url("../../../../assets/auth-hero.jpg") center / 100% 100% no-repeat,
+  //   $navy-800;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -136,7 +139,7 @@ $line: rgba(255, 255, 255, 0.1);
   max-width: 25rem;
 
   .auth-logo{
-    width:40vw;
+    width:30vw;
     height: 20vh;
     mix-blend-mode: lighten;
     background: url("../../../../assets/logo-auth.png")  left center / contain

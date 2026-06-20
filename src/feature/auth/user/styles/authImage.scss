@@ -1,0 +1,96 @@
+// ===== Login dạng "ảnh full làm nền + input đè" =====
+// Container khoá tỉ lệ ảnh; mọi ô định vị theo % nên co giãn theo ảnh.
+// ⚠️ Toạ độ % bên dưới là ƯỚC LƯỢNG — bật DEBUG (viền đỏ) rồi chỉnh
+//    top/left/width/height từng ô cho khớp ô vẽ trong ảnh.
+
+.auth-image-page {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #060c1a;
+  overflow: auto;
+}
+
+.auth-image-frame {
+  position: relative;
+  // Phủ kín màn hình
+  width: 100vw;
+  height: 100dvh;
+  // Dùng 100% 100% (KHÔNG phải cover) để ảnh giãn theo khung → các ô % vẫn
+  // khớp ô vẽ. Đổi lại, ảnh có thể hơi giãn nếu màn hình không phải tỉ lệ 3:2.
+  background: url("../../../../assets/auth-full.jpg") center / 100% 100%
+    no-repeat;
+}
+
+// Ô đè trong suốt (mặc định)
+.ov {
+  position: absolute;
+  margin: 0;
+  padding: 0 0.6rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+input.ov::placeholder {
+  color: transparent;
+}
+// Khử nền trắng do trình duyệt autofill (giữ ô trong suốt trên ảnh)
+input.ov:-webkit-autofill,
+input.ov:-webkit-autofill:hover,
+input.ov:-webkit-autofill:focus,
+input.ov:-webkit-autofill:active {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  transition: background-color 9999s ease-in-out 0s;
+}
+button.ov {
+  cursor: pointer;
+}
+
+// Chế độ căn vị trí: hiện viền + nền mờ để thấy ô nằm đâu
+.auth-image-frame.debug .ov {
+  outline: 1px solid red;
+  background: rgba(255, 0, 0, 0.12);
+}
+
+// ===== Toạ độ từng ô (đã căn theo ảnh) =====
+.ov-account {
+  top: 35%;
+  left: 67%;
+  width: 30%;
+  height: 6.5%;
+}
+.ov-password {
+  top: 43.2%;
+  left: 67%;
+  width: 30%;
+  height: 6.5%;
+}
+.ov-eye {
+  top: 43.2%;
+  left: 93%;
+  width: 4%;
+  height: 6.5%;
+}
+.ov-remember {
+  top: 50.2%;
+  left: 67%;
+  width: 2.2%;
+  height: 3.8%;
+}
+.ov-submit {
+  top: 57%;
+  left: 68%;
+  width: 28%;
+  height: 6.5%;
+}
+.ov-register {
+  top: 74%;
+  left: 78.5%;
+  width: 11%;
+  height: 4.2%;
+}

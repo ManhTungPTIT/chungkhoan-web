@@ -1,8 +1,9 @@
 import "./index.scss";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
+import IndicatorPicker from "../chart/layouts/IndicatorPicker";
 import {
   generateSignals,
   generateSignalsT,
@@ -76,6 +77,19 @@ function TradingView() {
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
 
+  // Chỉ báo: EMA bật sẵn; chuỗi activeKey truyền xuống chart để vẽ
+  const [activeIndicators, setActiveIndicators] = useState({ EMA: true });
+  const toggleIndicator = (name) =>
+    setActiveIndicators((p) => ({ ...p, [name]: !p[name] }));
+  const activeKey = useMemo(
+    () =>
+      Object.keys(activeIndicators)
+        .filter((k) => activeIndicators[k])
+        .sort()
+        .join(","),
+    [activeIndicators],
+  );
+
   console.log("candles", dataPanel);
   useEffect(() => {
     if (!infoRef.current) return;
@@ -141,7 +155,15 @@ function TradingView() {
               margin: "0",
             }}
           >
-            <h1 style={{ color: "purple", margin: "0.4rem" }}>{chanelCode}</h1>
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}
+            >
+              <IndicatorPicker
+                active={activeIndicators}
+                onToggle={toggleIndicator}
+              />
+              <h1 style={{ color: "purple", margin: "0.4rem" }}>{chanelCode}</h1>
+            </div>
             <div style={{ display: "flex", fontSize: "0.6rem" }}>
               Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
               <p style={{ color: "red" }}> Đỏ ra</p>
@@ -189,6 +211,7 @@ function TradingView() {
             candles={candles}
             signals={signals}
             infoHeight={infoHeight}
+            activeKey={activeKey}
           />
         </div>
         <div className="container_panel">
