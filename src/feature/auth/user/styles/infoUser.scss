@@ -1,0 +1,232 @@
+// ===== Trang thông tin tài khoản (tone tối navy + gold) =====
+$blue: #e0a92e; // accent (gold) — dùng cho tab active, label, focus, nút
+$ink: #e7ebf6; // chữ chính
+$muted: #8d98b5; // chữ phụ
+$line: rgba(255, 255, 255, 0.1);
+$bg: #0b1326; // nền trang
+$surface: #111c38; // nền card / input
+$radius: 10px;
+
+.info-user {
+  min-height: 100%;
+  background: $bg;
+  color: $ink;
+  font-family: sans-serif;
+  padding: 1.5rem;
+
+  // ---------- Tabs ----------
+  .iu-tabs {
+    display: flex;
+    gap: 1.8rem;
+    border-bottom: 1px solid $line;
+    margin-bottom: 1.5rem;
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: transparent;
+      border: none;
+      color: $muted;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.75rem 0.2rem;
+      cursor: pointer;
+      position: relative;
+      svg {
+        font-size: 1rem;
+      }
+      &.is-active {
+        color: $blue;
+        &::after {
+          content: "";
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: -1px;
+          height: 2px;
+          background: $blue;
+        }
+      }
+    }
+  }
+
+  .iu-state {
+    color: $muted;
+    font-size: 0.9rem;
+    padding: 1rem 0;
+    &--error {
+      color: #dc2626;
+    }
+  }
+
+  // ---------- Bố cục 2 cột ----------
+  .iu-body {
+    display: grid;
+    grid-template-columns: 18rem 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .iu-card {
+    background: $surface;
+    border: 1px solid $line;
+    border-radius: $radius;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+  }
+
+  // ---------- Cột trái: tóm tắt ----------
+  .iu-summary {
+    padding: 1.2rem;
+    &__head {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid $line;
+    }
+    .iu-avatar {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #fff;
+      background: linear-gradient(135deg, #6366f1, #ec4899);
+      flex-shrink: 0;
+    }
+    .iu-name {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .iu-role {
+      font-size: 0.82rem;
+      color: $muted;
+    }
+    &__row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding-top: 1rem;
+      font-size: 0.88rem;
+      svg {
+        color: $muted;
+        flex-shrink: 0;
+      }
+    }
+    &__label {
+      color: $muted;
+      width: 3.2rem;
+      flex-shrink: 0;
+    }
+    &__value {
+      color: $ink;
+      word-break: break-all;
+    }
+  }
+
+  // ---------- Cột phải: form ----------
+  .iu-form {
+    padding: 1.4rem 1.6rem 1.6rem;
+    &__title {
+      margin: 0 0 0.4rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid $line;
+    }
+    &__foot {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1.2rem;
+    }
+  }
+
+  .iu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .iu-field {
+    margin-top: 1rem;
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: $blue;
+      margin-bottom: 0.4rem;
+      .req {
+        color: #ef4444;
+      }
+    }
+    input,
+    select,
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: $surface;
+      border: 1px solid $line;
+      border-radius: 8px;
+      padding: 0.65rem 0.8rem;
+      font-size: 0.9rem;
+      color: $ink;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      &:focus {
+        border-color: $blue;
+        box-shadow: 0 0 0 3px rgba(224, 169, 46, 0.18);
+      }
+      &::placeholder {
+        color: #aab2c0;
+      }
+    }
+    textarea {
+      resize: vertical;
+    }
+  }
+
+  .iu-msg {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    &--error {
+      color: #dc2626;
+    }
+    &--ok {
+      color: #16a34a;
+    }
+  }
+
+  .iu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: $surface;
+    color: $blue;
+    border: 1px solid $blue;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    &:hover {
+      background: rgba(224, 169, 46, 0.1);
+    }
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+
+  // ---------- Responsive ----------
+  @media (max-width: 820px) {
+    .iu-body {
+      grid-template-columns: 1fr;
+    }
+    .iu-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

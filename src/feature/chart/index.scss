@@ -25,19 +25,47 @@
   flex-direction: row;
   height: 100dvh;
   overflow: hidden;
+
+  // ===== Theme tối (navy + gold) cho toàn bộ khung app =====
+  // Override biến màu để mọi component dùng var() tự chuyển tối
+  // (vd FilterStock). Vùng nến chart vẫn nền trắng (hardcode trong chart.jsx).
+  --bg: #111c38; // bề mặt (input, card, ô)
+  --text: #8d98b5; // chữ phụ
+  --text-h: #e7ebf6; // chữ chính
+  --border: rgba(255, 255, 255, 0.12);
+  --accent: #e0a92e; // gold
+  --accent-bg: rgba(224, 169, 46, 0.14);
+  --accent-border: rgba(224, 169, 46, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.45) 0 10px 15px -3px, rgba(0, 0, 0, 0.3) 0 4px 6px -2px;
+  --app-bg: #0b1326; // nền trang (đậm hơn bề mặt)
+  --gold: #e0a92e;
+  --gold-1: #f5d77a;
+
+  background: var(--app-bg);
+  color: var(--text-h);
 }
 .main-content {
   flex: 1;
   min-width: 0;
   height: 100dvh;
   overflow: auto;
+  background: var(--app-bg);
+  color: var(--text-h);
 }
 .mainSidebar {
   width: 14rem;
   flex-shrink: 0;
-  overflow: hidden;
+  overflow: auto;
+  // Ẩn thanh scroll nhưng vẫn cuộn được
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; 
+  &::-webkit-scrollbar {
+    display: none; 
+  }
   transition: width 0.3s ease;
-  background-color: rgb(7, 104, 159);
+  background-color: #0e1830; // navy thay cho xanh dương
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   color: white;
@@ -52,8 +80,9 @@
     padding: 0 0.5rem;
     div {
       font-size: 1.7rem;
-      font-weight: 500;
+      font-weight: 700;
       cursor: pointer;
+      color: var(--gold-1); // logo gold
     }
     button {
       height: 1.7rem;
@@ -65,7 +94,7 @@
     }
   }
   .ms-auth {
-    border-top: 3px solid rgba(255, 255, 255, 0.8);
+    border-top: 1px solid var(--border);
     padding-top: 0.5rem;
     margin-top: 0.3rem;
     a {
@@ -76,6 +105,7 @@
       gap: 0.75rem;
       cursor: pointer;
       .ms-auth-avatar {
+        display: flex;
         text-align: center;
       }
       button {
@@ -94,7 +124,7 @@
     }
   }
   .ms-body {
-    border-top: 3px solid rgba(255, 255, 255, 0.8);
+    border-top: 1px solid var(--border);
     margin-top: 0.5rem;
     .ms-body-navbar {
       list-style: none;
@@ -245,6 +275,17 @@
       box-shadow: 0 8px 22px rgba(99, 102, 241, 0.35);
     }
     &:active{ transform: translateY(0); }
+
+    // Panel ẩn => nút co lại, chỉ còn icon phễu
+    &.btPanelHidden{
+      gap: 0;
+      padding: 0.4rem;
+      justify-content: center;
+      .btPanel__divider,
+      .btPanel__text{
+        display: none;
+      }
+    }
 
     .btPanel__icon{
       width: 1.35rem;

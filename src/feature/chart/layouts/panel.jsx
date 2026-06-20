@@ -71,14 +71,20 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
       </thead>
       <tbody ref={tbodyRef} onScroll={handleScroll}>
         {dataPanel.map((item, index) => {
+          // Tín hiệu mây BB từ backend nếu có (item.signal: "buy"/"sell");
+          // chưa có field thì tạm suy theo change_pct (tăng = mua).
+          const isBuy =
+            item.signal != null
+              ? item.signal === "buy"
+              : Number(item.change_pct) >= 0;
           const isPositive = Number(item.change_pct) >= 0;
           return (
             <tr key={item.symbol ?? index}>
               <td className="code" onClick={() => onSelectSymbol(item.symbol)}>
                 {item.symbol}
               </td>
-              <td className={isPositive ? "hold" : "sell"}>
-                {isPositive ? "Mua" : "Bán"}
+              <td className={isBuy ? "hold" : "sell"}>
+                {isBuy ? "Mua" : "Bán"}
               </td>
               <td className="price">{(item.price / 1000).toFixed(2)}</td>
               <td className={isPositive ? "percent_hold" : "percent_sell"}>

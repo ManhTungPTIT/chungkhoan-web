@@ -3,15 +3,27 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
-import { generateSignals } from "./untils/indicators";
+import {
+  generateSignals,
+  generateSignalsT,
+  generateSignalsLong,
+} from "./untils/indicators";
+
+// Chọn hàm sinh tín hiệu theo BOT trên sidebar (qua /?bot=...)
+const SIGNAL_GENERATORS = {
+  trend: generateSignals, // BOT Trend (mặc định)
+  t: generateSignalsT, // BOT T+
+  long: generateSignalsLong, // BOT Dài hạn
+};
 import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
 import { useVn100 } from "./hooks/useVn100";
 
 
 
-const COLOR_CODE_BUY = { action: "Xanh", color: "blue" };
-const COLOR_CODE_SELL = { action: "Đỏ", color: "red" };
+// Màu sáng để đọc rõ trên nền tối
+const COLOR_CODE_BUY = { action: "Xanh", color: "#4aa3ff" };
+const COLOR_CODE_SELL = { action: "Đỏ", color: "#ff6b6b" };
 
 // Nhận Date hoặc chuỗi ngày ("2026-02-23 07:00"); giá trị không parse được
 // (vd "--" khi chưa có signal) trả về nguyên văn thay vì crash render
@@ -58,7 +70,10 @@ function TradingView() {
   const { data: candles = [] } = useIntraday(chanelCode);
   const { data: dataPanel = [] } = useVn100();
 
-  const signals = generateSignals(candles);
+  // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend
+  const generateSignalsFor =
+    SIGNAL_GENERATORS[searchParams.get("bot")] ?? generateSignals;
+  const signals = generateSignalsFor(candles);
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
 
@@ -127,7 +142,7 @@ function TradingView() {
               margin: "0",
             }}
           >
-            <h1 style={{ color: "purple", margin: "0.4rem" }}>{chanelCode}</h1>
+            <h1 style={{ color: "#f5d77a", margin: "0.4rem" }}>{chanelCode}</h1>
             <div style={{ display: "flex", fontSize: "0.6rem" }}>
               Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
               <p style={{ color: "red" }}> Đỏ ra</p>
@@ -179,7 +194,7 @@ function TradingView() {
         </div>
         <div className="container_panel">
 
-          <button className="btPanel" onClick={() => setOpenPanel((v) => !v)} >
+          <button className={`btPanel ${openPanel ? "" : "btPanelHidden"}`}  onClick={() => setOpenPanel((v) => !v)} >
             {/* Định nghĩa gradient để tô màu cho icon SVG */}
             <svg width="0" height="0" style={{ position: "absolute" }}>
               <defs>
@@ -191,7 +206,7 @@ function TradingView() {
             </svg>
             <PiFunnel className="btPanel__icon" />
             <span className="btPanel__divider" />
-            <span className="btPanel__text">Bộ lọc</span>
+            <span className="btPanel__text">Fillter</span>
           </button>
           <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
             <Panel

@@ -2,9 +2,10 @@
 // trong môi trường ESM (Node/Vitest) — import thẳng bản ESM để lấy đúng API.
 import { registerIndicator } from "klinecharts/dist/index.esm.js";
 
-const NEUTRAL_FILL = "rgba(180,180,220,0.08)"; // trước signal đầu tiên
-const BUY_FILL = "rgba(154, 250, 152,0.8)"; // từ signal MUA
-const SELL_FILL = "rgba(253, 228, 224,0.8)"; // từ signal BÁN
+// Mây BB tông tối, trong suốt — hợp nền chart tối (giống ảnh mẫu)
+const NEUTRAL_FILL = "rgba(180,180,220,0.06)"; // trước signal đầu tiên
+const BUY_FILL = "rgba(34, 110, 90, 0.40)"; // từ signal MUA: xanh đậm
+const SELL_FILL = "rgba(130, 36, 50, 0.45)"; // từ signal BÁN: đỏ maroon
 
 // Calc thuần — export riêng để unit test không cần chart/DOM.
 // Trả mảng thẳng hàng với dataList: {} khi chưa đủ period, ngược lại { upper, lower }.

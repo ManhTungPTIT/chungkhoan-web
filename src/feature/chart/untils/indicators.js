@@ -160,3 +160,88 @@ export function generateSignals(candles) {
 
   return signals;
 }
+
+export function generateSignalsT(candles) {
+  const ma10 = calcEMA(candles, 10);
+  const { macdLine, signal } = calcMACD(candles);
+  const signals = [];
+
+  let inLong = false;
+
+  for (let i = 34; i < candles.length; i++) {
+    const closePrice = candles[i].close;
+    const ma = ma10[i - 9].value;
+
+    const macd = macdLine[i - 25].value;
+    const sig = signal[i - 33].value;
+
+    if (!inLong) {
+      // Vào lệnh: giá trên MA10 VÀ MACD > Signal
+
+      if (closePrice > ma && macd > sig) {
+        signals.push({
+          time: candles[i].time,
+          date: toDateString(candles[i].time),
+          type: "buy",
+          priceTarget: closePrice,
+          price: candles[i].low, // hiển thị: neo marker ở giá thấp nhất của nến
+        });
+        inLong = true;
+      }
+    } else if (closePrice < ma && macd < sig) {
+      // Ra lệnh: giá thủng MA10
+      signals.push({
+        time: candles[i].time,
+        date: toDateString(candles[i].time),
+        type: "sell",
+        price: candles[i].high, // hiển thị: neo marker ở giá cao nhất của nến
+      });
+      inLong = false;
+    }
+  }
+
+  return signals;
+}
+
+export function generateSignalsLong(candles) {
+  const ma50 = calcEMA(candles, 50);
+  const { macdLine, signal } = calcMACD(candles);
+  const signals = [];
+
+  let inLong = false;
+
+  // Bắt đầu tại 49: MA50 cần đủ 50 nến (ma50[i-49] hợp lệ khi i>=49);
+  // MACD signal chỉ cần i>=33 nên 49 đã bao trùm.
+  for (let i = 49; i < candles.length; i++) {
+    const closePrice = candles[i].close;
+    const ma = ma50[i - 49].value;
+
+    const macd = macdLine[i - 25].value;
+    const sig = signal[i - 33].value;
+
+    if (!inLong) {
+      // Vào lệnh: giá trên MA50 VÀ MACD > Signal
+      if (closePrice > ma && macd > sig) {
+        signals.push({
+          time: candles[i].time,
+          date: toDateString(candles[i].time),
+          type: "buy",
+          priceTarget: closePrice,
+          price: candles[i].low, // hiển thị: neo marker ở giá thấp nhất của nến
+        });
+        inLong = true;
+      }
+    } else if (closePrice < ma && macd < sig) {
+      // Ra lệnh: giá thủng MA50
+      signals.push({
+        time: candles[i].time,
+        date: toDateString(candles[i].time),
+        type: "sell",
+        price: candles[i].high, // hiển thị: neo marker ở giá cao nhất của nến
+      });
+      inLong = false;
+    }
+  }
+
+  return signals;
+}

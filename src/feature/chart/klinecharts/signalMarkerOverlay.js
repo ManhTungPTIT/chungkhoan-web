@@ -38,7 +38,7 @@ registerOverlay({
     const signal = overlay.extendData ?? {};
     const isBuy = signal.type === "buy";
     const color = isBuy ? BUY_COLOR : SELL_COLOR;
-    const label = isBuy ? "MUA" : "BÁN";
+    const label = isBuy ? "XANH" : "ĐỎ";
     const priceStr = String(signal.price);
     const dir = isBuy ? 1 : -1; // buy vẽ phía dưới, sell vẽ phía trên
 

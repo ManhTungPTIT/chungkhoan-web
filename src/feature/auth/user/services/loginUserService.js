@@ -5,7 +5,9 @@ import { setTokens, clearTokens } from "../../admin/untils/tokenStorage";
 export function LoginUserService() {
   const login = async (data, remember = true) => {
     const response = await loginUserHook(data);
-    setTokens({ accessToken: response.data.accessToken, remember });
+    // Lấy user từ response (đổi đường dẫn nếu backend trả khác)
+    const user = response.data.user ?? response.data.data?.user ?? null;
+    setTokens({ accessToken: response.data.accessToken, user, remember });
   };
 
   const logout = async () => {

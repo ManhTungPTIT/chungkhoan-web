@@ -28,6 +28,8 @@ function MainLayout() {
     typeof window !== "undefined" && window.innerWidth <= 768,
   );
 
+  const data = JSON.parse(localStorage.getItem("auth-storage"));
+  console.log(data.state.user.fullName)
   // Đăng xuất: thu hồi refresh token ở BE + xoá token cục bộ rồi về /login.
   // Best-effort — service tự xoá token & chuyển trang kể cả khi API lỗi.
   const handleLogout = () => {
@@ -45,8 +47,8 @@ function MainLayout() {
       </button>
       <div className={`mainSidebar${showSidebar ? " hidden" : ""}`}>
         <div className="ms-header">
-          <div onClick={() => navigate("/")}>
-            <MdStackedLineChart /> Future R
+          <div >
+            <MdStackedLineChart /> Leostock
           </div>
           <button onClick={() => setShowSidebar(!showSidebar)}>
             <GiHamburgerMenu />
@@ -54,10 +56,14 @@ function MainLayout() {
         </div>
         <div className="ms-auth">
           <a>
-            <div className="ms-auth-avatar">
+            <div
+              className="ms-auth-avatar"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate("/info")}
+            >
               <FaUserCircle style={{ width: "1.5rem", height: "1.5rem" }} />
+            <span>{data.state.user.fullName}</span>
             </div>
-            <span>0133456798</span>
             <button onClick={handleLogout}>
               <IoLogOutOutline />
             </button>
@@ -74,10 +80,22 @@ function MainLayout() {
             <li className="navbar-item">
               <span>Chứng khoán cơ sở</span>
             </li>
-            <li className="navbar-item text-redirect">
+            <li className="navbar-item text-redirect" onClick={() => navigate("/?bot=trend")}>
               <a>
                 <LuArrowUpNarrowWide />
-                <span>Future R Đánh T+</span>
+                <span>BOT Trend</span>
+              </a>
+            </li>
+            <li className="navbar-item text-redirect" onClick={() => navigate("/?bot=t")}>
+              <a>
+                <LuArrowUpNarrowWide />
+                <span>BOT T+</span>
+              </a>
+            </li>
+            <li className="navbar-item text-redirect" onClick={() => navigate("/?bot=long")}>
+              <a>
+                <LuArrowUpNarrowWide />
+                <span>BOT Dài hạn</span>
               </a>
             </li>
             <li
@@ -105,21 +123,6 @@ function MainLayout() {
               <a>
                 <BsBullseye />
                 <span>Vòng tròn quyền lực</span>
-              </a>
-            </li>
-            <li className="navbar-item">
-              <span>Chứng khoán phái sinh</span>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <PiSlidersHorizontal />
-                <span>Future R 1 Min</span>
-              </a>
-            </li>
-            <li className="navbar-item text-redirect">
-              <a>
-                <FaRegStar />
-                <span>Future R Trend 1M</span>
               </a>
             </li>
             <li className="navbar-item">

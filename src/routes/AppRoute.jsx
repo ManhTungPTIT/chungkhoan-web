@@ -8,6 +8,7 @@ import AdminLogin from '../feature/auth/admin/layouts/login';
 import AuthPage from '../feature/auth/user/layouts/AuthPage';
 import PrivateRoute from './PrivateRoute';
 import FilterStock from '../feature/stock/layouts/filterStock'
+import InfoUser from '../feature/auth/user/layouts/InfoUser';
 import MainLayout from '../layouts/MainLayout';
 
 // Lazy-load: echarts + các trang dùng echarts chỉ tải khi mở route,
@@ -21,6 +22,7 @@ function AppRoute() {
       <Route element={<MainLayout />}>
         <Route path="/" element={<TradingView />} />
         <Route path="/chart/filter" element={<FilterStock />} />
+        <Route path="/info" element={<InfoUser />} />
         <Route
           path="/chart/heatmap"
           element={
