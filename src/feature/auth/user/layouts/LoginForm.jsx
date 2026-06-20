@@ -51,6 +51,7 @@ export default function LoginForm({ onSwitchTab }) {
 
   return (
     <>
+      <div className="auth-logo"></div>
       <h3 className="auth-welcome">Chào mừng trở lại!</h3>
       <p className="auth-welcome-sub">Đăng nhập để tiếp tục sử dụng LEOSTOCK</p>
 

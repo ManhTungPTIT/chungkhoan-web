@@ -61,7 +61,7 @@ axiosClient.interceptors.response.use(
       // Bare axios (no interceptor) so a 401 from /refresh can't re-enter this
       // handler and deadlock the queue — it surfaces in the catch below instead.
       const { data } = await axios.post(
-        `${import.meta.env.VITE_BACK_API_URL}/api/auth/refresh`,
+        `${import.meta.env.VITE_NODEJS_API_URL}/auth/refresh`,
         null,
         { withCredentials: true },
       );

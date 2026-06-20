@@ -1,10 +1,10 @@
-// ===== Trang thông tin tài khoản (tone tối navy + gold) =====
-$blue: #e0a92e; // accent (gold) — dùng cho tab active, label, focus, nút
-$ink: #e7ebf6; // chữ chính
-$muted: #8d98b5; // chữ phụ
-$line: rgba(255, 255, 255, 0.1);
-$bg: #0b1326; // nền trang
-$surface: #111c38; // nền card / input
+// ===== Trang thông tin tài khoản (light theme) =====
+$blue: #2563eb; // accent xanh
+$ink: #1f2937; // chữ chính
+$muted: #6b7280; // chữ phụ
+$line: #e6e8ef;
+$bg: #f6f7fb; // nền trang
+$surface: #fff; // nền card / input
 $radius: 10px;
 
 .info-user {
@@ -176,7 +176,7 @@ $radius: 10px;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
       &:focus {
         border-color: $blue;
-        box-shadow: 0 0 0 3px rgba(224, 169, 46, 0.18);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
       }
       &::placeholder {
         color: #aab2c0;
@@ -212,7 +212,7 @@ $radius: 10px;
     cursor: pointer;
     transition: background 0.15s ease;
     &:hover {
-      background: rgba(224, 169, 46, 0.1);
+      background: rgba(37, 99, 235, 0.06);
     }
     &:disabled {
       opacity: 0.6;

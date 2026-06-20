@@ -25,32 +25,13 @@
   flex-direction: row;
   height: 100dvh;
   overflow: hidden;
-
-  // ===== Theme tối (navy + gold) cho toàn bộ khung app =====
-  // Override biến màu để mọi component dùng var() tự chuyển tối
-  // (vd FilterStock). Vùng nến chart vẫn nền trắng (hardcode trong chart.jsx).
-  --bg: #111c38; // bề mặt (input, card, ô)
-  --text: #8d98b5; // chữ phụ
-  --text-h: #e7ebf6; // chữ chính
-  --border: rgba(255, 255, 255, 0.12);
-  --accent: #e0a92e; // gold
-  --accent-bg: rgba(224, 169, 46, 0.14);
-  --accent-border: rgba(224, 169, 46, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.45) 0 10px 15px -3px, rgba(0, 0, 0, 0.3) 0 4px 6px -2px;
-  --app-bg: #0b1326; // nền trang (đậm hơn bề mặt)
-  --gold: #e0a92e;
-  --gold-1: #f5d77a;
-
-  background: var(--app-bg);
-  color: var(--text-h);
 }
 .main-content {
   flex: 1;
   min-width: 0;
   height: 100dvh;
   overflow: auto;
-  background: var(--app-bg);
+  background: #fff; // tông trắng cho phần nội dung (trừ sidebar)
   color: var(--text-h);
 }
 .mainSidebar {
@@ -64,8 +45,8 @@
     display: none; 
   }
   transition: width 0.3s ease;
-  background-color: #0e1830; // navy thay cho xanh dương
-  border-right: 1px solid var(--border);
+  background-color: #0e1830; // navy — sidebar giữ tông tối
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   flex-direction: column;
   color: white;
@@ -82,7 +63,7 @@
       font-size: 1.7rem;
       font-weight: 700;
       cursor: pointer;
-      color: var(--gold-1); // logo gold
+      color: #f5d77a; // logo gold
     }
     button {
       height: 1.7rem;
@@ -92,9 +73,16 @@
       cursor: pointer;
       font-size: 1.7rem;
     }
+    div{
+      .logo{
+        width: 10rem;
+        height: 3rem;
+        mix-blend-mode: lighten;
+      }
+    }
   }
   .ms-auth {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
     padding-top: 0.5rem;
     margin-top: 0.3rem;
     a {
@@ -124,7 +112,7 @@
     }
   }
   .ms-body {
-    border-top: 1px solid var(--border);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
     margin-top: 0.5rem;
     .ms-body-navbar {
       list-style: none;

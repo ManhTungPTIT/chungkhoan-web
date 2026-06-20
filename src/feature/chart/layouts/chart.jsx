@@ -46,9 +46,9 @@ function addIndicator(chart, name) {
     chart.createIndicator(
       {
         name: "EMA",
-        calcParams: [10, 20, 50],
+        calcParams: [10, 20],
         styles: {
-          lines: ["blue", "purple", "red"].map((color) => ({
+          lines: ["blue", "purple"].map((color) => ({
             style: "solid",
             smooth: false,
             size: 1,
@@ -90,9 +90,6 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
     const container = containerRef.current;
     const chart = init(container);
 
-    // ===== Theme tối cho biểu đồ (navy, grid mờ, trục chữ sáng) =====
-    const AXIS_LINE = "rgba(255, 255, 255, 0.15)";
-    const AXIS_TEXT = "#8d98b5";
     chart.setStyles({
       grid: {
         show: false, // bỏ đường kẻ lưới trong đồ thị
@@ -108,35 +105,10 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
           upWickColor: "#26a69a",
           downWickColor: "#ef5350",
         },
-        priceMark: {
-          high: { color: AXIS_TEXT },
-          low: { color: AXIS_TEXT },
-        },
         tooltip: { showRule: "none" }, // ẩn dòng Time, Open, High, Low, Close, Volume
       },
       indicator: {
         tooltip: { showRule: "none" }, // ẩn dòng EMA(10,20,50), BOLL(20,2)...
-      },
-      xAxis: {
-        axisLine: { color: AXIS_LINE },
-        tickLine: { color: AXIS_LINE },
-        tickText: { color: AXIS_TEXT },
-      },
-      yAxis: {
-        axisLine: { color: AXIS_LINE },
-        tickLine: { color: AXIS_LINE },
-        tickText: { color: AXIS_TEXT },
-      },
-      separator: { color: AXIS_LINE },
-      crosshair: {
-        horizontal: {
-          line: { color: "rgba(255, 255, 255, 0.3)" },
-          text: { backgroundColor: "#2a3550", borderColor: "#2a3550" },
-        },
-        vertical: {
-          line: { color: "rgba(255, 255, 255, 0.3)" },
-          text: { backgroundColor: "#2a3550", borderColor: "#2a3550" },
-        },
       },
     });
 
@@ -214,10 +186,9 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
             gap: 4,
             padding: "4px 10px",
             fontSize: "0.8rem",
-            border: "1px solid rgba(255,255,255,0.18)",
+            border: "1px solid var(--border, #d6dae3)",
             borderRadius: 6,
-            background: "#111c38",
-            color: "#e7ebf6",
+            background: "#fff",
             cursor: "pointer",
           }}
         >
@@ -231,11 +202,10 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
               minWidth: 200,
               maxHeight: "60dvh",
               overflowY: "auto",
-              background: "#111c38",
-              color: "#e7ebf6",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: "#fff",
+              border: "1px solid #e6e8ef",
               borderRadius: 8,
-              boxShadow: "0 10px 24px rgba(0,0,0,0.5)",
+              boxShadow: "0 6px 18px rgba(16,24,40,0.12)",
             }}
           >
             {ALL_INDICATORS.map((ind) => (
@@ -266,7 +236,7 @@ export default function TradingChart({ candles, signals, infoHeight = 0 }) {
 
       <div
         ref={containerRef}
-        style={{ width: "100%", height: "100%", background: "#0b1326" }}
+        style={{ width: "100%", height: "100%", background: "#fff" }}
       />
     </div>
   );

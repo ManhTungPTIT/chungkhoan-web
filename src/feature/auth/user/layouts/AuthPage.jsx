@@ -34,13 +34,13 @@ export default function AuthPage({ initialTab = "login" }) {
     <div className="auth-page">
       <aside className="auth-hero">
         <div className="auth-brand">
-          <GiLion className="auth-brand__mark" />
+          {/* <GiLion className="auth-brand__mark" />
           <div>
             <div className="auth-brand__name">
               LEO<span>STOCK</span>
             </div>
             <span className="auth-brand__sub">Công cụ hỗ trợ nhà đầu tư</span>
-          </div>
+          </div> */}
         </div>
 
         <div className="auth-tagline">

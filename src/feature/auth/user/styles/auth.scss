@@ -25,10 +25,9 @@ $line: rgba(255, 255, 255, 0.1);
   position: relative;
   flex: 1;
   min-width: 0;
-  // Ảnh nền (lưu vào public/auth-hero.jpg). Thiếu file thì chỉ hiện gradient.
+  // Cảnh nền phủ kín cột trái
   background:
-    
-    url("../../../../assets/auth-hero.jpg") center / cover no-repeat,
+    url("../../../../assets/auth-hero.jpg") center / 100% 100% no-repeat,
     $navy-800;
   display: flex;
   flex-direction: column;
@@ -39,6 +38,16 @@ $line: rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    // Logo bằng ảnh: cần kích thước cụ thể thì background mới hiện
+    width: 15rem;
+    height: 7rem;
+    // Kéo sát góc trên–trái (bù lại padding của hero)
+    margin: -3rem 0 0 -1.5rem;
+    background: url("../../../../assets/logo.png") left center / contain
+      no-repeat;
+    // logo.jpg có nền tối (JPG không trong suốt) → "lighten" làm nền tối
+    // biến mất (lộ hero phía sau), chỉ giữ phần sáng: sư tử + chữ.
+    mix-blend-mode: lighten;
     .auth-brand__mark {
       font-size: 2rem;
       color: $gold-2;
@@ -126,11 +135,18 @@ $line: rgba(255, 255, 255, 0.1);
   width: 100%;
   max-width: 25rem;
 
+  .auth-logo{
+    width:40vw;
+    height: 20vh;
+    mix-blend-mode: lighten;
+    background: url("../../../../assets/logo-auth.png")  left center / contain
+      no-repeat;
+  }
   .auth-tabs {
     display: flex;
     gap: 1.5rem;
     border-bottom: 1px solid $line;
-    margin-bottom: 1.5rem;
+    
     button {
       flex: 1;
       background: transparent;
@@ -158,6 +174,12 @@ $line: rgba(255, 255, 255, 0.1);
       }
     }
   }
+   h3{
+      text-align: left;
+    }
+    p{
+      text-align: left;
+    }
 
   .auth-welcome {
     margin: 0 0 0.2rem;

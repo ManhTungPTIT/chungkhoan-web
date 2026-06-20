@@ -21,9 +21,8 @@ import { useVn100 } from "./hooks/useVn100";
 
 
 
-// Màu sáng để đọc rõ trên nền tối
-const COLOR_CODE_BUY = { action: "Xanh", color: "#4aa3ff" };
-const COLOR_CODE_SELL = { action: "Đỏ", color: "#ff6b6b" };
+const COLOR_CODE_BUY = { action: "Xanh", color: "blue" };
+const COLOR_CODE_SELL = { action: "Đỏ", color: "red" };
 
 // Nhận Date hoặc chuỗi ngày ("2026-02-23 07:00"); giá trị không parse được
 // (vd "--" khi chưa có signal) trả về nguyên văn thay vì crash render
@@ -142,7 +141,7 @@ function TradingView() {
               margin: "0",
             }}
           >
-            <h1 style={{ color: "#f5d77a", margin: "0.4rem" }}>{chanelCode}</h1>
+            <h1 style={{ color: "purple", margin: "0.4rem" }}>{chanelCode}</h1>
             <div style={{ display: "flex", fontSize: "0.6rem" }}>
               Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
               <p style={{ color: "red" }}> Đỏ ra</p>
@@ -206,7 +205,7 @@ function TradingView() {
             </svg>
             <PiFunnel className="btPanel__icon" />
             <span className="btPanel__divider" />
-            <span className="btPanel__text">Fillter</span>
+            <span className="btPanel__text">Bộ lọc</span>
           </button>
           <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
             <Panel

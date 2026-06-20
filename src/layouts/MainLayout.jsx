@@ -18,7 +18,9 @@ import { IoBookOutline } from "react-icons/io5";
 import { FiDollarSign } from "react-icons/fi";
 import { IoLogOutOutline } from "react-icons/io5";
 import { LoginUserService } from "../feature/auth/user/services/loginUserService";
+import { GiLion } from "react-icons/gi";
 import "../feature/chart/index.scss";
+import logo from "../assets/logo-auth.png"
 
 function MainLayout() {
   const navigate = useNavigate();
@@ -47,8 +49,8 @@ function MainLayout() {
       </button>
       <div className={`mainSidebar${showSidebar ? " hidden" : ""}`}>
         <div className="ms-header">
-          <div >
-            <MdStackedLineChart /> Leostock
+          <div style={{display: "flex", marginTop: "0.3rem"}}>
+            <img className="logo" src={logo} alt="ảnh logo"/>
           </div>
           <button onClick={() => setShowSidebar(!showSidebar)}>
             <GiHamburgerMenu />
