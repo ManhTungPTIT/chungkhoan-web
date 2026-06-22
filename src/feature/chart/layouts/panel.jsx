@@ -2,6 +2,7 @@ import { useRef, useCallback, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { IoCloseOutline } from "react-icons/io5";
 import "../styles/panel.scss";
+import { signalDisplay } from "../untils/signalDisplay";
 
 function Panel({ dataPanel = [], onSelectSymbol }) {
   const tbodyRef = useRef(null);
@@ -71,21 +72,16 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
       </thead>
       <tbody ref={tbodyRef} onScroll={handleScroll}>
         {dataPanel.map((item, index) => {
-          // Tín hiệu mây BB từ backend nếu có (item.signal: "buy"/"sell");
-          // chưa có field thì tạm suy theo change_pct (tăng = mua).
-          const isBuy =
-            item.signal != null
-              ? item.signal === "buy"
-              : Number(item.change_pct) >= 0;
+          // Chỉ hiển thị tín hiệu THẬT từ backend (item.signal). Mã chưa có
+          // tín hiệu → "—" trung tính, không đoán theo change_pct.
+          const sig = signalDisplay(item.signal);
           const isPositive = Number(item.change_pct) >= 0;
           return (
             <tr key={item.symbol ?? index}>
               <td className="code" onClick={() => onSelectSymbol(item.symbol)}>
                 {item.symbol}
               </td>
-              <td className={isBuy ? "hold" : "sell"}>
-                {isBuy ? "Mua" : "Bán"}
-              </td>
+              <td className={sig.className}>{sig.label}</td>
               <td className="price">{(item.price / 1000).toFixed(2)}</td>
               <td className={isPositive ? "percent_hold" : "percent_sell"}>
                 {item.change_pct}
