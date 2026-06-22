@@ -20,7 +20,13 @@ export default function PowerCircle({ data }) {
         text: "BẢN ĐỒ SỨC MẠNH DÒNG TIỀN ",
         left: "center",
         top: 4,
-        textStyle: { fontSize: 15, color: "#333" },
+        textStyle: {
+          fontSize: 15,
+          color: "#333",
+          fontFamily: "Times New Roman", // tên font, vd: "Roboto", "Arial"
+          fontWeight: "bold", // "normal" | "bold" | "bolder" | 100–900
+          fontStyle: "normal", // "normal" | "italic" | "oblique"
+        },
       },
       tooltip: {
         formatter: (p) => {
