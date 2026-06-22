@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { init, dispose } from "klinecharts/dist/index.esm.js";
 import "../klinecharts/bbSignalIndicator";
 import "../klinecharts/mcdxIndicator";
+import "../klinecharts/ichimokuIndicator";
 import "../klinecharts/signalMarkerOverlay";
 
 // Toàn bộ chỉ báo built-in của KLineChart v9.
@@ -15,6 +16,7 @@ export const ALL_INDICATORS = [
   { name: "BOLL", label: "BOLL — Bollinger Bands", pane: "candle_pane" },
   { name: "SAR", label: "SAR — Parabolic SAR", pane: "candle_pane" },
   { name: "AVP", label: "AVP — Giá bình quân", pane: "candle_pane" },
+  { name: "ICHIMOKU", label: "Ichimoku — Mây Kumo", pane: "candle_pane" },
   // --- Khung riêng bên dưới ---
   { name: "VOL", label: "VOL — Khối lượng", pane: "sub" },
   { name: "MCDX", label: "MCDX — Dòng tiền", pane: "sub" },
@@ -195,6 +197,7 @@ export default function TradingChart({
     >
       {/* Thanh công cụ vẽ — ngang, trượt vào/ra theo showDraw */}
       <div
+        className="draw-toolbar"
         style={{
           position: "absolute",
           top: 8,

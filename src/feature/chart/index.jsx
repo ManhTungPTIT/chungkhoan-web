@@ -91,6 +91,20 @@ function TradingView() {
 
   // Bật/tắt thanh công cụ vẽ (truyền xuống chart)
   const [showDrawBar, setShowDrawBar] = useState(false);
+
+  // Bấm ra ngoài nút "Công cụ" và thanh vẽ (.draw-toolbar) → ẩn thanh vẽ.
+  // pointerdown để bắt cả chuột lẫn chạm; closest theo class nên không cần ref
+  // tới thanh vẽ đang nằm trong chart.jsx.
+  useEffect(() => {
+    if (!showDrawBar) return;
+    const onPointerDown = (e) => {
+      if (e.target.closest(".draw-tool-trigger") || e.target.closest(".draw-toolbar"))
+        return;
+      setShowDrawBar(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [showDrawBar]);
   const activeKey = useMemo(
     () =>
       Object.keys(activeIndicators)
@@ -173,6 +187,7 @@ function TradingView() {
             />
             <button
                 type="button"
+                className="draw-tool-trigger"
                 onClick={() => setShowDrawBar((v) => !v)}
                 style={{
                   padding: "4px 10px",

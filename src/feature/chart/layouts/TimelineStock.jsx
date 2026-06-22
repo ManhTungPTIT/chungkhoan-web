@@ -29,17 +29,20 @@ function TimelineStock({activeTimeline, onSelect}) {
          style={{
            display: "inline-flex",
            alignItems: "center",
+           justifyContent: "center",
            gap: 4,
+           minWidth: 56,
            padding: "4px 10px",
            fontSize: "0.8rem",
            border: "1px solid var(--border, #d6dae3)",
            borderRadius: 6,
            background: "#fff",
+           color: "#1d2939",
            cursor: "pointer",
            whiteSpace: "nowrap",
          }}
        >
-         {activeTimeline}
+         ⏱ {activeTimeline} <span style={{ fontSize: "0.7rem" }}>▾</span>
        </button>
        {open && (
          <div

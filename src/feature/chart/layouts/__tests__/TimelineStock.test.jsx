@@ -5,7 +5,7 @@ import TimelineStock from "../TimelineStock";
 describe("TimelineStock", () => {
   it("hiển thị khung đang chọn trên nút", () => {
     render(<TimelineStock activeTimeline="1d" onSelect={() => {}} />);
-    expect(screen.getByRole("button", { name: "1d" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /1d/ })).toBeTruthy();
   });
 
   it("chọn một khung gọi onSelect với token đúng", () => {
@@ -13,7 +13,7 @@ describe("TimelineStock", () => {
     render(<TimelineStock activeTimeline="1d" onSelect={onSelect} />);
 
     // mở dropdown
-    fireEvent.click(screen.getByRole("button", { name: "1d" }));
+    fireEvent.click(screen.getByRole("button", { name: /1d/ }));
     // chọn "1 giờ" (token 1h)
     fireEvent.click(screen.getByText("1 giờ"));
 

@@ -20,5 +20,7 @@ export function useVn100() {
   return useQuery({
     queryKey: ["vn100"],
     queryFn: () => fetchVn100(),
+    refetchInterval: 60 * 1000,
+    staleTime: 2 * 60 * 1000,
   });
 }
