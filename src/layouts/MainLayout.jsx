@@ -122,9 +122,9 @@ function MainLayout() {
               className="navbar-item text-redirect"
               onClick={() => navigate("/chart/power")}
             >
-              <a>
+              <a className="break-word">
                 <BsBullseye />
-                <span>Vòng tròn quyền lực</span>
+                <span>Bản đồ sức mạnh dòng tiền</span>
               </a>
             </li>
             <li className="navbar-item">

@@ -17,7 +17,7 @@ export default function PowerCircle({ data }) {
 
     chart.setOption({
       title: {
-        text: "VÒNG TRÒN QUYỀN LỰC CHỨNG KHOÁN",
+        text: "BẢN ĐỒ SỨC MẠNH DÒNG TIỀN ",
         left: "center",
         top: 4,
         textStyle: { fontSize: 15, color: "#333" },
@@ -37,6 +37,7 @@ export default function PowerCircle({ data }) {
         axisLine: { show: false },
         axisTick: { show: false },
         axisLabel: {
+          interval: 0, // ép hiện TẤT CẢ nhãn (mặc định "auto" tự ẩn nhãn chen nhau)
           fontSize: 10,
           margin: 8,
           // màu nhãn theo nhóm của mã ở vị trí đó

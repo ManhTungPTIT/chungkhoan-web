@@ -73,6 +73,7 @@ export default function RegisterForm({ onSwitchTab }) {
 
   return (
     <>
+    <div className="auth-logo"></div>
       <h3 className="auth-welcome">Tạo tài khoản</h3>
       <p className="auth-welcome-sub">Đăng ký để bắt đầu cùng LEOSTOCK</p>
 

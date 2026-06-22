@@ -2,8 +2,10 @@ import "./index.scss";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PiFunnel } from "react-icons/pi";
+import { TbMathFunction } from "react-icons/tb";
 import TradingChart from "../chart/layouts/chart";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
+import TimelineStock from "../chart/layouts/TimelineStock"
 import {
   generateSignals,
   generateSignalsT,
@@ -67,9 +69,13 @@ function TradingView() {
     () => searchParams.get("symbol")?.toUpperCase() || "VNINDEX",
   );
 
-  const { data: candles = [] } = useIntraday(chanelCode);
-  const { data: dataPanel = [] } = useVn100();
+  //Khung thời gian; mặc định là khung 1 ngày (single-select)
+  const [activeTimeline, setActiveTimeline] = useState("1d");
+  const onSelectTimeline = (name) => setActiveTimeline(name);
 
+  const { data: candles = [] } = useIntraday(chanelCode, activeTimeline);
+  const { data: dataPanel = [] } = useVn100();
+  console.log(candles)
   // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend
   const generateSignalsFor =
     SIGNAL_GENERATORS[searchParams.get("bot")] ?? generateSignals;
@@ -77,10 +83,14 @@ function TradingView() {
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
 
-  // Chỉ báo: EMA bật sẵn; chuỗi activeKey truyền xuống chart để vẽ
-  const [activeIndicators, setActiveIndicators] = useState({ EMA: true });
+  // Chỉ báo: EMA + Volume bật sẵn; chuỗi activeKey truyền xuống chart để vẽ.
+  // VOL hiển thị ở pane dưới (thay MCDX cũ); MCDX nay thêm tùy ý qua picker.
+  const [activeIndicators, setActiveIndicators] = useState({ EMA: true, VOL: true });
   const toggleIndicator = (name) =>
     setActiveIndicators((p) => ({ ...p, [name]: !p[name] }));
+
+  // Bật/tắt thanh công cụ vẽ (truyền xuống chart)
+  const [showDrawBar, setShowDrawBar] = useState(false);
   const activeKey = useMemo(
     () =>
       Object.keys(activeIndicators)
@@ -90,7 +100,6 @@ function TradingView() {
     [activeIndicators],
   );
 
-  console.log("candles", dataPanel);
   useEffect(() => {
     if (!infoRef.current) return;
     const ro = new ResizeObserver(() => {
@@ -158,10 +167,30 @@ function TradingView() {
             <div
               style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}
             >
+            <TimelineStock
+              activeTimeline = {activeTimeline}
+              onSelect = {onSelectTimeline}
+            />
+            <button
+                type="button"
+                onClick={() => setShowDrawBar((v) => !v)}
+                style={{
+                  padding: "4px 10px",
+                  fontSize: "0.8rem",
+                  border: "1px solid var(--border, #d6dae3)",
+                  borderRadius: 6,
+                  background: showDrawBar ? "#eef2ff" : "#fff",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                ✏ Công cụ
+              </button>
               <IndicatorPicker
                 active={activeIndicators}
                 onToggle={toggleIndicator}
               />
+              
               <h1 style={{ color: "purple", margin: "0.4rem" }}>{chanelCode}</h1>
             </div>
             <div style={{ display: "flex", fontSize: "0.6rem" }}>
@@ -212,6 +241,7 @@ function TradingView() {
             signals={signals}
             infoHeight={infoHeight}
             activeKey={activeKey}
+            showDraw={showDrawBar}
           />
         </div>
         <div className="container_panel">

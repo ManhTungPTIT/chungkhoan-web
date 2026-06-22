@@ -91,14 +91,14 @@ registerIndicator({
       title: "Retail: ",
       type: "bar",
       baseValue: 0,
-      styles: () => ({ color: "#43A047" }),
+      styles: () => ({ color: "#19ff19" }),
     },
     {
       key: "hot",
       title: "Hot: ",
       type: "bar",
       baseValue: 0,
-      styles: () => ({ color: "#FDD835" }),
+      styles: () => ({ color: "#e8ff02" }),
     },
     {
       key: "banker",
@@ -112,15 +112,15 @@ registerIndicator({
           prev.indicatorData?.banker != null &&
           current.indicatorData?.banker != null &&
           current.indicatorData.banker < prev.indicatorData.banker
-            ? "#FB8C00"
-            : "#E53935",
+            ? "#fd8c73"
+            : "#ff0000",
       }),
     },
     {
       key: "shark",
       title: "Shark: ",
       type: "line",
-      styles: () => ({ color: "#1E88E5", size: 2 }),
+      styles: () => ({ color: "#7E57C2", size: 2 }),
     },
   ],
   calc: (dataList, { calcParams }) =>

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ALL_INDICATORS } from "./chart";
+import { TbMathFunction } from "react-icons/tb";
+
 
 // Nút + dropdown chọn chỉ báo. Đặt cạnh mã cổ phiếu (trong panel info) nên
 // tự bám theo mã ở mọi kích thước màn hình (kể cả mobile).
@@ -24,6 +26,7 @@ export default function IndicatorPicker({ active, onToggle }) {
           whiteSpace: "nowrap",
         }}
       >
+      <TbMathFunction />
         Chỉ báo ▾
       </button>
       {open && (

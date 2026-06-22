@@ -15,24 +15,36 @@ export function normalizeCandle(item) {
     high: Number(item.high),
     low: Number(item.low),
     close: Number(item.close),
+    // volume cho biểu đồ Volume; thiếu/"nan" → 0 để không vẽ cột rác
+    volume: Number.isFinite(Number(item.volume)) ? Number(item.volume) : 0,
   };
 }
 
-const fetchIntraday = async (symbol) => {
+export const fetchIntraday = async (symbol, interval = "1d") => {
   const { data } = await axios.get(
     `${import.meta.env.VITE_PYTHON_API_URL}/intraday`,
     {
-      params: { symbol },
+      params: { symbol, interval },
     },
   );
 
-  return Object.values(data.data).map(normalizeCandle);
+  // vnstock pad nến giờ nghỉ/lễ bằng "nan" → Number("nan")=NaN; một nến NaN
+  // làm hỏng thang giá klinecharts → chart trắng. Lọc bỏ nến OHLC không hợp lệ.
+  return Object.values(data.data)
+    .map(normalizeCandle)
+    .filter(
+      (c) =>
+        Number.isFinite(c.open) &&
+        Number.isFinite(c.high) &&
+        Number.isFinite(c.low) &&
+        Number.isFinite(c.close),
+    );
 };
 
-export function useIntraday(symbol = "VNINDEX") {
+export function useIntraday(symbol = "VNINDEX", interval = "1d") {
   return useQuery({
-    queryKey: ["intraday", symbol],
-    queryFn: () => fetchIntraday(symbol),
+    queryKey: ["intraday", symbol, interval],
+    queryFn: () => fetchIntraday(symbol, interval),
     refetchInterval: 60 * 1000,
     staleTime: 2 * 60 * 1000, //thoi gian du cho data coi nhu la moi
   });

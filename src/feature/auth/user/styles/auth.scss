@@ -26,106 +26,21 @@ $line: rgba(255, 255, 255, 0.1);
 // ---------- Cột trái: hero ----------
 .auth-hero {
   position: relative;
-  flex: 1;
+  flex: 3;
   min-width: 0;
-  // Cảnh nền phủ kín cột trái
-  // background:
-  //   url("../../../../assets/auth-hero.jpg") center / 100% 100% no-repeat,
-  //   $navy-800;
+  //Cảnh nền phủ kín cột trái
+  background:
+    url("../../../../assets/logo.jpg") center / 100% 100% no-repeat,
+    $navy-800;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 2rem 2.5rem;
-
-  .auth-brand {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    // Logo bằng ảnh: cần kích thước cụ thể thì background mới hiện
-    width: 15rem;
-    height: 7rem;
-    // Kéo sát góc trên–trái (bù lại padding của hero)
-    margin: -3rem 0 0 -1.5rem;
-    background: url("../../../../assets/logo.png") left center / contain
-      no-repeat;
-    // logo.jpg có nền tối (JPG không trong suốt) → "lighten" làm nền tối
-    // biến mất (lộ hero phía sau), chỉ giữ phần sáng: sư tử + chữ.
-    mix-blend-mode: lighten;
-    .auth-brand__mark {
-      font-size: 2rem;
-      color: $gold-2;
-      line-height: 1;
-    }
-    .auth-brand__name {
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      span {
-        background: linear-gradient(135deg, $gold-1, $gold-2);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-    }
-    .auth-brand__sub {
-      display: block;
-      font-size: 0.6rem;
-      letter-spacing: 0.18em;
-      color: $text-muted;
-      text-transform: uppercase;
-    }
-  }
-
-  .auth-tagline {
-    h2 {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.85);
-    }
-    .auth-tagline__big {
-      margin: 0.4rem 0;
-      font-size: 2.6rem;
-      font-weight: 800;
-      line-height: 1.05;
-      letter-spacing: 0.02em;
-      background: linear-gradient(135deg, $gold-1, $gold-2);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-  }
-
-  .auth-features {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.6rem;
-    .auth-feature {
-      max-width: 7rem;
-      .auth-feature__icon {
-        font-size: 1.3rem;
-        color: $gold-2;
-      }
-      b {
-        display: block;
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        margin-top: 0.3rem;
-      }
-      span {
-        font-size: 0.66rem;
-        color: $text-muted;
-      }
-    }
-  }
 }
 
 // ---------- Cột phải: card ----------
 .auth-panel {
-  flex: 0 0 30rem;
+  flex: 1;
   max-width: 100%;
   display: flex;
   align-items: center;
@@ -139,10 +54,12 @@ $line: rgba(255, 255, 255, 0.1);
   max-width: 25rem;
 
   .auth-logo{
-    width:30vw;
-    height: 20vh;
+    // clamp(min, ưa thích, max): mobile không bé hơn 200px, desktop tối đa 300px
+    width: clamp(200px, 60vw, 300px);
+    height: 5rem;
+    margin: 0 auto 0.5rem; // căn giữa trong card
     mix-blend-mode: lighten;
-    background: url("../../../../assets/logo-auth.png")  left center / contain
+    background: url("../../../../assets/logo-auth.png") center / contain
       no-repeat;
   }
   .auth-tabs {
@@ -190,13 +107,13 @@ $line: rgba(255, 255, 255, 0.1);
     font-weight: 800;
   }
   .auth-welcome-sub {
-    margin: 0 0 1.3rem;
+    margin: 0 0 0.8rem;
     font-size: 0.85rem;
     color: $text-muted;
   }
 
   .field-group {
-    margin-bottom: 0.9rem;
+    margin-bottom: 0.55rem;
     label {
       display: block;
       font-size: 0.78rem;

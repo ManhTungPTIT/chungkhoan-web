@@ -127,6 +127,7 @@
         color: rgba(255, 255, 255, 0.5);
         padding-left: 1rem;
         margin-top: 1rem;
+        
         a {
           width: 100%;
           height: 100%;
@@ -136,7 +137,18 @@
           padding-left: clamp(0.5rem, 15%, 1rem);
           font-size: 1rem;
           color: rgba(255, 255, 255, 0.8);
+          // Riêng mục chữ dài (xuống dòng): canh đỉnh thay vì giữa
+          &.break-word {
+            align-items: start;
+            svg{
+              margin-top: 0.3rem;
+            }
+            span{
+              text-align: left;
+              overflow-wrap: break-word;
+            }
         }
+      }
         a:hover {
           color: white;
         }
@@ -311,6 +323,14 @@
       width: clamp(150px, 20vw, 260px);
     }
   }
+}
+
+.timeline-active{
+  background: transparent;
+}
+.timeline-active:hover{
+  color: white;
+  background: blue;
 }
 
 @media (max-width: 768px) {

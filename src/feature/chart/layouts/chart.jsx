@@ -17,6 +17,7 @@ export const ALL_INDICATORS = [
   { name: "AVP", label: "AVP — Giá bình quân", pane: "candle_pane" },
   // --- Khung riêng bên dưới ---
   { name: "VOL", label: "VOL — Khối lượng", pane: "sub" },
+  { name: "MCDX", label: "MCDX — Dòng tiền", pane: "sub" },
   { name: "MACD", label: "MACD", pane: "sub" },
   { name: "KDJ", label: "KDJ — Stochastic", pane: "sub" },
   { name: "RSI", label: "RSI", pane: "sub" },
@@ -62,6 +63,18 @@ function addIndicator(chart, name) {
     );
     return;
   }
+  if (name === "VOL") {
+    // Bật tooltip riêng cho VOL: chỉ hiện giá trị khối lượng khi rê chuột
+    // (crosshair) qua cột, không ảnh hưởng tooltip các chỉ báo khác.
+    chart.createIndicator(
+      {
+        name: "VOL",
+        styles: { tooltip: { showRule: "follow_cross" } },
+      },
+      false,
+    );
+    return;
+  }
   const pane = ALL_INDICATORS.find((i) => i.name === name)?.pane;
   if (pane === "candle_pane") {
     chart.createIndicator(name, true, { id: "candle_pane" });
@@ -70,18 +83,35 @@ function addIndicator(chart, name) {
   }
 }
 
+// Công cụ vẽ (overlay built-in của KLineChart). glyph = ký hiệu nút.
+const DRAW_TOOLS = [
+  { name: "horizontalStraightLine", glyph: "—", label: "Đường ngang" },
+  { name: "straightLine", glyph: "／", label: "Đường thẳng" },
+  { name: "segment", glyph: "↗", label: "Đoạn thẳng" },
+  { name: "rayLine", glyph: "→", label: "Tia" },
+  { name: "priceLine", glyph: "⎯", label: "Đường giá" },
+  { name: "fibonacciLine", glyph: "Fib", label: "Fibonacci" },
+  { name: "rect", glyph: "▭", label: "Hình chữ nhật" },
+  { name: "circle", glyph: "◯", label: "Hình tròn" },
+  { name: "arrow", glyph: "➜", label: "Mũi tên" },
+  { name: "simpleAnnotation", glyph: "✎", label: "Ghi chú" },
+];
+
 // activeKey: chuỗi tên chỉ báo đang bật (do TradingView truyền xuống).
 export default function TradingChart({
   candles,
   signals,
   infoHeight = 0,
   activeKey = "",
+  showDraw = false,
 }) {
   const containerRef = useRef(null);
+  const chartRef = useRef(null); // giữ instance để thanh công cụ vẽ gọi createOverlay
 
   useEffect(() => {
     const container = containerRef.current;
     const chart = init(container);
+    chartRef.current = chart;
 
     chart.setStyles({
       grid: {
@@ -114,6 +144,7 @@ export default function TradingChart({
         high: c.high,
         low: c.low,
         close: c.close,
+        volume: c.volume,
       }));
     chart.applyNewData(dataList);
 
@@ -127,9 +158,6 @@ export default function TradingChart({
     chart.createIndicator({ name: "BBS", extendData: signals }, true, {
       id: "candle_pane",
     });
-
-    // MCDX — pane riêng bên dưới
-    chart.createIndicator("MCDX", false);
 
     // Markers mua/bán
     signals.forEach((s) => {
@@ -148,20 +176,92 @@ export default function TradingChart({
     return () => {
       ro.disconnect();
       dispose(container);
+      chartRef.current = null;
     };
   }, [candles, signals, activeKey]);
 
+  // Vào chế độ vẽ một overlay; groupId "draw" để xoá riêng hình vẽ (không đụng marker)
+  const startDraw = (name) =>
+    chartRef.current?.createOverlay({ name, groupId: "draw" });
+  const clearDraw = () => chartRef.current?.removeOverlay({ groupId: "draw" });
+
   return (
     <div
-      ref={containerRef}
       style={{
+        position: "relative",
         width: "100%",
         height: `calc(100dvh - ${infoHeight}px)`,
-        background: "#fff",
-        // Để cử chỉ chạm (pinch-zoom / kéo) đi vào chart thay vì bị trình duyệt
-        // mobile xử lý thành zoom/cuộn trang → mới zoom được trên điện thoại.
-        touchAction: "none",
       }}
-    />
+    >
+      {/* Thanh công cụ vẽ — ngang, trượt vào/ra theo showDraw */}
+      <div
+        style={{
+          position: "absolute",
+          top: 8,
+          left: 8,
+          zIndex: 10,
+          display: "flex",
+          flexDirection: "row",
+          gap: 2,
+          background: "#fff",
+          border: "1px solid var(--border, #d6dae3)",
+          borderRadius: 8,
+          padding: 4,
+          boxShadow: "0 4px 12px rgba(16,24,40,0.12)",
+          transition: "transform 0.25s ease, opacity 0.25s ease",
+          transform: showDraw ? "translateX(0)" : "translateX(-110%)",
+          opacity: showDraw ? 1 : 0,
+          pointerEvents: showDraw ? "auto" : "none",
+        }}
+      >
+        {DRAW_TOOLS.map((t) => (
+          <button
+            key={t.name}
+            type="button"
+            title={t.label}
+            onClick={() => startDraw(t.name)}
+            style={{
+              width: 30,
+              height: 30,
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              borderRadius: 6,
+              fontSize: "0.85rem",
+            }}
+          >
+            {t.glyph}
+          </button>
+        ))}
+        <button
+          type="button"
+          title="Xoá hình vẽ"
+          onClick={clearDraw}
+          style={{
+            width: 30,
+            height: 30,
+            border: "none",
+            borderLeft: "1px solid #eee",
+            background: "transparent",
+            cursor: "pointer",
+            fontSize: "0.9rem",
+          }}
+        >
+          🗑
+        </button>
+      </div>
+
+      <div
+        ref={containerRef}
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "#fff",
+          // Để cử chỉ chạm (pinch-zoom / kéo) đi vào chart thay vì bị trình duyệt
+          // mobile xử lý thành zoom/cuộn trang → mới zoom được trên điện thoại.
+          touchAction: "none",
+        }}
+      />
+    </div>
   );
 }
