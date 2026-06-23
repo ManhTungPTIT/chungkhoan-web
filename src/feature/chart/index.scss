@@ -261,6 +261,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  height: 100dvh; // full màn hình để panel bên dưới nút có chiều cao tính %
   .btPanel{
     display: inline-flex;            // bố cục nằm ngang: icon | gạch | chữ
     align-items: center;
@@ -324,6 +325,8 @@
   .panel-slide{
     overflow: hidden;
     width: 0;
+    flex: 1 1 auto; // chiếm phần cao còn lại dưới nút "Bộ lọc"
+    min-height: 0;  // cho phép table bên trong cuộn thay vì tràn
     transition: width 0.3s ease;
     &.is-open{
       width: clamp(150px, 20vw, 260px);

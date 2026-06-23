@@ -195,6 +195,26 @@
       white-space: nowrap;
     }
 
+    // Nhãn cột + icon sắp xếp/lọc nằm cùng hàng (như ảnh thiết kế)
+    .th-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+
+      &--left {
+        justify-content: flex-start;
+      }
+    }
+
+    .th-sort,
+    .th-filter {
+      flex-shrink: 0;
+      font-size: 15px;
+      color: var(--text);
+      opacity: 0.7;
+    }
+
     tbody td {
       text-align: center;
       padding: 0 12px;
@@ -215,6 +235,18 @@
       padding: 0;
     }
 
+    // Lãi/Lỗ (%): xanh khi tăng, đỏ khi giảm
+    .col-pnl {
+      font-weight: 600;
+
+      &--up {
+        color: #1fa463;
+      }
+      &--down {
+        color: #ff5b78;
+      }
+    }
+
     .badge {
       display: flex;
       align-items: center;
@@ -231,6 +263,9 @@
       }
       &--sell {
         background: #ff5b78;
+      }
+      &--neutral {
+        background: #9aa0a6;
       }
     }
   }

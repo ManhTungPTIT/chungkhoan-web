@@ -5,10 +5,23 @@ import {
   FiChevronLeft,
   FiChevronRight,
 } from "react-icons/fi";
+import { LuChevronsUpDown } from "react-icons/lu";
 import "../styles/filterStock.scss";
 import useSector from "../hooks/useSector";
 import useSectorSymbol from "../hooks/useSectorSymbol"
 import {useVn100} from "../../chart/hooks/useVn100"
+import { signalDisplay } from "../../chart/untils/signalDisplay";
+
+// Cấu hình cột header — khớp ảnh thiết kế. sortable: hiện icon ↕; filter: icon ▾.
+const COLUMNS = [
+  { key: "symbol", label: "Mã", sortable: true, align: "left" },
+  { key: "signal", label: "Tín hiệu", filter: true },
+  { key: "date", label: "Ngày báo", sortable: true },
+  { key: "priceReport", label: "Giá báo", sortable: true },
+  { key: "price", label: "Giá hiện tại", sortable: true },
+  { key: "pnl", label: "Lãi/Lỗ (%)", sortable: true },
+  { key: "tplus", label: "T+ (Ngày)" },
+];
 
 const PAGE_SIZE = 6;
 
@@ -51,6 +64,8 @@ function FilterStock() {
   const { data: sector = [] } = useSector();
   const {data: symbols = []} = useSectorSymbol(codeCate)
   const { data: dataPanel = [] } = useVn100();
+
+  console.log("VN100",dataPanel )
   
   // Danh mục = "Tất cả" + nhóm ngành lấy từ API (tính lại khi sector đổi)
   const categories = useMemo(
@@ -153,27 +168,44 @@ function FilterStock() {
         <table>
           <thead>
             <tr>
-              <th>Mã</th>
-              <th>Tín hiệu</th>
-              <th>%Tăng/giảm</th>
-              <th>Giá hiện tại</th>
+              {COLUMNS.map((col) => (
+                <th key={col.key}>
+                  <div
+                    className={`th-cell ${col.align === "left" ? "th-cell--left" : ""}`}
+                  >
+                    <span>{col.label}</span>
+                    {col.sortable && <LuChevronsUpDown className="th-sort" />}
+                    {col.filter && <FiChevronDown className="th-filter" />}
+                  </div>
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {pagedRows.map((s) => (
-              <tr key={s.code}>
-                <td className="col-code">{s.symbol}</td>
-                <td className="col-signal">
-                  <span
-                    className={`badge ${s.change_pct >= 0 ? "badge--hold" : "badge--sell"}`}
+            {pagedRows.map((s) => {
+              const sig = signalDisplay(s.signal);
+              const pct = Number(s.change_pct);
+              return (
+                <tr key={s.symbol}>
+                  <td className="col-code">{s.symbol}</td>
+                  <td className="col-signal">
+                    <span className={`badge badge--${sig.className}`}>
+                      {sig.label === "Mua" && sig.signal_sessions > 0 ? "Giữ" : sig.label}
+                    </span>
+                  </td>
+                  {/* Backend VN100 chưa trả ngày báo/giá báo/T+ → tạm "--" */}
+                  <td>{s.signal_date ? convertDay(s.signal_date) : "--"}</td>
+                  <td>{s.signal_price != null ? s.signal_price : "--"}</td>
+                  <td className="col-price">{(s.price / 1000).toFixed(2)}</td>
+                  <td
+                    className={`col-pnl ${pct >= 0 ? "col-pnl--up" : "col-pnl--down"}`}
                   >
-                    {s.change_pct > 0 ? "GIỮ" : "BÁN"}
-                  </span>
-                </td>
-                <td className="col-date">{s.change_pct}</td>
-                <td className="col-price">{s.price/1000}</td>
-              </tr>
-            ))}
+                    {Number.isFinite(pct) ? `${pct}%` : "--"}
+                  </td>
+                  <td>T+{s.signal_sessions ?? "--"}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

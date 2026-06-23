@@ -75,7 +75,6 @@ function TradingView() {
 
   const { data: candles = [] } = useIntraday(chanelCode, activeTimeline);
   const { data: dataPanel = [] } = useVn100();
-  console.log(candles)
   // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend
   const generateSignalsFor =
     SIGNAL_GENERATORS[searchParams.get("bot")] ?? generateSignals;

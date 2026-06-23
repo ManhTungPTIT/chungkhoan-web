@@ -1,6 +1,10 @@
 table {
   // Sàn 150px để 4 cột không bị bóp; trần 260px tránh quá rộng trên desktop
   width: clamp(150px, 20vw, 260px);
+  // Cao bằng panel-slide + xếp dọc để tbody nhận phần cao còn lại và cuộn được
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
   thead {
     display: block;
@@ -74,6 +78,8 @@ table {
 
   tbody {
     display: block;
+    flex: 1;        // chiếm hết chiều cao còn lại dưới thead
+    min-height: 0;  // cho phép co nhỏ hơn nội dung → mới kích hoạt cuộn
     overflow-y: scroll;
 
     &::-webkit-scrollbar {
