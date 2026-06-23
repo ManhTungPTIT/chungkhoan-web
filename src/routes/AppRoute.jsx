@@ -7,6 +7,7 @@ import TradingView from '../feature/chart/index';
 import AdminLogin from '../feature/auth/admin/layouts/login';
 import AuthPage from '../feature/auth/user/layouts/AuthPage';
 import PrivateRoute from './PrivateRoute';
+import AdminPrivateRoute from './AdminPrivateRoute';
 import FilterStock from '../feature/stock/layouts/filterStock'
 import InfoUser from '../feature/auth/user/layouts/InfoUser';
 import MainLayout from '../layouts/MainLayout';
@@ -19,39 +20,47 @@ const PowerPage = lazy(() => import('../feature/power'));
 function AppRoute() {
   return (
     <Routes>
-      <Route element={<MainLayout />}>
-        <Route path="/" element={<TradingView />} />
-        <Route path="/chart/filter" element={<FilterStock />} />
-        <Route path="/info" element={<InfoUser />} />
-        <Route
-          path="/chart/heatmap"
-          element={
-            <Suspense
-              fallback={<div style={{ padding: "2rem" }}>Đang tải bản đồ nhiệt…</div>}
-            >
-              <HeatmapPage />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/chart/power"
-          element={
-            <Suspense
-              fallback={<div style={{ padding: "2rem" }}>Đang tải vòng tròn quyền lực…</div>}
-            >
-              <PowerPage />
-            </Suspense>
-          }
-        />
-      </Route>
+      {/* Public routes — NOT gated by PrivateRoute, otherwise the guard would
+          redirect to /login while /login itself is gated → infinite loop / blank page. */}
       <Route path="/login" element={<AuthPage initialTab="login" />} />
       <Route path="/register" element={<AuthPage initialTab="register" />} />
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/login" element={<AdminLogin />} />
-      <Route element={<PrivateRoute requiredRole="admin" />}>
+
+      {/* Admin dashboard — chỉ tài khoản role "admin" mới vào được. */}
+      <Route element={<AdminPrivateRoute />}>
         <Route element={<Admin />}>
           <Route path="/admin/user" element={<ManagerUser />} />
           <Route path="/admin/kyc" element={<KycAdmin />} />
+        </Route>
+      </Route>
+
+      {/* Protected routes — only these sit behind PrivateRoute. */}
+      <Route element={<PrivateRoute />}>
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<TradingView />} />
+          <Route path="/chart/filter" element={<FilterStock />} />
+          <Route path="/info" element={<InfoUser />} />
+          <Route
+            path="/chart/heatmap"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải bản đồ nhiệt…</div>}
+              >
+                <HeatmapPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/power"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải vòng tròn quyền lực…</div>}
+              >
+                <PowerPage />
+              </Suspense>
+            }
+          />
         </Route>
       </Route>
     </Routes>

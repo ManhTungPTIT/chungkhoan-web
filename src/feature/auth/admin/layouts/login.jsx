@@ -31,7 +31,7 @@ export default function AdminLogin() {
 
     try {
       await login({ username: account.trim(), password: password.trim() });
-      navigate("/admin/user");
+       navigate("/admin/user");
     } catch {
       setShowPopup(true);
     }

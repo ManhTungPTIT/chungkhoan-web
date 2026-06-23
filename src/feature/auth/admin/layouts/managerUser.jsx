@@ -21,7 +21,7 @@ import {
 
 // Lấy { total, online, offline } từ BE (đi qua interceptor refresh của axiosAdmin)
 async function fetchUserStats() {
-  const { data } = await axiosAdmin.get("/api/user/stats");
+  const { data } = await axiosAdmin.get("/user/stats");
   return data;
 }
 

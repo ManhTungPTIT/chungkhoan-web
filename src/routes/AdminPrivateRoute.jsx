@@ -3,12 +3,13 @@ import { Navigate, Outlet } from "react-router-dom";
 import { getAccessToken } from "../feature/auth/admin/untils/tokenStorage";
 import axiosClient from "../feature/auth/untils/axiosClient";
 
-// Validate the session via the protected /api/auth/me endpoint:
-//   access valid                  → 200 → allow
-//   access expired, refresh OK     → interceptor refreshes + retries → 200 → allow
-//   refresh expired/reused         → interceptor clears + redirects; we also fall
-//                                    back to unauthed here
-export default function PrivateRoute() {
+// Gate cho các trang quản trị. Giống PrivateRoute nhưng BẮT BUỘC role === "admin":
+//   không có token / token hỏng        → /admin/login
+//   token hợp lệ nhưng là user thường   → /admin/login (không đủ quyền)
+//   token hợp lệ và là admin            → cho qua
+// /api/auth/me trả về { admin: { role, ... } } cho cả user lẫn admin, nên phải
+// kiểm tra role để chặn user thường lọt vào dashboard.
+export default function AdminPrivateRoute() {
   const [status, setStatus] = useState(() =>
     getAccessToken() ? "checking" : "unauthed",
   );
@@ -22,9 +23,7 @@ export default function PrivateRoute() {
       .then((res) => {
         if (!active) return;
         const role = res.data?.admin?.role;
-        
-          setStatus("authed");
-        
+        setStatus(role === "admin" ? "authed" : "unauthed");
       })
       .catch(() => active && setStatus("unauthed"));
 
@@ -38,6 +37,5 @@ export default function PrivateRoute() {
   }
   if (status === "authed") return <Outlet />;
 
-  const loginPath = "/login";
-  return <Navigate to={loginPath} replace />;
+  return <Navigate to="/admin/login" replace />;
 }

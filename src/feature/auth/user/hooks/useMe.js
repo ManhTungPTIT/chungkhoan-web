@@ -3,7 +3,7 @@ import axiosClient from "../../untils/axiosClient";
 
 // Hồ sơ người dùng đang đăng nhập. Đổi path nếu backend khác /api/user/me.
 const fetchMe = async () => {
-  const { data } = await axiosClient.get("/api/user/me");
+  const { data } = await axiosClient.get("/user/me");
   // Một số backend bọc trong { data: {...} } — lấy phần lõi nếu có.
   return data?.data ?? data;
 };
@@ -21,7 +21,7 @@ export function useUpdateMe() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (payload) => {
-      const { data } = await axiosClient.patch("/api/user/me", payload);
+      const { data } = await axiosClient.patch("/user/me", payload);
       return data?.data ?? data;
     },
     onSuccess: () => {

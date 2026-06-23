@@ -12,7 +12,7 @@ export function LoginUserService() {
 
   const logout = async () => {
     try {
-      await axiosClient.post("/api/auth/logout");
+      await axiosClient.post("/auth/logout");
     } catch {
       // best-effort; clear locally regardless
     }

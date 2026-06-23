@@ -8,8 +8,8 @@ import {
 import { LuChevronsUpDown } from "react-icons/lu";
 import "../styles/filterStock.scss";
 import useSector from "../hooks/useSector";
-import useSectorSymbol from "../hooks/useSectorSymbol"
-import {useVn100} from "../../chart/hooks/useVn100"
+import useSectorSymbol from "../hooks/useSectorSymbol";
+import { useVn100 } from "../../chart/hooks/useVn100";
 import { signalDisplay } from "../../chart/untils/signalDisplay";
 
 // Cấu hình cột header — khớp ảnh thiết kế. sortable: hiện icon ↕; filter: icon ▾.
@@ -37,10 +37,7 @@ const getPageNumbers = (current, total, max = 5) => {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 };
 
-const CATEGORIES = [
-  {name:"Tất cả", code: 1}
-];
-
+const CATEGORIES = [{ name: "Tất cả", code: 1 }];
 
 const convertDay = (value) => {
   const d = value instanceof Date ? value : new Date(value);
@@ -60,26 +57,24 @@ function FilterStock() {
   const [page, setPage] = useState(1);
   const dropdownRef = useRef(null);
 
-  
   const { data: sector = [] } = useSector();
-  const {data: symbols = []} = useSectorSymbol(codeCate)
+  const { data: symbols = [] } = useSectorSymbol(codeCate);
   const { data: dataPanel = [] } = useVn100();
 
-  console.log("VN100",dataPanel )
-  
+
   // Danh mục = "Tất cả" + nhóm ngành lấy từ API (tính lại khi sector đổi)
   const categories = useMemo(
-    () => [...CATEGORIES, ...sector.map((item) => ({
-      name:item.group,
-      code:item.icb_code
-    }))],
-    [sector]
+    () => [
+      ...CATEGORIES,
+      ...sector.map((item) => ({
+        name: item.group,
+        code: item.icb_code,
+      })),
+    ],
+    [sector],
   );
-  
-  
-  const today = convertDay(new Date());
 
-  
+  const today = convertDay(new Date());
 
   // Đóng dropdown khi click ra ngoài
   useEffect(() => {
@@ -94,7 +89,7 @@ function FilterStock() {
 
   let list;
   const rows = useMemo(() => {
-    if(codeCate === 1) list = Array.isArray(dataPanel)? dataPanel : [];
+    if (codeCate === 1) list = Array.isArray(dataPanel) ? dataPanel : [];
     else list = Array.isArray(symbols[2]) ? symbols[2] : [];
     const keyword = search.trim().toUpperCase();
     if (!keyword) return list;
@@ -115,9 +110,7 @@ function FilterStock() {
     <div className="filter-stock">
       <div className="filter-stock__header">
         <h2 className="filter-stock__title">Bộ lọc cổ phiếu</h2>
-        <span className="filter-stock__updated">
-          Cập nhật lúc {today}
-        </span>
+        <span className="filter-stock__updated">Cập nhật lúc {today}</span>
       </div>
 
       <div className="filter-stock__toolbar">
@@ -127,7 +120,9 @@ function FilterStock() {
             className={`dropdown-trigger ${openDropdown ? "is-open" : ""}`}
             onClick={() => setOpenDropdown((v) => !v)}
           >
-            <span className={category === categories[0].name ? "placeholder" : ""}>
+            <span
+              className={category === categories[0].name ? "placeholder" : ""}
+            >
               {category === categories[0].name ? "Chọn danh mục" : category}
             </span>
             <FiChevronDown className="chevron" />
@@ -142,7 +137,7 @@ function FilterStock() {
                   onClick={() => {
                     setCategory(item.name);
                     setOpenDropdown(false);
-                    setCodeCate(item.code)
+                    setCodeCate(item.code);
                   }}
                 >
                   <span className="dropdown-label">{item.name}</span>
@@ -190,7 +185,9 @@ function FilterStock() {
                   <td className="col-code">{s.symbol}</td>
                   <td className="col-signal">
                     <span className={`badge badge--${sig.className}`}>
-                      {sig.label === "Mua" && sig.signal_sessions > 0 ? "Giữ" : sig.label}
+                      {sig.label === "Mua" && Number(s.signal_sessions) > 0
+                        ? "Nắm giữ"
+                        : sig.label}
                     </span>
                   </td>
                   {/* Backend VN100 chưa trả ngày báo/giá báo/T+ → tạm "--" */}
