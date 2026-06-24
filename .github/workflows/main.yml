@@ -25,6 +25,7 @@ jobs:
         run: CI=false npm run build
         env:
           VITE_PYTHON_API_URL: ${{ secrets.VITE_PYTHON_API_URL }}
+          VITE_NODEJS_API_URL: ${{ secrets.VITE_NODEJS_API_URL }}
 
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
