@@ -11,6 +11,7 @@ import AdminPrivateRoute from './AdminPrivateRoute';
 import FilterStock from '../feature/stock/layouts/filterStock'
 import InfoUser from '../feature/auth/user/layouts/InfoUser';
 import MainLayout from '../layouts/MainLayout';
+import HomePage from '../feature/homepage/layouts/HomePage'
 
 // Lazy-load: echarts + các trang dùng echarts chỉ tải khi mở route,
 // không nằm trong bundle khởi động.
@@ -39,6 +40,7 @@ function AppRoute() {
       <Route element={<PrivateRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/" element={<TradingView />} />
+          <Route path="/home" element = {<HomePage/>}/>
           <Route path="/chart/filter" element={<FilterStock />} />
           <Route path="/info" element={<InfoUser />} />
           <Route

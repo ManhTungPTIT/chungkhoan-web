@@ -10,6 +10,7 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
   const inputRef = useRef(null);
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  console.log(dataPanel)
 
   const handleScroll = useCallback(() => {
     const el = tbodyRef.current;
@@ -81,7 +82,13 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
               <td className="code" onClick={() => onSelectSymbol(item.symbol)}>
                 {item.symbol}
               </td>
-              <td className={sig.className}>{sig.label}</td>
+              <td className={sig.className}>
+              {item.signal === "buy" && Number(item.signal_sessions) > 0 ? "NẮM GIỮ" : (
+                item.signal === "sell" && Number(item.signal_sessions) > 0
+                ? "Ở NGOÀI" : sig.label
+              )
+              }
+              </td>
               <td className="price">{(item.price / 1000).toFixed(2)}</td>
               <td className={isPositive ? "percent_hold" : "percent_sell"}>
                 {item.change_pct}

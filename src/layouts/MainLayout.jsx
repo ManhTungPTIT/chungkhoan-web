@@ -73,7 +73,7 @@ function MainLayout() {
         </div>
         <div className="ms-body">
           <ul className="ms-body-navbar">
-            <li className="navbar-item text-redirect" onClick={() => navigate("/")}>
+            <li className="navbar-item text-redirect" onClick={() => navigate("/home")}>
               <a>
                 <TiHomeOutline />
                 <span>Trang chủ</span>
@@ -155,9 +155,6 @@ function MainLayout() {
               </a>
             </li>
           </ul>
-        </div>
-        <div className="ms-footer">
-          <b>Nền tảng số cho Môi giới chứng khoán</b>
         </div>
       </div>
       <div className="main-content">

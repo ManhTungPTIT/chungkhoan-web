@@ -87,14 +87,19 @@ function FilterStock() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  let list;
   const rows = useMemo(() => {
-    if (codeCate === 1) list = Array.isArray(dataPanel) ? dataPanel : [];
-    else list = Array.isArray(symbols[2]) ? symbols[2] : [];
+    const list =
+      codeCate === 1
+        ? Array.isArray(dataPanel)
+          ? dataPanel
+          : []
+        : Array.isArray(symbols[2])
+          ? symbols[2]
+          : [];
     const keyword = search.trim().toUpperCase();
     if (!keyword) return list;
-    return list.filter((s) => s.symbol.includes(keyword));
-  }, [search, symbols]);
+    return list.filter((s) => s.symbol?.includes(keyword));
+  }, [search, symbols, dataPanel, codeCate]);
 
   const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
 
@@ -187,7 +192,11 @@ function FilterStock() {
                     <span className={`badge badge--${sig.className}`}>
                       {sig.label === "Mua" && Number(s.signal_sessions) > 0
                         ? "Nắm giữ"
-                        : sig.label}
+                        : (
+                          sig.label === "Bán" && Number(s.signal_sessions) > 0
+                          ? "Ở ngoài"
+                          : sig.label
+                        )}
                     </span>
                   </td>
                   {/* Backend VN100 chưa trả ngày báo/giá báo/T+ → tạm "--" */}

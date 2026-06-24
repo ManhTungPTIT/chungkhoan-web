@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   background: #f0f4f8;
+  color-scheme: light;
 }
 
 .login-card {
@@ -41,6 +42,8 @@
     border-radius: 8px;
     font-size: 0.95rem;
     outline: none;
+    background-color: white;
+    color: #111;
     transition: border-color 0.2s;
     &:focus {
       border-color: rgb(7, 104, 159);
@@ -62,6 +65,7 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   overflow: hidden;
+  background-color: white;
   transition: border-color 0.2s;
   &:focus-within {
     border-color: rgb(7, 104, 159);
@@ -76,6 +80,8 @@
     padding: 0.55rem 0.75rem;
     font-size: 0.95rem;
     outline: none;
+    background-color: white;
+    color: #111;
   }
 
   .toggle-pw {
