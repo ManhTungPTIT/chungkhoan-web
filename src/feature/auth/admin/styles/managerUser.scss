@@ -55,6 +55,12 @@
     background-color: white;
     color: #111;
   }
+  // Cho phép bảng cuộn ngang trên màn nhỏ thay vì bóp cột làm chữ đè nhau
+  .table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
   table {
     width: 100%;
     margin: 0;
@@ -73,6 +79,20 @@
           padding: 0.5rem 0.2rem;
           font-weight: 500;
           color: black;
+          // Email/SĐT dài thì ngắt dòng thay vì tràn đè cột bên cạnh
+          word-break: break-word;
+
+          // Ô "Khách hàng": avatar bên trái, tên xuống dòng khi quá dài
+          &.td-user {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            .u-name {
+              min-width: 0;
+              white-space: normal;
+              word-break: break-word;
+            }
+          }
           button {
             margin: 0 auto;
             display: flex;
@@ -92,6 +112,42 @@
           }
         }
       }
+    }
+  }
+
+  // ===== Màn hình điện thoại =====
+  @media (max-width: 640px) {
+    .managerUser_card {
+      // 3 thẻ chen nhau quá hẹp → xếp dọc cho dễ đọc
+      grid-template-columns: 1fr;
+    }
+
+    .tab {
+      flex-wrap: wrap;
+    }
+
+    table {
+      // Giữ bề rộng tối thiểu để các cột không bị bóp, rồi cuộn ngang
+      min-width: 560px;
+      thead th {
+        white-space: nowrap;
+        font-size: 0.8rem;
+      }
+      // Cột Thao tác giữ nguyên 1 dòng, các cột chữ thì cho xuống dòng
+      tbody tr td:last-child {
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+// Modal vừa khít màn hình điện thoại
+@media (max-width: 640px) {
+  .user-modal {
+    width: 92vw;
+
+    .modal-packages {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 }

@@ -192,6 +192,49 @@
         left: 50%;
         transform: translate(-50%, -50%);
       }
+
+      // Menu con xổ xuống (accordion) cho "Bản đồ sức mạnh dòng tiền"
+      .navbar-caret {
+        margin-left: auto;
+        flex: 0 0 auto;
+        font-size: 1.1rem;
+        transition: transform 0.28s ease;
+      }
+      .power-parent.is-open .navbar-caret {
+        transform: rotate(180deg);
+      }
+      .navbar-submenu {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 0.28s ease;
+
+        > ul {
+          overflow: hidden;
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+        &.is-open {
+          grid-template-rows: 1fr;
+        }
+      }
+      .navbar-subitem {
+        cursor: pointer;
+        a {
+          display: flex;
+          align-items: center;
+          height: 2.6rem;
+          padding-left: 2.8rem;
+          font-size: 0.88rem;
+          color: rgba(255, 255, 255, 0.65);
+          span {
+            text-align: left;
+          }
+        }
+        a:hover {
+          color: #fff;
+        }
+      }
     }
   }
   .ms-footer {
@@ -328,6 +371,7 @@
     flex: 1 1 auto; // chiếm phần cao còn lại dưới nút "Bộ lọc"
     min-height: 0;  // cho phép table bên trong cuộn thay vì tràn
     transition: width 0.3s ease;
+    translate: no;
     &.is-open{
       width: clamp(150px, 20vw, 260px);
     }

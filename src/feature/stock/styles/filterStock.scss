@@ -178,6 +178,9 @@
 
   // ===== Bảng dữ liệu =====
   &__table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
     table {
       width: 100%;
       border-collapse: collapse;
@@ -323,6 +326,28 @@
     }
     &__dropdown {
       flex: 1 1 auto;
+    }
+
+    // Màn hình nhỏ: giữ bề rộng tối thiểu cho bảng rồi cuộn ngang,
+    // tránh các cột bị bóp khiến chữ đè lên nhau.
+    &__table table {
+      min-width: 640px;
+    }
+
+    &__table {
+      thead th {
+        padding: 12px 8px;
+        font-size: 12px;
+      }
+
+      tbody td {
+        padding: 0 8px;
+        font-size: 13px;
+      }
+
+      .badge {
+        font-size: 13px;
+      }
     }
   }
 }

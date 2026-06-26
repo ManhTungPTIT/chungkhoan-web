@@ -6,11 +6,14 @@ import {
   FaEquals,
   FaMoneyBillWave,
 } from "react-icons/fa";
-import { GiLion } from "react-icons/gi";
+
 import SupplyBalanceScene from "./SupplyBalanceScene";
 import "../styles/homePage.scss";
 import useTopVolumn from "../hooks/useTopVolumn";
+import useMarket from "../hooks/useMarket";
+import useMarketBreadth from "../hooks/useMarketBreadth";
 import { buildFlowMap } from "../untils/flowMapData";
+import brandLogo from "../../../assets/logo-auth-white.png";
 
 export const DEFAULT_HOME_MARKET_DATA = {
   brand: {
@@ -250,8 +253,9 @@ function BalancePanel({ data }) {
         <div className="supply-balance__side supply-balance__side--buy">
           <MetricValue value={`${data.buy.percent}%`} tone="positive" />
           <b>{data.buy.label}</b>
-          <strong>{data.buy.value}</strong>
-          <span>{data.buy.unit}</span>
+          <strong>
+            {data.buy.value} <span>{data.buy.unit}</span>
+          </strong>
         </div>
 
         <SupplyBalanceScene
@@ -262,8 +266,8 @@ function BalancePanel({ data }) {
         <div className="supply-balance__side supply-balance__side--sell">
           <MetricValue value={`${data.sell.percent}%`} tone="negative" />
           <b>{data.sell.label}</b>
-          <strong>{data.sell.value}</strong>
-          <span>{data.sell.unit}</span>
+          <strong>{data.sell.value} <span>{data.sell.unit}</span></strong>
+          
         </div>
       </div>
 
@@ -341,7 +345,7 @@ function FlowMap({ data }) {
               className={`flow-map__point flow-map__point--${point.tone} flow-map__point--${point.strength}`}
               style={getPointPosition(point.angle, point.radius)}
             >
-              <b>{point.symbol}</b>
+              <b translate="no">{point.symbol}</b>
               <span>{point.value}</span>
             </article>
           ))}
@@ -397,29 +401,158 @@ function MarketStats({ items }) {
   );
 }
 
+const convertDay = (value) => {
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  return `${day}/${month}/${year}`;
+};
+
+// Đổ tổng cầu/tổng cung thật từ /homepage/market-depth ({total_bid_volume,
+// total_ask_volume}) vào shape balance của BalancePanel: % phe mua/bán theo tỉ
+// trọng dư mua/dư bán, value = khối lượng chờ khớp, summary "Chênh lệch" = dư
+// mua − dư bán. Chưa có dữ liệu (đang tải/lỗi/0) → giữ nguyên balance mặc định.
+const buildBalance = (defaultBalance, market) => {
+  const bid = Number(market?.total_bid_volume) || 0;
+  const ask = Number(market?.total_ask_volume) || 0;
+  const total = bid + ask;
+  if (!total) return defaultBalance;
+
+  const buyPercent = Math.round((bid / total) * 100);
+  const diff = bid - ask;
+  const fmt = (n) => Math.abs(n).toLocaleString("vi-VN");
+
+  return {
+    ...defaultBalance,
+    buy: {
+      ...defaultBalance.buy,
+      percent: buyPercent,
+      value: fmt(bid),
+      unit: "CP",
+    },
+    sell: {
+      ...defaultBalance.sell,
+      percent: 100 - buyPercent,
+      value: fmt(ask),
+      unit: "CP",
+    },
+    summary: defaultBalance.summary.map((item) => {
+      if (item.icon === "trend") {
+        return {
+          ...item,
+          value: `${diff >= 0 ? "+" : "-"}${fmt(diff)}`,
+          unit: "CP",
+          tone: diff >= 0 ? "positive" : "negative",
+        };
+      }
+      // Tổng giá trị khớp lệnh = tổng mua + bán (bid + ask)
+      if (item.label === "Tổng giá trị khớp lệnh") {
+        return { ...item, value: fmt(total), unit: "CP" };
+      }
+      return item;
+    }),
+  };
+};
+
+const buildMarketStats = (
+  advancers,
+  decliners,
+  unchanged,
+  total_value,
+  prev_total_volume,
+) => {
+  const precentBuy = (
+    (advancers / (advancers + decliners + unchanged)) *
+    100
+  ).toFixed(2);
+  const precentSell = (
+    (decliners / (advancers + decliners + unchanged)) *
+    100
+  ).toFixed(2);
+  const precentUnchange = (
+    (unchanged / (advancers + decliners + unchanged)) *
+    100
+  ).toFixed(2);
+
+  return [
+    {
+      label: "Mã tăng giá",
+      value: advancers,
+      detail: `Chiếm ${precentBuy}%`,
+      tone: "positive",
+      icon: "up",
+    },
+    {
+      label: "Mã giảm giá",
+      value: decliners,
+      detail: `Chiếm ${precentSell}%`,
+      tone: "negative",
+      icon: "down",
+    },
+    {
+      label: "Mã tham chiếu",
+      value: unchanged,
+      detail: `Chiếm ${precentUnchange}%`,
+      tone: "warning",
+      icon: "flat",
+    },
+    {
+      label: "KL khớp lệnh",
+      value: (prev_total_volume / 1000000).toFixed(2),
+      detail: "Triệu CP",
+      tone: "positive",
+      icon: "cash",
+    },
+    {
+      label: "GT khớp lệnh",
+      value: (total_value / 1000000000).toFixed(2),
+      detail: "Tỷ đồng",
+      tone: "warning",
+      icon: "coin",
+    },
+  ];
+};
+
 function HomePage({ data = DEFAULT_HOME_MARKET_DATA }) {
   const { data: topVolume } = useTopVolumn();
+  const { data: market } = useMarket();
+  const { data: marketBreadth } = useMarketBreadth();
+  // Cân cung cầu thật từ market-depth; chưa có dữ liệu → balance mặc định.
+  const balanceData = buildBalance(data.balance, market);
+  // Có dữ liệu market-breadth thật → dựng thống kê từ nó; chưa có (đang
+  // tải/lỗi) → dùng marketStats mặc định.
+  const marketStatsData = marketBreadth
+    ? buildMarketStats(
+        marketBreadth.advancers,
+        marketBreadth.decliners,
+        marketBreadth.unchanged,
+        marketBreadth.total_value,
+        marketBreadth.prev_total_volume,
+      )
+    : data.marketStats;
+
+  const day = new Date();
+  const today = convertDay(day);
   // Có dữ liệu top-volume thật → dựng FlowMap từ nó; chưa có (đang tải/lỗi) →
   // dùng flowMap mặc định để trang vẫn hiển thị.
-  const flowMapData = topVolume?.length ? buildFlowMap(topVolume) : data.flowMap;
+  const flowMapData = topVolume?.length
+    ? buildFlowMap(topVolume)
+    : data.flowMap;
   return (
     <main className="home-market">
       <header className="home-market__header">
         <div className="home-market__brand" aria-label={data.brand.name}>
-          <GiLion />
-          <div>
-            <strong>{data.brand.name}</strong>
-            <span>{data.brand.tagline}</span>
-          </div>
+          <img src={brandLogo} alt={data.brand.name} />
         </div>
 
-        <h1>{data.title}</h1>
+        <h1>Cập nhật lúc: {today}</h1>
 
         <div className="home-market__updated">
-          {data.updatedAt.label ? <span>{data.updatedAt.label}</span> : null}
-          <b>
-            {data.updatedAt.time} | {data.updatedAt.date}
-          </b>
+          <span>Cập nhật lúc: </span>
+          <b> {today}</b>
           <button type="button" aria-label="Thông tin thị trường">
             i
           </button>
@@ -427,9 +560,9 @@ function HomePage({ data = DEFAULT_HOME_MARKET_DATA }) {
       </header>
 
       <div className="home-market__grid">
-        <BalancePanel data={data.balance} />
+        <BalancePanel data={balanceData} />
         <FlowMap data={flowMapData} />
-        <MarketStats items={data.marketStats} />
+        <MarketStats items={marketStatsData} />
       </div>
     </main>
   );

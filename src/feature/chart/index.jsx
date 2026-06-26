@@ -5,7 +5,7 @@ import { PiFunnel } from "react-icons/pi";
 import { TbMathFunction } from "react-icons/tb";
 import TradingChart from "../chart/layouts/chart";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
-import TimelineStock from "../chart/layouts/TimelineStock"
+import TimelineStock from "../chart/layouts/TimelineStock";
 import {
   generateSignals,
   generateSignalsT,
@@ -21,8 +21,6 @@ const SIGNAL_GENERATORS = {
 import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
 import { useVn100 } from "./hooks/useVn100";
-
-
 
 const COLOR_CODE_BUY = { action: "Xanh", color: "blue" };
 const COLOR_CODE_SELL = { action: "Đỏ", color: "red" };
@@ -84,7 +82,10 @@ function TradingView() {
 
   // Chỉ báo: EMA + Volume bật sẵn; chuỗi activeKey truyền xuống chart để vẽ.
   // VOL hiển thị ở pane dưới (thay MCDX cũ); MCDX nay thêm tùy ý qua picker.
-  const [activeIndicators, setActiveIndicators] = useState({ EMA: true, VOL: true });
+  const [activeIndicators, setActiveIndicators] = useState({
+    EMA: true,
+    VOL: true,
+  });
   const toggleIndicator = (name) =>
     setActiveIndicators((p) => ({ ...p, [name]: !p[name] }));
 
@@ -97,7 +98,10 @@ function TradingView() {
   useEffect(() => {
     if (!showDrawBar) return;
     const onPointerDown = (e) => {
-      if (e.target.closest(".draw-tool-trigger") || e.target.closest(".draw-toolbar"))
+      if (
+        e.target.closest(".draw-tool-trigger") ||
+        e.target.closest(".draw-toolbar")
+      )
         return;
       setShowDrawBar(false);
     };
@@ -136,9 +140,10 @@ function TradingView() {
 
   const priceCurrent =
     candles.length > 0 ? candles[candles.length - 1].close : "--";
-  
+
   //Goi y nam giu
-  const pricePct = (((priceCurrent - priceChange) / priceChange) * 100).toFixed(2) + "%";
+  const pricePct =
+    (((priceCurrent - priceChange) / priceChange) * 100).toFixed(2) + "%";
   const dayCount = countTradingSessions(dayChange, today);
   const target1 = (priceChange * 1.2).toFixed(2);
   const target2 = (priceChange * 1.4).toFixed(2);
@@ -157,132 +162,134 @@ function TradingView() {
         marginLeft: "0.1rem",
       }}
     >
+      <div
+        style={{
+          position: "relative",
+          flex: 1,
+          minWidth: 0,
+          borderInline: "1px solid var(--border)",
+        }}
+      >
         <div
+          ref={infoRef}
+          className="information"
           style={{
-            position: "relative",
-            flex: 1,
-            minWidth: 0,
-            borderInline: "1px solid var(--border)",
+            fontFamily: "sans-serif",
+            textTransform: "uppercase",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "end",
+            margin: "0",
           }}
         >
-          <div
-            ref={infoRef}
-            className="information"
-            style={{
-              fontFamily: "sans-serif",
-              textTransform: "uppercase",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "end",
-              margin: "0",
-            }}
-          >
-            <div
-              style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}
-            >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
             <TimelineStock
-              activeTimeline = {activeTimeline}
-              onSelect = {onSelectTimeline}
+              activeTimeline={activeTimeline}
+              onSelect={onSelectTimeline}
             />
             <button
-                type="button"
-                className="draw-tool-trigger"
-                onClick={() => setShowDrawBar((v) => !v)}
-                style={{
-                  padding: "4px 10px",
-                  fontSize: "0.8rem",
-                  border: "1px solid var(--border, #d6dae3)",
-                  borderRadius: 6,
-                  background: showDrawBar ? "#eef2ff" : "#fff",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                ✏ Công cụ
-              </button>
-              <IndicatorPicker
-                active={activeIndicators}
-                onToggle={toggleIndicator}
-              />
-              
-              <h1 style={{ color: "purple", margin: "0.4rem" }}>{chanelCode}</h1>
-            </div>
-            <div style={{ display: "flex", fontSize: "0.6rem" }}>
-              Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
-              <p style={{ color: "red" }}> Đỏ ra</p>
-            </div>
-            <div style={{ display: "flex", gap: "1rem", fontSize: "1rem" }}>
-              <p style={{ color: COLORCODE.color }}>
-                Giá chuyển {COLORCODE.action}: {priceChange}
-              </p>
-              <p style={{ color: COLORCODE.color }}>
-                Ngày chuyển {COLORCODE.action}: {dayChangeConvert}
-              </p>
-            </div>
-             <div
-                  style={{
-                    color: "#B36AAA",
-                    fontSize: "0.7rem",
-                    display: "flex",
-                    gap: "1rem",
-                  }}
-                >
-                  <p>Giá hiện tại: {priceCurrent}</p>
-                  <p>Ngày HIỆN TẠI: {dayCurrent}</p>
-                </div>
+              type="button"
+              className="draw-tool-trigger"
+              onClick={() => setShowDrawBar((v) => !v)}
+              style={{
+                padding: "4px 10px",
+                fontSize: "0.8rem",
+                border: "1px solid var(--border, #d6dae3)",
+                borderRadius: 6,
+                background: showDrawBar ? "#eef2ff" : "#fff",
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              ✏ Công cụ
+            </button>
+            <IndicatorPicker
+              active={activeIndicators}
+              onToggle={toggleIndicator}
+            />
 
-            {COLORCODE.action === "Xanh" ? (
-              <div>
+            <h1 translate="no" style={{ color: "purple", margin: "0.4rem" }}>
+              {chanelCode}
+            </h1>
+          </div>
+          <div style={{ display: "flex", fontSize: "0.6rem" }}>
+            Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
+            <p style={{ color: "red" }}> Đỏ ra</p>
+          </div>
+          <div style={{ display: "flex", gap: "1rem", fontSize: "1rem" }}>
+            <p style={{ color: COLORCODE.color }}>
+              Giá chuyển {COLORCODE.action}: {priceChange}
+            </p>
+            <p style={{ color: COLORCODE.color }}>
+              Ngày chuyển {COLORCODE.action}: {dayChangeConvert}
+            </p>
+          </div>
+          <div
+            style={{
+              color: "#B36AAA",
+              fontSize: "0.7rem",
+              display: "flex",
+              gap: "1rem",
+            }}
+          >
+            <p>Giá hiện tại: {priceCurrent}</p>
+            <p>Ngày HIỆN TẠI: {dayCurrent}</p>
+          </div>
 
-                <div
-                  style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}
-                >
-                  <p style={{ color: COLORCODE.color }}>Giá chốt lãi/Cắt lỗ: {priceTarget}</p>
-                  <p>Mục tiêu dự kiến: {target1} | {target2} | {target3}</p>
-                </div>
-                <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
-                  (Đã Tăng {pricePct} | Vùng Xanh, nắm giữ {dayCount} phiên)
+          {COLORCODE.action === "Xanh" ? (
+            <div>
+              <div style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}>
+                <p style={{ color: COLORCODE.color }}>
+                  Giá chốt lãi/Cắt lỗ: {priceTarget}
+                </p>
+                <p>
+                  Mục tiêu dự kiến: {target1} | {target2} | {target3}
                 </p>
               </div>
-            ) : (
               <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
-                  (Tránh Giảm {pricePct} | Vùng Đỏ đã đứng ngoài {dayCount} phiên)
-                </p>
-            )}
-          </div>
-          <TradingChart
-            candles={candles}
-            signals={signals}
-            infoHeight={infoHeight}
-            activeKey={activeKey}
-            showDraw={showDrawBar}
+                (Đã Tăng {pricePct} | Vùng Xanh, nắm giữ {dayCount} phiên)
+              </p>
+            </div>
+          ) : (
+            <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
+              (Tránh Giảm {pricePct} | Vùng Đỏ đã đứng ngoài {dayCount} phiên)
+            </p>
+          )}
+        </div>
+        <TradingChart
+          candles={candles}
+          signals={signals}
+          infoHeight={infoHeight}
+          activeKey={activeKey}
+          showDraw={showDrawBar}
+        />
+      </div>
+      <div className="container_panel">
+        <button
+          className={`btPanel ${openPanel ? "" : "btPanelHidden"}`}
+          onClick={() => setOpenPanel((v) => !v)}
+        >
+          {/* Định nghĩa gradient để tô màu cho icon SVG */}
+          <svg width="0" height="0" style={{ position: "absolute" }}>
+            <defs>
+              <linearGradient id="funnelGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#8b3df5" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <PiFunnel className="btPanel__icon" />
+          <span className="btPanel__divider" />
+          <span className="btPanel__text">Bộ lọc</span>
+        </button>
+        <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
+          <Panel
+            dataPanel={dataPanel}
+            onSelectSymbol={(symbol) => setChaneCode(symbol)}
           />
         </div>
-        <div className="container_panel">
-
-          <button className={`btPanel ${openPanel ? "" : "btPanelHidden"}`}  onClick={() => setOpenPanel((v) => !v)} >
-            {/* Định nghĩa gradient để tô màu cho icon SVG */}
-            <svg width="0" height="0" style={{ position: "absolute" }}>
-              <defs>
-                <linearGradient id="funnelGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="100%" stopColor="#8b3df5" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <PiFunnel className="btPanel__icon" />
-            <span className="btPanel__divider" />
-            <span className="btPanel__text">Bộ lọc</span>
-          </button>
-          <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
-            <Panel
-              dataPanel={dataPanel}
-              onSelectSymbol={(symbol) => setChaneCode(symbol)}
-            />
-          </div>
-        </div>
-        
       </div>
+    </div>
   );
 }
 

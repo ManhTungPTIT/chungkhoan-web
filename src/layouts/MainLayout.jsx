@@ -7,7 +7,7 @@ import { TiHomeOutline } from "react-icons/ti";
 import { LuArrowUpNarrowWide } from "react-icons/lu";
 import { BsFunnel } from "react-icons/bs";
 import { MdGridView } from "react-icons/md";
-import { BsBullseye } from "react-icons/bs";
+import { MdExpandMore } from "react-icons/md";
 import { FaRegStar } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa6";
 import { FaArrowUp } from "react-icons/fa";
@@ -29,6 +29,8 @@ function MainLayout() {
   const [showSidebar, setShowSidebar] = useState(
     typeof window !== "undefined" && window.innerWidth <= 768,
   );
+  // Dropdown gộp "Bản đồ nhiệt", "Bản đồ sức mạnh dòng tiền", "Toàn cảnh thị trường"
+  const [mapMenuOpen, setMapMenuOpen] = useState(false);
 
   const data = JSON.parse(localStorage.getItem("auth-storage"));
   
@@ -73,7 +75,7 @@ function MainLayout() {
         </div>
         <div className="ms-body">
           <ul className="ms-body-navbar">
-            <li className="navbar-item text-redirect" onClick={() => navigate("/home")}>
+            <li className="navbar-item text-redirect" onClick={() => navigate("/?bot=trend")}>
               <a>
                 <TiHomeOutline />
                 <span>Trang chủ</span>
@@ -110,22 +112,53 @@ function MainLayout() {
               </a>
             </li>
             <li
-              className="navbar-item text-redirect"
-              onClick={() => navigate("/chart/heatmap")}
-            >
-              <a>
-                <MdGridView />
-                <span>Bản đồ nhiệt</span>
-              </a>
-            </li>
-            <li
-              className="navbar-item text-redirect"
-              onClick={() => navigate("/chart/power")}
+              className={`navbar-item text-redirect power-parent${
+                mapMenuOpen ? " is-open" : ""
+              }`}
+              onClick={() => setMapMenuOpen((v) => !v)}
             >
               <a className="break-word">
-                <BsBullseye />
-                <span>Bản đồ sức mạnh dòng tiền</span>
+                <MdGridView />
+                <span>Bản đồ thị trường</span>
+                <MdExpandMore className="navbar-caret" />
               </a>
+            </li>
+            <li className={`navbar-submenu${mapMenuOpen ? " is-open" : ""}`}>
+              <ul>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/heatmap");
+                  }}
+                >
+                  <a>
+                    <span>Bản đồ nhiệt</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/power");
+                  }}
+                >
+                  <a>
+                    <span>Bản đồ sức mạnh dòng tiền</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/home");
+                  }}
+                >
+                  <a>
+                    <span>Bản đồ toàn cảnh thị trường</span>
+                  </a>
+                </li>
+              </ul>
             </li>
             <li className="navbar-item">
               <span>Thông tin</span>

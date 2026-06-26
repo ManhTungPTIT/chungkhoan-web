@@ -31,7 +31,7 @@ export default function IndicatorPicker({ active, onToggle }) {
     : ALL_INDICATORS;
 
   return (
-    <div ref={rootRef} style={{ position: "relative", zIndex: 20 }}>
+    <div ref={rootRef} translate="no" style={{ position: "relative", zIndex: 20 }}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

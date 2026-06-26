@@ -81,6 +81,7 @@ table {
     flex: 1;        // chiếm hết chiều cao còn lại dưới thead
     min-height: 0;  // cho phép co nhỏ hơn nội dung → mới kích hoạt cuộn
     overflow-y: scroll;
+    
 
     &::-webkit-scrollbar {
       width: 6px;

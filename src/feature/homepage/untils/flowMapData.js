@@ -17,18 +17,12 @@ function formatVolume(volume) {
   return String(v);
 }
 
-// HẠNG (index đã sort giảm dần) → mức ảnh hưởng. total nhỏ vẫn chia 3 bậc.
-function strengthByRank(index, total) {
-  const third = total / 3;
-  if (index < third) return "strong";
-  if (index < third * 2) return "medium";
-  return "weak";
-}
-
 export function buildFlowMap(rows) {
+  const third = rows.length / 3;
   const points = rows.map((row, index) => {
     const tone = row.trend === "buy" ? "positive" : "negative";
-    const strength = strengthByRank(index, rows.length);
+    // strength chỉ dùng để đặt bán kính điểm trên la bàn (top volume = gần tâm)
+    const strength = index < third ? "strong" : index < third * 2 ? "medium" : "weak";
     return {
       symbol: row.symbol,
       value: `${tone === "positive" ? "+" : "-"}${formatVolume(row.volume)}`,
@@ -41,15 +35,14 @@ export function buildFlowMap(rows) {
 
   const totalVolume = rows.reduce((sum, r) => sum + (Number(r.volume) || 0), 0);
 
-  const countLevel = (tone, strength) =>
-    points.filter((p) => p.tone === tone && p.strength === strength).length;
+  // Số chấm "Ảnh hưởng" cố định: Mạnh 3 → Trung bình 2 → Yếu 1
   const influenceGroup = (title, tone) => ({
     title,
     tone,
     levels: [
-      { label: "Mạnh", count: countLevel(tone, "strong") },
-      { label: "Trung bình", count: countLevel(tone, "medium") },
-      { label: "Yếu", count: countLevel(tone, "weak") },
+      { label: "Mạnh", count: 3 },
+      { label: "Trung bình", count: 2 },
+      { label: "Yếu", count: 1 },
     ],
   });
 

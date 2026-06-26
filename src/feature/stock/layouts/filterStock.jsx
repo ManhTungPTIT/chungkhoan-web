@@ -12,7 +12,7 @@ import useSectorSymbol from "../hooks/useSectorSymbol";
 import { useVn100 } from "../../chart/hooks/useVn100";
 import { signalDisplay } from "../../chart/untils/signalDisplay";
 
-// Cấu hình cột header — khớp ảnh thiết kế. sortable: hiện icon ↕; filter: icon ▾.
+// Cấu hình cột header
 const COLUMNS = [
   { key: "symbol", label: "Mã", sortable: true, align: "left" },
   { key: "signal", label: "Tín hiệu", filter: true },
@@ -55,12 +55,15 @@ function FilterStock() {
   const [openDropdown, setOpenDropdown] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  // Số dòng/trang tự co theo chiều cao màn (tính ở effect bên dưới)
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const dropdownRef = useRef(null);
+  const tableRef = useRef(null);
 
   const { data: sector = [] } = useSector();
   const { data: symbols = [] } = useSectorSymbol(codeCate);
   const { data: dataPanel = [] } = useVn100();
-
+  console.log(dataPanel)
 
   // Danh mục = "Tất cả" + nhóm ngành lấy từ API (tính lại khi sector đổi)
   const categories = useMemo(
@@ -101,14 +104,40 @@ function FilterStock() {
     return list.filter((s) => s.symbol?.includes(keyword));
   }, [search, symbols, dataPanel, codeCate]);
 
-  const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
 
   // Khi đổi bộ lọc khiến số trang giảm, kéo trang hiện tại về trong khoảng hợp lệ
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
 
-  const pagedRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Tính số dòng vừa khít chiều cao còn lại: đo từ đỉnh tbody tới đáy viewport,
+  // chừa chỗ cho thanh phân trang. Màn to → nhiều dòng, màn nhỏ → ít dòng.
+  useEffect(() => {
+    const el = tableRef.current;
+    if (!el) return;
+    const recompute = () => {
+      const tbody = el.querySelector("tbody");
+      if (!tbody) return;
+      const firstRow = tbody.querySelector("tr");
+      const rowH = firstRow?.getBoundingClientRect().height || 72;
+      const top = tbody.getBoundingClientRect().top;
+      const RESERVE = 50; // thanh phân trang (20+38) + padding dưới (16)
+      const avail = window.innerHeight - top - RESERVE;
+      const fit = Math.max(3, Math.floor(avail / rowH));
+      setPageSize((prev) => (prev !== fit ? fit : prev));
+    };
+    recompute();
+    const ro = new ResizeObserver(recompute);
+    ro.observe(el);
+    window.addEventListener("resize", recompute);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", recompute);
+    };
+  }, [rows.length]);
+
+  const pagedRows = rows.slice((page - 1) * pageSize, page * pageSize);
   const pageNumbers = getPageNumbers(page, totalPages);
 
   return (
@@ -164,7 +193,7 @@ function FilterStock() {
         </div>
       </div>
 
-      <div className="filter-stock__table">
+      <div className="filter-stock__table" ref={tableRef}>
         <table>
           <thead>
             <tr>
@@ -190,13 +219,11 @@ function FilterStock() {
                   <td className="col-code">{s.symbol}</td>
                   <td className="col-signal">
                     <span className={`badge badge--${sig.className}`}>
-                      {sig.label === "Mua" && Number(s.signal_sessions) > 0
+                      {sig.label === "BUY" && Number(s.signal_sessions) > 0
                         ? "Nắm giữ"
-                        : (
-                          sig.label === "Bán" && Number(s.signal_sessions) > 0
+                        : sig.label === "SELL" && Number(s.signal_sessions) > 0
                           ? "Ở ngoài"
-                          : sig.label
-                        )}
+                          : sig.label}
                     </span>
                   </td>
                   {/* Backend VN100 chưa trả ngày báo/giá báo/T+ → tạm "--" */}

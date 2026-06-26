@@ -71,7 +71,7 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
           <th>(%)</th>
         </tr>
       </thead>
-      <tbody ref={tbodyRef} onScroll={handleScroll}>
+      <tbody ref={tbodyRef} translate="no" onScroll={handleScroll}>
         {dataPanel.map((item, index) => {
           // Chỉ hiển thị tín hiệu THẬT từ backend (item.signal). Mã chưa có
           // tín hiệu → "—" trung tính, không đoán theo change_pct.
@@ -83,9 +83,9 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
                 {item.symbol}
               </td>
               <td className={sig.className}>
-              {item.signal === "buy" && Number(item.signal_sessions) > 0 ? "NẮM GIỮ" : (
+              {item.signal === "buy" && Number(item.signal_sessions) > 0 ? "HOLD" : (
                 item.signal === "sell" && Number(item.signal_sessions) > 0
-                ? "Ở NGOÀI" : sig.label
+                ? "OUT" : sig.label
               )
               }
               </td>

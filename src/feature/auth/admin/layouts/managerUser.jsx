@@ -232,6 +232,7 @@ function UsersTable({ users, onAction, emptyText }) {
     return <p className="pending-empty">{emptyText}</p>;
   }
   return (
+    <div className="table-wrap">
     <table>
       <thead>
         <tr>
@@ -245,9 +246,9 @@ function UsersTable({ users, onAction, emptyText }) {
       <tbody>
         {users.map((u) => (
           <tr key={u.id}>
-            <td style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+            <td className="td-user">
               <Avatar init={initialsOf(u.fullName)} idx={avatarIdx(u.fullName)} />
-              {u.fullName}
+              <span className="u-name">{u.fullName}</span>
             </td>
             <td>{u.email || u.phoneNumber || "—"}</td>
             <td><Status status={u.status} expiresAt={u.expiresAt} /></td>
@@ -261,6 +262,7 @@ function UsersTable({ users, onAction, emptyText }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 
@@ -270,6 +272,7 @@ function PendingUsersTable({ users, busyId, onApprove, onReject }) {
     return <p className="pending-empty">Không có tài khoản nào chờ duyệt.</p>;
   }
   return (
+    <div className="table-wrap">
     <table>
       <thead>
         <tr>
@@ -282,9 +285,9 @@ function PendingUsersTable({ users, busyId, onApprove, onReject }) {
       <tbody>
         {users.map((u) => (
           <tr key={u.id}>
-            <td style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+            <td className="td-user">
               <Avatar init={initialsOf(u.fullName)} idx={avatarIdx(u.fullName)} />
-              {u.fullName}
+              <span className="u-name">{u.fullName}</span>
             </td>
             <td>{u.email || u.phoneNumber || "—"}</td>
             <td>{fmtDate(u.createdAt)}</td>
@@ -308,6 +311,7 @@ function PendingUsersTable({ users, busyId, onApprove, onReject }) {
         ))}
       </tbody>
     </table>
+    </div>
   );
 }
 

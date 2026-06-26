@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateBalanceTilt } from "../SupplyBalanceScene";
+import { calculateBalanceCameraZ, calculateBalanceTilt } from "../SupplyBalanceScene";
 
 describe("calculateBalanceTilt", () => {
   it("tilts the heavier buy side downward", () => {
@@ -12,5 +12,13 @@ describe("calculateBalanceTilt", () => {
 
   it("keeps the beam level when both sides are equal", () => {
     expect(calculateBalanceTilt({ buyPercent: 50, sellPercent: 50 })).toBe(0);
+  });
+
+  it("keeps the default camera distance for wide scene containers", () => {
+    expect(calculateBalanceCameraZ({ width: 520, height: 300 })).toBe(10.8);
+  });
+
+  it("moves the camera far enough back for narrow tall scene containers", () => {
+    expect(calculateBalanceCameraZ({ width: 320, height: 480 })).toBeGreaterThanOrEqual(21);
   });
 });

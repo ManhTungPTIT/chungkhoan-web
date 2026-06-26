@@ -6,6 +6,9 @@ const RED = 0xff304a;
 const GOLD = 0xffd34e;
 const LEFT_PAN_X = -2.65;
 const RIGHT_PAN_X = 2.65;
+const BASE_CAMERA_FOV = 34;
+const BASE_CAMERA_Z = 10.8;
+const SCENE_HALF_WIDTH_WITH_MARGIN = 4.8;
 
 function clampPercent(value) {
   const numericValue = Number(value);
@@ -22,6 +25,16 @@ export function calculateBalanceTilt({ buyPercent = 0, sellPercent = 0 }) {
   const sell = clampPercent(sellPercent);
 
   return THREE.MathUtils.clamp((buy - sell) / 520, -0.14, 0.14);
+}
+
+export function calculateBalanceCameraZ({ width = 1, height = 1, fov = BASE_CAMERA_FOV } = {}) {
+  const safeWidth = Math.max(1, Number(width) || 1);
+  const safeHeight = Math.max(1, Number(height) || 1);
+  const aspect = Math.max(0.1, safeWidth / safeHeight);
+  const halfFovRadians = THREE.MathUtils.degToRad(fov / 2);
+  const distanceToFitWidth = SCENE_HALF_WIDTH_WITH_MARGIN / (Math.tan(halfFovRadians) * aspect);
+
+  return Math.max(BASE_CAMERA_Z, distanceToFitWidth);
 }
 
 function createCylinder({ radius, height, color, opacity = 1, position }) {
@@ -109,7 +122,7 @@ export default function SupplyBalanceScene({ buyPercent = 0, sellPercent = 0 }) 
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    const camera = new THREE.PerspectiveCamera(BASE_CAMERA_FOV, 1, 0.1, 100);
     camera.position.set(0, 3.1, 10.8);
     camera.lookAt(0, 0.65, 0);
 
@@ -218,6 +231,8 @@ export default function SupplyBalanceScene({ buyPercent = 0, sellPercent = 0 }) 
       const safeHeight = Math.max(1, height);
       renderer.setSize(safeWidth, safeHeight, false);
       camera.aspect = safeWidth / safeHeight;
+      camera.position.z = calculateBalanceCameraZ({ width: safeWidth, height: safeHeight });
+      camera.lookAt(0, 0.65, 0);
       camera.updateProjectionMatrix();
     };
 
