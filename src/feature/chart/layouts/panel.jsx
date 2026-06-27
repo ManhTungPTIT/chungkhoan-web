@@ -10,7 +10,7 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
   const inputRef = useRef(null);
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  console.log(dataPanel)
+  
 
   const handleScroll = useCallback(() => {
     const el = tbodyRef.current;

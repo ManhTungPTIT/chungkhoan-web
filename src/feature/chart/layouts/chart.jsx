@@ -1,63 +1,84 @@
 import { useEffect, useRef } from "react";
-import { init, dispose } from "klinecharts/dist/index.esm.js";
+import { init, dispose, DomPosition } from "klinecharts/dist/index.esm.js";
 import "../klinecharts/bbSignalIndicator";
 import "../klinecharts/mcdxIndicator";
 import "../klinecharts/ichimokuIndicator";
 import "../klinecharts/signalMarkerOverlay";
+import {
+  ALL_INDICATORS,
+  getIndicatorDefinition,
+  normalizeIndicatorConfigs,
+} from "../untils/indicatorSettings";
 
-// Toàn bộ chỉ báo built-in của KLineChart v9.
-// pane: "candle_pane" = vẽ đè lên nến; "sub" = khung riêng bên dưới.
-export const ALL_INDICATORS = [
-  // --- Vẽ đè lên nến ---
-  { name: "MA", label: "MA — Trung bình động", pane: "candle_pane" },
-  { name: "EMA", label: "EMA — TB động luỹ thừa", pane: "candle_pane" },
-  { name: "SMA", label: "SMA — TB động giản đơn", pane: "candle_pane" },
-  { name: "BBI", label: "BBI — Bull & Bear Index", pane: "candle_pane" },
-  { name: "BOLL", label: "BOLL — Bollinger Bands", pane: "candle_pane" },
-  { name: "SAR", label: "SAR — Parabolic SAR", pane: "candle_pane" },
-  { name: "AVP", label: "AVP — Giá bình quân", pane: "candle_pane" },
-  { name: "ICHIMOKU", label: "Ichimoku — Mây Kumo", pane: "candle_pane" },
-  // --- Khung riêng bên dưới ---
-  { name: "VOL", label: "VOL — Khối lượng", pane: "sub" },
-  { name: "MCDX", label: "MCDX — Dòng tiền", pane: "sub" },
-  { name: "MACD", label: "MACD", pane: "sub" },
-  { name: "KDJ", label: "KDJ — Stochastic", pane: "sub" },
-  { name: "RSI", label: "RSI", pane: "sub" },
-  { name: "BIAS", label: "BIAS — Độ lệch", pane: "sub" },
-  { name: "BRAR", label: "BRAR", pane: "sub" },
-  { name: "CCI", label: "CCI", pane: "sub" },
-  { name: "DMI", label: "DMI", pane: "sub" },
-  { name: "CR", label: "CR", pane: "sub" },
-  { name: "PSY", label: "PSY — Psychological Line", pane: "sub" },
-  { name: "DMA", label: "DMA", pane: "sub" },
-  { name: "TRIX", label: "TRIX", pane: "sub" },
-  { name: "OBV", label: "OBV", pane: "sub" },
-  { name: "VR", label: "VR — Volume Ratio", pane: "sub" },
-  { name: "WR", label: "WR — Williams %R", pane: "sub" },
-  { name: "MTM", label: "MTM — Momentum", pane: "sub" },
-  { name: "ROC", label: "ROC", pane: "sub" },
-  { name: "EMV", label: "EMV", pane: "sub" },
-  { name: "PVT", label: "PVT", pane: "sub" },
-  { name: "AO", label: "AO — Awesome Oscillator", pane: "sub" },
-];
+export { ALL_INDICATORS };
+
+function getIndicatorParams(name, indicatorConfigs) {
+  const config = normalizeIndicatorConfigs(indicatorConfigs)[name];
+  const definition = getIndicatorDefinition(name);
+  return (
+    config?.params ??
+    definition?.params?.map((param) => param.defaultValue) ??
+    []
+  );
+}
+
+function getIndicatorLineStyles(name, indicatorConfigs) {
+  const rawConfig = indicatorConfigs?.[name];
+  if (!rawConfig?.styles?.lines?.length) {
+    return [];
+  }
+
+  const config = normalizeIndicatorConfigs(indicatorConfigs)[name];
+  const styleLines = config?.styles?.lines ?? [];
+  return styleLines.map((line, index) => {
+    return {
+      style: line.style,
+      smooth: false,
+      size: line.visible ? line.size : 0,
+      dashedValue: line.style === "dashed" ? [4, 4] : [2, 2],
+      color: line.visible ? line.color : "rgba(0,0,0,0)",
+    };
+  });
+}
+
+function getIndicatorCreateValue(name, indicatorConfigs, extra = {}) {
+  const params = getIndicatorParams(name, indicatorConfigs);
+  const lineStyles = getIndicatorLineStyles(name, indicatorConfigs);
+  const hasExtra = Object.keys(extra).length > 0;
+  if (params.length > 0 || lineStyles.length > 0 || hasExtra) {
+    return {
+      name,
+      ...(params.length > 0 ? { calcParams: params } : {}),
+      ...(lineStyles.length > 0 ? { styles: { lines: lineStyles } } : {}),
+      ...extra,
+    };
+  }
+  return name;
+}
 
 // Tạo 1 chỉ báo trên chart (EMA dùng cấu hình màu riêng cũ).
-function addIndicator(chart, name) {
+function addIndicator(chart, name, indicatorConfigs) {
   if (name === "EMA") {
+    const params = getIndicatorParams(name, indicatorConfigs);
+    const lineStyles = getIndicatorLineStyles(name, indicatorConfigs);
+    const colors = ["blue", "purple", "#f59e0b", "#16a34a", "#ef4444"];
     // styles.lines THAY THẾ toàn bộ default — phải đủ style/smooth/size/dashedValue,
     // thiếu dashedValue sẽ crash khi zoom.
     chart.createIndicator(
       {
         name: "EMA",
-        calcParams: [10, 20],
+        calcParams: params,
         styles: {
-          lines: ["blue", "purple"].map((color) => ({
-            style: "solid",
-            smooth: false,
-            size: 1,
-            dashedValue: [2, 2],
-            color,
-          })),
+          lines:
+            lineStyles.length > 0
+              ? lineStyles
+              : params.map((_, index) => ({
+                  style: "solid",
+                  smooth: false,
+                  size: 1,
+                  dashedValue: [2, 2],
+                  color: colors[index % colors.length],
+                })),
         },
       },
       true,
@@ -77,12 +98,91 @@ function addIndicator(chart, name) {
     );
     return;
   }
-  const pane = ALL_INDICATORS.find((i) => i.name === name)?.pane;
+  const pane = getIndicatorDefinition(name)?.pane;
+  const createValue = getIndicatorCreateValue(name, indicatorConfigs);
   if (pane === "candle_pane") {
-    chart.createIndicator(name, true, { id: "candle_pane" });
+    chart.createIndicator(createValue, true, { id: "candle_pane" });
   } else {
-    chart.createIndicator(name, false); // pane riêng
+    chart.createIndicator(createValue, false); // pane riêng
   }
+}
+
+function dispatchTouchAsMouse(target, type, touch, buttons) {
+  if (!(target instanceof EventTarget) || typeof MouseEvent === "undefined") {
+    return;
+  }
+
+  const event = new MouseEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    button: 0,
+    buttons,
+    clientX: touch.clientX,
+    clientY: touch.clientY,
+    screenX: touch.screenX,
+    screenY: touch.screenY,
+  });
+  Object.defineProperty(event, "sourceCapabilities", {
+    value: { firesTouchEvents: false },
+  });
+  target.dispatchEvent(event);
+}
+
+function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
+  const yAxisElement = chart.getDom?.(paneId, DomPosition.YAxis);
+  if (!yAxisElement) return () => {};
+
+  yAxisElement.style.touchAction = "none";
+
+  let activeTouchId = null;
+
+  const findTouch = (touches) => {
+    for (const touch of touches) {
+      if (touch.identifier === activeTouchId) return touch;
+    }
+    return null;
+  };
+
+  const onTouchStart = (event) => {
+    if (activeTouchId !== null || event.touches.length !== 1) return;
+    const touch = event.changedTouches[0];
+    activeTouchId = touch.identifier;
+    event.preventDefault();
+    dispatchTouchAsMouse(yAxisElement, "mousedown", touch, 1);
+  };
+
+  const onTouchMove = (event) => {
+    if (activeTouchId === null) return;
+    const touch = findTouch(event.changedTouches);
+    if (!touch) return;
+    event.preventDefault();
+    dispatchTouchAsMouse(document.documentElement, "mousemove", touch, 1);
+  };
+
+  const endTouch = (event) => {
+    if (activeTouchId === null) return;
+    const touch = findTouch(event.changedTouches);
+    if (!touch) return;
+    event.preventDefault();
+    activeTouchId = null;
+    dispatchTouchAsMouse(document.documentElement, "mouseup", touch, 0);
+  };
+
+  yAxisElement.addEventListener("touchstart", onTouchStart, {
+    passive: false,
+  });
+  yAxisElement.addEventListener("touchmove", onTouchMove, {
+    passive: false,
+  });
+  yAxisElement.addEventListener("touchend", endTouch);
+  yAxisElement.addEventListener("touchcancel", endTouch);
+
+  return () => {
+    yAxisElement.removeEventListener("touchstart", onTouchStart);
+    yAxisElement.removeEventListener("touchmove", onTouchMove);
+    yAxisElement.removeEventListener("touchend", endTouch);
+    yAxisElement.removeEventListener("touchcancel", endTouch);
+  };
 }
 
 // Công cụ vẽ (overlay built-in của KLineChart). glyph = ký hiệu nút.
@@ -106,6 +206,7 @@ export default function TradingChart({
   infoHeight = 0,
   activeKey = "",
   showDraw = false,
+  indicatorConfigs = {},
 }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null); // giữ instance để thanh công cụ vẽ gọi createOverlay
@@ -154,7 +255,7 @@ export default function TradingChart({
     activeKey
       .split(",")
       .filter(Boolean)
-      .forEach((name) => addIndicator(chart, name));
+      .forEach((name) => addIndicator(chart, name, indicatorConfigs));
 
     // Bollinger + fill xanh/đỏ theo tín hiệu — signals truyền qua extendData
     chart.createIndicator({ name: "BBS", extendData: signals }, true, {
@@ -174,13 +275,15 @@ export default function TradingChart({
     // KLineChart v9 không tự autoSize theo container
     const ro = new ResizeObserver(() => chart.resize());
     ro.observe(container);
+    const disableMobileYAxisTouchZoom = enableMobileYAxisTouchZoom(chart);
 
     return () => {
+      disableMobileYAxisTouchZoom();
       ro.disconnect();
       dispose(container);
       chartRef.current = null;
     };
-  }, [candles, signals, activeKey]);
+  }, [candles, signals, activeKey, indicatorConfigs]);
 
   // Vào chế độ vẽ một overlay; groupId "draw" để xoá riêng hình vẽ (không đụng marker)
   const startDraw = (name) =>

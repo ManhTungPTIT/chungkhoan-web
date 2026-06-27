@@ -11,6 +11,11 @@ import {
   generateSignalsT,
   generateSignalsLong,
 } from "./untils/indicators";
+import {
+  loadIndicatorState,
+  normalizeIndicatorConfigs,
+  saveIndicatorState,
+} from "./untils/indicatorSettings";
 
 // Chọn hàm sinh tín hiệu theo BOT trên sidebar (qua /?bot=...)
 const SIGNAL_GENERATORS = {
@@ -82,12 +87,29 @@ function TradingView() {
 
   // Chỉ báo: EMA + Volume bật sẵn; chuỗi activeKey truyền xuống chart để vẽ.
   // VOL hiển thị ở pane dưới (thay MCDX cũ); MCDX nay thêm tùy ý qua picker.
-  const [activeIndicators, setActiveIndicators] = useState({
-    EMA: true,
-    VOL: true,
-  });
+  const [indicatorState, setIndicatorState] = useState(() =>
+    loadIndicatorState(),
+  );
+  const activeIndicators = indicatorState.active;
+  const indicatorConfigs = indicatorState.configs;
   const toggleIndicator = (name) =>
-    setActiveIndicators((p) => ({ ...p, [name]: !p[name] }));
+    setIndicatorState((prev) => ({
+      active: { ...prev.active, [name]: !prev.active[name] },
+      configs: prev.configs,
+    }));
+  const saveIndicatorConfig = (name, config) => {
+    setIndicatorState((prev) => ({
+      active: prev.active,
+      configs: normalizeIndicatorConfigs({
+        ...prev.configs,
+        [name]: { ...prev.configs[name], ...config },
+      }),
+    }));
+  };
+
+  useEffect(() => {
+    saveIndicatorState(activeIndicators, indicatorConfigs);
+  }, [activeIndicators, indicatorConfigs]);
 
   // Bật/tắt thanh công cụ vẽ (truyền xuống chart)
   const [showDrawBar, setShowDrawBar] = useState(false);
@@ -205,7 +227,9 @@ function TradingView() {
             </button>
             <IndicatorPicker
               active={activeIndicators}
+              configs={indicatorConfigs}
               onToggle={toggleIndicator}
+              onSaveConfig={saveIndicatorConfig}
             />
 
             <h1 translate="no" style={{ color: "purple", margin: "0.4rem" }}>
@@ -262,6 +286,7 @@ function TradingView() {
           infoHeight={infoHeight}
           activeKey={activeKey}
           showDraw={showDrawBar}
+          indicatorConfigs={indicatorConfigs}
         />
       </div>
       <div className="container_panel">

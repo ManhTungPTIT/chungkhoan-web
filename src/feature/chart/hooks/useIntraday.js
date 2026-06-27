@@ -45,7 +45,7 @@ export function useIntraday(symbol = "VNINDEX", interval = "1d") {
   return useQuery({
     queryKey: ["intraday", symbol, interval],
     queryFn: () => fetchIntraday(symbol, interval),
-    refetchInterval: 60 * 1000,
-    staleTime: 2 * 60 * 1000, //thoi gian du cho data coi nhu la moi
+    // refetchInterval: 60 * 1000,
+    // staleTime: 2 * 60 * 1000, //thoi gian du cho data coi nhu la moi
   });
 }

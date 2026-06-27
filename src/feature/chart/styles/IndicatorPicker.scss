@@ -1,0 +1,325 @@
+.indicator-picker {
+  position: relative;
+  z-index: 20;
+}
+
+.indicator-picker__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border, #d6dae3);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.indicator-picker__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: min(360px, calc(100vw - 24px));
+  max-height: 60dvh;
+  margin-top: 4px;
+  padding: 6px 4px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e6e8ef;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.12);
+  text-align: left;
+  text-transform: none;
+}
+
+.indicator-picker__menu > input {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 6px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  border: 1px solid var(--border, #d6dae3);
+  border-radius: 6px;
+  outline: none;
+}
+
+.indicator-picker__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border-radius: 6px;
+}
+
+.indicator-picker__item label {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.indicator-picker__item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indicator-picker__settings,
+.indicator-editor__icon-button {
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.indicator-picker__settings {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.indicator-picker__settings:hover {
+  border-color: #d6dae3;
+  background: #f5f7fb;
+}
+
+.indicator-picker__empty,
+.indicator-editor__empty {
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  color: #98a2b3;
+}
+
+.indicator-editor__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: start center;
+  padding: 9vh 16px 24px;
+  background: rgba(15, 23, 42, 0.22);
+}
+
+.indicator-editor {
+  width: min(452px, 100%);
+  max-height: min(720px, 82dvh);
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e6e8ef;
+  border-radius: 8px;
+  box-shadow: 0 22px 60px rgba(16, 24, 40, 0.24);
+  text-align: left;
+  text-transform: none;
+}
+
+.indicator-editor__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 14px 6px;
+}
+
+.indicator-editor__header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  line-height: 1.4;
+  color: #111827;
+}
+
+.indicator-editor__icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+}
+
+.indicator-editor__tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  padding: 0 14px;
+  border-bottom: 4px solid #f1f4f8;
+}
+
+.indicator-editor__tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px 6px 8px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #111827;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.indicator-editor__tabs button.is-active {
+  border-bottom-color: #111827;
+}
+
+.indicator-editor__tabs span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indicator-editor__body {
+  max-height: calc(82dvh - 96px);
+  overflow: auto;
+  padding: 14px;
+}
+
+.indicator-editor__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid #eef2f7;
+}
+
+.indicator-editor__button {
+  min-width: 82px;
+  height: 36px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.indicator-editor__button--ghost {
+  border: 1px solid #cfd6e3;
+  background: #fff;
+  color: #344054;
+}
+
+.indicator-editor__button--primary {
+  border: 1px solid #2f63ff;
+  background: #2f63ff;
+  color: #fff;
+}
+
+.indicator-editor__grid--inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.indicator-editor__field {
+  display: grid;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: #475467;
+}
+
+.indicator-editor input,
+.indicator-editor select {
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #cfd6e3;
+  border-radius: 6px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+}
+
+.indicator-editor__field input,
+.indicator-editor__style-row input[type="number"],
+.indicator-editor__style-row select,
+.indicator-editor__display-row input[type="number"] {
+  height: 34px;
+  padding: 6px 8px;
+}
+
+.indicator-editor__rows {
+  display: grid;
+  gap: 12px;
+}
+
+.indicator-editor__style-row,
+.indicator-editor__display-row {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+}
+
+.indicator-editor__style-row {
+  grid-template-columns: minmax(92px, 1fr) 42px 74px 58px 42px;
+}
+
+.indicator-editor__display-row {
+  grid-template-columns: minmax(92px, 1fr) 100px minmax(90px, 1fr) 100px;
+}
+
+.indicator-editor__check {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #1f2937;
+}
+
+.indicator-editor__check span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indicator-editor input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #2f63ff;
+}
+
+.indicator-editor__swatch {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 34px;
+  border: 1px solid #cfd6e3;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.indicator-editor__swatch input {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+.indicator-editor__preview {
+  display: block;
+  width: 34px;
+  border-top: 2px solid currentColor;
+}
+
+.indicator-editor__preview--dashed {
+  border-top-style: dashed;
+}
+
+.indicator-editor input[type="range"] {
+  accent-color: #2f63ff;
+}
+
+@media (max-width: 560px) {
+  .indicator-editor__grid--inputs,
+  .indicator-editor__style-row,
+  .indicator-editor__display-row {
+    grid-template-columns: 1fr;
+  }
+
+  .indicator-editor__tabs button {
+    font-size: 0.78rem;
+  }
+}
