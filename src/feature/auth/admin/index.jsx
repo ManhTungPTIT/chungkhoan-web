@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import './admin.scss';
 import { LoginAdminService } from './services/loginAdminService';
+import logo from "../../../assets/logo-auth-white.png"
 
 function Admin() {
   const { logout } = LoginAdminService();
@@ -13,6 +14,8 @@ function Admin() {
   return (
     <div className="admin_container">
       <div className="admin_header">
+        <img src={logo}  alt='Logo'/>
+        {/* TẠM ẨN sidebar — bỏ comment khối nút toggle này để khôi phục
         <button
           type="button"
           className="sidebar-toggle"
@@ -34,13 +37,18 @@ function Admin() {
             />
           </svg>
         </button>
+        */}
+        <div className="admin_header_auth">
+
         <img
           src="https://images.pexels.com/photos/18101841/pexels-photo-18101841.jpeg"
           alt="Anh"
         />
         <button onClick={logout}>Logout</button>
+        </div>
       </div>
       <div className="admin_body">
+        {/* TẠM ẨN sidebar — bỏ comment khối .sidebar + overlay này để khôi phục
         <div className={`sidebar ${sidebarOpen ? 'is-open' : ''}`}>
           <Link
             className="sidebar_item"
@@ -72,6 +80,7 @@ function Admin() {
             onClick={() => setSidebarOpen(false)}
           />
         )}
+        */}
         <div className="container">
           <Outlet />
         </div>

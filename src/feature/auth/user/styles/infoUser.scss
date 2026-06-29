@@ -97,6 +97,10 @@ $radius: 10px;
       background: linear-gradient(135deg, #6366f1, #ec4899);
       flex-shrink: 0;
     }
+    .iu-avatar--img {
+      object-fit: cover;
+      overflow: hidden;
+    }
     .iu-name {
       font-weight: 700;
       font-size: 1rem;
@@ -217,6 +221,35 @@ $radius: 10px;
     &:disabled {
       opacity: 0.6;
       cursor: default;
+    }
+  }
+
+  // Nút hành động chính, nền đỏ đặc (vd "Đổi mật khẩu").
+  .iu-btn--primary {
+    background: #ef4444;
+    color: #fff;
+    border-color: #ef4444;
+    &:hover {
+      background: #dc2626;
+    }
+  }
+
+  // "Quên mật khẩu? Click vào đây" ngay dưới ô mật khẩu hiện tại.
+  .iu-forgot {
+    margin-top: 0.45rem;
+    font-size: 0.82rem;
+    color: $muted;
+  }
+  .iu-link {
+    background: none;
+    border: none;
+    padding: 0;
+    color: $blue;
+    font-size: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
     }
   }
 

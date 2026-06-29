@@ -24,6 +24,21 @@ describe("calcIchimoku", () => {
     expect(res[50].chikou).toBe(76);
   });
 
+  it("tách riêng độ lùi Chikou (lag) và độ dịch mây (lead)", () => {
+    // params: [Tenkan, Kijun, SpanB, lag=10, lead=5] → Chikou và mây dịch khác nhau.
+    const r = calcIchimoku(linear(80), [9, 26, 52, 10, 5]);
+    expect(r[50].chikou).toBe(60); // close[50 + lag] = close[60]
+    expect(r[60].spanA).toBeCloseTo(46.75, 6); // spanARaw[60 - lead] = spanARaw[55]
+    expect(r[60].spanB).toBeCloseTo(29.5, 6); // spanBRaw[55] = 55 - 25.5
+  });
+
+  it("thiếu tham số lead (cấu hình cũ 4 ô) thì dùng chung lag để dịch mây", () => {
+    const four = calcIchimoku(linear(80), [9, 26, 52, 26]);
+    const five = calcIchimoku(linear(80), [9, 26, 52, 26, 26]);
+    expect(four[78].spanA).toBeCloseTo(five[78].spanA, 6);
+    expect(four[50].chikou).toBe(five[50].chikou);
+  });
+
   it("vắng key khi chưa đủ period / ngoài biên (không crash)", () => {
     expect(res[5].tenkan).toBeUndefined(); // i<8
     expect(res[5].kijun).toBeUndefined(); // i<25

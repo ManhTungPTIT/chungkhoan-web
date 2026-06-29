@@ -21,10 +21,14 @@
   top: 100%;
   right: 0;
   width: min(360px, calc(100vw - 24px));
-  max-height: 60dvh;
+  // Dùng tối đa khoảng trống dưới nút (cách mép dưới ~16px) nhưng không quá 70dvh,
+  // để toàn bộ danh sách chỉ báo luôn cuộn được trong menu, không bị tràn/mất item.
+  max-height: min(70dvh, calc(100dvh - 64px));
   margin-top: 4px;
   padding: 6px 4px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background: #fff;
   border: 1px solid #e6e8ef;
   border-radius: 8px;
@@ -107,6 +111,8 @@
 }
 
 .indicator-editor {
+  display: flex;
+  flex-direction: column;
   width: min(452px, 100%);
   max-height: min(720px, 82dvh);
   overflow: hidden;
@@ -174,7 +180,8 @@
 }
 
 .indicator-editor__body {
-  max-height: calc(82dvh - 96px);
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
   padding: 14px;
 }
@@ -207,10 +214,71 @@
   color: #fff;
 }
 
+.indicator-editor__button--inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: end;
+  min-width: 104px;
+}
+
 .indicator-editor__grid--inputs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+.indicator-editor__dynamic {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 12px;
+}
+
+.indicator-editor__dynamic-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.indicator-editor__ma-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.indicator-editor__ma-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 4px 6px 4px 10px;
+  border: 1px solid #e3e8f2;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #1f2937;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.indicator-editor__ma-row > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indicator-editor__remove-button {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: #667085;
+}
+
+.indicator-editor__remove-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .indicator-editor__field {
@@ -256,7 +324,13 @@
 }
 
 .indicator-editor__display-row {
-  grid-template-columns: minmax(92px, 1fr) 100px minmax(90px, 1fr) 100px;
+  grid-template-columns: minmax(72px, 1fr) minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.indicator-editor__display-sep {
+  text-align: center;
+  color: #98a2b3;
+  user-select: none;
 }
 
 .indicator-editor__check {
@@ -264,7 +338,23 @@
   align-items: center;
   min-width: 0;
   gap: 8px;
-  font-size: 0.88rem;
+  font-size: 0.7rem;
+  color: #1f2937;
+}
+
+// Khối màu nền (mây Kumo…): checkbox tiêu đề + các hàng "Màu N" thụt vào.
+.indicator-editor__fill {
+  display: grid;
+  gap: 8px;
+}
+
+.indicator-editor__fill-color {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-left: 26px; // thụt thẳng hàng với nhãn checkbox phía trên
+  font-size: 0.8rem;
   color: #1f2937;
 }
 
@@ -315,11 +405,40 @@
 @media (max-width: 560px) {
   .indicator-editor__grid--inputs,
   .indicator-editor__style-row,
-  .indicator-editor__display-row {
+  .indicator-editor__dynamic-entry,
+  .indicator-editor__ma-list {
     grid-template-columns: 1fr;
   }
 
   .indicator-editor__tabs button {
     font-size: 0.78rem;
+  }
+
+  // Trên điện thoại: modal gói gọn trong màn hình, chỉ phần body cuộn,
+  // header/tabs/footer luôn cố định, không để tràn ra ngoài viewport.
+  .indicator-editor__backdrop {
+    padding: 12px;
+    place-items: center;
+  }
+
+  .indicator-editor {
+    width: 100%;
+    max-height: calc(100dvh - 24px);
+  }
+}
+
+// Trên điện thoại, thanh thông tin xuống dòng (flex-wrap) nên nút "Chỉ báo" bị
+// đẩy xuống, khiến menu absolute (top:100%) tràn xuống dưới và bị .main-content
+// (overflow:auto, 100dvh) cắt mất phần đáy. Ghim menu bằng position:fixed để nó
+// luôn nằm gọn trong viewport và tự cuộn → không còn khuyết item nào.
+@media (max-width: 768px) {
+  .indicator-picker__menu {
+    position: fixed;
+    top: 64px;
+    right: 12px;
+    left: auto;
+    width: min(360px, calc(100vw - 24px));
+    max-height: calc(100dvh - 76px);
+    margin-top: 0;
   }
 }

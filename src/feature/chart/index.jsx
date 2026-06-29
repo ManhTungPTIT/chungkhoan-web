@@ -78,10 +78,15 @@ function TradingView() {
 
   const { data: candles = [] } = useIntraday(chanelCode, activeTimeline);
   const { data: dataPanel = [] } = useVn100();
-  // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend
-  const generateSignalsFor =
-    SIGNAL_GENERATORS[searchParams.get("bot")] ?? generateSignals;
-  const signals = generateSignalsFor(candles);
+  // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend.
+  // useMemo giữ reference 'signals' ổn định: nếu tính inline mỗi render sẽ tạo
+  // mảng mới → useEffect khởi tạo chart (deps có signals) chạy lại → dispose()+
+  // init() xoá sạch overlay đang vẽ. Chỉ đổi khi candles hoặc bot thay đổi.
+  const bot = searchParams.get("bot");
+  const signals = useMemo(() => {
+    const generateSignalsFor = SIGNAL_GENERATORS[bot] ?? generateSignals;
+    return generateSignalsFor(candles);
+  }, [candles, bot]);
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
 

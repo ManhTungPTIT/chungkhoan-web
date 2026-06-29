@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import IndicatorPicker from "../IndicatorPicker";
 import { buildDefaultIndicatorConfigs } from "../../untils/indicatorSettings";
@@ -43,9 +43,10 @@ describe("IndicatorPicker", () => {
   it("does not apply draft changes when the user cancels", () => {
     const onSaveConfig = openEditor();
 
-    fireEvent.change(screen.getByRole("spinbutton", { name: "Tenkan" }), {
-      target: { value: "7" },
-    });
+    fireEvent.change(
+      screen.getByRole("spinbutton", { name: "Khoảng thời gian quy đổi" }),
+      { target: { value: "7" } },
+    );
     expect(onSaveConfig).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "Hủy" }));
@@ -57,15 +58,44 @@ describe("IndicatorPicker", () => {
   it("applies draft changes only when the user saves", () => {
     const onSaveConfig = openEditor();
 
-    fireEvent.change(screen.getByRole("spinbutton", { name: "Tenkan" }), {
-      target: { value: "7" },
-    });
+    fireEvent.change(
+      screen.getByRole("spinbutton", { name: "Khoảng thời gian quy đổi" }),
+      { target: { value: "7" } },
+    );
     fireEvent.click(screen.getByRole("button", { name: "Lưu" }));
 
     expect(onSaveConfig).toHaveBeenCalledWith(
       "ICHIMOKU",
-      expect.objectContaining({ params: [7, 26, 52, 26] }),
+      expect.objectContaining({ params: [7, 26, 52, 26, 26] }),
     );
     expect(screen.queryByRole("dialog", { name: /Ichimoku/i })).toBeNull();
+  });
+
+  it("lets users add MA periods from a single input", () => {
+    const onSaveConfig = openEditor({ MA: true });
+    const dialog = screen.getByRole("dialog", { name: /MA/i });
+
+    expect(within(dialog).queryByText("P1")).toBeNull();
+    expect(within(dialog).getByText("MA5")).toBeTruthy();
+    expect(within(dialog).getByText("MA10")).toBeTruthy();
+    expect(within(dialog).getByText("MA20")).toBeTruthy();
+
+    fireEvent.change(within(dialog).getByRole("spinbutton", { name: /MA/i }), {
+      target: { value: "50" },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Them MA" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: /L/i }));
+
+    expect(onSaveConfig).toHaveBeenCalledWith(
+      "MA",
+      expect.objectContaining({
+        params: [5, 10, 20, 50],
+        styles: expect.objectContaining({
+          lines: expect.arrayContaining([
+            expect.objectContaining({ label: "MA50" }),
+          ]),
+        }),
+      }),
+    );
   });
 });

@@ -18,6 +18,7 @@ import { IoBookOutline } from "react-icons/io5";
 import { FiDollarSign } from "react-icons/fi";
 import { IoLogOutOutline } from "react-icons/io5";
 import { LoginUserService } from "../feature/auth/user/services/loginUserService";
+import { useMe } from "../feature/auth/user/hooks/useMe";
 import { GiLion } from "react-icons/gi";
 import "../feature/chart/index.scss";
 import logo from "../assets/logo-auth.png"
@@ -33,7 +34,12 @@ function MainLayout() {
   const [mapMenuOpen, setMapMenuOpen] = useState(false);
 
   const data = JSON.parse(localStorage.getItem("auth-storage"));
-  
+  // Hồ sơ lấy từ API (/user/me) — nguồn chuẩn; localStorage chỉ là fallback hiển
+  // thị tức thời. Login có thể không lưu user nên không dựa hẳn vào localStorage.
+  const { data: me } = useMe();
+  const fullName =
+    me?.fullName || data?.state?.user?.fullName || "Người dùng";
+
   // Đăng xuất: thu hồi refresh token ở BE + xoá token cục bộ rồi về /login.
   // Best-effort — service tự xoá token & chuyển trang kể cả khi API lỗi.
   const handleLogout = () => {
@@ -66,7 +72,7 @@ function MainLayout() {
               onClick={() => navigate("/info")}
             >
               <FaUserCircle style={{ width: "1.5rem", height: "1.5rem" }} />
-            <span>{data?.state?.user?.fullName || "Nguyen Van A"}</span>
+            <span>{fullName}</span>
             </div>
             <button onClick={handleLogout}>
               <IoLogOutOutline />

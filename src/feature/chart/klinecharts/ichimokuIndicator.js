@@ -2,8 +2,18 @@
 // trong môi trường ESM (Node/Vitest) — import thẳng bản ESM để lấy đúng API.
 import { registerIndicator } from "klinecharts/dist/index.esm.js";
 
-const CLOUD_UP = "rgba(38,166,154,0.20)"; // Senkou A ≥ B → mây xanh
-const CLOUD_DOWN = "rgba(239,83,80,0.20)"; // Senkou A < B → mây đỏ
+const CLOUD_ALPHA = 0.2; // độ trong của mây (color picker chỉ cho hex, alpha cố định)
+const CLOUD_UP = "rgba(38,166,154,0.20)"; // Senkou A ≥ B → mây xanh (mặc định)
+const CLOUD_DOWN = "rgba(239,83,80,0.20)"; // Senkou A < B → mây đỏ (mặc định)
+
+// Hex #rrggbb → rgba(...) với alpha cho mây. Hex sai → null để dùng màu mặc định.
+function hexToRgba(hex, alpha) {
+  if (!/^#[0-9a-f]{6}$/i.test(String(hex))) return null;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
 
 // (HH + LL) / 2 trên cửa sổ `period` nến kết thúc tại i. Dùng high/low, fallback
 // close (tương thích dữ liệu thiếu high/low như các test khác trong repo).
@@ -21,9 +31,12 @@ function midpoint(dataList, i, period) {
 
 // Calc thuần — export riêng để unit test không cần chart/DOM. Trả mảng thẳng
 // hàng dataList; mỗi phần tử chỉ chứa key đã đủ dữ liệu:
-//   tenkan, kijun (không dịch), spanA/spanB (dịch +disp tới), chikou (dịch −disp lùi).
-export function calcIchimoku(dataList, params = [9, 26, 52, 26]) {
-  const [tenkanP, kijunP, spanBP, disp] = params;
+//   tenkan, kijun (không dịch), spanA/spanB (dịch tiến +lead), chikou (dịch lùi +lag).
+// params: [Tenkan, Kijun, SpanB, lag (Lagging Span/Chikou), lead (dịch mây tiến)].
+// Tương thích cấu hình cũ 4 tham số: thiếu 'lead' thì dùng chung 'lag'.
+export function calcIchimoku(dataList, params = [9, 26, 52, 26, 26]) {
+  const [tenkanP, kijunP, spanBP, lag, lead] = params;
+  const leadShift = lead ?? lag;
   const n = dataList.length;
 
   const tenkanRaw = new Array(n);
@@ -43,11 +56,11 @@ export function calcIchimoku(dataList, params = [9, 26, 52, 26]) {
     const out = {};
     if (tenkanRaw[i] != null) out.tenkan = tenkanRaw[i];
     if (kijunRaw[i] != null) out.kijun = kijunRaw[i];
-    if (i - disp >= 0) {
-      if (spanARaw[i - disp] != null) out.spanA = spanARaw[i - disp];
-      if (spanBRaw[i - disp] != null) out.spanB = spanBRaw[i - disp];
+    if (i - leadShift >= 0) {
+      if (spanARaw[i - leadShift] != null) out.spanA = spanARaw[i - leadShift];
+      if (spanBRaw[i - leadShift] != null) out.spanB = spanBRaw[i - leadShift];
     }
-    if (i + disp < n) out.chikou = dataList[i + disp].close;
+    if (i + lag < n) out.chikou = dataList[i + lag].close;
     return out;
   });
 }
@@ -64,7 +77,7 @@ registerIndicator({
   name: "ICHIMOKU",
   shortName: "Ichimoku",
   precision: 2,
-  calcParams: [9, 26, 52, 26],
+  calcParams: [9, 26, 52, 26, 26],
   figures: [
     { key: "tenkan", title: "Tenkan: ", type: "line" },
     { key: "kijun", title: "Kijun: ", type: "line" },
@@ -87,6 +100,12 @@ registerIndicator({
   // Tô mây Kumo giữa Senkou A & B, chia màu theo dấu (A≥B xanh / A<B đỏ).
   // destination-over đặt mây sau nến; return false để thư viện vẽ 5 đường đè lên.
   draw: ({ ctx, indicator, visibleRange, xAxis, yAxis }) => {
+    // Màu nền (mây) lấy từ config truyền qua extendData; thiếu → màu mặc định.
+    const cloud = indicator.extendData?.cloud;
+    if (cloud?.visible === false) return false; // ẩn mây, vẫn để thư viện vẽ 5 đường
+    const cloudUp = hexToRgba(cloud?.colors?.[0], CLOUD_ALPHA) ?? CLOUD_UP;
+    const cloudDown = hexToRgba(cloud?.colors?.[1], CLOUD_ALPHA) ?? CLOUD_DOWN;
+
     const result = indicator.result;
     ctx.save();
     ctx.globalCompositeOperation = "destination-over";
@@ -115,7 +134,7 @@ registerIndicator({
         segColor = null;
         continue;
       }
-      const color = data.spanA >= data.spanB ? CLOUD_UP : CLOUD_DOWN;
+      const color = data.spanA >= data.spanB ? cloudUp : cloudDown;
       const point = {
         x: xAxis.convertToPixel(i),
         yA: yAxis.convertToPixel(data.spanA),

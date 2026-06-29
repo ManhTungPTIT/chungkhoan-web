@@ -9,7 +9,9 @@ import {
   TbEye,
   TbMathFunction,
   TbPalette,
+  TbPlus,
   TbSettings,
+  TbTrash,
   TbX,
 } from "react-icons/tb";
 import "../styles/IndicatorPicker.scss";
@@ -50,16 +52,25 @@ function IndicatorEditor({
     [indicator, configs],
   );
   const [draftConfig, setDraftConfig] = useState(initialConfig);
+  const [newDynamicParam, setNewDynamicParam] = useState(
+    String(indicator.params?.[0]?.defaultValue ?? 1),
+  );
   const params = indicator.params ?? [];
+  const isDynamicParams = !!indicator.dynamicParams;
+  const dynamicParam = params[0] ?? {};
+  const dynamicParams = draftConfig?.params ?? [];
   const styleLines = draftConfig?.styles?.lines ?? [];
+  const styleFills = draftConfig?.styles?.fills ?? [];
   const displayScopes = draftConfig?.display?.scopes ?? [];
-  const hasInputs = params.length > 0;
+  const hasInputs = isDynamicParams || params.length > 0;
   const hasLines = styleLines.length > 0;
+  const hasFills = styleFills.length > 0;
   const hasDisplayScopes = displayScopes.length > 0;
 
   useEffect(() => {
     setDraftConfig(initialConfig);
-  }, [initialConfig]);
+    setNewDynamicParam(String(indicator.params?.[0]?.defaultValue ?? 1));
+  }, [initialConfig, indicator]);
 
   useEffect(() => {
     if (tab === "inputs" && !hasInputs) setTab("style");
@@ -73,11 +84,49 @@ function IndicatorEditor({
     });
   };
 
+  const normalizeDraft = (config) =>
+    normalizeIndicatorConfigs({ [indicator.name]: config }, [indicator])[
+      indicator.name
+    ];
+
+  const updateDynamicParams = (nextParams) => {
+    setDraftConfig((current) =>
+      normalizeDraft({ ...current, params: nextParams }),
+    );
+  };
+
+  const addDynamicParam = () => {
+    updateDynamicParams([...dynamicParams, newDynamicParam]);
+  };
+
+  const removeDynamicParam = (period) => {
+    if (dynamicParams.length <= 1) return;
+    updateDynamicParams(dynamicParams.filter((value) => value !== period));
+  };
+
   const updateLineStyle = (index, key, value) => {
     setDraftConfig((current) => {
       const lines = [...(current.styles?.lines ?? [])];
       lines[index] = { ...(lines[index] ?? {}), [key]: value };
       return { ...current, styles: { ...current.styles, lines } };
+    });
+  };
+
+  const updateFillStyle = (index, key, value) => {
+    setDraftConfig((current) => {
+      const fills = [...(current.styles?.fills ?? [])];
+      fills[index] = { ...(fills[index] ?? {}), [key]: value };
+      return { ...current, styles: { ...current.styles, fills } };
+    });
+  };
+
+  const updateFillColor = (index, colorIndex, value) => {
+    setDraftConfig((current) => {
+      const fills = [...(current.styles?.fills ?? [])];
+      const colors = [...(fills[index]?.colors ?? [])];
+      colors[colorIndex] = value;
+      fills[index] = { ...(fills[index] ?? {}), colors };
+      return { ...current, styles: { ...current.styles, fills } };
     });
   };
 
@@ -137,7 +186,51 @@ function IndicatorEditor({
         <div className="indicator-editor__body">
           {tab === "inputs" && (
             <div className="indicator-editor__grid indicator-editor__grid--inputs">
-              {hasInputs ? (
+              {isDynamicParams ? (
+                <div className="indicator-editor__dynamic">
+                  <div className="indicator-editor__dynamic-entry">
+                    <label className="indicator-editor__field">
+                      <span>{dynamicParam.label ?? "Chu kỳ"}</span>
+                      <input
+                        aria-label={dynamicParam.label ?? "Chu kỳ"}
+                        type="number"
+                        value={newDynamicParam}
+                        min={dynamicParam.min ?? 1}
+                        max={dynamicParam.max ?? 500}
+                        step={dynamicParam.step ?? 1}
+                        onChange={(event) =>
+                          setNewDynamicParam(event.target.value)
+                        }
+                      />
+                    </label>
+                    <button
+                      aria-label="Them MA"
+                      className="indicator-editor__button indicator-editor__button--primary indicator-editor__button--inline"
+                      type="button"
+                      onClick={addDynamicParam}
+                    >
+                      <TbPlus />
+                      <span>Thêm MA</span>
+                    </button>
+                  </div>
+                  <div className="indicator-editor__ma-list">
+                    {dynamicParams.map((period) => (
+                      <div className="indicator-editor__ma-row" key={period}>
+                        <span>{indicator.name}{period}</span>
+                        <button
+                          aria-label={`Xóa ${indicator.name}${period}`}
+                          className="indicator-editor__icon-button indicator-editor__remove-button"
+                          type="button"
+                          disabled={dynamicParams.length <= 1}
+                          onClick={() => removeDynamicParam(period)}
+                        >
+                          <TbTrash />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : hasInputs ? (
                 params.map((param, index) => (
                   <label
                     className="indicator-editor__field"
@@ -162,7 +255,7 @@ function IndicatorEditor({
 
           {tab === "style" && (
             <div className="indicator-editor__rows">
-              {hasLines ? (
+              {hasLines &&
                 styleLines.map((line, index) => (
                   <div className="indicator-editor__style-row" key={`${line.label}-${index}`}>
                     <label className="indicator-editor__check">
@@ -229,8 +322,45 @@ function IndicatorEditor({
                       style={{ color: line.color }}
                     />
                   </div>
-                ))
-              ) : (
+                ))}
+              {hasFills &&
+                styleFills.map((fill, index) => (
+                  <div className="indicator-editor__fill" key={fill.label}>
+                    <label className="indicator-editor__check">
+                      <input
+                        type="checkbox"
+                        checked={fill.visible}
+                        onChange={(event) =>
+                          updateFillStyle(index, "visible", event.target.checked)
+                        }
+                      />
+                      <span>{fill.label}</span>
+                    </label>
+                    {fill.colors.map((color, colorIndex) => (
+                      <div
+                        className="indicator-editor__fill-color"
+                        key={colorIndex}
+                      >
+                        <span>Màu {colorIndex}</span>
+                        <label className="indicator-editor__swatch" title="Màu">
+                          <input
+                            aria-label={`${fill.label} màu ${colorIndex}`}
+                            type="color"
+                            value={color}
+                            onChange={(event) =>
+                              updateFillColor(
+                                index,
+                                colorIndex,
+                                event.target.value,
+                              )
+                            }
+                          />
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              {!hasLines && !hasFills && (
                 <p className="indicator-editor__empty">Chỉ báo này không có đường định dạng.</p>
               )}
             </div>
@@ -269,20 +399,7 @@ function IndicatorEditor({
                         )
                       }
                     />
-                    <input
-                      aria-label={`${scope.label} thanh hiển thị`}
-                      type="range"
-                      min="1"
-                      max="500"
-                      value={scope.max}
-                      onChange={(event) =>
-                        updateDisplayScope(
-                          index,
-                          "max",
-                          event.target.value,
-                        )
-                      }
-                    />
+                    <span className="indicator-editor__display-sep">—</span>
                     <input
                       aria-label={`${scope.label} tối đa`}
                       type="number"

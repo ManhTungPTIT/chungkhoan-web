@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_ACTIVE_INDICATORS,
   buildDefaultIndicatorConfigs,
+  getIndicatorLineDefinitions,
   normalizeIndicatorConfigs,
   serializeIndicatorState,
 } from "../indicatorSettings";
@@ -11,7 +12,39 @@ describe("indicatorSettings", () => {
     const configs = buildDefaultIndicatorConfigs();
 
     expect(configs.EMA.params).toEqual([10, 20]);
+    expect(configs.MA.params).toEqual([5, 10, 20]);
     expect(configs.BOLL.params).toEqual([20, 2]);
+  });
+
+  it("builds MA line labels from the configured MA periods", () => {
+    const configs = normalizeIndicatorConfigs({
+      MA: { params: [5, 10, 20, 50] },
+    });
+
+    expect(getIndicatorLineDefinitions("MA")).toEqual([
+      { label: "MA5" },
+      { label: "MA10" },
+      { label: "MA20" },
+    ]);
+    expect(configs.MA.styles.lines).toEqual([
+      expect.objectContaining({ label: "MA5" }),
+      expect.objectContaining({ label: "MA10" }),
+      expect.objectContaining({ label: "MA20" }),
+      expect.objectContaining({ label: "MA50" }),
+    ]);
+  });
+
+  it("normalizes MA as a dynamic list of unique periods", () => {
+    const configs = normalizeIndicatorConfigs({
+      MA: { params: [20, "bad", 5, 20, 10, 0, 501] },
+    });
+
+    expect(configs.MA.params).toEqual([5, 10, 20]);
+    expect(configs.MA.styles.lines.map((line) => line.label)).toEqual([
+      "MA5",
+      "MA10",
+      "MA20",
+    ]);
   });
 
   it("builds default style configs for indicator lines", () => {
@@ -55,7 +88,8 @@ describe("indicatorSettings", () => {
       ICHIMOKU: { params: [7, 22, 44, 0] },
     });
 
-    expect(configs.ICHIMOKU.params).toEqual([7, 22, 44, 0]);
+    // 5 tham số: Tenkan, Kijun, Span B, Lagging Span (=0), dịch mây (mặc định 26)
+    expect(configs.ICHIMOKU.params).toEqual([7, 22, 44, 0, 26]);
   });
 
   it("serializes active indicators with normalized params", () => {

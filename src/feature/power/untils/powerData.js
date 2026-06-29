@@ -37,6 +37,7 @@ export function buildPowerData(board, { topN = 40, purpleN = 10 } = {}) {
 
   const purpleSymbols = new Set(
     [...selected]
+      .filter((x) => x.pct > 0) // chỉ mã trên giá tham chiếu mới vào dòng tiền mạnh
       .sort((a, b) => b.value - a.value)
       .slice(0, purpleN)
       .map((x) => x.symbol),

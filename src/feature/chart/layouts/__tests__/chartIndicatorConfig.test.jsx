@@ -86,7 +86,65 @@ describe("TradingChart indicator config", () => {
     );
 
     expect(chart.createIndicator).toHaveBeenCalledWith(
-      { name: "ICHIMOKU", calcParams: [7, 22, 44, 22] },
+      expect.objectContaining({
+        name: "ICHIMOKU",
+        calcParams: [7, 22, 44, 22, 26],
+        extendData: {
+          cloud: { visible: true, colors: ["#26A69A", "#EF5350"] },
+        },
+      }),
+      true,
+      { id: "candle_pane" },
+    );
+  });
+
+  it("passes configured cloud fill colors to Ichimoku via extendData", () => {
+    const chart = init();
+
+    render(
+      <TradingChart
+        candles={[]}
+        signals={[]}
+        activeKey="ICHIMOKU"
+        indicatorConfigs={{
+          ICHIMOKU: {
+            params: [9, 26, 52, 26],
+            styles: {
+              fills: [
+                { visible: true, colors: ["#112233", "#445566"] },
+              ],
+            },
+          },
+        }}
+      />,
+    );
+
+    expect(chart.createIndicator).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "ICHIMOKU",
+        extendData: {
+          cloud: { visible: true, colors: ["#112233", "#445566"] },
+        },
+      }),
+      true,
+      { id: "candle_pane" },
+    );
+  });
+
+  it("uses a dynamic MA period list when creating MA", () => {
+    const chart = init();
+
+    render(
+      <TradingChart
+        candles={[]}
+        signals={[]}
+        activeKey="MA"
+        indicatorConfigs={{ MA: { params: [5, 10, 20, 50] } }}
+      />,
+    );
+
+    expect(chart.createIndicator).toHaveBeenCalledWith(
+      { name: "MA", calcParams: [5, 10, 20, 50] },
       true,
       { id: "candle_pane" },
     );

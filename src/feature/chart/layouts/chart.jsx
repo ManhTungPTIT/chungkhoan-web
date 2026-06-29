@@ -3,6 +3,7 @@ import { init, dispose, DomPosition } from "klinecharts/dist/index.esm.js";
 import "../klinecharts/bbSignalIndicator";
 import "../klinecharts/mcdxIndicator";
 import "../klinecharts/ichimokuIndicator";
+import "../klinecharts/adxIndicator";
 import "../klinecharts/signalMarkerOverlay";
 import {
   ALL_INDICATORS,
@@ -56,8 +57,28 @@ function getIndicatorCreateValue(name, indicatorConfigs, extra = {}) {
   return name;
 }
 
+// Mây Kumo của Ichimoku do hàm draw tự tô (không phải line) → truyền màu nền
+// qua extendData để draw đọc. Thiếu config thì draw dùng màu mặc định.
+function getIchimokuCloudExtend(indicatorConfigs) {
+  const fill = normalizeIndicatorConfigs(indicatorConfigs)?.ICHIMOKU?.styles
+    ?.fills?.[0];
+  if (!fill) return {};
+  return {
+    extendData: { cloud: { visible: fill.visible !== false, colors: fill.colors } },
+  };
+}
+
 // Tạo 1 chỉ báo trên chart (EMA dùng cấu hình màu riêng cũ).
 function addIndicator(chart, name, indicatorConfigs) {
+  if (name === "ICHIMOKU") {
+    const createValue = getIndicatorCreateValue(
+      name,
+      indicatorConfigs,
+      getIchimokuCloudExtend(indicatorConfigs),
+    );
+    chart.createIndicator(createValue, true, { id: "candle_pane" });
+    return;
+  }
   if (name === "EMA") {
     const params = getIndicatorParams(name, indicatorConfigs);
     const lineStyles = getIndicatorLineStyles(name, indicatorConfigs);
@@ -195,7 +216,6 @@ const DRAW_TOOLS = [
   { name: "fibonacciLine", glyph: "Fib", label: "Fibonacci" },
   { name: "rect", glyph: "▭", label: "Hình chữ nhật" },
   { name: "circle", glyph: "◯", label: "Hình tròn" },
-  { name: "arrow", glyph: "➜", label: "Mũi tên" },
   { name: "simpleAnnotation", glyph: "✎", label: "Ghi chú" },
 ];
 

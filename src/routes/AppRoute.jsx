@@ -12,6 +12,7 @@ import FilterStock from '../feature/stock/layouts/filterStock'
 import InfoUser from '../feature/auth/user/layouts/InfoUser';
 import MainLayout from '../layouts/MainLayout';
 import HomePage from '../feature/homepage/layouts/HomePage'
+import { useLogoutOnAreaSwitch } from './useLogoutOnAreaSwitch';
 
 // Lazy-load: echarts + các trang dùng echarts chỉ tải khi mở route,
 // không nằm trong bundle khởi động.
@@ -19,6 +20,9 @@ const HeatmapPage = lazy(() => import('../feature/heatmap'));
 const PowerPage = lazy(() => import('../feature/power'));
 
 function AppRoute() {
+  // Đổi vùng admin ↔ user thì tự logout (xem hook).
+  useLogoutOnAreaSwitch();
+
   return (
     <Routes>
       {/* Public routes — NOT gated by PrivateRoute, otherwise the guard would

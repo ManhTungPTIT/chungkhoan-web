@@ -4,6 +4,18 @@ import { IoCloseOutline } from "react-icons/io5";
 import "../styles/panel.scss";
 import { signalDisplay } from "../untils/signalDisplay";
 
+// Nhãn tín hiệu hiển thị thực tế của một mã (khớp với logic render bên dưới).
+function displaySignal(item) {
+  if (item.signal === "buy") {
+    return Number(item.signal_sessions) > 0 ? "HOLD" : "BUY";
+  }
+  if (item.signal === "sell") return "SELL";
+  return "—";
+}
+
+// Thứ tự sắp xếp nhóm tín hiệu: BUY → HOLD → SELL → (trung tính).
+const SIGNAL_ORDER = { BUY: 0, HOLD: 1, SELL: 2, "—": 3 };
+
 function Panel({ dataPanel = [], onSelectSymbol }) {
   const tbodyRef = useRef(null);
   const timerRef = useRef(null);
@@ -41,6 +53,11 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
     closeInput();
   };
 
+  // Sắp xếp theo nhóm tín hiệu: BUY → HOLD → SELL → trung tính.
+  const sortedPanel = [...dataPanel].sort(
+    (a, b) => SIGNAL_ORDER[displaySignal(a)] - SIGNAL_ORDER[displaySignal(b)],
+  );
+
   return (
     <table>
       <thead>
@@ -72,23 +89,18 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
         </tr>
       </thead>
       <tbody ref={tbodyRef} translate="no" onScroll={handleScroll}>
-        {dataPanel.map((item, index) => {
+        {sortedPanel.map((item, index) => {
           // Chỉ hiển thị tín hiệu THẬT từ backend (item.signal). Mã chưa có
           // tín hiệu → "—" trung tính, không đoán theo change_pct.
           const sig = signalDisplay(item.signal);
+          const label = displaySignal(item);
           const isPositive = Number(item.change_pct) >= 0;
           return (
             <tr key={item.symbol ?? index}>
               <td className="code" onClick={() => onSelectSymbol(item.symbol)}>
                 {item.symbol}
               </td>
-              <td className={sig.className}>
-              {item.signal === "buy" && Number(item.signal_sessions) > 0 ? "HOLD" : (
-                item.signal === "sell" && Number(item.signal_sessions) > 0
-                ? "OUT" : sig.label
-              )
-              }
-              </td>
+              <td className={sig.className}>{label}</td>
               <td className="price">{(item.price / 1000).toFixed(2)}</td>
               <td className={isPositive ? "percent_hold" : "percent_sell"}>
                 {item.change_pct}

@@ -1,6 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiPhone, FiSave, FiKey } from "react-icons/fi";
 import { detectAccountType } from "../untils/accountType";
+import { useMe } from "../hooks/useMe";
+import { useChangePassword } from "../hooks/useChangePassword";
 import "../styles/infoUser.scss";
 
 // Danh sách nơi cư trú rút gọn — thêm/bớt tuỳ nhu cầu.
@@ -41,8 +44,10 @@ function persistStoredUser(patch) {
 export default function InfoUser() {
   const [tab, setTab] = useState("info");
 
-  // Nguồn dữ liệu: localStorage (không gọi API)
-  const [user, setUser] = useState(() => readStoredUser());
+  // Nguồn chuẩn: API /user/me. localStorage chỉ để fallback khi API chưa về/lỗi.
+  const { data: apiUser, isLoading, isError } = useMe();
+  const user = apiUser ?? readStoredUser();
+
 
   const [form, setForm] = useState(() => {
     const u = readStoredUser() ?? {};
@@ -56,6 +61,18 @@ export default function InfoUser() {
   });
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+
+  // Khi dữ liệu API về: merge vào user, đồng bộ localStorage (cho nơi khác đọc)
+  // và seed lại họ tên từ server đúng một lần — không ghi đè khi user đang sửa form.
+  const seededRef = useRef(false);
+  useEffect(() => {
+    if (!apiUser) return;
+    persistStoredUser(apiUser);
+    if (!seededRef.current) {
+      setForm((p) => ({ ...p, fullName: apiUser.fullName ?? p.fullName }));
+      seededRef.current = true;
+    }
+  }, [apiUser]);
 
   // Cái nào đã có thì khoá; cái còn thiếu cho nhập (email ↔ SĐT).
   const hasEmail = !!user?.email;
@@ -104,10 +121,70 @@ export default function InfoUser() {
     }
 
     persistStoredUser(patch);
-    setUser((prev) => ({ ...prev, ...patch }));
     setForm((p) => ({ ...p, contact: "" }));
     setSaved(true);
   };
+
+  // ---------- Đổi mật khẩu ----------
+  const navigate = useNavigate();
+  const changePassword = useChangePassword();
+  const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
+  const [pwError, setPwError] = useState("");
+  const [pwSaved, setPwSaved] = useState(false);
+
+  const setPwField = (key) => (e) => {
+    setPwForm((p) => ({ ...p, [key]: e.target.value }));
+    setPwError("");
+    setPwSaved(false);
+  };
+
+  const handleChangePassword = (e) => {
+    e.preventDefault();
+    const { current, next, confirm } = pwForm;
+
+    if (!current || !next || !confirm) {
+      setPwError("Vui lòng nhập đầy đủ các trường");
+      return;
+    }
+    if (next.length < 6) {
+      setPwError("Mật khẩu mới phải từ 6 ký tự trở lên");
+      return;
+    }
+    if (next !== confirm) {
+      setPwError("Xác nhận mật khẩu không khớp");
+      return;
+    }
+    if (next === current) {
+      setPwError("Mật khẩu mới phải khác mật khẩu hiện tại");
+      return;
+    }
+
+    setPwError("");
+    changePassword.mutate(
+      { currentPassword: current, newPassword: next },
+      {
+        onSuccess: () => {
+          setPwSaved(true);
+          setPwForm({ current: "", next: "", confirm: "" });
+        },
+        onError: (err) => {
+          setPwError(
+            err?.response?.data?.message ||
+              "Đổi mật khẩu thất bại. Vui lòng kiểm tra lại mật khẩu hiện tại.",
+          );
+        },
+      },
+    );
+  };
+
+  // Chưa có dữ liệu nào (cả cache lẫn API) mà API đang tải → hiện trạng thái tải.
+  if (!user && isLoading) {
+    return (
+      <div className="info-user">
+        <div className="iu-state">Đang tải thông tin tài khoản…</div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -121,6 +198,11 @@ export default function InfoUser() {
 
   return (
     <div className="info-user">
+      {isError && (
+        <div className="iu-msg iu-msg--error">
+          Không tải được dữ liệu mới nhất — đang hiển thị thông tin đã lưu.
+        </div>
+      )}
       <div className="iu-tabs">
         <button
           className={tab === "info" ? "is-active" : ""}
@@ -141,10 +223,22 @@ export default function InfoUser() {
           {/* Cột trái: thẻ tóm tắt */}
           <aside className="iu-card iu-summary">
             <div className="iu-summary__head">
-              <div className="iu-avatar">{avatarChar}</div>
+              {user.avatarUrl ? (
+                <img
+                  className="iu-avatar iu-avatar--img"
+                  src={user.avatarUrl}
+                  alt={user.fullName || "Avatar"}
+                />
+              ) : (
+                <div className="iu-avatar">{avatarChar}</div>
+              )}
               <div>
-                <div className="iu-name">{user.fullName || "Người dùng"}</div>
-                <div className="iu-role">Người dùng</div>
+                <div className="iu-name">
+                  {form.fullName || user.fullName || "Người dùng"}
+                </div>
+                <div className="iu-role">
+                  {user.role === "admin" ? "Quản trị viên" : "Người dùng"}
+                </div>
               </div>
             </div>
             <div className="iu-summary__row">
@@ -216,7 +310,7 @@ export default function InfoUser() {
               <textarea rows={3} value={form.bio} onChange={setField("bio")} />
             </div>
 
-            <div className="iu-field">
+            {/* <div className="iu-field">
               <label>Số điện thoại NV Tư vấn</label>
               <input
                 type="tel"
@@ -224,7 +318,7 @@ export default function InfoUser() {
                 value={form.advisorPhone}
                 onChange={setField("advisorPhone")}
               />
-            </div>
+            </div> */}
 
             {error && <div className="iu-msg iu-msg--error">{error}</div>}
             {saved && (
@@ -241,9 +335,65 @@ export default function InfoUser() {
       )}
 
       {tab === "password" && (
-        <div className="iu-card iu-state">
-          Chức năng đổi mật khẩu sẽ sớm có.
-        </div>
+        <form className="iu-card iu-form" onSubmit={handleChangePassword}>
+          <h3 className="iu-form__title">Đổi mật khẩu</h3>
+
+          <div className="iu-field">
+            <label>
+              Mật khẩu hiện tại <span className="req">*</span>
+            </label>
+            <input
+              type="password"
+              autoComplete="current-password"
+              placeholder="Nhập mật khẩu hiện tại của bạn"
+              value={pwForm.current}
+              onChange={setPwField("current")}
+            />
+            
+          </div>
+
+          <div className="iu-grid">
+            <div className="iu-field">
+              <label>
+                Mật khẩu mới <span className="req">*</span>
+              </label>
+              <input
+                type="password"
+                autoComplete="new-password"
+                placeholder="Nhập mật khẩu mới"
+                value={pwForm.next}
+                onChange={setPwField("next")}
+              />
+            </div>
+            <div className="iu-field">
+              <label>
+                Xác nhận mật khẩu <span className="req">*</span>
+              </label>
+              <input
+                type="password"
+                autoComplete="new-password"
+                placeholder="Nhập lại mật khẩu mới"
+                value={pwForm.confirm}
+                onChange={setPwField("confirm")}
+              />
+            </div>
+          </div>
+
+          {pwError && <div className="iu-msg iu-msg--error">{pwError}</div>}
+          {pwSaved && (
+            <div className="iu-msg iu-msg--ok">Đổi mật khẩu thành công.</div>
+          )}
+
+          <div className="iu-form__foot">
+            <button
+              type="submit"
+              className="iu-btn iu-btn--primary"
+              disabled={changePassword.isPending}
+            >
+              {changePassword.isPending ? "Đang đổi…" : "Đổi mật khẩu"}
+            </button>
+          </div>
+        </form>
       )}
     </div>
   );
