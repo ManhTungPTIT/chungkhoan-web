@@ -2,7 +2,6 @@ import "./index.scss";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PiFunnel } from "react-icons/pi";
-import { TbMathFunction } from "react-icons/tb";
 import TradingChart from "../chart/layouts/chart";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
 import TimelineStock from "../chart/layouts/TimelineStock";
@@ -203,13 +202,10 @@ function TradingView() {
           style={{
             fontFamily: "sans-serif",
             textTransform: "uppercase",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "end",
             margin: "0",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+          <div className="information__toolbar">
             <TimelineStock
               activeTimeline={activeTimeline}
               onSelect={onSelectTimeline}
@@ -218,15 +214,7 @@ function TradingView() {
               type="button"
               className="draw-tool-trigger"
               onClick={() => setShowDrawBar((v) => !v)}
-              style={{
-                padding: "4px 10px",
-                fontSize: "0.8rem",
-                border: "1px solid var(--border, #d6dae3)",
-                borderRadius: 6,
-                background: showDrawBar ? "#eef2ff" : "#fff",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
+              data-active={showDrawBar ? "true" : "false"}
             >
               ✏ Công cụ
             </button>
@@ -237,53 +225,64 @@ function TradingView() {
               onSaveConfig={saveIndicatorConfig}
             />
 
-            <h1 translate="no" style={{ color: "purple", margin: "0.4rem" }}>
+          </div>
+          <section
+            className={`signal-card signal-card--${COLORCODE.action === "Xanh" ? "buy" : "sell"}`}
+            style={{ "--signal-color": COLORCODE.color }}
+          >
+            <h1 className="information__symbol" translate="no">
               {chanelCode}
             </h1>
-          </div>
-          <div style={{ display: "flex", fontSize: "0.6rem" }}>
-            Quy tắc giao dịch:<p style={{ color: "green" }}>Xanh vào</p>-
-            <p style={{ color: "red" }}> Đỏ ra</p>
-          </div>
-          <div style={{ display: "flex", gap: "1rem", fontSize: "1rem" }}>
-            <p style={{ color: COLORCODE.color }}>
-              Giá chuyển {COLORCODE.action}: {priceChange}
-            </p>
-            <p style={{ color: COLORCODE.color }}>
-              Ngày chuyển {COLORCODE.action}: {dayChangeConvert}
-            </p>
-          </div>
-          <div
-            style={{
-              color: "#B36AAA",
-              fontSize: "0.7rem",
-              display: "flex",
-              gap: "1rem",
-            }}
-          >
-            <p>Giá hiện tại: {priceCurrent}</p>
-            <p>Ngày HIỆN TẠI: {dayCurrent}</p>
-          </div>
-
-          {COLORCODE.action === "Xanh" ? (
-            <div>
-              <div style={{ display: "flex", gap: "2rem", fontSize: "0.6rem" }}>
-                <p style={{ color: COLORCODE.color }}>
-                  Giá chốt lãi/Cắt lỗ: {priceTarget}
-                </p>
-                <p>
-                  Mục tiêu dự kiến: {target1} | {target2} | {target3}
-                </p>
-              </div>
-              <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
-                (Đã Tăng {pricePct} | Vùng Xanh, nắm giữ {dayCount} phiên)
-              </p>
+            <div className="signal-card__topline">
+              <span>Quy tắc giao dịch</span>
+              <strong>
+                <span>Xanh vào</span>
+                <span>Đỏ ra</span>
+              </strong>
             </div>
-          ) : (
-            <p style={{ color: COLORCODE.color, fontSize: "0.6rem" }}>
-              (Tránh Giảm {pricePct} | Vùng Đỏ đã đứng ngoài {dayCount} phiên)
+
+            <div className="signal-card__hero">
+              <div className="signal-card__metric signal-card__metric--primary">
+                <span>Giá chuyển {COLORCODE.action}</span>
+                <strong>{priceChange}</strong>
+              </div>
+              <div className="signal-card__metric signal-card__metric--primary">
+                <span>Ngày chuyển {COLORCODE.action}</span>
+                <strong>{dayChangeConvert}</strong>
+              </div>
+            </div>
+
+            <div className="signal-card__grid">
+              <div className="signal-card__metric">
+                <span>Giá hiện tại</span>
+                <strong>{priceCurrent}</strong>
+              </div>
+              <div className="signal-card__metric">
+                <span>Ngày hiện tại</span>
+                <strong>{dayCurrent}</strong>
+              </div>
+              {COLORCODE.action === "Xanh" ? (
+                <>
+                  <div className="signal-card__metric">
+                    <span>Chốt lãi / Cắt lỗ</span>
+                    <strong>{priceTarget}</strong>
+                  </div>
+                  <div className="signal-card__metric signal-card__metric--targets">
+                    <span>Mục tiêu dự kiến</span>
+                    <strong>
+                      {target1} | {target2} | {target3}
+                    </strong>
+                  </div>
+                </>
+              ) : null}
+            </div>
+
+            <p className="signal-card__note">
+              {COLORCODE.action === "Xanh"
+                ? `Đã tăng ${pricePct} | Vùng Xanh, nắm giữ ${dayCount} phiên`
+                : `Tránh giảm ${pricePct} | Vùng Đỏ đã đứng ngoài ${dayCount} phiên`}
             </p>
-          )}
+          </section>
         </div>
         <TradingChart
           candles={candles}

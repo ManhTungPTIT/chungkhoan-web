@@ -206,6 +206,34 @@ function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
   };
 }
 
+// Cho phép VUỐT DỌC trên thân biểu đồ để PAN khung giá (di chuyển lên/xuống),
+// giữ nguyên mức zoom. KLineChart đã hỗ trợ sẵn pan trục Y ở pane chính, nhưng
+// CHỈ khi auto-fit (autoCalcTickFlag) tắt + scrollZoom bật (mặc định bật). Vì vậy
+// ta đợi chart fit giá lần đầu (range hợp lệ) rồi tắt auto-fit để giữ đúng khung
+// giá ban đầu và bật pan. Double-click/double-tap vào trục giá sẽ bật lại auto-fit.
+// Dùng API runtime nội bộ (getDrawPaneById/getAxisComponent) — bọc try/catch để
+// an toàn nếu klinecharts đổi nội bộ ở bản khác.
+function enablePriceAxisPan(chart, paneId = "candle_pane") {
+  let rafId = 0;
+  let tries = 0;
+  const apply = () => {
+    tries += 1;
+    try {
+      const axis = chart.getDrawPaneById?.(paneId)?.getAxisComponent?.();
+      const range = axis?.getRange?.();
+      if (axis && range && range.realFrom !== range.realTo) {
+        axis.setAutoCalcTickFlag(false); // giữ khung giá hiện tại → cho phép pan
+        return;
+      }
+    } catch {
+      return; // API nội bộ không còn → bỏ qua, không làm hỏng chart
+    }
+    if (tries < 30) rafId = requestAnimationFrame(apply); // đợi tới khi fit xong
+  };
+  rafId = requestAnimationFrame(apply);
+  return () => cancelAnimationFrame(rafId);
+}
+
 // Công cụ vẽ (overlay built-in của KLineChart). glyph = ký hiệu nút.
 const DRAW_TOOLS = [
   { name: "horizontalStraightLine", glyph: "—", label: "Đường ngang" },
@@ -296,9 +324,11 @@ export default function TradingChart({
     const ro = new ResizeObserver(() => chart.resize());
     ro.observe(container);
     const disableMobileYAxisTouchZoom = enableMobileYAxisTouchZoom(chart);
+    const disablePriceAxisPan = enablePriceAxisPan(chart);
 
     return () => {
       disableMobileYAxisTouchZoom();
+      disablePriceAxisPan();
       ro.disconnect();
       dispose(container);
       chartRef.current = null;

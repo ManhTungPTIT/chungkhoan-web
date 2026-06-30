@@ -43,8 +43,13 @@ const isExpired = (expiresAt) =>
   !!expiresAt && new Date(expiresAt).getTime() < Date.now();
 
 const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-const isExpiringSoon = (u) =>
-  !!u.expiresAt && new Date(u.expiresAt).getTime() - Date.now() <= SEVEN_DAYS;
+// "Sắp hết hạn" = tài khoản đang active, CHƯA hết hạn, còn ≤ 7 ngày.
+// Loại trừ tài khoản đã hết hạn (diff < 0) và các trạng thái khác (locked/pending/...).
+const isExpiringSoon = (u) => {
+  if (u.status !== "active" || !u.expiresAt) return false;
+  const diff = new Date(u.expiresAt).getTime() - Date.now();
+  return diff >= 0 && diff <= SEVEN_DAYS;
+};
 
 // ─── Avatar ───────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -325,6 +330,7 @@ export default function ManagerUser() {
   const [pending, setPending] = useState([]);
   const [busyId, setBusyId] = useState(null);
 
+  
   useEffect(() => {
     let active = true;
     fetchUserStats()
@@ -412,7 +418,9 @@ export default function ManagerUser() {
     { id: 1, label: "Danh sách", cnt: String(users.length) },
     { id: 2, label: "Tài khoản mới", cnt: String(pending.length) },
     { id: 3, label: "Tài khoản khóa", cnt: String(lockedUsers.length) },
-    { id: 4, label: "Nâng hạn mức", cnt: String(expiringUsers.length) },
+    { id: 4, label: "Tài khoản sắp hết hạn", cnt: String(expiringUsers.length) },
+    { id: 5, label: "Nâng hạn mức", cnt: String(expiringUsers.length) },
+    
   ];
 
   return (

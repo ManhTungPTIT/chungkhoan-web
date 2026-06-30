@@ -1,5 +1,158 @@
 .information {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
   padding-right: 3rem;
+  background: #fff;
+}
+
+.information__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+}
+
+.information__symbol {
+  margin: 0.25rem 0 0.25rem 0.15rem;
+  color: #6d28d9;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: right;
+}
+
+.draw-tool-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid var(--border, #d6dae3);
+  border-radius: 6px;
+  background: #fff;
+  color: #1d2939;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &[data-active="true"] {
+    border-color: #a5b4fc;
+    background: #eef2ff;
+    color: #3730a3;
+  }
+}
+
+.signal-card {
+  width: min(720px, calc(100% - 0.75rem));
+  box-sizing: border-box;
+  padding: 0.7rem 0.85rem 0.65rem;
+  border: 1px solid #e8edf5;
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--signal-color) 8%, #fff), #fff 36%) padding-box,
+    #fff;
+  box-shadow: 0 10px 26px rgba(16, 24, 40, 0.08);
+  color: #101828;
+}
+
+.signal-card p,
+.signal-card strong {
+  margin: 0;
+}
+
+.signal-card__topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #667085;
+  font-size: 0.66rem;
+  line-height: 1.25;
+}
+
+.signal-card__topline strong {
+  display: inline-flex;
+  gap: 0.35rem;
+  color: #344054;
+  font-weight: 700;
+}
+
+.signal-card__topline strong span:first-child {
+  color: #12805c;
+}
+
+.signal-card__topline strong span:last-child {
+  color: #d92d20;
+}
+
+.signal-card__hero {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-top: 0.55rem;
+}
+
+.signal-card__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.55rem;
+}
+
+.signal-card__metric {
+  min-width: 0;
+  padding: 0.45rem 0.4rem;
+  border: 1px solid #eef2f7;
+  border-radius: 7px;
+  background: rgba(248, 250, 252, 0.82);
+}
+
+.signal-card__metric span {
+  display: block;
+  overflow: hidden;
+  color: #667085;
+  font-size: 0.58rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signal-card__metric strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 0.18rem;
+  color: #1d2939;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signal-card__metric--primary {
+  border-color: color-mix(in srgb, var(--signal-color) 24%, #eef2f7);
+  background: color-mix(in srgb, var(--signal-color) 6%, #fff);
+}
+
+.signal-card__metric--primary strong {
+  color: var(--signal-color);
+  font-size: 1.18rem;
+}
+
+.signal-card__metric--targets strong {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.signal-card__note {
+  margin-top: 0.55rem;
+  color: var(--signal-color);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
 }
 
 .panel {
@@ -283,21 +436,79 @@
     box-shadow: 2px 0 14px rgba(0, 0, 0, 0.35);
   }
 
-  // Panel thông tin: cho xuống dòng, bớt đệm phải, thu nhỏ tiêu đề
+  // Panel thông tin: card gọn hơn để chart vẫn còn nhiều không gian trên mobile.
   .information {
-    padding-right: 0.5rem;
+    align-items: stretch;
+    gap: 0.35rem;
+    padding: 0.35rem 0.35rem 0.45rem 0.45rem;
+    border-bottom: 1px solid #eef2f7;
+  }
 
-    > div {
-      // align-items:end khiến hàng co theo nội dung (max-content) nên không
-      // tự xuống dòng; chặn max-width 100% để flex-wrap thực sự hoạt động,
-      // tránh nút Timeline tràn ra ngoài màn hình và không bấm được.
-      flex-wrap: wrap;
-      max-width: 100%;
-      justify-content: flex-end;
-    }
-    h1 {
-      font-size: 1.3rem;
-    }
+  .information__toolbar {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.35rem;
+  }
+
+  .information__symbol {
+    order: -1;
+    margin: 0;
+    text-align: right;
+    font-size: 2rem;
+  }
+
+  .draw-tool-trigger,
+  .indicator-picker__trigger {
+    min-height: 32px;
+    padding: 4px 9px;
+    font-size: 0.78rem;
+  }
+
+  .signal-card {
+    width: 100%;
+    padding: 0.55rem 0.55rem 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.07);
+  }
+
+  .signal-card__topline {
+    font-size: 0.56rem;
+  }
+
+  .signal-card__hero {
+    gap: 0.42rem;
+    margin-top: 0.42rem;
+  }
+
+  .signal-card__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.38rem;
+    margin-top: 0.42rem;
+  }
+
+  .signal-card__metric--targets {
+    grid-column: 1 / -1;
+  }
+
+  .signal-card__metric {
+    padding: 0.36rem 0.42rem;
+  }
+
+  .signal-card__metric span {
+    font-size: 0.52rem;
+  }
+
+  .signal-card__metric strong {
+    font-size: 0.76rem;
+  }
+
+  .signal-card__metric--primary strong {
+    font-size: 1rem;
+  }
+
+  .signal-card__note {
+    margin-top: 0.42rem;
+    font-size: 0.6rem;
   }
 }
 .container_panel{

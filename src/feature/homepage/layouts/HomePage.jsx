@@ -524,15 +524,14 @@ function HomePage({ data = DEFAULT_HOME_MARKET_DATA }) {
   const balanceData = buildBalance(data.balance, market);
   // Có dữ liệu market-breadth thật → dựng thống kê từ nó; chưa có (đang
   // tải/lỗi) → dùng marketStats mặc định.
-  const marketStatsData = marketBreadth
-    ? buildMarketStats(
+  const marketStatsData = 
+     buildMarketStats(
         marketBreadth.advancers,
         marketBreadth.decliners,
         marketBreadth.unchanged,
         marketBreadth.total_value,
         marketBreadth.prev_total_volume,
-      )
-    : data.marketStats;
+     )
 
   const day = new Date();
   const today = convertDay(day);
