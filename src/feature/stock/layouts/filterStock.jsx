@@ -63,7 +63,7 @@ function FilterStock() {
   const { data: sector = [] } = useSector();
   const { data: symbols = [] } = useSectorSymbol(codeCate);
   const { data: dataPanel = [] } = useVn100();
-  console.log(dataPanel)
+  console.log(dataPanel);
 
   // Danh mục = "Tất cả" + nhóm ngành lấy từ API (tính lại khi sector đổi)
   const categories = useMemo(
@@ -221,9 +221,7 @@ function FilterStock() {
                     <span className={`badge badge--${sig.className}`}>
                       {sig.label === "BUY" && Number(s.signal_sessions) > 0
                         ? "Nắm giữ"
-                        : sig.label === "SELL" && Number(s.signal_sessions) > 0
-                          ? "Ở ngoài"
-                          : sig.label}
+                        : sig.label}
                     </span>
                   </td>
                   {/* Backend VN100 chưa trả ngày báo/giá báo/T+ → tạm "--" */}
