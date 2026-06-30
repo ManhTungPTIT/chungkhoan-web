@@ -1,8 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createElement } from "react";
+import { renderHook, waitFor } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import axios from "axios";
-import { normalizeCandle, fetchIntraday } from "../useIntraday";
+import { normalizeCandle, fetchIntraday, useIntraday } from "../useIntraday";
 
 vi.mock("axios");
+
+// Một nến hợp lệ tối thiểu để fetchIntraday giữ lại sau bước filter OHLC.
+const candle = (close) => ({
+  time: "2026-06-15",
+  open: "1",
+  high: "1.1",
+  low: "0.9",
+  close: String(close),
+});
 
 describe("fetchIntraday", () => {
   beforeEach(() => {
@@ -40,6 +52,63 @@ describe("fetchIntraday", () => {
     expect(out).toHaveLength(2);
     expect(out.every((c) => Number.isFinite(c.open) && Number.isFinite(c.high) &&
       Number.isFinite(c.low) && Number.isFinite(c.close))).toBe(true);
+  });
+});
+
+// Hành vi cache/perceived-speed cho ô search: đổi mã không để chart trắng,
+// và xem lại mã đã cache thì tức thì (không loading, không gọi backend).
+describe("useIntraday — cache & keepPreviousData", () => {
+  const makeWrapper = () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    return ({ children }) =>
+      createElement(QueryClientProvider, { client }, children);
+  };
+
+  beforeEach(() => {
+    // Trả nến theo từng mã để phân biệt data mã cũ/mới.
+    vi.mocked(axios.get).mockImplementation((_url, cfg) => {
+      const sym = cfg?.params?.symbol;
+      return Promise.resolve({ data: { data: [candle(sym === "AAA" ? 10 : 20)] } });
+    });
+  });
+
+  it("giữ nến mã cũ trong lúc tải mã mới (không trắng chart)", async () => {
+    const { result, rerender } = renderHook(
+      ({ sym }) => useIntraday(sym, "1d"),
+      { wrapper: makeWrapper(), initialProps: { sym: "AAA" } },
+    );
+
+    await waitFor(() => expect(result.current.data?.[0].close).toBe(10));
+
+    // Đổi sang mã mới: data cũ (AAA=10) vẫn còn, cờ placeholder bật.
+    rerender({ sym: "BBB" });
+    expect(result.current.data?.[0].close).toBe(10);
+    expect(result.current.isPlaceholderData).toBe(true);
+
+    // Khi data mã mới về thì cập nhật.
+    await waitFor(() => expect(result.current.data?.[0].close).toBe(20));
+    expect(result.current.isPlaceholderData).toBe(false);
+  });
+
+  it("xem lại mã đã cache trong staleTime → không fetch lại", async () => {
+    const wrapper = makeWrapper();
+    const { result, rerender } = renderHook(
+      ({ sym }) => useIntraday(sym, "1d"),
+      { wrapper, initialProps: { sym: "AAA" } },
+    );
+    await waitFor(() => expect(result.current.data?.[0].close).toBe(10));
+
+    rerender({ sym: "BBB" });
+    await waitFor(() => expect(result.current.data?.[0].close).toBe(20));
+
+    const callsBefore = vi.mocked(axios.get).mock.calls.length;
+    // Quay lại AAA (đã cache, còn trong staleTime): data tức thì, không gọi thêm.
+    rerender({ sym: "AAA" });
+    expect(result.current.data?.[0].close).toBe(10);
+    expect(result.current.isFetching).toBe(false);
+    expect(vi.mocked(axios.get).mock.calls.length).toBe(callsBefore);
   });
 });
 

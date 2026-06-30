@@ -234,6 +234,105 @@ function enablePriceAxisPan(chart, paneId = "candle_pane") {
   return () => cancelAnimationFrame(rafId);
 }
 
+// Pan KHUNG GIÁ bằng VUỐT DỌC trên thân biểu đồ — DÀNH RIÊNG cho điện thoại.
+// KLineChart xử lý touch ở pane chính (touchMoveEvent) CHỈ cuộn ngang thời gian,
+// KHÔNG pan trục Y như đường chuột — nên ta tự pan: vuốt dọc 1 ngón → dịch dải
+// giá trục Y (giữ nguyên độ rộng = giữ zoom). Vuốt ngang vẫn để klinecharts cuộn
+// thời gian; 2 ngón vẫn để klinecharts pinch-zoom. Dùng API runtime nội bộ, bọc
+// try/catch để an toàn nếu klinecharts đổi nội bộ ở bản khác.
+function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
+  const mainEl = chart.getDom?.(paneId, DomPosition.Main);
+  if (!mainEl) return () => {};
+
+  let activeId = null;
+  let startY = 0;
+  let startX = 0;
+  let startRange = null;
+  let height = 1;
+
+  const getAxis = () => {
+    try {
+      return chart.getDrawPaneById?.(paneId)?.getAxisComponent?.() ?? null;
+    } catch {
+      return null;
+    }
+  };
+
+  const onStart = (event) => {
+    if (event.touches.length !== 1) {
+      activeId = null; // 2 ngón → nhường klinecharts pinch-zoom
+      return;
+    }
+    const range = getAxis()?.getRange?.();
+    if (!range) return;
+    const touch = event.changedTouches[0];
+    activeId = touch.identifier;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    startRange = range;
+    height = mainEl.clientHeight || 1;
+  };
+
+  const onMove = (event) => {
+    if (activeId === null || event.touches.length !== 1) {
+      activeId = null;
+      return;
+    }
+    let touch = null;
+    for (const t of event.changedTouches) {
+      if (t.identifier === activeId) {
+        touch = t;
+        break;
+      }
+    }
+    if (!touch) return;
+
+    const dy = touch.clientY - startY;
+    const dx = touch.clientX - startX;
+    // Chỉ pan khi vuốt DỌC trội hơn ngang (ngang nhường klinecharts cuộn thời gian).
+    if (Math.abs(dy) <= Math.abs(dx)) return;
+
+    const axis = getAxis();
+    if (!axis || !startRange) return;
+    try {
+      // Dịch dải giá theo tỉ lệ quãng vuốt / chiều cao pane (giống công thức pan
+      // trục Y của đường chuột trong klinecharts). from/to dịch cùng lượng → giữ zoom.
+      const difRange = startRange.range * (dy / height);
+      const newFrom = startRange.from + difRange;
+      const newTo = startRange.to + difRange;
+      const realFrom = axis.convertToRealValue(newFrom);
+      const realTo = axis.convertToRealValue(newTo);
+      axis.setRange({
+        from: newFrom,
+        to: newTo,
+        range: newTo - newFrom,
+        realFrom,
+        realTo,
+        realRange: realTo - realFrom,
+      });
+      chart.adjustPaneViewport?.(false, true, true, true); // repaint
+    } catch {
+      activeId = null; // API nội bộ đổi → ngừng, không làm hỏng chart
+    }
+  };
+
+  const onEnd = () => {
+    activeId = null;
+  };
+
+  mainEl.addEventListener("touchstart", onStart, { passive: true });
+  mainEl.addEventListener("touchmove", onMove, { passive: true });
+  mainEl.addEventListener("touchend", onEnd);
+  mainEl.addEventListener("touchcancel", onEnd);
+
+  return () => {
+    mainEl.removeEventListener("touchstart", onStart);
+    mainEl.removeEventListener("touchmove", onMove);
+    mainEl.removeEventListener("touchend", onEnd);
+    mainEl.removeEventListener("touchcancel", onEnd);
+  };
+}
+
 // Công cụ vẽ (overlay built-in của KLineChart). glyph = ký hiệu nút.
 const DRAW_TOOLS = [
   { name: "horizontalStraightLine", glyph: "—", label: "Đường ngang" },
@@ -325,10 +424,12 @@ export default function TradingChart({
     ro.observe(container);
     const disableMobileYAxisTouchZoom = enableMobileYAxisTouchZoom(chart);
     const disablePriceAxisPan = enablePriceAxisPan(chart);
+    const disableMobilePriceTouchPan = enableMobilePriceTouchPan(chart);
 
     return () => {
       disableMobileYAxisTouchZoom();
       disablePriceAxisPan();
+      disableMobilePriceTouchPan();
       ro.disconnect();
       dispose(container);
       chartRef.current = null;

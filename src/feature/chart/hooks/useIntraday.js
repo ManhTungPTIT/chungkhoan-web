@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import axios from "axios";
 
 // API trả time là unix giây hoặc chuỗi ngày "YYYY-MM-DD", OHLC dạng chuỗi
@@ -45,7 +45,15 @@ export function useIntraday(symbol = "VNINDEX", interval = "1d") {
   return useQuery({
     queryKey: ["intraday", symbol, interval],
     queryFn: () => fetchIntraday(symbol, interval),
+    // Backend /intraday chậm ~2-3s mỗi lần gọi. Cache để bớt gọi lại:
+    // staleTime: trong 5' coi data là mới → xem lại mã vừa xem là tức thì,
+    // không refetch ngầm (không nhấp nháy). gcTime: giữ cache 30' kể cả khi
+    // rời mã, nên quay lại trong 30' vẫn còn data.
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    // Giữ nến của mã CŨ trong lúc tải mã mới → biểu đồ không trắng. Trong
+    // giai đoạn này isPlaceholderData=true để UI hiện overlay "đang cập nhật".
+    placeholderData: keepPreviousData,
     // refetchInterval: 60 * 1000,
-    // staleTime: 2 * 60 * 1000, //thoi gian du cho data coi nhu la moi
   });
 }

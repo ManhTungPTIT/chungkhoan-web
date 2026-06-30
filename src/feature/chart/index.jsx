@@ -1,6 +1,7 @@
 import "./index.scss";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
+import { FiCalendar, FiTarget } from "react-icons/fi";
 import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
@@ -26,8 +27,8 @@ import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
 import { useVn100 } from "./hooks/useVn100";
 
-const COLOR_CODE_BUY = { action: "Xanh", color: "blue" };
-const COLOR_CODE_SELL = { action: "Đỏ", color: "red" };
+const COLOR_CODE_BUY = { action: "Xanh", color: "#2563eb" };
+const COLOR_CODE_SELL = { action: "Đỏ", color: "#e11d48" };
 
 // Nhận Date hoặc chuỗi ngày ("2026-02-23 07:00"); giá trị không parse được
 // (vd "--" khi chưa có signal) trả về nguyên văn thay vì crash render
@@ -75,7 +76,16 @@ function TradingView() {
   const [activeTimeline, setActiveTimeline] = useState("1d");
   const onSelectTimeline = (name) => setActiveTimeline(name);
 
-  const { data: candles = [] } = useIntraday(chanelCode, activeTimeline);
+  const {
+    data: candles = [],
+    isFetching,
+    isPlaceholderData,
+  } = useIntraday(chanelCode, activeTimeline);
+  // Chỉ hiện overlay khi biểu đồ CHƯA phải data của mã đang chọn:
+  // - đang hiện nến mã cũ trong lúc tải mã mới (isPlaceholderData), hoặc
+  // - lần đầu mở, chưa có nến nào (candles.length === 0).
+  // Mã đã cache (xem lại trong 5') → isFetching=false → không hiện overlay.
+  const isLoadingSymbol = isFetching && (isPlaceholderData || candles.length === 0);
   const { data: dataPanel = [] } = useVn100();
   // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend.
   // useMemo giữ reference 'signals' ổn định: nếu tính inline mỗi render sẽ tạo
@@ -163,6 +173,7 @@ function TradingView() {
   const dayChangeConvert = convertDay(dayChange);
   const COLORCODE =
     lastSignal && lastSignal.type === "buy" ? COLOR_CODE_BUY : COLOR_CODE_SELL;
+  const isBuySignal = COLORCODE.action === "Xanh";
 
   const priceCurrent =
     candles.length > 0 ? candles[candles.length - 1].close : "--";
@@ -224,64 +235,71 @@ function TradingView() {
               onToggle={toggleIndicator}
               onSaveConfig={saveIndicatorConfig}
             />
-
           </div>
           <section
-            className={`signal-card signal-card--${COLORCODE.action === "Xanh" ? "buy" : "sell"}`}
+            className={`signal-card signal-card--${isBuySignal ? "buy" : "sell"}`}
             style={{ "--signal-color": COLORCODE.color }}
           >
-            <h1 className="information__symbol" translate="no">
-              {chanelCode}
-            </h1>
-            <div className="signal-card__topline">
-              <span>Quy tắc giao dịch</span>
-              <strong>
-                <span>Xanh vào</span>
-                <span>Đỏ ra</span>
-              </strong>
-            </div>
-
-            <div className="signal-card__hero">
-              <div className="signal-card__metric signal-card__metric--primary">
-                <span>Giá chuyển {COLORCODE.action}</span>
-                <strong>{priceChange}</strong>
-              </div>
-              <div className="signal-card__metric signal-card__metric--primary">
-                <span>Ngày chuyển {COLORCODE.action}</span>
-                <strong>{dayChangeConvert}</strong>
-              </div>
-            </div>
-
-            <div className="signal-card__grid">
-              <div className="signal-card__metric">
-                <span>Giá hiện tại</span>
-                <strong>{priceCurrent}</strong>
-              </div>
-              <div className="signal-card__metric">
-                <span>Ngày hiện tại</span>
-                <strong>{dayCurrent}</strong>
-              </div>
-              {COLORCODE.action === "Xanh" ? (
-                <>
+            <div className="signal-card__body">
+              <div className="signal-card__main">
+                <div className="signal-card__row signal-card__row--top">
+                  <div className="signal-card__brand">
+                    <h1 className="information__symbol" translate="no">
+                      {chanelCode}
+                    </h1>
+                    <p>
+                      <span>Xanh vào</span>
+                      <span>- Đỏ ra</span>
+                    </p>
+                  </div>
+                  <span className="signal-card__dot" aria-hidden="true" />
+                  <div className="signal-card__metric">
+                    <span>Giá chuyển {COLORCODE.action}</span>
+                    <strong>{priceChange}</strong>
+                  </div>
+                  <div className="signal-card__metric">
+                    <span>Giá hiện tại</span>
+                    <strong>{priceCurrent}</strong>
+                  </div>
                   <div className="signal-card__metric">
                     <span>Chốt lãi / Cắt lỗ</span>
                     <strong>{priceTarget}</strong>
                   </div>
-                  <div className="signal-card__metric signal-card__metric--targets">
+                </div>
+
+                <div className="signal-card__row signal-card__row--bottom">
+                  <div className="signal-card__metric signal-card__metric--icon">
+                    <FiCalendar aria-hidden="true" />
+                    <span>Ngày chuyển {COLORCODE.action}</span>
+                    <strong>{dayChangeConvert}</strong>
+                  </div>
+                  <div className="signal-card__metric signal-card__metric--icon">
+                    <FiCalendar aria-hidden="true" />
+                    <span>Ngày hiện tại</span>
+                    <strong>{dayCurrent}</strong>
+                  </div>
+                  <div className="signal-card__metric signal-card__metric--icon signal-card__metric--targets">
+                    <FiTarget aria-hidden="true" />
                     <span>Mục tiêu dự kiến</span>
                     <strong>
                       {target1} | {target2} | {target3}
                     </strong>
                   </div>
-                </>
-              ) : null}
-            </div>
+                </div>
+              </div>
 
-            <p className="signal-card__note">
-              {COLORCODE.action === "Xanh"
-                ? `Đã tăng ${pricePct} | Vùng Xanh, nắm giữ ${dayCount} phiên`
-                : `Tránh giảm ${pricePct} | Vùng Đỏ đã đứng ngoài ${dayCount} phiên`}
-            </p>
+              <aside
+                className="signal-card__summary"
+                style={{ "--color-signal": COLORCODE.color }}
+              >
+                <span>{isBuySignal ? "Đã tăng" : "Tránh giảm"}</span>
+                <strong>{pricePct}</strong>
+                <span>Vùng</span>
+                <strong>{COLORCODE.action}</strong>
+                <span>{isBuySignal ? "Nắm giữ" : "Đứng ngoài"}</span>
+                <strong>{dayCount} phiên</strong>
+              </aside>
+            </div>
           </section>
         </div>
         <TradingChart
@@ -292,6 +310,12 @@ function TradingView() {
           showDraw={showDrawBar}
           indicatorConfigs={indicatorConfigs}
         />
+        {isLoadingSymbol && (
+          <div className="chart-loading" role="status" aria-live="polite">
+            <span className="chart-loading__spinner" aria-hidden="true" />
+            <span className="chart-loading__text">Đang tải {chanelCode}…</span>
+          </div>
+        )}
       </div>
       <div className="container_panel">
         <button

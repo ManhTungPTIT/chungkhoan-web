@@ -519,19 +519,42 @@ const buildMarketStats = (
 function HomePage({ data = DEFAULT_HOME_MARKET_DATA }) {
   const { data: topVolume } = useTopVolumn();
   const { data: market } = useMarket();
-  const { data: marketBreadth } = useMarketBreadth();
+  const {
+    data: marketBreadth,
+    isLoading: isBreadthLoading,
+    isError: isBreadthError,
+  } = useMarketBreadth();
+
+  // Chưa có dữ liệu market-breadth (đang tải / lỗi) → hiện thông báo chờ thay vì
+  // truy cập marketBreadth.* gây crash trắng trang.
+  if (isBreadthLoading || !marketBreadth) {
+    return (
+      <main className="home-market home-market--loading">
+        <p className="home-market__status">Đang tải trang…</p>
+      </main>
+    );
+  }
+
+  if (isBreadthError) {
+    return (
+      <main className="home-market home-market--loading">
+        <p className="home-market__status">
+          Không tải được dữ liệu thị trường. Vui lòng thử lại.
+        </p>
+      </main>
+    );
+  }
+
   // Cân cung cầu thật từ market-depth; chưa có dữ liệu → balance mặc định.
   const balanceData = buildBalance(data.balance, market);
-  // Có dữ liệu market-breadth thật → dựng thống kê từ nó; chưa có (đang
-  // tải/lỗi) → dùng marketStats mặc định.
-  const marketStatsData = 
-     buildMarketStats(
-        marketBreadth.advancers,
-        marketBreadth.decliners,
-        marketBreadth.unchanged,
-        marketBreadth.total_value,
-        marketBreadth.prev_total_volume,
-     )
+  // Có dữ liệu market-breadth thật → dựng thống kê từ nó.
+  const marketStatsData = buildMarketStats(
+    marketBreadth.advancers,
+    marketBreadth.decliners,
+    marketBreadth.unchanged,
+    marketBreadth.total_value,
+    marketBreadth.prev_total_volume,
+  );
 
   const day = new Date();
   const today = convertDay(day);
