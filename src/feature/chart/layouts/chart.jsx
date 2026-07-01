@@ -16,6 +16,16 @@ export { ALL_INDICATORS };
 const DRAGGABLE_SEPARATOR_SIZE = 1;
 const MOBILE_CROSSHAIR_DELAY = 500;
 const MOBILE_CROSSHAIR_MOVE_TOLERANCE = 8;
+const INDICATOR_PANE_HEIGHT = 160;
+const INDICATOR_PANE_MIN_HEIGHT = 72;
+
+function getResizableIndicatorPaneOptions() {
+  return {
+    height: INDICATOR_PANE_HEIGHT,
+    minHeight: INDICATOR_PANE_MIN_HEIGHT,
+    dragEnabled: true,
+  };
+}
 
 function getIndicatorParams(name, indicatorConfigs) {
   const config = normalizeIndicatorConfigs(indicatorConfigs)[name];
@@ -117,9 +127,11 @@ function addIndicator(chart, name, indicatorConfigs) {
     return chart.createIndicator(
       {
         name: "VOL",
+        calcParams: [],
         styles: { tooltip: { showRule: "follow_cross" } },
       },
       false,
+      getResizableIndicatorPaneOptions(),
     );
   }
   const pane = getIndicatorDefinition(name)?.pane;
@@ -128,7 +140,11 @@ function addIndicator(chart, name, indicatorConfigs) {
     chart.createIndicator(createValue, true, { id: "candle_pane" });
     return "candle_pane";
   } else {
-    return chart.createIndicator(createValue, false); // pane riêng
+    return chart.createIndicator(
+      createValue,
+      false,
+      getResizableIndicatorPaneOptions(),
+    ); // pane riêng
   }
 }
 
@@ -271,6 +287,8 @@ function clearMobileCrosshair(chart) {
 function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
   const mainEl = chart.getDom?.(paneId, DomPosition.Main);
   if (!mainEl) return () => {};
+  const rootEl = mainEl.ownerDocument?.documentElement;
+  if (!rootEl) return () => {};
 
   let activeId = null;
   let startY = 0;
@@ -417,33 +435,21 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
     // Chỉ pan khi vuốt DỌC trội hơn ngang (ngang nhường klinecharts cuộn thời gian).
     if (Math.abs(dy) <= Math.abs(dx)) return;
 
-    const axis = getAxis();
-    if (!axis || !startRange) return;
     if (paneId !== "candle_pane") {
       event.preventDefault?.();
-      try {
-        const centerRate = 1 - startY / height;
-        const center = startRange.from + startRange.range * centerRate;
-        const zoom = Math.exp(dy / height);
-        const nextRange = Math.max(startRange.range * zoom, Number.EPSILON);
-        const newFrom = center - nextRange * centerRate;
-        const newTo = newFrom + nextRange;
-        const realFrom = axis.convertToRealValue(newFrom);
-        const realTo = axis.convertToRealValue(newTo);
-        axis.setRange({
-          from: newFrom,
-          to: newTo,
-          range: newTo - newFrom,
-          realFrom,
-          realTo,
-          realRange: realTo - realFrom,
-        });
-        chart.adjustPaneViewport?.(false, true, true, true);
-      } catch {
-        activeId = null;
-      }
+      event.stopPropagation?.();
+      event.stopImmediatePropagation?.();
+      const nextHeight = Math.max(INDICATOR_PANE_MIN_HEIGHT, height - dy);
+      chart.setPaneOptions?.({
+        id: paneId,
+        height: nextHeight,
+        minHeight: INDICATOR_PANE_MIN_HEIGHT,
+        dragEnabled: true,
+      });
       return;
     }
+    const axis = getAxis();
+    if (!axis || !startRange) return;
     try {
       // Dịch dải giá theo tỉ lệ quãng vuốt / chiều cao pane (giống công thức pan
       // trục Y của đường chuột trong klinecharts). from/to dịch cùng lượng → giữ zoom.
@@ -470,6 +476,8 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
     clearLongPressTimer();
     if (crosshairActive) {
       event.preventDefault?.();
+      event.stopPropagation?.();
+      event.stopImmediatePropagation?.();
       clearMobileCrosshair(chart);
     }
     activeId = null;
@@ -478,18 +486,19 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
   };
 
   const touchMoveOptions = { passive: false, capture: true };
+  const touchEndOptions = { capture: true };
 
   mainEl.addEventListener("touchstart", onStart, { passive: true });
-  mainEl.addEventListener("touchmove", onMove, touchMoveOptions);
-  mainEl.addEventListener("touchend", onEnd);
-  mainEl.addEventListener("touchcancel", onEnd);
+  rootEl.addEventListener("touchmove", onMove, touchMoveOptions);
+  rootEl.addEventListener("touchend", onEnd, touchEndOptions);
+  rootEl.addEventListener("touchcancel", onEnd, touchEndOptions);
 
   return () => {
     clearLongPressTimer();
     mainEl.removeEventListener("touchstart", onStart);
-    mainEl.removeEventListener("touchmove", onMove, touchMoveOptions);
-    mainEl.removeEventListener("touchend", onEnd);
-    mainEl.removeEventListener("touchcancel", onEnd);
+    rootEl.removeEventListener("touchmove", onMove, touchMoveOptions);
+    rootEl.removeEventListener("touchend", onEnd, touchEndOptions);
+    rootEl.removeEventListener("touchcancel", onEnd, touchEndOptions);
   };
 }
 

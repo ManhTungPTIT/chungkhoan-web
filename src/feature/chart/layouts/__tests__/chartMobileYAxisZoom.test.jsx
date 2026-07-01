@@ -11,6 +11,7 @@ vi.mock("klinecharts/dist/index.esm.js", () => {
     createOverlay: vi.fn(),
     resize: vi.fn(),
     getDom: vi.fn(),
+    setPaneOptions: vi.fn(),
   };
 
   return {
@@ -167,6 +168,10 @@ describe("TradingChart mobile Y-axis zoom", () => {
       mainElements.vol_pane,
       "addEventListener",
     );
+    const rootAddEventListenerSpy = vi.spyOn(
+      document.documentElement,
+      "addEventListener",
+    );
     const setRange = vi.fn();
     const axis = {
       getRange: vi.fn(() => ({
@@ -197,9 +202,13 @@ describe("TradingChart mobile Y-axis zoom", () => {
     const touchStartHandler = addEventListenerSpy.mock.calls.find(
       ([eventName]) => eventName === "touchstart",
     )[1];
-    const touchMoveHandler = addEventListenerSpy.mock.calls.find(
-      ([eventName]) => eventName === "touchmove",
-    )[1];
+    const touchMoveHandler =
+      addEventListenerSpy.mock.calls.find(
+        ([eventName]) => eventName === "touchmove",
+      )?.[1] ??
+      rootAddEventListenerSpy.mock.calls
+        .filter(([eventName]) => eventName === "touchmove")
+        .at(-1)[1];
 
     touchStartHandler({
       touches: [
@@ -233,7 +242,7 @@ describe("TradingChart mobile Y-axis zoom", () => {
     );
   });
 
-  it("zooms an indicator pane vertically with a one-finger drag", () => {
+  it("resizes an indicator pane vertically with a one-finger drag", () => {
     const chart = init();
     chart.createIndicator.mockImplementation((indicator) => {
       if (indicator?.name === "VOL") return "vol_pane";
@@ -243,6 +252,10 @@ describe("TradingChart mobile Y-axis zoom", () => {
     const volMain = document.createElement("div");
     Object.defineProperty(volMain, "clientHeight", { value: 200 });
     const addEventListenerSpy = vi.spyOn(volMain, "addEventListener");
+    const rootAddEventListenerSpy = vi.spyOn(
+      document.documentElement,
+      "addEventListener",
+    );
     const setRange = vi.fn();
     const axis = {
       getRange: vi.fn(() => ({
@@ -273,9 +286,13 @@ describe("TradingChart mobile Y-axis zoom", () => {
     const touchStartHandler = addEventListenerSpy.mock.calls.find(
       ([eventName]) => eventName === "touchstart",
     )[1];
-    const touchMoveHandler = addEventListenerSpy.mock.calls.find(
-      ([eventName]) => eventName === "touchmove",
-    )[1];
+    const touchMoveHandler =
+      addEventListenerSpy.mock.calls.find(
+        ([eventName]) => eventName === "touchmove",
+      )?.[1] ??
+      rootAddEventListenerSpy.mock.calls
+        .filter(([eventName]) => eventName === "touchmove")
+        .at(-1)[1];
     const touch = {
       identifier: 1,
       clientX: 20,
@@ -295,9 +312,16 @@ describe("TradingChart mobile Y-axis zoom", () => {
       preventDefault: vi.fn(),
     });
 
-    const nextRange = setRange.mock.calls[0][0];
-    expect(nextRange.range).not.toBe(100);
-    expect(nextRange.to - nextRange.from).toBe(nextRange.range);
+    expect(setRange).not.toHaveBeenCalled();
+    expect(chart.setPaneOptions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "vol_pane",
+        dragEnabled: true,
+        minHeight: expect.any(Number),
+        height: expect.any(Number),
+      }),
+    );
+    expect(chart.setPaneOptions.mock.calls[0][0].height).toBeGreaterThan(200);
   });
 
   it("shows and moves the crosshair while long-pressing on mobile", () => {
@@ -305,6 +329,10 @@ describe("TradingChart mobile Y-axis zoom", () => {
     const chart = init();
     const candleMain = document.createElement("div");
     const addEventListenerSpy = vi.spyOn(candleMain, "addEventListener");
+    const rootAddEventListenerSpy = vi.spyOn(
+      document.documentElement,
+      "addEventListener",
+    );
     const setCrosshair = vi.fn();
     const setRange = vi.fn();
     const axis = {
@@ -349,10 +377,10 @@ describe("TradingChart mobile Y-axis zoom", () => {
     const touchStartHandler = addEventListenerSpy.mock.calls.find(
       ([eventName]) => eventName === "touchstart",
     )[1];
-    const touchMoveHandler = addEventListenerSpy.mock.calls.find(
+    const touchMoveHandler = rootAddEventListenerSpy.mock.calls.find(
       ([eventName]) => eventName === "touchmove",
     )[1];
-    const touchEndHandler = addEventListenerSpy.mock.calls.find(
+    const touchEndHandler = rootAddEventListenerSpy.mock.calls.find(
       ([eventName]) => eventName === "touchend",
     )[1];
     const touch = {
@@ -399,13 +427,21 @@ describe("TradingChart mobile Y-axis zoom", () => {
       paneId: "candle_pane",
     });
 
+    const endPreventDefault = vi.fn();
+    const endStopPropagation = vi.fn();
+    const endStopImmediatePropagation = vi.fn();
     touchEndHandler({
       changedTouches: [{ ...touch, clientX: 90, clientY: 120 }],
-      preventDefault: vi.fn(),
+      preventDefault: endPreventDefault,
+      stopPropagation: endStopPropagation,
+      stopImmediatePropagation: endStopImmediatePropagation,
     });
 
+    expect(endPreventDefault).toHaveBeenCalled();
+    expect(endStopPropagation).toHaveBeenCalled();
+    expect(endStopImmediatePropagation).toHaveBeenCalled();
     expect(setCrosshair).toHaveBeenLastCalledWith();
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
+    expect(rootAddEventListenerSpy).toHaveBeenCalledWith(
       "touchmove",
       expect.any(Function),
       expect.objectContaining({ capture: true, passive: false }),

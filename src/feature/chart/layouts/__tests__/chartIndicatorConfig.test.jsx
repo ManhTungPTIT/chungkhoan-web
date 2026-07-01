@@ -119,6 +119,33 @@ describe("TradingChart indicator config", () => {
     expect(chart.createIndicator).toHaveBeenCalledWith(
       { name: "RSI", calcParams: [21, 12, 24] },
       false,
+      expect.objectContaining({
+        dragEnabled: true,
+        height: expect.any(Number),
+        minHeight: expect.any(Number),
+      }),
+    );
+  });
+
+  it("creates VOL without volume MA lines", () => {
+    const chart = init();
+
+    render(<TradingChart candles={[]} signals={[]} activeKey="VOL" />);
+
+    expect(chart.createIndicator).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "VOL",
+        calcParams: [],
+        styles: expect.objectContaining({
+          tooltip: { showRule: "follow_cross" },
+        }),
+      }),
+      false,
+      expect.objectContaining({
+        dragEnabled: true,
+        height: expect.any(Number),
+        minHeight: expect.any(Number),
+      }),
     );
   });
 

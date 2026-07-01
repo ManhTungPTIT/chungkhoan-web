@@ -204,7 +204,6 @@ function TradingView() {
           position: "relative",
           flex: 1,
           minWidth: 0,
-          marginRight: "0.5rem"
          
         }}
       >
