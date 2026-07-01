@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiUser, FiMail, FiPhone, FiSave, FiKey } from "react-icons/fi";
+import { FiUser, FiMail, FiPhone, FiSave, FiKey, FiPackage } from "react-icons/fi";
 import { detectAccountType } from "../untils/accountType";
-import { useMe } from "../hooks/useMe";
+import { useMe, useRequestPackage } from "../hooks/useMe";
 import { useChangePassword } from "../hooks/useChangePassword";
 import "../styles/infoUser.scss";
 
@@ -17,6 +17,22 @@ const RESIDENCES = [
 ];
 
 // Đọc user từ store auth-storage (zustand persist) trong localStorage.
+const PACKAGE_OPTIONS = [
+  { id: "1", days: 30, title: "30 ngày", description: "Dùng thử tín hiệu trong 1 tháng" },
+  { id: "2",days: 90, title: "90 ngày", description: "Theo dõi một quý giao dịch" },
+  { id: "3",days: 180, title: "180 ngày", description: "Phù hợp nhà đầu tư trung hạn" },
+  { id: "4",days: 365, title: "1 năm", description: "Theo dõi dài hạn với chi phí tốt hơn" },
+  { id: "5",days: 1095, title: "3 năm", description: "Theo dõi dài hạn với chi phí tốt hơn" },
+  { id: "6",days: 1825, title: "5 năm", description: "Theo dõi dài hạn với chi phí tốt hơn" },
+];
+
+function formatDate(value) {
+  if (!value) return "Chưa có";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Chưa có";
+  return date.toLocaleDateString("vi-VN");
+}
+
 function readStoredUser() {
   try {
     const raw = localStorage.getItem("auth-storage");
@@ -61,6 +77,13 @@ export default function InfoUser() {
   });
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [selectedPackageDays, setSelectedPackageDays] = useState(90);
+  const [packageRequest, setPackageRequest] = useState(
+    () => user?.packageRequest ?? readStoredUser()?.packageRequest ?? null,
+  );
+  const [packageError, setPackageError] = useState("");
+  const [packageSaved, setPackageSaved] = useState(false);
+  const requestPackage = useRequestPackage();
 
   // Khi dữ liệu API về: merge vào user, đồng bộ localStorage (cho nơi khác đọc)
   // và seed lại họ tên từ server đúng một lần — không ghi đè khi user đang sửa form.
@@ -68,6 +91,7 @@ export default function InfoUser() {
   useEffect(() => {
     if (!apiUser) return;
     persistStoredUser(apiUser);
+    if (apiUser.packageRequest) setPackageRequest(apiUser.packageRequest);
     if (!seededRef.current) {
       setForm((p) => ({ ...p, fullName: apiUser.fullName ?? p.fullName }));
       seededRef.current = true;
@@ -177,6 +201,32 @@ export default function InfoUser() {
     );
   };
 
+  const handleRequestPackage = () => {
+    setPackageError("");
+    setPackageSaved(false);
+    requestPackage.mutate(
+      { days: selectedPackageDays },
+      {
+        onSuccess: (response) => {
+          const nextRequest = response?.packageRequest ?? response ?? {
+            days: selectedPackageDays,
+            status: "pending",
+            requestedAt: new Date().toISOString(),
+          };
+          setPackageRequest(nextRequest);
+          persistStoredUser({ packageRequest: nextRequest });
+          setPackageSaved(true);
+        },
+        onError: (err) => {
+          setPackageError(
+            err?.response?.data?.message ||
+              "Gửi yêu cầu đăng ký gói thất bại. Vui lòng thử lại.",
+          );
+        },
+      },
+    );
+  };
+
   // Chưa có dữ liệu nào (cả cache lẫn API) mà API đang tải → hiện trạng thái tải.
   if (!user && isLoading) {
     return (
@@ -215,6 +265,12 @@ export default function InfoUser() {
           onClick={() => setTab("password")}
         >
           <FiKey /> Đổi mật khẩu
+        </button>
+        <button
+          className={tab === "package" ? "is-active" : ""}
+          onClick={() => setTab("package")}
+        >
+          <FiPackage /> Gói đăng ký
         </button>
       </div>
 
@@ -331,6 +387,69 @@ export default function InfoUser() {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {tab === "package" && (
+        <div className="iu-card iu-form iu-package">
+          <div className="iu-package__head">
+            <div>
+              <h3 className="iu-form__title">Gói đăng ký</h3>
+              <p className="iu-package__desc">
+                Chọn gói bạn muốn sử dụng. Yêu cầu sẽ được gửi cho admin duyệt trước khi kích hoạt.
+              </p>
+            </div>
+            <div className="iu-package__status">
+              <span>Hết hạn</span>
+              <strong>{formatDate(user.expiresAt)}</strong>
+            </div>
+          </div>
+
+          {packageRequest?.status === "pending" && (
+            <div className="iu-msg iu-msg--pending">
+              Gói {packageRequest.days} ngày đang chờ admin duyệt.
+            </div>
+          )}
+
+          <div className="iu-package-grid">
+            {PACKAGE_OPTIONS.map((pkg) => (
+              <button
+                key={pkg.days}
+                type="button"
+                className={`iu-package-card${
+                  selectedPackageDays === pkg.days ? " is-selected" : ""
+                }`}
+                onClick={() => {
+                  setSelectedPackageDays(pkg.days);
+                  setPackageError("");
+                  setPackageSaved(false);
+                }}
+              >
+                <span className="iu-package-card__title">{pkg.title}</span>
+                <span className="iu-package-card__desc">{pkg.description}</span>
+              </button>
+            ))}
+          </div>
+
+          {packageError && (
+            <div className="iu-msg iu-msg--error">{packageError}</div>
+          )}
+          {packageSaved && (
+            <div className="iu-msg iu-msg--ok">
+              Đã gửi yêu cầu đăng ký gói. Vui lòng chờ admin duyệt.
+            </div>
+          )}
+
+          <div className="iu-form__foot">
+            <button
+              type="button"
+              className="iu-btn"
+              disabled={requestPackage.isPending}
+              onClick={handleRequestPackage}
+            >
+              {requestPackage.isPending ? "Đang gửi…" : "Gửi yêu cầu duyệt"}
+            </button>
+          </div>
         </div>
       )}
 

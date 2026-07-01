@@ -13,6 +13,10 @@ import {
 
 export { ALL_INDICATORS };
 
+const DRAGGABLE_SEPARATOR_SIZE = 1;
+const MOBILE_CROSSHAIR_DELAY = 500;
+const MOBILE_CROSSHAIR_MOVE_TOLERANCE = 8;
+
 function getIndicatorParams(name, indicatorConfigs) {
   const config = normalizeIndicatorConfigs(indicatorConfigs)[name];
   const definition = getIndicatorDefinition(name);
@@ -77,7 +81,7 @@ function addIndicator(chart, name, indicatorConfigs) {
       getIchimokuCloudExtend(indicatorConfigs),
     );
     chart.createIndicator(createValue, true, { id: "candle_pane" });
-    return;
+    return "candle_pane";
   }
   if (name === "EMA") {
     const params = getIndicatorParams(name, indicatorConfigs);
@@ -105,26 +109,26 @@ function addIndicator(chart, name, indicatorConfigs) {
       true,
       { id: "candle_pane" },
     );
-    return;
+    return "candle_pane";
   }
   if (name === "VOL") {
     // Bật tooltip riêng cho VOL: chỉ hiện giá trị khối lượng khi rê chuột
     // (crosshair) qua cột, không ảnh hưởng tooltip các chỉ báo khác.
-    chart.createIndicator(
+    return chart.createIndicator(
       {
         name: "VOL",
         styles: { tooltip: { showRule: "follow_cross" } },
       },
       false,
     );
-    return;
   }
   const pane = getIndicatorDefinition(name)?.pane;
   const createValue = getIndicatorCreateValue(name, indicatorConfigs);
   if (pane === "candle_pane") {
     chart.createIndicator(createValue, true, { id: "candle_pane" });
+    return "candle_pane";
   } else {
-    chart.createIndicator(createValue, false); // pane riêng
+    return chart.createIndicator(createValue, false); // pane riêng
   }
 }
 
@@ -234,6 +238,30 @@ function enablePriceAxisPan(chart, paneId = "candle_pane") {
   return () => cancelAnimationFrame(rafId);
 }
 
+function setMobileCrosshair(chart, paneId, element, touch) {
+  try {
+    const rect = element.getBoundingClientRect();
+    chart
+      .getChartStore?.()
+      ?.getTooltipStore?.()
+      ?.setCrosshair?.({
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+        paneId,
+      });
+  } catch {
+    // Internal API changed; leave native chart gestures untouched.
+  }
+}
+
+function clearMobileCrosshair(chart) {
+  try {
+    chart.getChartStore?.()?.getTooltipStore?.()?.setCrosshair?.();
+  } catch {
+    // Internal API changed; leave native chart gestures untouched.
+  }
+}
+
 // Pan KHUNG GIÁ bằng VUỐT DỌC trên thân biểu đồ — DÀNH RIÊNG cho điện thoại.
 // KLineChart xử lý touch ở pane chính (touchMoveEvent) CHỈ cuộn ngang thời gian,
 // KHÔNG pan trục Y như đường chuột — nên ta tự pan: vuốt dọc 1 ngón → dịch dải
@@ -249,6 +277,9 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
   let startX = 0;
   let startRange = null;
   let height = 1;
+  let pinchStart = null;
+  let longPressTimerId = 0;
+  let crosshairActive = false;
 
   const getAxis = () => {
     try {
@@ -258,23 +289,109 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
     }
   };
 
+  const clearLongPressTimer = () => {
+    if (longPressTimerId) {
+      clearTimeout(longPressTimerId);
+      longPressTimerId = 0;
+    }
+  };
+
+  const findActiveTouch = (touches) => {
+    for (const touch of touches) {
+      if (touch.identifier === activeId) return touch;
+    }
+    return null;
+  };
+
   const onStart = (event) => {
+    if (event.touches.length === 2) {
+      clearLongPressTimer();
+      crosshairActive = false;
+      const range = getAxis()?.getRange?.();
+      if (!range) return;
+      const [a, b] = event.touches;
+      const dy = Math.abs(b.clientY - a.clientY);
+      const dx = Math.abs(b.clientX - a.clientX);
+      activeId = null;
+      pinchStart = {
+        dy: Math.max(dy, 1),
+        dx: Math.max(dx, 1),
+        centerY: (a.clientY + b.clientY) / 2,
+        range,
+        height: mainEl.clientHeight || 1,
+      };
+      return;
+    }
     if (event.touches.length !== 1) {
+      clearLongPressTimer();
+      crosshairActive = false;
       activeId = null; // 2 ngón → nhường klinecharts pinch-zoom
       return;
     }
-    const range = getAxis()?.getRange?.();
-    if (!range) return;
     const touch = event.changedTouches[0];
     activeId = touch.identifier;
     startX = touch.clientX;
     startY = touch.clientY;
-    startRange = range;
+    startRange = getAxis()?.getRange?.() ?? null;
     height = mainEl.clientHeight || 1;
+    crosshairActive = false;
+    clearLongPressTimer();
+    longPressTimerId = setTimeout(() => {
+      if (activeId !== touch.identifier) return;
+      crosshairActive = true;
+      setMobileCrosshair(chart, paneId, mainEl, touch);
+    }, MOBILE_CROSSHAIR_DELAY);
   };
 
   const onMove = (event) => {
+    if (crosshairActive) {
+      const touch =
+        findActiveTouch(event.touches) ?? findActiveTouch(event.changedTouches);
+      if (!touch) return;
+      event.preventDefault?.();
+      setMobileCrosshair(chart, paneId, mainEl, touch);
+      return;
+    }
+
+    if (event.touches.length === 2 && pinchStart) {
+      clearLongPressTimer();
+      const [a, b] = event.touches;
+      const dy = Math.max(Math.abs(b.clientY - a.clientY), 1);
+      const dx = Math.max(Math.abs(b.clientX - a.clientX), 1);
+      const verticalChange = Math.abs(dy - pinchStart.dy);
+      const horizontalChange = Math.abs(dx - pinchStart.dx);
+      if (verticalChange <= horizontalChange) return;
+
+      const axis = getAxis();
+      if (!axis) return;
+      event.preventDefault?.();
+      try {
+        const zoom = pinchStart.dy / dy;
+        const start = pinchStart.range;
+        const centerRate = 1 - pinchStart.centerY / pinchStart.height;
+        const center = start.from + start.range * centerRate;
+        const nextRange = Math.max(start.range * zoom, Number.EPSILON);
+        const newFrom = center - nextRange * centerRate;
+        const newTo = newFrom + nextRange;
+        const realFrom = axis.convertToRealValue(newFrom);
+        const realTo = axis.convertToRealValue(newTo);
+        axis.setRange({
+          from: newFrom,
+          to: newTo,
+          range: newTo - newFrom,
+          realFrom,
+          realTo,
+          realRange: realTo - realFrom,
+        });
+        chart.adjustPaneViewport?.(false, true, true, true);
+      } catch {
+        pinchStart = null;
+      }
+      return;
+    }
+
     if (activeId === null || event.touches.length !== 1) {
+      clearLongPressTimer();
       activeId = null;
       return;
     }
@@ -289,11 +406,42 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
 
     const dy = touch.clientY - startY;
     const dx = touch.clientX - startX;
+    if (
+      Math.abs(dx) > MOBILE_CROSSHAIR_MOVE_TOLERANCE ||
+      Math.abs(dy) > MOBILE_CROSSHAIR_MOVE_TOLERANCE
+    ) {
+      clearLongPressTimer();
+    }
     // Chỉ pan khi vuốt DỌC trội hơn ngang (ngang nhường klinecharts cuộn thời gian).
     if (Math.abs(dy) <= Math.abs(dx)) return;
 
     const axis = getAxis();
     if (!axis || !startRange) return;
+    if (paneId !== "candle_pane") {
+      event.preventDefault?.();
+      try {
+        const centerRate = 1 - startY / height;
+        const center = startRange.from + startRange.range * centerRate;
+        const zoom = Math.exp(dy / height);
+        const nextRange = Math.max(startRange.range * zoom, Number.EPSILON);
+        const newFrom = center - nextRange * centerRate;
+        const newTo = newFrom + nextRange;
+        const realFrom = axis.convertToRealValue(newFrom);
+        const realTo = axis.convertToRealValue(newTo);
+        axis.setRange({
+          from: newFrom,
+          to: newTo,
+          range: newTo - newFrom,
+          realFrom,
+          realTo,
+          realRange: realTo - realFrom,
+        });
+        chart.adjustPaneViewport?.(false, true, true, true);
+      } catch {
+        activeId = null;
+      }
+      return;
+    }
     try {
       // Dịch dải giá theo tỉ lệ quãng vuốt / chiều cao pane (giống công thức pan
       // trục Y của đường chuột trong klinecharts). from/to dịch cùng lượng → giữ zoom.
@@ -316,16 +464,24 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
     }
   };
 
-  const onEnd = () => {
+  const onEnd = (event) => {
+    clearLongPressTimer();
+    if (crosshairActive) {
+      event.preventDefault?.();
+      clearMobileCrosshair(chart);
+    }
     activeId = null;
+    pinchStart = null;
+    crosshairActive = false;
   };
 
   mainEl.addEventListener("touchstart", onStart, { passive: true });
-  mainEl.addEventListener("touchmove", onMove, { passive: true });
+  mainEl.addEventListener("touchmove", onMove, { passive: false });
   mainEl.addEventListener("touchend", onEnd);
   mainEl.addEventListener("touchcancel", onEnd);
 
   return () => {
+    clearLongPressTimer();
     mainEl.removeEventListener("touchstart", onStart);
     mainEl.removeEventListener("touchmove", onMove);
     mainEl.removeEventListener("touchend", onEnd);
@@ -369,6 +525,55 @@ export default function TradingChart({
         horizontal: { show: false },
         vertical: { show: false },
       },
+      xAxis: {
+        axisLine: { show: false, color: "transparent", size: 0 },
+        tickLine: { show: false, color: "transparent", size: 0, length: 0 },
+      },
+      yAxis: {
+        axisLine: { show: false, color: "transparent", size: 0 },
+        tickLine: { show: false, color: "transparent", size: 0, length: 0 },
+      },
+      separator: {
+        // KLineCharts uses the separator pane as the drag handle for resizing
+        // indicator panes. Keep it transparent, but never set the size to 0.
+        size: DRAGGABLE_SEPARATOR_SIZE,
+        color: "transparent",
+        fill: false,
+        activeBackgroundColor: "rgba(37, 99, 235, 0.08)",
+      },
+      crosshair: {
+        show: true,
+        horizontal: {
+          show: true,
+          line: {
+            show: true,
+            style: "dashed",
+            dashedValue: [4, 2],
+            size: 1,
+            color: "rgba(17, 24, 39, 0.55)",
+          },
+          text: {
+            show: true,
+            color: "#fff",
+            backgroundColor: "#111827",
+          },
+        },
+        vertical: {
+          show: true,
+          line: {
+            show: true,
+            style: "dashed",
+            dashedValue: [4, 2],
+            size: 1,
+            color: "rgba(17, 24, 39, 0.45)",
+          },
+          text: {
+            show: true,
+            color: "#fff",
+            backgroundColor: "#111827",
+          },
+        },
+      },
       candle: {
         bar: {
           upColor: "#26a69a",
@@ -381,6 +586,10 @@ export default function TradingChart({
         tooltip: { showRule: "none" }, // ẩn dòng Time, Open, High, Low, Close, Volume
       },
       indicator: {
+        lastValueMark: {
+          show: true,
+          text: { show: true },
+        },
         tooltip: { showRule: "none" }, // ẩn dòng EMA(10,20,50), BOLL(20,2)...
       },
     });
@@ -399,10 +608,14 @@ export default function TradingChart({
     chart.applyNewData(dataList);
 
     // Chỉ báo do người dùng chọn
+    const paneIds = new Set(["candle_pane"]);
     activeKey
       .split(",")
       .filter(Boolean)
-      .forEach((name) => addIndicator(chart, name, indicatorConfigs));
+      .forEach((name) => {
+        const paneId = addIndicator(chart, name, indicatorConfigs);
+        if (paneId) paneIds.add(paneId);
+      });
 
     // Bollinger + fill xanh/đỏ theo tín hiệu — signals truyền qua extendData
     chart.createIndicator({ name: "BBS", extendData: signals }, true, {
@@ -422,14 +635,14 @@ export default function TradingChart({
     // KLineChart v9 không tự autoSize theo container
     const ro = new ResizeObserver(() => chart.resize());
     ro.observe(container);
-    const disableMobileYAxisTouchZoom = enableMobileYAxisTouchZoom(chart);
-    const disablePriceAxisPan = enablePriceAxisPan(chart);
-    const disableMobilePriceTouchPan = enableMobilePriceTouchPan(chart);
+    const disableMobilePaneGestures = [...paneIds].flatMap((paneId) => [
+      enableMobileYAxisTouchZoom(chart, paneId),
+      enablePriceAxisPan(chart, paneId),
+      enableMobilePriceTouchPan(chart, paneId),
+    ]);
 
     return () => {
-      disableMobileYAxisTouchZoom();
-      disablePriceAxisPan();
-      disableMobilePriceTouchPan();
+      disableMobilePaneGestures.forEach((disable) => disable());
       ro.disconnect();
       dispose(container);
       chartRef.current = null;

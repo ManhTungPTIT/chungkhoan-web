@@ -623,12 +623,7 @@
     font-size: clamp(0.68rem, 2.6vw, 0.82rem);
   }
 }
-.container_panel {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  height: 100dvh; // full màn hình để panel bên dưới nút có chiều cao tính %
-  .btPanel {
+.btPanel {
     display: inline-flex; // bố cục nằm ngang: icon | gạch | chữ
     align-items: center;
     gap: 0.2rem;
@@ -690,6 +685,12 @@
       color: transparent;
     }
   }
+.container_panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  height: 100dvh; // full màn hình để panel bên dưới nút có chiều cao tính %
+  
   // Trượt ẩn/hiện: luôn render, animate width 0 <-> width thật của panel.
   // overflow:hidden để bảng bên trong bị cắt gọn trong lúc trượt.
   .panel-slide {

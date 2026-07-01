@@ -23,7 +23,6 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
   const [showInput, setShowInput] = useState(false);
   const [inputValue, setInputValue] = useState("");
   
-
   const handleScroll = useCallback(() => {
     const el = tbodyRef.current;
     if (!el) return;
@@ -100,7 +99,7 @@ function Panel({ dataPanel = [], onSelectSymbol }) {
               <td className="code" onClick={() => onSelectSymbol(item.symbol)}>
                 {item.symbol}
               </td>
-              <td className={sig.className}>{label}</td>
+              <td className={label === "HOLD" || label === "SELL" ?  sig.className : "buy" }>{label}</td>
               <td className="price">{(item.price / 1000).toFixed(2)}</td>
               <td className={isPositive ? "percent_hold" : "percent_sell"}>
                 {item.change_pct}

@@ -7,7 +7,7 @@ const fetchMe = async () => {
   const { data } = await axiosClient.get("/user/me", {
     params: { token },
   });
-  console.log(data);
+  
   // Một số backend bọc trong { data: {...} } — lấy phần lõi nếu có.
   return data?.data ?? data;
 };
@@ -26,6 +26,19 @@ export function useUpdateMe() {
   return useMutation({
     mutationFn: async (payload) => {
       const { data } = await axiosClient.patch("/user/me", payload);
+      return data?.data ?? data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+  });
+}
+
+export function useRequestPackage() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ days }) => {
+      const { data } = await axiosClient.post("/user/packageRequest", { days });
       return data?.data ?? data;
     },
     onSuccess: () => {

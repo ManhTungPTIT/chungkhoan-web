@@ -25,3 +25,18 @@ export async function setPackage(id, days) {
   const { data } = await axiosAdmin.patch(`/user/${id}/package`, { days });
   return data;
 }
+
+export async function getPackageRequests() {
+  const { data } = await axiosAdmin.get("/user/package-request/pending");
+  return data;
+}
+
+export async function approvePackageRequest(id) {
+  const { data } = await axiosAdmin.patch(`/user/package-request/${id}/approve`);
+  return data;
+}
+
+export async function rejectPackageRequest(id) {
+  const { data } = await axiosAdmin.patch(`/user/package-request/${id}/reject`);
+  return data;
+}

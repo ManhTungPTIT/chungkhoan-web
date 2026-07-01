@@ -17,6 +17,9 @@ import {
   unlockUser,
   deleteUser,
   setPackage,
+  getPackageRequests,
+  approvePackageRequest,
+  rejectPackageRequest,
 } from "../services/adminUsers";
 
 // Lấy { total, online, offline } từ BE (đi qua interceptor refresh của axiosAdmin)
@@ -321,6 +324,60 @@ function PendingUsersTable({ users, busyId, onApprove, onReject }) {
 }
 
 // ─── ManagerUser ──────────────────────────────────────────
+function PackageRequestsTable({ requests, busyId, onApprove, onReject }) {
+  if (requests.length === 0) {
+    return <p className="pending-empty">Không có yêu cầu gói nào chờ duyệt.</p>;
+  }
+  return (
+    <div className="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Khách hàng</th>
+            <th>Email / Số điện thoại</th>
+            <th>Gói yêu cầu</th>
+            <th>Ngày yêu cầu</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          {requests.map((request) => {
+            const u = request.user ?? request;
+            const id = request.id ?? request._id;
+            return (
+              <tr key={id}>
+                <td className="td-user">
+                  <Avatar init={initialsOf(u.fullName)} idx={avatarIdx(u.fullName)} />
+                  <span className="u-name">{u.fullName || "Người dùng"}</span>
+                </td>
+                <td>{u.email || u.phoneNumber || "—"}</td>
+                <td>{request.days} ngày</td>
+                <td>{fmtDate(request.requestedAt ?? request.createdAt)}</td>
+                <td style={{ display: "flex", gap: "0.4rem" }}>
+                  <button
+                    className="pending-approve"
+                    disabled={busyId === id}
+                    onClick={() => onApprove(id)}
+                  >
+                    Duyệt
+                  </button>
+                  <button
+                    className="pending-reject"
+                    disabled={busyId === id}
+                    onClick={() => onReject(id)}
+                  >
+                    Từ chối
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function ManagerUser() {
   const [activeTab, setActiveTab] = useState(1);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -328,6 +385,7 @@ export default function ManagerUser() {
   const [stats, setStats] = useState({ total: 0, online: 0, offline: 0 });
   const [users, setUsers] = useState([]);
   const [pending, setPending] = useState([]);
+  const [packageRequests, setPackageRequests] = useState([]);
   const [busyId, setBusyId] = useState(null);
 
   
@@ -353,10 +411,17 @@ export default function ManagerUser() {
       .catch(() => setPending([]));
   }, []);
 
+  const loadPackageRequests = useCallback(() => {
+    getPackageRequests()
+      .then(setPackageRequests)
+      .catch(() => setPackageRequests([]));
+  }, []);
+
   useEffect(() => {
     loadUsers();
     loadPending();
-  }, [loadUsers, loadPending]);
+    loadPackageRequests();
+  }, [loadUsers, loadPending, loadPackageRequests]);
 
   // ── Duyệt / từ chối (tab Tài khoản mới)
   const handleApprove = async (id) => {
@@ -386,6 +451,31 @@ export default function ManagerUser() {
   };
 
   // ── Thao tác trong modal (khóa/mở/xóa/gói) — gọi API rồi refetch + đóng
+  const handleApprovePackageRequest = async (id) => {
+    setBusyId(id);
+    try {
+      await approvePackageRequest(id);
+      loadPackageRequests();
+      loadUsers();
+    } catch {
+      
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleRejectPackageRequest = async (id) => {
+    setBusyId(id);
+    try {
+      await rejectPackageRequest(id);
+      loadPackageRequests();
+    } catch {
+      
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const actOnUser = async (fn) => {
     if (!selectedUser) return;
     setBusyId(selectedUser.id);
@@ -420,6 +510,7 @@ export default function ManagerUser() {
     { id: 3, label: "Tài khoản khóa", cnt: String(lockedUsers.length) },
     { id: 4, label: "Tài khoản sắp hết hạn", cnt: String(expiringUsers.length) },
     { id: 5, label: "Nâng hạn mức", cnt: String(expiringUsers.length) },
+    { id: 6, label: "Gói chờ duyệt", cnt: String(packageRequests.length) },
     
   ];
 
@@ -469,6 +560,15 @@ export default function ManagerUser() {
           users={expiringUsers}
           onAction={setSelectedUser}
           emptyText="Không có tài khoản sắp hết hạn."
+        />
+      )}
+
+      {activeTab === 6 && (
+        <PackageRequestsTable
+          requests={packageRequests}
+          busyId={busyId}
+          onApprove={handleApprovePackageRequest}
+          onReject={handleRejectPackageRequest}
         />
       )}
 

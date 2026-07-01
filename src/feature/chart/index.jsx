@@ -204,7 +204,8 @@ function TradingView() {
           position: "relative",
           flex: 1,
           minWidth: 0,
-          borderInline: "1px solid var(--border)",
+          marginRight: "0.5rem"
+         
         }}
       >
         <div
@@ -235,6 +236,23 @@ function TradingView() {
               onToggle={toggleIndicator}
               onSaveConfig={saveIndicatorConfig}
             />
+            <button
+          className={`btPanel ${openPanel ? "" : "btPanelHidden"}`}
+          onClick={() => setOpenPanel((v) => !v)}
+        >
+          {/* Định nghĩa gradient để tô màu cho icon SVG */}
+          <svg width="0" height="0" style={{ position: "absolute" }}>
+            <defs>
+              <linearGradient id="funnelGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#8b3df5" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <PiFunnel className="btPanel__icon" />
+          <span className="btPanel__divider" />
+          <span className="btPanel__text">Bộ lọc</span>
+        </button>
           </div>
           <section
             className={`signal-card signal-card--${isBuySignal ? "buy" : "sell"}`}
@@ -318,23 +336,7 @@ function TradingView() {
         )}
       </div>
       <div className="container_panel">
-        <button
-          className={`btPanel ${openPanel ? "" : "btPanelHidden"}`}
-          onClick={() => setOpenPanel((v) => !v)}
-        >
-          {/* Định nghĩa gradient để tô màu cho icon SVG */}
-          <svg width="0" height="0" style={{ position: "absolute" }}>
-            <defs>
-              <linearGradient id="funnelGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" />
-                <stop offset="100%" stopColor="#8b3df5" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <PiFunnel className="btPanel__icon" />
-          <span className="btPanel__divider" />
-          <span className="btPanel__text">Bộ lọc</span>
-        </button>
+        
         <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
           <Panel
             dataPanel={dataPanel}

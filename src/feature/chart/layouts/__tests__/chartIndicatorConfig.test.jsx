@@ -33,6 +33,55 @@ afterEach(() => {
 });
 
 describe("TradingChart indicator config", () => {
+  it("hides grid and axes while keeping pane separators draggable", () => {
+    const chart = init();
+
+    render(<TradingChart candles={[]} signals={[]} />);
+
+    const styles = chart.setStyles.mock.calls[0][0];
+
+    expect(chart.setStyles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        grid: expect.objectContaining({
+          show: false,
+          horizontal: expect.objectContaining({ show: false }),
+          vertical: expect.objectContaining({ show: false }),
+        }),
+        xAxis: expect.objectContaining({
+          axisLine: expect.objectContaining({ show: false }),
+          tickLine: expect.objectContaining({ show: false }),
+        }),
+        yAxis: expect.objectContaining({
+          axisLine: expect.objectContaining({ show: false }),
+          tickLine: expect.objectContaining({ show: false }),
+        }),
+        indicator: expect.objectContaining({
+          lastValueMark: expect.objectContaining({
+            show: true,
+            text: expect.objectContaining({ show: true }),
+          }),
+        }),
+        separator: expect.objectContaining({
+          color: "transparent",
+          fill: false,
+          activeBackgroundColor: expect.any(String),
+        }),
+        crosshair: expect.objectContaining({
+          show: true,
+          horizontal: expect.objectContaining({
+            line: expect.objectContaining({ show: true }),
+            text: expect.objectContaining({ show: true }),
+          }),
+          vertical: expect.objectContaining({
+            line: expect.objectContaining({ show: true }),
+            text: expect.objectContaining({ show: true }),
+          }),
+        }),
+      }),
+    );
+    expect(styles.separator.size).toBeGreaterThan(0);
+  });
+
   it("uses configured params when creating EMA", () => {
     const chart = init();
 

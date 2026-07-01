@@ -54,6 +54,6 @@ export function useIntraday(symbol = "VNINDEX", interval = "1d") {
     // Giữ nến của mã CŨ trong lúc tải mã mới → biểu đồ không trắng. Trong
     // giai đoạn này isPlaceholderData=true để UI hiện overlay "đang cập nhật".
     placeholderData: keepPreviousData,
-    // refetchInterval: 60 * 1000,
+    refetchInterval: 30 * 1000,
   });
 }
