@@ -379,13 +379,19 @@ describe("TradingChart mobile Y-axis zoom", () => {
     });
 
     const preventDefault = vi.fn();
+    const stopPropagation = vi.fn();
+    const stopImmediatePropagation = vi.fn();
     touchMoveHandler({
       touches: [{ ...touch, clientX: 90, clientY: 120 }],
       changedTouches: [{ ...touch, clientX: 90, clientY: 120 }],
       preventDefault,
+      stopPropagation,
+      stopImmediatePropagation,
     });
 
     expect(preventDefault).toHaveBeenCalled();
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(stopImmediatePropagation).toHaveBeenCalled();
     expect(setRange).not.toHaveBeenCalled();
     expect(setCrosshair).toHaveBeenLastCalledWith({
       x: 80,
@@ -399,5 +405,10 @@ describe("TradingChart mobile Y-axis zoom", () => {
     });
 
     expect(setCrosshair).toHaveBeenLastCalledWith();
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "touchmove",
+      expect.any(Function),
+      expect.objectContaining({ capture: true, passive: false }),
+    );
   });
 });

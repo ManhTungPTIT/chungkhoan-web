@@ -349,6 +349,8 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
         findActiveTouch(event.touches) ?? findActiveTouch(event.changedTouches);
       if (!touch) return;
       event.preventDefault?.();
+      event.stopPropagation?.();
+      event.stopImmediatePropagation?.();
       setMobileCrosshair(chart, paneId, mainEl, touch);
       return;
     }
@@ -475,15 +477,17 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
     crosshairActive = false;
   };
 
+  const touchMoveOptions = { passive: false, capture: true };
+
   mainEl.addEventListener("touchstart", onStart, { passive: true });
-  mainEl.addEventListener("touchmove", onMove, { passive: false });
+  mainEl.addEventListener("touchmove", onMove, touchMoveOptions);
   mainEl.addEventListener("touchend", onEnd);
   mainEl.addEventListener("touchcancel", onEnd);
 
   return () => {
     clearLongPressTimer();
     mainEl.removeEventListener("touchstart", onStart);
-    mainEl.removeEventListener("touchmove", onMove);
+    mainEl.removeEventListener("touchmove", onMove, touchMoveOptions);
     mainEl.removeEventListener("touchend", onEnd);
     mainEl.removeEventListener("touchcancel", onEnd);
   };
