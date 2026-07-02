@@ -350,7 +350,7 @@ describe("TradingChart mobile Y-axis zoom", () => {
     );
   });
 
-  it("resizes an indicator pane vertically with a one-finger drag", () => {
+  it("keeps an indicator pane fixed during a one-finger vertical drag", () => {
     const chart = init();
     chart.createIndicator.mockImplementation((indicator) => {
       if (indicator?.name === "VOL") return "vol_pane";
@@ -421,20 +421,15 @@ describe("TradingChart mobile Y-axis zoom", () => {
     });
 
     expect(setRange).not.toHaveBeenCalled();
-    expect(chart.setPaneOptions).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: "vol_pane",
-        dragEnabled: true,
-        minHeight: expect.any(Number),
-        height: expect.any(Number),
-      }),
-    );
-    expect(chart.setPaneOptions.mock.calls[0][0].height).toBeGreaterThan(200);
+    expect(chart.setPaneOptions).not.toHaveBeenCalled();
   });
 
   // Dựng chart giả lập cho các test crosshair mobile và trả về các handler
   // touch đã đăng ký (touchstart trên pane chính, move/end trên documentElement).
-  function setupMobileCrosshairChart() {
+  function setupMobileCrosshairChart({
+    dataList = [],
+    convertFromPixel = () => ({}),
+  } = {}) {
     const chart = init();
     const candleMain = document.createElement("div");
     const addEventListenerSpy = vi.spyOn(candleMain, "addEventListener");
@@ -478,6 +473,8 @@ describe("TradingChart mobile Y-axis zoom", () => {
     chart.getChartStore = vi.fn(() => ({
       getTooltipStore: () => ({ setCrosshair }),
     }));
+    chart.getDataList = vi.fn(() => dataList);
+    chart.convertFromPixel = vi.fn(convertFromPixel);
 
     render(
       <TradingChart candles={[]} signals={[]} infoHeight={0} activeKey="" />,
@@ -617,6 +614,33 @@ describe("TradingChart mobile Y-axis zoom", () => {
 
     // Tap nhanh vào vùng khác → crosshair bị xóa (setCrosshair gọi không tham số).
     expect(setCrosshair).toHaveBeenLastCalledWith();
+  });
+
+  it("moves the pinned crosshair instead of clearing it when quick tapping another candle", () => {
+    vi.useFakeTimers();
+    const { setCrosshair, touchStartHandler, touchEndHandler } =
+      setupMobileCrosshairChart({
+        dataList: [{ timestamp: 1, close: 10 }],
+        convertFromPixel: () => ({ dataIndex: 0 }),
+      });
+    pinCrosshair({ touchStartHandler, touchEndHandler });
+
+    const tap = {
+      identifier: 2,
+      clientX: 150,
+      clientY: 60,
+      screenX: 150,
+      screenY: 60,
+    };
+    touchStartHandler(makeTouchEvent([tap]));
+    vi.advanceTimersByTime(50);
+    touchEndHandler(makeTouchEvent([], [tap]));
+
+    expect(setCrosshair).toHaveBeenLastCalledWith({
+      x: 140,
+      y: 40,
+      paneId: "candle_pane",
+    });
   });
 
   it("keeps the pinned crosshair while dragging the chart", () => {

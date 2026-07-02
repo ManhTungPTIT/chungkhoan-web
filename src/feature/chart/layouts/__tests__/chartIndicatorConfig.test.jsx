@@ -116,15 +116,19 @@ describe("TradingChart indicator config", () => {
       />,
     );
 
+    const paneOptions = chart.createIndicator.mock.calls.find(
+      ([indicator]) => indicator?.name === "RSI",
+    )[2];
     expect(chart.createIndicator).toHaveBeenCalledWith(
       { name: "RSI", calcParams: [21] },
       false,
       expect.objectContaining({
-        dragEnabled: true,
+        dragEnabled: false,
         height: expect.any(Number),
         minHeight: expect.any(Number),
       }),
     );
+    expect(paneOptions.height).toBe(paneOptions.minHeight);
   });
 
   it("creates VOL without volume MA lines", () => {
@@ -132,6 +136,9 @@ describe("TradingChart indicator config", () => {
 
     render(<TradingChart candles={[]} signals={[]} activeKey="VOL" />);
 
+    const paneOptions = chart.createIndicator.mock.calls.find(
+      ([indicator]) => indicator?.name === "VOL",
+    )[2];
     expect(chart.createIndicator).toHaveBeenCalledWith(
       expect.objectContaining({
         name: "VOL",
@@ -142,11 +149,12 @@ describe("TradingChart indicator config", () => {
       }),
       false,
       expect.objectContaining({
-        dragEnabled: true,
+        dragEnabled: false,
         height: expect.any(Number),
         minHeight: expect.any(Number),
       }),
     );
+    expect(paneOptions.height).toBe(paneOptions.minHeight);
   });
 
   it("uses configured params when creating Ichimoku on the candle pane", () => {

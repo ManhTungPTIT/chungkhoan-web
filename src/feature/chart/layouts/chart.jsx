@@ -18,13 +18,12 @@ const DRAGGABLE_SEPARATOR_SIZE = 1;
 const MOBILE_CROSSHAIR_DELAY = 500;
 const MOBILE_CROSSHAIR_MOVE_TOLERANCE = 8;
 const INDICATOR_PANE_HEIGHT = 160;
-const INDICATOR_PANE_MIN_HEIGHT = 72;
 
-function getResizableIndicatorPaneOptions() {
+function getFixedIndicatorPaneOptions() {
   return {
     height: INDICATOR_PANE_HEIGHT,
-    minHeight: INDICATOR_PANE_MIN_HEIGHT,
-    dragEnabled: true,
+    minHeight: INDICATOR_PANE_HEIGHT,
+    dragEnabled: false,
   };
 }
 
@@ -132,7 +131,7 @@ function addIndicator(chart, name, indicatorConfigs) {
         styles: { tooltip: { showRule: "follow_cross" } },
       },
       false,
-      getResizableIndicatorPaneOptions(),
+      getFixedIndicatorPaneOptions(),
     );
   }
   const pane = getIndicatorDefinition(name)?.pane;
@@ -144,7 +143,7 @@ function addIndicator(chart, name, indicatorConfigs) {
     return chart.createIndicator(
       createValue,
       false,
-      getResizableIndicatorPaneOptions(),
+      getFixedIndicatorPaneOptions(),
     ); // pane riêng
   }
 }
@@ -317,14 +316,46 @@ function applyMobileCrosshair(chart, point) {
   }
 }
 
+function getMobileCrosshairPoint(paneId, element, touch) {
+  const rect = element.getBoundingClientRect();
+  return {
+    x: touch.clientX - rect.left,
+    y: touch.clientY - rect.top,
+    paneId,
+  };
+}
+
+function mobileCrosshairPointHasData(chart, paneId, point) {
+  try {
+    const dataList =
+      chart.getDataList?.() ?? chart.getChartStore?.()?.getDataList?.() ?? [];
+    if (dataList.length === 0) return false;
+
+    const converted = chart.convertFromPixel?.([point], { paneId });
+    const convertedPoint = Array.isArray(converted) ? converted[0] : converted;
+    let dataIndex = convertedPoint?.dataIndex;
+    if (!Number.isInteger(dataIndex)) {
+      dataIndex = chart
+        .getChartStore?.()
+        ?.getTimeScaleStore?.()
+        ?.coordinateToDataIndex?.(point.x);
+    }
+    return (
+      Number.isInteger(dataIndex) &&
+      dataIndex >= 0 &&
+      dataIndex < dataList.length
+    );
+  } catch {
+    return false;
+  }
+}
+
 function setMobileCrosshair(chart, paneId, element, touch) {
   try {
-    const rect = element.getBoundingClientRect();
-    return applyMobileCrosshair(chart, {
-      x: touch.clientX - rect.left,
-      y: touch.clientY - rect.top,
-      paneId,
-    });
+    return applyMobileCrosshair(
+      chart,
+      getMobileCrosshairPoint(paneId, element, touch),
+    );
   } catch {
     // Internal API changed; leave native chart gestures untouched.
     return null;
@@ -506,16 +537,6 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
     if (Math.abs(dy) <= Math.abs(dx)) return;
 
     if (paneId !== "candle_pane") {
-      event.preventDefault?.();
-      event.stopPropagation?.();
-      event.stopImmediatePropagation?.();
-      const nextHeight = Math.max(INDICATOR_PANE_MIN_HEIGHT, height - dy);
-      chart.setPaneOptions?.({
-        id: paneId,
-        height: nextHeight,
-        minHeight: INDICATOR_PANE_MIN_HEIGHT,
-        dragEnabled: true,
-      });
       return;
     }
     const axis = getAxis();
@@ -551,13 +572,20 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
       // Nhấc tay sau khi giữ lâu → GHIM crosshair tại vị trí cuối cùng.
       crosshairPinned = true;
     } else if (crosshairPinned) {
-      const endedActiveTouch =
-        activeId !== null && findActiveTouch(event.changedTouches) !== null;
-      if (endedActiveTouch && !movedBeyondTolerance) {
+      const endedTouch =
+        activeId !== null ? findActiveTouch(event.changedTouches) : null;
+      const endedActiveTouch = endedTouch !== null;
+      if (endedTouch && !movedBeyondTolerance) {
+        const tapPoint = getMobileCrosshairPoint(paneId, mainEl, endedTouch);
+        if (mobileCrosshairPointHasData(chart, paneId, tapPoint)) {
+          pinnedCrosshair =
+            applyMobileCrosshair(chart, tapPoint) ?? pinnedCrosshair;
+        } else {
         // Tap nhanh khi đang ghim → xóa crosshair.
-        crosshairPinned = false;
-        pinnedCrosshair = null;
-        clearMobileCrosshair(chart);
+          crosshairPinned = false;
+          pinnedCrosshair = null;
+          clearMobileCrosshair(chart);
+        }
       } else if (pinnedCrosshair && (endedActiveTouch || pinchStart)) {
         // Kéo/cuộn/pinch xong → klinecharts có thể đã vẽ đè hoặc xóa crosshair
         // trong lúc thao tác; áp lại đúng vị trí đã ghim.
