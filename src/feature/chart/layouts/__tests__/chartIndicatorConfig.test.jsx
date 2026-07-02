@@ -112,12 +112,12 @@ describe("TradingChart indicator config", () => {
         candles={[]}
         signals={[]}
         activeKey="RSI"
-        indicatorConfigs={{ RSI: { params: [21] } }}
+        indicatorConfigs={{ RSI: { paramsVersion: 2, params: [21] } }}
       />,
     );
 
     expect(chart.createIndicator).toHaveBeenCalledWith(
-      { name: "RSI", calcParams: [21, 12, 24] },
+      { name: "RSI", calcParams: [21] },
       false,
       expect.objectContaining({
         dragEnabled: true,

@@ -87,6 +87,7 @@ function TradingView() {
   // Mã đã cache (xem lại trong 5') → isFetching=false → không hiện overlay.
   const isLoadingSymbol = isFetching && (isPlaceholderData || candles.length === 0);
   const { data: dataPanel = [] } = useVn100();
+  
   // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend.
   // useMemo giữ reference 'signals' ổn định: nếu tính inline mỗi render sẽ tạo
   // mảng mới → useEffect khởi tạo chart (deps có signals) chạy lại → dispose()+

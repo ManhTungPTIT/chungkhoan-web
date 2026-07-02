@@ -1,6 +1,7 @@
 .indicator-picker {
   position: relative;
   z-index: 20;
+  color-scheme: light;
 }
 
 .indicator-picker__trigger {
@@ -14,6 +15,8 @@
   background: #fff;
   cursor: pointer;
   white-space: nowrap;
+  background-color: white;
+  color: black;
 }
 
 .indicator-picker__menu {
@@ -21,6 +24,8 @@
   top: 100%;
   right: 0;
   width: min(360px, calc(100vw - 24px));
+  background-color: white;
+  color: black;
   // Dùng tối đa khoảng trống dưới nút (cách mép dưới ~16px) nhưng không quá 70dvh,
   // để toàn bộ danh sách chỉ báo luôn cuộn được trong menu, không bị tràn/mất item.
   max-height: min(70dvh, calc(100dvh - 64px));
@@ -35,17 +40,25 @@
   box-shadow: 0 6px 18px rgba(16, 24, 40, 0.12);
   text-align: left;
   text-transform: none;
+  color-scheme: light;
 }
 
 .indicator-picker__menu > input {
   width: 100%;
   box-sizing: border-box;
+  background-color: #fff;
+  color: #111827;
   margin: 0 0 6px;
   padding: 6px 10px;
   font-size: 0.82rem;
-  border: 1px solid var(--border, #d6dae3);
+  border: 1px solid #d6dae3;
   border-radius: 6px;
   outline: none;
+}
+
+.indicator-picker__menu > input::placeholder {
+  color: #667085;
+  opacity: 1;
 }
 
 .indicator-picker__item {
@@ -55,6 +68,11 @@
   gap: 6px;
   padding: 5px 8px;
   border-radius: 6px;
+  color: #000;
+}
+
+.indicator-picker__item:hover {
+  background: #f5f7fb;
 }
 
 .indicator-picker__item label {
@@ -70,6 +88,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.indicator-picker__item input[type="checkbox"] {
+  accent-color: #2f63ff;
 }
 
 .indicator-picker__settings,
@@ -122,6 +144,7 @@
   box-shadow: 0 22px 60px rgba(16, 24, 40, 0.24);
   text-align: left;
   text-transform: none;
+  color-scheme: light;
 }
 
 .indicator-editor__header {
@@ -368,6 +391,7 @@
   width: 18px;
   height: 18px;
   accent-color: #2f63ff;
+  background-color: #fff;
 }
 
 .indicator-editor__swatch {

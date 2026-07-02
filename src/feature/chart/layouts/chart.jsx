@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { init, dispose, DomPosition } from "klinecharts/dist/index.esm.js";
 import "../klinecharts/bbSignalIndicator";
 import "../klinecharts/mcdxIndicator";
+import "../klinecharts/rsiIndicator";
 import "../klinecharts/ichimokuIndicator";
 import "../klinecharts/adxIndicator";
 import "../klinecharts/signalMarkerOverlay";
@@ -148,27 +149,16 @@ function addIndicator(chart, name, indicatorConfigs) {
   }
 }
 
-function dispatchTouchAsMouse(target, type, touch, buttons) {
-  if (!(target instanceof EventTarget) || typeof MouseEvent === "undefined") {
-    return;
-  }
+const YAXIS_DOUBLE_TAP_MS = 500;
 
-  const event = new MouseEvent(type, {
-    bubbles: true,
-    cancelable: true,
-    button: 0,
-    buttons,
-    clientX: touch.clientX,
-    clientY: touch.clientY,
-    screenX: touch.screenX,
-    screenY: touch.screenY,
-  });
-  Object.defineProperty(event, "sourceCapabilities", {
-    value: { firesTouchEvents: false },
-  });
-  target.dispatchEvent(event);
-}
-
+// Zoom dải giá trị bằng MỘT NGÓN kéo dọc trên trục Y — dành cho điện thoại.
+// Trước đây chuyển touch → chuột giả cho klinecharts tự xử lý, nhưng klinecharts
+// chỉ zoom khi con trỏ còn NẰM TRONG widget trục Y của đúng pane; pane chỉ báo
+// thấp (~160px) nên vừa vuốt ra ngoài là zoom dừng. Touch event luôn bắn về
+// element bắt đầu chạm nên tự zoom trực tiếp thì kéo xa mấy cũng không dừng.
+// Kéo xuống → giãn dải (đồ thị nhỏ lại), kéo lên → co dải (phóng to) — cùng
+// công thức scale = pageY/startPageY klinecharts dùng cho chuột. Chạm ĐÚP vào
+// trục → bật lại auto-fit (khớp hành vi double-click chuột của klinecharts).
 function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
   const yAxisElement = chart.getDom?.(paneId, DomPosition.YAxis);
   if (!yAxisElement) return () => {};
@@ -176,6 +166,18 @@ function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
   yAxisElement.style.touchAction = "none";
 
   let activeTouchId = null;
+  let startPageY = 1;
+  let startRange = null;
+  let moved = false;
+  let lastTapAt = 0;
+
+  const getAxis = () => {
+    try {
+      return chart.getDrawPaneById?.(paneId)?.getAxisComponent?.() ?? null;
+    } catch {
+      return null;
+    }
+  };
 
   const findTouch = (touches) => {
     for (const touch of touches) {
@@ -184,12 +186,16 @@ function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
     return null;
   };
 
+  const pageYOf = (touch) => touch.pageY ?? touch.clientY;
+
   const onTouchStart = (event) => {
     if (activeTouchId !== null || event.touches.length !== 1) return;
     const touch = event.changedTouches[0];
     activeTouchId = touch.identifier;
+    startPageY = Math.max(pageYOf(touch), 1);
+    startRange = getAxis()?.getRange?.() ?? null;
+    moved = false;
     event.preventDefault();
-    dispatchTouchAsMouse(yAxisElement, "mousedown", touch, 1);
   };
 
   const onTouchMove = (event) => {
@@ -197,7 +203,36 @@ function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
     const touch = findTouch(event.changedTouches);
     if (!touch) return;
     event.preventDefault();
-    dispatchTouchAsMouse(document.documentElement, "mousemove", touch, 1);
+    const axis = getAxis();
+    if (!axis || !startRange) return;
+    const scale = pageYOf(touch) / startPageY;
+    if (!Number.isFinite(scale) || scale <= 0) return;
+    if (
+      Math.abs(pageYOf(touch) - startPageY) > MOBILE_CROSSHAIR_MOVE_TOLERANCE
+    ) {
+      moved = true;
+    }
+    try {
+      // Tắt auto-fit để dải vừa zoom không bị fit đè lại ở lần vẽ sau
+      axis.setAutoCalcTickFlag?.(false);
+      const newRange = Math.max(startRange.range * scale, Number.EPSILON);
+      const difRange = (newRange - startRange.range) / 2;
+      const newFrom = startRange.from - difRange;
+      const newTo = startRange.to + difRange;
+      const realFrom = axis.convertToRealValue(newFrom);
+      const realTo = axis.convertToRealValue(newTo);
+      axis.setRange({
+        from: newFrom,
+        to: newTo,
+        range: newTo - newFrom,
+        realFrom,
+        realTo,
+        realRange: realTo - realFrom,
+      });
+      chart.adjustPaneViewport?.(false, true, true, true);
+    } catch {
+      activeTouchId = null; // API nội bộ đổi → ngừng, không làm hỏng chart
+    }
   };
 
   const endTouch = (event) => {
@@ -206,7 +241,23 @@ function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
     if (!touch) return;
     event.preventDefault();
     activeTouchId = null;
-    dispatchTouchAsMouse(document.documentElement, "mouseup", touch, 0);
+    startRange = null;
+    if (moved) {
+      lastTapAt = 0;
+      return;
+    }
+    const now = Date.now();
+    if (now - lastTapAt < YAXIS_DOUBLE_TAP_MS) {
+      lastTapAt = 0;
+      try {
+        getAxis()?.setAutoCalcTickFlag?.(true);
+        chart.adjustPaneViewport?.(false, true, true, true);
+      } catch {
+        // API nội bộ đổi → bỏ qua, không làm hỏng chart
+      }
+    } else {
+      lastTapAt = now;
+    }
   };
 
   yAxisElement.addEventListener("touchstart", onTouchStart, {
@@ -254,19 +305,29 @@ function enablePriceAxisPan(chart, paneId = "candle_pane") {
   return () => cancelAnimationFrame(rafId);
 }
 
+// Đặt crosshair theo point có sẵn; trả về point nếu thành công để caller lưu
+// lại vị trí ghim (áp lại sau khi kéo/cuộn).
+function applyMobileCrosshair(chart, point) {
+  try {
+    chart.getChartStore?.()?.getTooltipStore?.()?.setCrosshair?.(point);
+    return point;
+  } catch {
+    // Internal API changed; leave native chart gestures untouched.
+    return null;
+  }
+}
+
 function setMobileCrosshair(chart, paneId, element, touch) {
   try {
     const rect = element.getBoundingClientRect();
-    chart
-      .getChartStore?.()
-      ?.getTooltipStore?.()
-      ?.setCrosshair?.({
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top,
-        paneId,
-      });
+    return applyMobileCrosshair(chart, {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+      paneId,
+    });
   } catch {
     // Internal API changed; leave native chart gestures untouched.
+    return null;
   }
 }
 
@@ -298,6 +359,11 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
   let pinchStart = null;
   let longPressTimerId = 0;
   let crosshairActive = false;
+  // Crosshair đã GHIM (nhấc tay sau khi giữ lâu): giữ nguyên vị trí cho tới khi
+  // người dùng TAP nhanh vào chart; kéo/cuộn/pinch không làm mất.
+  let crosshairPinned = false;
+  let pinnedCrosshair = null;
+  let movedBeyondTolerance = false;
 
   const getAxis = () => {
     try {
@@ -353,11 +419,13 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
     startRange = getAxis()?.getRange?.() ?? null;
     height = mainEl.clientHeight || 1;
     crosshairActive = false;
+    movedBeyondTolerance = false;
     clearLongPressTimer();
     longPressTimerId = setTimeout(() => {
       if (activeId !== touch.identifier) return;
       crosshairActive = true;
-      setMobileCrosshair(chart, paneId, mainEl, touch);
+      pinnedCrosshair =
+        setMobileCrosshair(chart, paneId, mainEl, touch) ?? pinnedCrosshair;
     }, MOBILE_CROSSHAIR_DELAY);
   };
 
@@ -369,7 +437,8 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
       event.preventDefault?.();
       event.stopPropagation?.();
       event.stopImmediatePropagation?.();
-      setMobileCrosshair(chart, paneId, mainEl, touch);
+      pinnedCrosshair =
+        setMobileCrosshair(chart, paneId, mainEl, touch) ?? pinnedCrosshair;
       return;
     }
 
@@ -430,6 +499,7 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
       Math.abs(dx) > MOBILE_CROSSHAIR_MOVE_TOLERANCE ||
       Math.abs(dy) > MOBILE_CROSSHAIR_MOVE_TOLERANCE
     ) {
+      movedBeyondTolerance = true; // hết là tap → không xóa crosshair đã ghim
       clearLongPressTimer();
     }
     // Chỉ pan khi vuốt DỌC trội hơn ngang (ngang nhường klinecharts cuộn thời gian).
@@ -478,7 +548,21 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
       event.preventDefault?.();
       event.stopPropagation?.();
       event.stopImmediatePropagation?.();
-      clearMobileCrosshair(chart);
+      // Nhấc tay sau khi giữ lâu → GHIM crosshair tại vị trí cuối cùng.
+      crosshairPinned = true;
+    } else if (crosshairPinned) {
+      const endedActiveTouch =
+        activeId !== null && findActiveTouch(event.changedTouches) !== null;
+      if (endedActiveTouch && !movedBeyondTolerance) {
+        // Tap nhanh khi đang ghim → xóa crosshair.
+        crosshairPinned = false;
+        pinnedCrosshair = null;
+        clearMobileCrosshair(chart);
+      } else if (pinnedCrosshair && (endedActiveTouch || pinchStart)) {
+        // Kéo/cuộn/pinch xong → klinecharts có thể đã vẽ đè hoặc xóa crosshair
+        // trong lúc thao tác; áp lại đúng vị trí đã ghim.
+        applyMobileCrosshair(chart, pinnedCrosshair);
+      }
     }
     activeId = null;
     pinchStart = null;
@@ -495,6 +579,7 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
 
   return () => {
     clearLongPressTimer();
+    clearMobileCrosshair(chart);
     mainEl.removeEventListener("touchstart", onStart);
     rootEl.removeEventListener("touchmove", onMove, touchMoveOptions);
     rootEl.removeEventListener("touchend", onEnd, touchEndOptions);

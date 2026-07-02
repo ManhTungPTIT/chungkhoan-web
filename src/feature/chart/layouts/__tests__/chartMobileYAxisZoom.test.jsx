@@ -110,43 +110,151 @@ describe("TradingChart mobile Y-axis zoom", () => {
     );
   });
 
-  it("marks translated mouse events as non-touch generated", () => {
+  // Dựng chart giả lập với trục Y cho candle_pane + vol_pane, trả về handler
+  // touch của trục Y pane yêu cầu cùng axis/setRange để kiểm tra zoom.
+  function setupYAxisZoomChart(paneId) {
     const chart = init();
-    const yAxisElement = document.createElement("div");
-    const addEventListenerSpy = vi.spyOn(yAxisElement, "addEventListener");
-    chart.getDom.mockImplementation((paneId, position) => {
-      if (paneId === "candle_pane" && position === DomPosition.YAxis) {
-        return yAxisElement;
-      }
+    chart.createIndicator.mockImplementation((indicator) => {
+      if (indicator?.name === "VOL") return "vol_pane";
+      return "candle_pane";
+    });
+    const yAxisElements = {
+      candle_pane: document.createElement("div"),
+      vol_pane: document.createElement("div"),
+    };
+    const addEventListenerSpy = vi.spyOn(
+      yAxisElements[paneId],
+      "addEventListener",
+    );
+    const setRange = vi.fn();
+    const axis = {
+      getRange: vi.fn(() => ({
+        from: 0,
+        to: 100,
+        range: 100,
+        realFrom: 0,
+        realTo: 100,
+      })),
+      convertToRealValue: vi.fn((value) => value),
+      setAutoCalcTickFlag: vi.fn(),
+      setRange,
+    };
+    chart.getDom.mockImplementation((id, position) => {
+      if (position === DomPosition.YAxis) return yAxisElements[id] ?? null;
+      if (position === DomPosition.Main) return document.createElement("div");
       return null;
     });
-    const mouseDownSpy = vi.fn();
-    yAxisElement.addEventListener("mousedown", mouseDownSpy);
+    chart.getDrawPaneById = vi.fn(() => ({
+      getAxisComponent: () => axis,
+    }));
+    chart.adjustPaneViewport = vi.fn();
 
     render(
-      <TradingChart candles={[]} signals={[]} infoHeight={0} activeKey="" />,
+      <TradingChart candles={[]} signals={[]} infoHeight={0} activeKey="VOL" />,
     );
 
-    const touchStartHandler = addEventListenerSpy.mock.calls.find(
-      ([eventName]) => eventName === "touchstart",
-    )[1];
-    const touch = {
-      identifier: 1,
-      clientX: 30,
-      clientY: 120,
-      screenX: 30,
-      screenY: 120,
+    const findHandler = (eventName) =>
+      addEventListenerSpy.mock.calls.find(([name]) => name === eventName)[1];
+    return {
+      chart,
+      axis,
+      setRange,
+      touchStartHandler: findHandler("touchstart"),
+      touchMoveHandler: findHandler("touchmove"),
+      touchEndHandler: findHandler("touchend"),
     };
+  }
+
+  it("zooms the candle pane price axis with a one-finger drag on the axis", () => {
+    const { chart, setRange, touchStartHandler, touchMoveHandler } =
+      setupYAxisZoomChart("candle_pane");
+    const touch = { identifier: 1, clientY: 200, pageY: 200 };
+
     touchStartHandler({
       touches: [touch],
       changedTouches: [touch],
       preventDefault: vi.fn(),
     });
-
-    expect(mouseDownSpy).toHaveBeenCalledTimes(1);
-    expect(mouseDownSpy.mock.calls[0][0].sourceCapabilities).toEqual({
-      firesTouchEvents: false,
+    touchMoveHandler({
+      touches: [{ ...touch, clientY: 100, pageY: 100 }],
+      changedTouches: [{ ...touch, clientY: 100, pageY: 100 }],
+      preventDefault: vi.fn(),
     });
+
+    // scale = 100/200 = 0.5 → range 100 → 50, phóng to quanh tâm dải
+    expect(setRange).toHaveBeenCalledWith({
+      from: 25,
+      to: 75,
+      range: 50,
+      realFrom: 25,
+      realTo: 75,
+      realRange: 50,
+    });
+    expect(chart.adjustPaneViewport).toHaveBeenCalledWith(
+      false,
+      true,
+      true,
+      true,
+    );
+  });
+
+  it("zooms an indicator pane price axis even when the drag leaves the pane", () => {
+    const { setRange, touchStartHandler, touchMoveHandler } =
+      setupYAxisZoomChart("vol_pane");
+    const touch = { identifier: 1, clientY: 100, pageY: 100 };
+
+    touchStartHandler({
+      touches: [touch],
+      changedTouches: [touch],
+      preventDefault: vi.fn(),
+    });
+    // Kéo xa xuống dưới, vượt hẳn khỏi pane chỉ báo (~160px) → vẫn zoom tiếp
+    touchMoveHandler({
+      touches: [{ ...touch, clientY: 400, pageY: 400 }],
+      changedTouches: [{ ...touch, clientY: 400, pageY: 400 }],
+      preventDefault: vi.fn(),
+    });
+
+    // scale = 400/100 = 4 → range 100 → 400, thu nhỏ quanh tâm dải
+    expect(setRange).toHaveBeenCalledWith({
+      from: -150,
+      to: 250,
+      range: 400,
+      realFrom: -150,
+      realTo: 250,
+      realRange: 400,
+    });
+  });
+
+  it("re-enables auto-fit with a double tap on the price axis", () => {
+    const { chart, axis, setRange, touchStartHandler, touchEndHandler } =
+      setupYAxisZoomChart("vol_pane");
+    const tap = { identifier: 1, clientY: 100, pageY: 100 };
+    const tapOnce = () => {
+      touchStartHandler({
+        touches: [tap],
+        changedTouches: [tap],
+        preventDefault: vi.fn(),
+      });
+      touchEndHandler({
+        touches: [],
+        changedTouches: [tap],
+        preventDefault: vi.fn(),
+      });
+    };
+
+    tapOnce();
+    expect(axis.setAutoCalcTickFlag).not.toHaveBeenCalledWith(true);
+    tapOnce();
+
+    expect(axis.setAutoCalcTickFlag).toHaveBeenCalledWith(true);
+    expect(chart.adjustPaneViewport).toHaveBeenCalledWith(
+      false,
+      true,
+      true,
+      true,
+    );
+    expect(setRange).not.toHaveBeenCalled();
   });
 
   it("zooms an indicator pane vertically with a two-finger pinch", () => {
@@ -324,8 +432,9 @@ describe("TradingChart mobile Y-axis zoom", () => {
     expect(chart.setPaneOptions.mock.calls[0][0].height).toBeGreaterThan(200);
   });
 
-  it("shows and moves the crosshair while long-pressing on mobile", () => {
-    vi.useFakeTimers();
+  // Dựng chart giả lập cho các test crosshair mobile và trả về các handler
+  // touch đã đăng ký (touchstart trên pane chính, move/end trên documentElement).
+  function setupMobileCrosshairChart() {
     const chart = init();
     const candleMain = document.createElement("div");
     const addEventListenerSpy = vi.spyOn(candleMain, "addEventListener");
@@ -377,12 +486,57 @@ describe("TradingChart mobile Y-axis zoom", () => {
     const touchStartHandler = addEventListenerSpy.mock.calls.find(
       ([eventName]) => eventName === "touchstart",
     )[1];
-    const touchMoveHandler = rootAddEventListenerSpy.mock.calls.find(
-      ([eventName]) => eventName === "touchmove",
-    )[1];
-    const touchEndHandler = rootAddEventListenerSpy.mock.calls.find(
-      ([eventName]) => eventName === "touchend",
-    )[1];
+    const touchMoveHandler = rootAddEventListenerSpy.mock.calls
+      .filter(([eventName]) => eventName === "touchmove")
+      .at(-1)[1];
+    const touchEndHandler = rootAddEventListenerSpy.mock.calls
+      .filter(([eventName]) => eventName === "touchend")
+      .at(-1)[1];
+
+    return {
+      setCrosshair,
+      setRange,
+      rootAddEventListenerSpy,
+      touchStartHandler,
+      touchMoveHandler,
+      touchEndHandler,
+    };
+  }
+
+  function makeTouchEvent(touches, changedTouches = touches) {
+    return {
+      touches,
+      changedTouches,
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+      stopImmediatePropagation: vi.fn(),
+    };
+  }
+
+  // Giữ 500ms tại (40,80) rồi nhấc tay → crosshair được ghim tại {x:30, y:60}.
+  function pinCrosshair({ touchStartHandler, touchEndHandler }) {
+    const touch = {
+      identifier: 1,
+      clientX: 40,
+      clientY: 80,
+      screenX: 40,
+      screenY: 80,
+    };
+    touchStartHandler(makeTouchEvent([touch]));
+    vi.advanceTimersByTime(500);
+    touchEndHandler(makeTouchEvent([], [touch]));
+  }
+
+  it("shows and moves the crosshair while long-pressing, then keeps it after release", () => {
+    vi.useFakeTimers();
+    const {
+      setCrosshair,
+      setRange,
+      rootAddEventListenerSpy,
+      touchStartHandler,
+      touchMoveHandler,
+      touchEndHandler,
+    } = setupMobileCrosshairChart();
     const touch = {
       identifier: 1,
       clientX: 40,
@@ -391,11 +545,7 @@ describe("TradingChart mobile Y-axis zoom", () => {
       screenY: 80,
     };
 
-    touchStartHandler({
-      touches: [touch],
-      changedTouches: [touch],
-      preventDefault: vi.fn(),
-    });
+    touchStartHandler(makeTouchEvent([touch]));
     vi.advanceTimersByTime(499);
     expect(setCrosshair).not.toHaveBeenCalled();
 
@@ -406,20 +556,12 @@ describe("TradingChart mobile Y-axis zoom", () => {
       paneId: "candle_pane",
     });
 
-    const preventDefault = vi.fn();
-    const stopPropagation = vi.fn();
-    const stopImmediatePropagation = vi.fn();
-    touchMoveHandler({
-      touches: [{ ...touch, clientX: 90, clientY: 120 }],
-      changedTouches: [{ ...touch, clientX: 90, clientY: 120 }],
-      preventDefault,
-      stopPropagation,
-      stopImmediatePropagation,
-    });
+    const moveEvent = makeTouchEvent([{ ...touch, clientX: 90, clientY: 120 }]);
+    touchMoveHandler(moveEvent);
 
-    expect(preventDefault).toHaveBeenCalled();
-    expect(stopPropagation).toHaveBeenCalled();
-    expect(stopImmediatePropagation).toHaveBeenCalled();
+    expect(moveEvent.preventDefault).toHaveBeenCalled();
+    expect(moveEvent.stopPropagation).toHaveBeenCalled();
+    expect(moveEvent.stopImmediatePropagation).toHaveBeenCalled();
     expect(setRange).not.toHaveBeenCalled();
     expect(setCrosshair).toHaveBeenLastCalledWith({
       x: 80,
@@ -427,24 +569,81 @@ describe("TradingChart mobile Y-axis zoom", () => {
       paneId: "candle_pane",
     });
 
-    const endPreventDefault = vi.fn();
-    const endStopPropagation = vi.fn();
-    const endStopImmediatePropagation = vi.fn();
-    touchEndHandler({
-      changedTouches: [{ ...touch, clientX: 90, clientY: 120 }],
-      preventDefault: endPreventDefault,
-      stopPropagation: endStopPropagation,
-      stopImmediatePropagation: endStopImmediatePropagation,
-    });
+    const endEvent = makeTouchEvent(
+      [],
+      [{ ...touch, clientX: 90, clientY: 120 }],
+    );
+    touchEndHandler(endEvent);
 
-    expect(endPreventDefault).toHaveBeenCalled();
-    expect(endStopPropagation).toHaveBeenCalled();
-    expect(endStopImmediatePropagation).toHaveBeenCalled();
-    expect(setCrosshair).toHaveBeenLastCalledWith();
+    expect(endEvent.preventDefault).toHaveBeenCalled();
+    expect(endEvent.stopPropagation).toHaveBeenCalled();
+    expect(endEvent.stopImmediatePropagation).toHaveBeenCalled();
+
+    // Nhấc tay xong crosshair phải GIỮ NGUYÊN, không tự xóa theo thời gian.
+    vi.advanceTimersByTime(10000);
+    expect(setCrosshair).toHaveBeenLastCalledWith({
+      x: 80,
+      y: 100,
+      paneId: "candle_pane",
+    });
     expect(rootAddEventListenerSpy).toHaveBeenCalledWith(
       "touchmove",
       expect.any(Function),
       expect.objectContaining({ capture: true, passive: false }),
     );
+  });
+
+  it("clears the pinned crosshair with a quick tap", () => {
+    vi.useFakeTimers();
+    const { setCrosshair, touchStartHandler, touchEndHandler } =
+      setupMobileCrosshairChart();
+    pinCrosshair({ touchStartHandler, touchEndHandler });
+    expect(setCrosshair).toHaveBeenLastCalledWith({
+      x: 30,
+      y: 60,
+      paneId: "candle_pane",
+    });
+
+    const tap = {
+      identifier: 2,
+      clientX: 150,
+      clientY: 60,
+      screenX: 150,
+      screenY: 60,
+    };
+    touchStartHandler(makeTouchEvent([tap]));
+    vi.advanceTimersByTime(50);
+    touchEndHandler(makeTouchEvent([], [tap]));
+
+    // Tap nhanh vào vùng khác → crosshair bị xóa (setCrosshair gọi không tham số).
+    expect(setCrosshair).toHaveBeenLastCalledWith();
+  });
+
+  it("keeps the pinned crosshair while dragging the chart", () => {
+    vi.useFakeTimers();
+    const { setCrosshair, touchStartHandler, touchMoveHandler, touchEndHandler } =
+      setupMobileCrosshairChart();
+    pinCrosshair({ touchStartHandler, touchEndHandler });
+
+    const drag = {
+      identifier: 2,
+      clientX: 40,
+      clientY: 80,
+      screenX: 40,
+      screenY: 80,
+    };
+    touchStartHandler(makeTouchEvent([drag]));
+    touchMoveHandler(makeTouchEvent([{ ...drag, clientX: 140 }]));
+    const callsBeforeEnd = setCrosshair.mock.calls.length;
+    touchEndHandler(makeTouchEvent([], [{ ...drag, clientX: 140 }]));
+
+    // Kéo ngang để cuộn chart → crosshair KHÔNG bị xóa; khi nhấc tay phải được
+    // áp LẠI đúng vị trí ghim (klinecharts có thể đã vẽ đè trong lúc cuộn).
+    expect(setCrosshair.mock.calls.length).toBe(callsBeforeEnd + 1);
+    expect(setCrosshair).toHaveBeenLastCalledWith({
+      x: 30,
+      y: 60,
+      paneId: "candle_pane",
+    });
   });
 });

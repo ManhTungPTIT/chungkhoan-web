@@ -1,79 +1,118 @@
 // "klinecharts" (entry CJS/UMD) không expose named export registerIndicator
 // trong môi trường ESM (Node/Vitest) — import thẳng bản ESM để lấy đúng API.
 import { registerIndicator } from "klinecharts/dist/index.esm.js";
-import { emaOf } from "../untils/indicators";
+import { wilderRsiSeries } from "../untils/wilderRsi";
 
-const RSV_SMOOTH = 3; // làm mượt RSV như MCDX gốc
+// [bankerPeriod, bankerBase, bankerFactor, hotPeriod, hotBase, hotFactor,
+//  retailPeriod, retailBase] — bộ tham số MCDX chuẩn (Banker Fund).
+const DEFAULT_MCDX_PARAMS = [50, 50, 1.5, 40, 30, 0.7, 20, 10];
+const SHARK_SMA_PERIOD = 10;
 
-/**
- * RSV (Stochastic) — vị trí của close trong biên độ [LLV, HHV] của `period`
- * nến gần nhất, quy về 0–100. Trả mảng thẳng hàng dataList; null khi chưa đủ
- * nến. Dùng high/low nếu có, không thì fallback về close (tương thích test).
- */
-function rsvSeries(dataList, period) {
-  const out = new Array(dataList.length).fill(null);
-  for (let i = period - 1; i < dataList.length; i++) {
-    let hi = -Infinity,
-      lo = Infinity;
-    for (let j = i - period + 1; j <= i; j++) {
-      const c = dataList[j];
-      hi = Math.max(hi, c.high ?? c.close);
-      lo = Math.min(lo, c.low ?? c.close);
-    }
-    const close = dataList[i].close;
-    out[i] = hi === lo ? 50 : ((close - lo) / (hi - lo)) * 100;
-  }
-  return out;
-}
-
-// SMA giữ nguyên alignment — null cho tới khi đủ `p` phần tử liên tiếp.
-function smooth(arr, p) {
+// SMA có warm-up: chưa đủ `period` giá trị thì lấy trung bình phần đã có,
+// để đường Shark hiện cùng lúc với cột banker thay vì trễ thêm 10 nến.
+function smaSeries(arr, period) {
   const out = new Array(arr.length).fill(null);
-  for (let i = p - 1; i < arr.length; i++) {
-    if (arr[i - p + 1] == null) continue;
-    let s = 0;
-    for (let j = i - p + 1; j <= i; j++) s += arr[j];
-    out[i] = s / p;
+  const window = [];
+  let sum = 0;
+  for (let i = 0; i < arr.length; i++) {
+    const value = arr[i];
+    if (value == null) continue;
+    window.push(value);
+    sum += value;
+    if (window.length > period) sum -= window.shift();
+    out[i] = sum / window.length;
   }
   return out;
 }
 
+function normalizeMCDXParams(paramsOrBankerPeriod, hotPeriod, sharkPeriod) {
+  if (Array.isArray(paramsOrBankerPeriod)) {
+    const params = [...paramsOrBankerPeriod];
+    if (params.length <= 3) {
+      return [
+        params[0] ?? DEFAULT_MCDX_PARAMS[0],
+        DEFAULT_MCDX_PARAMS[1],
+        DEFAULT_MCDX_PARAMS[2],
+        params[1] ?? DEFAULT_MCDX_PARAMS[3],
+        DEFAULT_MCDX_PARAMS[4],
+        DEFAULT_MCDX_PARAMS[5],
+        DEFAULT_MCDX_PARAMS[6],
+        params[2] ?? DEFAULT_MCDX_PARAMS[7],
+      ];
+    }
+    return DEFAULT_MCDX_PARAMS.map((fallback, index) => {
+      const value = Number(params[index]);
+      return Number.isFinite(value) && value > 0 ? value : fallback;
+    });
+  }
+
+  return normalizeMCDXParams([
+    paramsOrBankerPeriod,
+    hotPeriod,
+    sharkPeriod,
+  ]);
+}
+
 /**
- * MCDX (Banker Fund) — thang cố định 0–20:
- *   retail : nền xanh lá cố định 20 (lớp dưới cùng)
- *   hot    : RSV(hotPeriod) — chu kỳ ngắn, cột vàng "núi" nhô lên trên
- *   banker : RSV(bankerPeriod) — chu kỳ dài, cột đỏ làm nền (đè trên vàng),
+ * MCDX (Banker Fund) chuẩn — thang cố định 0–20, mỗi nhóm dòng tiền là
+ * sức mạnh RSI vượt ngưỡng: clamp((RSI(period) − baseline) × sensitivity, 0, 20)
+ *   banker : RSI(50), ngưỡng 50, hệ số 1.5 — cột đỏ, chỉ hiện khi RSI(50) > 50,
  *            chuyển CAM khi giảm so với nến trước
- *   shark  : EMA(sharkPeriod) của banker — đường "Cá Mập" xanh dương
- * Mỗi RSV làm mượt SMA(3) rồi quy về 0–20: value / 100 * 20, kẹp 0–20.
- * Dùng RSV (chuẩn hoá theo biên độ) thay vì RSI để cột trải đủ thang như mẫu.
+ *   hot    : RSI(40), ngưỡng 30, hệ số 0.7 — cột vàng vẽ chồng lên đỉnh cột đỏ
+ *   retail : RSI(20), ngưỡng 10, hệ số 1  — nền xanh lá (gần như luôn kịch 20)
+ *   shark  : SMA(banker, 10) — đường "Cá Mập" tím bám theo cụm cột đỏ
  */
 // Calc thuần — export riêng để unit test không cần chart/DOM.
 export function calcMCDXValues(
   dataList,
-  bankerPeriod = 50,
-  hotPeriod = 21,
-  sharkPeriod = 10,
+  paramsOrBankerPeriod = DEFAULT_MCDX_PARAMS,
+  hotPeriod,
+  sharkPeriod,
 ) {
   const result = dataList.map(() => ({}));
-  const scale = (v) => Math.min(20, Math.max(0, (v / 100) * 20));
-  const hot = smooth(rsvSeries(dataList, hotPeriod), RSV_SMOOTH);
-  const banker = smooth(rsvSeries(dataList, bankerPeriod), RSV_SMOOTH);
+  const [
+    bankerPeriod,
+    bankerBase,
+    bankerFactor,
+    hotRsiPeriod,
+    hotBase,
+    hotFactor,
+    retailPeriod,
+    retailBase,
+  ] = normalizeMCDXParams(paramsOrBankerPeriod, hotPeriod, sharkPeriod);
+  const strength = (rsi, base, factor) =>
+    rsi == null ? null : Math.min(20, Math.max(0, (rsi - base) * factor));
+  const banker = wilderRsiSeries(dataList, bankerPeriod).map((rsi) =>
+    strength(rsi, bankerBase, bankerFactor),
+  );
+  const hot = wilderRsiSeries(dataList, hotRsiPeriod).map((rsi) =>
+    strength(rsi, hotBase, hotFactor),
+  );
+  const retail = wilderRsiSeries(dataList, retailPeriod).map((rsi) =>
+    strength(rsi, retailBase, 1),
+  );
+  const shark = smaSeries(banker, SHARK_SMA_PERIOD);
 
-  const bankerValues = [];
-  let firstIdx = -1;
   for (let i = 0; i < dataList.length; i++) {
-    if (hot[i] == null || banker[i] == null) continue;
-    const b = scale(banker[i]);
-    result[i] = { retail: 20, hot: scale(hot[i]), banker: b };
-    if (firstIdx === -1) firstIdx = i;
-    bankerValues.push(b);
+    if (
+      hot[i] == null ||
+      banker[i] == null ||
+      retail[i] == null ||
+      shark[i] == null
+    ) {
+      continue;
+    }
+    result[i] = {
+      retail: retail[i],
+      hot: Math.min(20, banker[i] + hot[i]),
+      hotRaw: hot[i],
+      banker: banker[i],
+      shark: shark[i],
+      level5: 5,
+      level10: 10,
+      level15: 15,
+    };
   }
-  if (firstIdx === -1) return result;
-
-  emaOf(bankerValues, sharkPeriod).forEach((value, j) => {
-    result[firstIdx + sharkPeriod - 1 + j].shark = value;
-  });
 
   return result;
 }
@@ -82,7 +121,7 @@ registerIndicator({
   name: "MCDX",
   shortName: "MCDX",
   precision: 2,
-  calcParams: [50, 21, 10],
+  calcParams: DEFAULT_MCDX_PARAMS,
   minValue: 0,
   maxValue: 20,
   figures: [
@@ -122,7 +161,25 @@ registerIndicator({
       type: "line",
       styles: () => ({ color: "#7E57C2", size: 2 }),
     },
+    {
+      key: "level5",
+      title: "5: ",
+      type: "line",
+      styles: () => ({ color: "#111827", size: 1 }),
+    },
+    {
+      key: "level10",
+      title: "10: ",
+      type: "line",
+      styles: () => ({ color: "#111827", size: 1 }),
+    },
+    {
+      key: "level15",
+      title: "15: ",
+      type: "line",
+      styles: () => ({ color: "#111827", size: 1 }),
+    },
   ],
   calc: (dataList, { calcParams }) =>
-    calcMCDXValues(dataList, calcParams[0], calcParams[1], calcParams[2]),
+    calcMCDXValues(dataList, calcParams),
 });

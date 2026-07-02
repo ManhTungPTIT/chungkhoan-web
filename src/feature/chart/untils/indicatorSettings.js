@@ -42,10 +42,39 @@ export const ALL_INDICATORS = [
     fills: [{ label: "Màu nền Biểu đồ", colors: ["#26A69A", "#EF5350"] }],
   },
   { name: "VOL", label: "VOL — Khối lượng", pane: "sub" },
-  { name: "MCDX", label: "MCDX — Dòng tiền", pane: "sub", params: [{ label: "Banker", defaultValue: 50 }, { label: "Hot", defaultValue: 21 }, { label: "Shark", defaultValue: 10 }] },
+  {
+    name: "MCDX",
+    label: "MCDX — Dòng tiền",
+    pane: "sub",
+    // v2: đổi từ bộ tham số RSV cũ (Lookback/Smooth/Weight và bản 3 tham số
+    // trước đó) sang MCDX chuẩn RSI (Period/Baseline/Sensitivity). Ý nghĩa
+    // từng VỊ TRÍ đã đổi nên config lưu từ version cũ phải bị bỏ, không được
+    // pad theo vị trí (Hot=21 cũ mà thành Baseline=21 sẽ làm banker kịch trần).
+    paramsVersion: 2,
+    params: [
+      { label: "Banker RSI Period", defaultValue: 50 },
+      { label: "Banker Baseline", defaultValue: 50 },
+      { label: "Banker Sensitivity", defaultValue: 1.5, min: 0.1, step: 0.1 },
+      { label: "Hot Money RSI Period", defaultValue: 40 },
+      { label: "Hot Money Baseline", defaultValue: 30 },
+      { label: "Hot Money Sensitivity", defaultValue: 0.7, min: 0.1, step: 0.1 },
+      { label: "Retail RSI Period", defaultValue: 20 },
+      { label: "Retail Baseline", defaultValue: 10 },
+    ],
+  },
   { name: "MACD", label: "MACD", pane: "sub", params: [{ label: "Fast", defaultValue: 12 }, { label: "Slow", defaultValue: 26 }, { label: "Signal", defaultValue: 9 }], lines: [{ label: "DIF" }, { label: "DEA" }, { label: "MACD" }] },
   { name: "KDJ", label: "KDJ — Stochastic", pane: "sub", params: [{ label: "N", defaultValue: 9 }, { label: "M1", defaultValue: 3 }, { label: "M2", defaultValue: 3 }], lines: [{ label: "K" }, { label: "D" }, { label: "J" }] },
-  { name: "RSI", label: "RSI", pane: "sub", params: [{ label: "P1", defaultValue: 6 }, { label: "P2", defaultValue: 12 }, { label: "P3", defaultValue: 24 }] },
+  {
+    name: "RSI",
+    label: "RSI",
+    pane: "sub",
+    // v2: bỏ RSI built-in 3 chu kỳ [6,12,24] (công thức Cutler) → RSI Wilder
+    // MỘT chu kỳ 14 theo mẫu TradingView. Số lượng/ý nghĩa tham số đổi nên
+    // config lưu từ version cũ phải bị bỏ, không pad theo vị trí.
+    paramsVersion: 2,
+    params: [{ label: "Chu kỳ", defaultValue: 14 }],
+    lines: [{ label: "RSI", color: "#7E57C2" }],
+  },
   { name: "BIAS", label: "BIAS — Độ lệch", pane: "sub", params: [{ label: "P1", defaultValue: 6 }, { label: "P2", defaultValue: 12 }, { label: "P3", defaultValue: 24 }] },
   { name: "BRAR", label: "BRAR", pane: "sub", params: [{ label: "Chu kỳ", defaultValue: 26 }], lines: [{ label: "BR" }, { label: "AR" }] },
   { name: "CCI", label: "CCI", pane: "sub", params: [{ label: "Chu kỳ", defaultValue: 13 }] },
@@ -248,15 +277,23 @@ export function normalizeIndicatorConfigs(configs = {}, definitions = ALL_INDICA
 
     const userConfig = configs[indicator.name] ?? {};
     const nextConfig = {};
+    // Tham số chỉ tái sử dụng khi cùng paramsVersion với định nghĩa hiện tại;
+    // khác version = schema đã đổi ý nghĩa từng vị trí → bỏ, dùng mặc định.
+    const sameParamsVersion =
+      (indicator.paramsVersion ?? null) === (userConfig.paramsVersion ?? null);
+
+    if (indicator.paramsVersion != null) {
+      nextConfig.paramsVersion = indicator.paramsVersion;
+    }
 
     if (indicator.dynamicParams) {
       nextConfig.params = normalizeDynamicParams(
         indicator,
-        userConfig.params,
+        sameParamsVersion ? userConfig.params : [],
         defaultConfig.params,
       );
     } else if (indicator.params?.length) {
-      const userParams = userConfig.params ?? [];
+      const userParams = sameParamsVersion ? (userConfig.params ?? []) : [];
       nextConfig.params = indicator.params.map((param, index) => {
         const value = Number(userParams[index]);
         const min = param.min ?? 1;
@@ -272,14 +309,17 @@ export function normalizeIndicatorConfigs(configs = {}, definitions = ALL_INDICA
       ? buildDefaultLineConfig(indicator, nextConfig.params).styles?.lines
       : defaultConfig.styles?.lines;
 
+    // Styles cũng gắn với schema: khác version thì bỏ như params, tránh style
+    // dòng cũ (ghép theo vị trí) đè màu lên các dòng có ý nghĩa mới.
+    const userStyles = sameParamsVersion ? userConfig.styles : undefined;
     const fillDefaults = defaultConfig.styles?.fills;
     if (lineDefaults?.length || fillDefaults?.length) {
       nextConfig.styles = {
         ...(lineDefaults?.length
-          ? { lines: normalizeLineStyles(userConfig.styles?.lines, lineDefaults) }
+          ? { lines: normalizeLineStyles(userStyles?.lines, lineDefaults) }
           : {}),
         ...(fillDefaults?.length
-          ? { fills: normalizeFillStyles(userConfig.styles?.fills, fillDefaults) }
+          ? { fills: normalizeFillStyles(userStyles?.fills, fillDefaults) }
           : {}),
       };
     }
