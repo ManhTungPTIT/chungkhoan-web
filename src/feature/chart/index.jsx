@@ -26,6 +26,7 @@ const SIGNAL_GENERATORS = {
 import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
 import { useVn100 } from "./hooks/useVn100";
+import { color } from "echarts";
 
 const COLOR_CODE_BUY = { action: "Xanh", color: "#2563eb" };
 const COLOR_CODE_SELL = { action: "Đỏ", color: "#e11d48" };
@@ -277,11 +278,11 @@ function TradingView() {
                   </div>
                   <div className="signal-card__metric">
                     <span>Giá hiện tại</span>
-                    <strong>{priceCurrent}</strong>
+                    <strong style={{color: "#FE92AB"}}>{priceCurrent}</strong>
                   </div>
                   <div className="signal-card__metric">
                     <span>Chốt lãi / Cắt lỗ</span>
-                    <strong>{priceTarget}</strong>
+                    <strong style={{color: "red"}}>{priceTarget}</strong>
                   </div>
                 </div>
 
@@ -289,7 +290,7 @@ function TradingView() {
                   <div className="signal-card__metric signal-card__metric--icon">
                     <FiCalendar aria-hidden="true" />
                     <span>Ngày chuyển {COLORCODE.action}</span>
-                    <strong>{dayChangeConvert}</strong>
+                    <strong style={{ color: COLORCODE.color }}>{dayChangeConvert}</strong>
                   </div>
                   <div className="signal-card__metric signal-card__metric--icon">
                     <FiCalendar aria-hidden="true" />
@@ -299,7 +300,7 @@ function TradingView() {
                   <div className="signal-card__metric signal-card__metric--icon signal-card__metric--targets">
                     <FiTarget aria-hidden="true" />
                     <span>Mục tiêu dự kiến</span>
-                    <strong>
+                    <strong style={{color: "purple"}}>
                       {target1} | {target2} | {target3}
                     </strong>
                   </div>
