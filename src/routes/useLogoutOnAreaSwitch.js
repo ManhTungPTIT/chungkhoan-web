@@ -19,6 +19,10 @@ const LAST_AREA_KEY = "auth.lastArea";
 // phiên ở backend (best-effort) rồi xoá token cục bộ và đưa về trang đăng nhập
 // của vùng mới. Admin/user dùng chung accessToken nên không được mang phiên cũ
 // sang vùng kia. Chỉ ép logout/redirect khi đang có phiên (có token).
+//
+// NGOẠI LỆ: tài khoản admin có quyền xem cả hai vùng — admin mở URL trang user
+// (hoặc quay lại admin) thì vào bình thường, KHÔNG bị ép logout. Chỉ user thường
+// mang token sang vùng khác mới bị dọn phiên.
 export function useLogoutOnAreaSwitch() {
   const { pathname } = useLocation();
 
@@ -43,6 +47,15 @@ export function useLogoutOnAreaSwitch() {
     }
 
     (async () => {
+      // Admin được phép ở cả hai vùng → không ép logout khi đổi vùng.
+      // Không xác định được vai trò (API lỗi) thì cứ logout cho an toàn.
+      try {
+        const res = await axiosClient.get("/auth/me");
+        if (res.data?.admin?.role === "admin") return;
+      } catch {
+        // bỏ qua — coi như phiên không xác thực được, tiếp tục dọn phiên.
+      }
+
       try {
         await axiosClient.post("/auth/logout");
       } catch {

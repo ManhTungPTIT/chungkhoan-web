@@ -38,7 +38,8 @@ function MainLayout() {
   // thị tức thời. Login có thể không lưu user nên không dựa hẳn vào localStorage.
   const { data: me } = useMe();
   const fullName =
-    me?.fullName || data?.state?.user?.fullName || "Người dùng";
+    me?.fullName || data?.state?.user?.fullName || "Quản trị viên";
+  const role = me?.role || data?.state?.user?.role;
 
   // Đăng xuất: thu hồi refresh token ở BE + xoá token cục bộ rồi về /login.
   // Best-effort — service tự xoá token & chuyển trang kể cả khi API lỗi.

@@ -3,10 +3,7 @@ import axiosClient from "../../untils/axiosClient";
 
 // Hồ sơ người dùng đang đăng nhập. Đổi path nếu backend khác /api/user/me.
 const fetchMe = async () => {
-  const token = localStorage.getItem("accessToken");
-  const { data } = await axiosClient.get("/user/me", {
-    params: { token },
-  });
+  const { data } = await axiosClient.get("/user/me");
   
   // Một số backend bọc trong { data: {...} } — lấy phần lõi nếu có.
   return data?.data ?? data;

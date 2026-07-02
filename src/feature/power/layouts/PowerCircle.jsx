@@ -13,6 +13,9 @@ export default function PowerCircle({ data }) {
     const chart = echarts.init(containerRef.current);
 
     const symbols = data.map((d) => d.symbol);
+    // Màu tính một lần cho mỗi mã → dùng chung cho tia (bar) và nhãn mã,
+    // đảm bảo mã luôn cùng màu với tia của nó.
+    const colors = data.map((d) => colorForCategory(d.category));
     const maxMag = Math.max(1, ...data.map((d) => d.magnitude));
 
     chart.setOption({
@@ -42,12 +45,23 @@ export default function PowerCircle({ data }) {
         z: 10,
         axisLine: { show: false },
         axisTick: { show: false },
+        // Nan hoa tỏa từ tâm → cùng với vòng tròn đồng tâm (radiusAxis.splitLine)
+        // tạo lưới "chia ô" như mẫu.
+        splitLine: { show: true, lineStyle: { color: "#e5e5e5" } },
         axisLabel: {
           interval: 0, // ép hiện TẤT CẢ nhãn (mặc định "auto" tự ẩn nhãn chen nhau)
           fontSize: 10,
           margin: 8,
-          // màu nhãn theo nhóm của mã ở vị trí đó
-          color: (value, index) => colorForCategory(data[index]?.category),
+          fontWeight: 600,
+          // ECharts 6 không áp dụng color dạng hàm cho angleAxis → dùng rich text:
+          // mỗi mã gắn style theo nhóm để nhãn cùng màu với tia của nó.
+          formatter: (value, index) =>
+            `{${data[index]?.category ?? "green"}|${value}}`,
+          rich: {
+            green: { color: colorForCategory("green"), fontSize: 10 },
+            red: { color: colorForCategory("red"), fontSize: 10 },
+            purple: { color: colorForCategory("purple"), fontSize: 10 },
+          },
         },
       },
       radiusAxis: {
@@ -63,9 +77,9 @@ export default function PowerCircle({ data }) {
           type: "bar",
           coordinateSystem: "polar",
           barWidth: "55%",
-          data: data.map((d) => ({
+          data: data.map((d, index) => ({
             value: d.magnitude,
-            itemStyle: { color: colorForCategory(d.category) },
+            itemStyle: { color: colors[index] },
           })),
         },
       ],

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiPhone, FiSave, FiKey, FiPackage } from "react-icons/fi";
 import { detectAccountType } from "../untils/accountType";
 import { useMe, useRequestPackage } from "../hooks/useMe";
@@ -59,6 +59,11 @@ function persistStoredUser(patch) {
 
 export default function InfoUser() {
   const [tab, setTab] = useState("info");
+
+  // Role được MainLayout truyền qua navigate("/info", { state: { role } }).
+  // Chỉ có khi vào trang bằng điều hướng SPA; gõ thẳng URL / F5 thì state rỗng
+  // → fallback về role trong hồ sơ user (apiUser/localStorage) bên dưới.
+
 
   // Nguồn chuẩn: API /user/me. localStorage chỉ để fallback khi API chưa về/lỗi.
   const { data: apiUser, isLoading, isError } = useMe();
@@ -266,12 +271,15 @@ export default function InfoUser() {
         >
           <FiKey /> Đổi mật khẩu
         </button>
-        <button
+        {user.role !== "admin" ? (
+          <button
           className={tab === "package" ? "is-active" : ""}
           onClick={() => setTab("package")}
         >
           <FiPackage /> Gói đăng ký
         </button>
+        ) : ""}
+        
       </div>
 
       {tab === "info" && (
@@ -293,7 +301,9 @@ export default function InfoUser() {
                   {form.fullName || user.fullName || "Người dùng"}
                 </div>
                 <div className="iu-role">
-                  {user.role === "admin" ? "Quản trị viên" : "Người dùng"}
+                  {user.role === "admin"
+                    ? "Quản trị viên"
+                    : "Người dùng"}
                 </div>
               </div>
             </div>
@@ -390,7 +400,7 @@ export default function InfoUser() {
         </div>
       )}
 
-      {tab === "package" && (
+      {tab === "package" && user.role !== "admin" (
         <div className="iu-card iu-form iu-package">
           <div className="iu-package__head">
             <div>

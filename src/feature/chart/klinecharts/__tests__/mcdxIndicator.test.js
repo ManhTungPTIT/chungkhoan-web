@@ -4,7 +4,9 @@ vi.mock("klinecharts/dist/index.esm.js", () => ({
   registerIndicator: vi.fn(),
 }));
 
+const { registerIndicator } = await import("klinecharts/dist/index.esm.js");
 const { calcMCDXValues } = await import("../mcdxIndicator");
+const registration = registerIndicator.mock.calls[0][0];
 
 const closesToCandles = (closes) =>
   closes.map((close) => ({ open: close, high: close, low: close, close }));
@@ -102,5 +104,57 @@ describe("calcMCDXValues", () => {
     expect(last.banker).toBeGreaterThanOrEqual(0);
     expect(last.hot).toBeGreaterThanOrEqual(0);
     expect(last.shark).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe("MCDX indicator drawing", () => {
+  it("draws inside the fixed pane bounds while following zoomed axes", () => {
+    const rects = [];
+    const ctx = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      rect: vi.fn(),
+      clip: vi.fn(),
+      fillRect: vi.fn((x, y, width, height) => {
+        rects.push({ x, y, width, height });
+      }),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      set fillStyle(value) {
+        this._fillStyle = value;
+      },
+      set strokeStyle(value) {
+        this._strokeStyle = value;
+      },
+      set lineWidth(value) {
+        this._lineWidth = value;
+      },
+    };
+
+    const isCover = registration.draw({
+      ctx,
+      bounding: { width: 300, height: 120 },
+      barSpace: { bar: 14, halfGapBar: 6 },
+      visibleRange: { realFrom: 0, realTo: 2 },
+      xAxis: { convertToPixel: (index) => 20 + index * 12 },
+      yAxis: { convertToPixel: (value) => 120 - value * 8 },
+      indicator: {
+        result: [
+          { retail: 20, hot: 20, banker: 18, shark: 17, level5: 5, level10: 10, level15: 15 },
+          { retail: 20, hot: 19, banker: 6, shark: 10, level5: 5, level10: 10, level15: 15 },
+        ],
+      },
+    });
+
+    expect(isCover).toBe(true);
+    expect(ctx.clip).toHaveBeenCalled();
+    expect(rects.length).toBeGreaterThan(0);
+    rects.forEach((rect) => {
+      expect(rect.y).toBeGreaterThanOrEqual(0);
+      expect(rect.y + rect.height).toBeLessThanOrEqual(120);
+      expect(rect.width).toBe(12);
+    });
   });
 });

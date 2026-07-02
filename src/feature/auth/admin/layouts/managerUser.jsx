@@ -506,7 +506,7 @@ export default function ManagerUser() {
 
   const listTabs = [
     { id: 1, label: "Danh sách", cnt: String(users.length) },
-    { id: 2, label: "Tài khoản mới", cnt: String(pending.length) },
+    { id: 2, label: "Tài khoản duyệt", cnt: String(pending.length) },
     { id: 3, label: "Tài khoản khóa", cnt: String(lockedUsers.length) },
     { id: 4, label: "Tài khoản sắp hết hạn", cnt: String(expiringUsers.length) },
     { id: 5, label: "Nâng hạn mức", cnt: String(expiringUsers.length) },

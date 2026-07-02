@@ -7,6 +7,7 @@ import TradingView from '../feature/chart/index';
 import AdminLogin from '../feature/auth/admin/layouts/login';
 import AuthPage from '../feature/auth/user/layouts/AuthPage';
 import PrivateRoute from './PrivateRoute';
+import GuestRoute from './GuestRoute';
 import AdminPrivateRoute from './AdminPrivateRoute';
 import FilterStock from '../feature/stock/layouts/filterStock'
 import InfoUser from '../feature/auth/user/layouts/InfoUser';
@@ -25,10 +26,13 @@ function AppRoute() {
 
   return (
     <Routes>
-      {/* Public routes — NOT gated by PrivateRoute, otherwise the guard would
+      {/* Guest-only routes — người đã đăng nhập gõ /login hoặc /register sẽ bị
+          đá về trang chủ. NOT gated by PrivateRoute, otherwise the guard would
           redirect to /login while /login itself is gated → infinite loop / blank page. */}
-      <Route path="/login" element={<AuthPage initialTab="login" />} />
-      <Route path="/register" element={<AuthPage initialTab="register" />} />
+      <Route element={<GuestRoute />}>
+        <Route path="/login" element={<AuthPage initialTab="login" />} />
+        <Route path="/register" element={<AuthPage initialTab="register" />} />
+      </Route>
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/login" element={<AdminLogin />} />
 

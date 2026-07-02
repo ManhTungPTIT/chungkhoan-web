@@ -7,6 +7,7 @@ import { wilderRsiSeries } from "../untils/wilderRsi";
 //  retailPeriod, retailBase] — bộ tham số MCDX chuẩn (Banker Fund).
 const DEFAULT_MCDX_PARAMS = [50, 50, 1.5, 40, 30, 0.7, 20, 10];
 const SHARK_SMA_PERIOD = 10;
+const MCDX_MAX_VALUE = 20;
 
 // SMA có warm-up: chưa đủ `period` giá trị thì lấy trung bình phần đã có,
 // để đường Shark hiện cùng lúc với cột banker thay vì trễ thêm 10 nến.
@@ -51,6 +52,121 @@ function normalizeMCDXParams(paramsOrBankerPeriod, hotPeriod, sharkPeriod) {
     hotPeriod,
     sharkPeriod,
   ]);
+}
+
+function clampMCDXValue(value) {
+  if (!Number.isFinite(value)) return null;
+  return Math.min(MCDX_MAX_VALUE, Math.max(0, value));
+}
+
+function getMCDXBarWidth(barSpace) {
+  if (Number.isFinite(barSpace?.halfGapBar)) {
+    return Math.max(1, barSpace.halfGapBar * 2);
+  }
+  return Math.max(1, (barSpace?.bar ?? 1) * 0.8);
+}
+
+function clipY(y, height) {
+  return Math.min(height, Math.max(0, y));
+}
+
+function drawMCDXBar(ctx, x, value, color, yAxis, bounding, width) {
+  const safeValue = clampMCDXValue(value);
+  if (safeValue == null || safeValue <= 0) return;
+  const valueY = yAxis.convertToPixel(safeValue);
+  const baseY = yAxis.convertToPixel(0);
+  const top = Math.min(valueY, baseY);
+  const bottom = Math.max(valueY, baseY);
+  const clippedTop = clipY(top, bounding.height);
+  const clippedBottom = clipY(bottom, bounding.height);
+  const height = clippedBottom - clippedTop;
+  if (height <= 0) return;
+  ctx.fillStyle = color;
+  ctx.fillRect(x - width / 2, clippedTop, width, height);
+}
+
+function drawMCDXLine(ctx, points, color, width = 1) {
+  if (points.length < 2) return;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(points[i].x, points[i].y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawMCDXIndicator({
+  ctx,
+  bounding,
+  barSpace,
+  visibleRange,
+  xAxis,
+  yAxis,
+  indicator,
+}) {
+  const result = indicator.result ?? [];
+  if (!result.length) return true;
+  const barWidth = getMCDXBarWidth(barSpace);
+  const from = Math.max(
+    0,
+    Math.floor(visibleRange.realFrom ?? visibleRange.from ?? 0),
+  );
+  const to = Math.min(
+    result.length,
+    Math.ceil(visibleRange.realTo ?? visibleRange.to ?? result.length),
+  );
+  const sharkPoints = [];
+  const levelPoints = {
+    level5: [],
+    level10: [],
+    level15: [],
+  };
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, bounding.width, bounding.height);
+  ctx.clip();
+
+  for (let i = from; i < to; i++) {
+    const data = result[i];
+    if (!data) continue;
+    const x = xAxis.convertToPixel(i);
+    drawMCDXBar(ctx, x, data.retail, "#19ff19", yAxis, bounding, barWidth);
+    drawMCDXBar(ctx, x, data.hot, "#e8ff02", yAxis, bounding, barWidth);
+    const bankerColor =
+      i > 0 &&
+      result[i - 1]?.banker != null &&
+      data.banker != null &&
+      data.banker < result[i - 1].banker
+        ? "#fd8c73"
+        : "#ff0000";
+    drawMCDXBar(ctx, x, data.banker, bankerColor, yAxis, bounding, barWidth);
+    if (data.shark != null) {
+      sharkPoints.push({
+        x,
+        y: yAxis.convertToPixel(clampMCDXValue(data.shark)),
+      });
+    }
+    ["level5", "level10", "level15"].forEach((key) => {
+      if (data[key] != null) {
+        levelPoints[key].push({
+          x,
+          y: yAxis.convertToPixel(clampMCDXValue(data[key])),
+        });
+      }
+    });
+  }
+
+  drawMCDXLine(ctx, levelPoints.level5, "rgba(17, 24, 39, 0.45)");
+  drawMCDXLine(ctx, levelPoints.level10, "rgba(17, 24, 39, 0.45)");
+  drawMCDXLine(ctx, levelPoints.level15, "rgba(17, 24, 39, 0.45)");
+  drawMCDXLine(ctx, sharkPoints, "#7E57C2", 2);
+  ctx.restore();
+  return true;
 }
 
 /**
@@ -180,6 +296,7 @@ registerIndicator({
       styles: () => ({ color: "#111827", size: 1 }),
     },
   ],
+  draw: drawMCDXIndicator,
   calc: (dataList, { calcParams }) =>
     calcMCDXValues(dataList, calcParams),
 });

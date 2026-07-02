@@ -350,7 +350,7 @@ describe("TradingChart mobile Y-axis zoom", () => {
     );
   });
 
-  it("keeps an indicator pane fixed during a one-finger vertical drag", () => {
+  it("zooms an indicator pane in place during a one-finger vertical drag", () => {
     const chart = init();
     chart.createIndicator.mockImplementation((indicator) => {
       if (indicator?.name === "VOL") return "vol_pane";
@@ -420,7 +420,20 @@ describe("TradingChart mobile Y-axis zoom", () => {
       preventDefault: vi.fn(),
     });
 
-    expect(setRange).not.toHaveBeenCalled();
+    expect(setRange).toHaveBeenCalledWith({
+      from: 12.5,
+      to: 87.5,
+      range: 75,
+      realFrom: 12.5,
+      realTo: 87.5,
+      realRange: 75,
+    });
+    expect(chart.adjustPaneViewport).toHaveBeenCalledWith(
+      false,
+      true,
+      true,
+      true,
+    );
     expect(chart.setPaneOptions).not.toHaveBeenCalled();
   });
 
@@ -639,6 +652,39 @@ describe("TradingChart mobile Y-axis zoom", () => {
     expect(setCrosshair).toHaveBeenLastCalledWith({
       x: 140,
       y: 40,
+      paneId: "candle_pane",
+    });
+  });
+
+  it("moves the pinned crosshair on a vertical drag instead of panning the price range", () => {
+    vi.useFakeTimers();
+    const {
+      setCrosshair,
+      setRange,
+      touchStartHandler,
+      touchMoveHandler,
+      touchEndHandler,
+    } = setupMobileCrosshairChart();
+    pinCrosshair({ touchStartHandler, touchEndHandler });
+
+    const drag = {
+      identifier: 2,
+      clientX: 40,
+      clientY: 80,
+      screenX: 40,
+      screenY: 80,
+    };
+    touchStartHandler(makeTouchEvent([drag]));
+    const moveEvent = makeTouchEvent([{ ...drag, clientX: 45, clientY: 140 }]);
+    touchMoveHandler(moveEvent);
+
+    expect(moveEvent.preventDefault).toHaveBeenCalled();
+    expect(moveEvent.stopPropagation).toHaveBeenCalled();
+    expect(moveEvent.stopImmediatePropagation).toHaveBeenCalled();
+    expect(setRange).not.toHaveBeenCalled();
+    expect(setCrosshair).toHaveBeenLastCalledWith({
+      x: 35,
+      y: 120,
       paneId: "candle_pane",
     });
   });

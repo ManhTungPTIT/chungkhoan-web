@@ -17,7 +17,7 @@ export { ALL_INDICATORS };
 const DRAGGABLE_SEPARATOR_SIZE = 1;
 const MOBILE_CROSSHAIR_DELAY = 500;
 const MOBILE_CROSSHAIR_MOVE_TOLERANCE = 8;
-const INDICATOR_PANE_HEIGHT = 160;
+const INDICATOR_PANE_HEIGHT = 120;
 
 function getFixedIndicatorPaneOptions() {
   return {
@@ -534,9 +534,49 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
       clearLongPressTimer();
     }
     // Chỉ pan khi vuốt DỌC trội hơn ngang (ngang nhường klinecharts cuộn thời gian).
+    if (
+      paneId === "candle_pane" &&
+      crosshairPinned &&
+      Math.abs(dy) > Math.abs(dx)
+    ) {
+      event.preventDefault?.();
+      event.stopPropagation?.();
+      event.stopImmediatePropagation?.();
+      pinnedCrosshair =
+        setMobileCrosshair(chart, paneId, mainEl, touch) ?? pinnedCrosshair;
+      return;
+    }
+
     if (Math.abs(dy) <= Math.abs(dx)) return;
 
     if (paneId !== "candle_pane") {
+      const axis = getAxis();
+      if (!axis || !startRange) return;
+      event.preventDefault?.();
+      event.stopPropagation?.();
+      event.stopImmediatePropagation?.();
+      try {
+        axis.setAutoCalcTickFlag?.(false);
+        const zoom = Math.max((height + dy) / height, Number.EPSILON);
+        const centerRate = 1 - startY / height;
+        const center = startRange.from + startRange.range * centerRate;
+        const nextRange = Math.max(startRange.range * zoom, Number.EPSILON);
+        const newFrom = center - nextRange * centerRate;
+        const newTo = newFrom + nextRange;
+        const realFrom = axis.convertToRealValue(newFrom);
+        const realTo = axis.convertToRealValue(newTo);
+        axis.setRange({
+          from: newFrom,
+          to: newTo,
+          range: newTo - newFrom,
+          realFrom,
+          realTo,
+          realRange: realTo - realFrom,
+        });
+        chart.adjustPaneViewport?.(false, true, true, true);
+      } catch {
+        activeId = null;
+      }
       return;
     }
     const axis = getAxis();
