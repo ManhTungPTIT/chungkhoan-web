@@ -76,14 +76,3 @@ export function buildPowerData(board, { topN = 40, purpleN = 10 } = {}) {
     return b.magnitude - a.magnitude;
   });
 }
-
-// Lọc board còn các mã thuộc rổ VN100 (cờ `vn100` do backend gắn) — dùng cho
-// trang bản đồ sức mạnh dòng tiền; các view khác vẫn dùng nguyên board.
-// Không dòng nào mang cờ true (backend chưa lấy được danh sách VN100, vd
-// rate-limit lúc khởi động) → trả nguyên board — degrade mềm, tự lành khi
-// backend lấy được danh sách ở lần refetch sau.
-export function filterVn100(board) {
-  if (!Array.isArray(board)) return [];
-  const members = board.filter((b) => b && b.vn100 === true);
-  return members.length > 0 ? members : board;
-}

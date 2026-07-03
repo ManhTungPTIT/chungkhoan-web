@@ -82,6 +82,16 @@ registerIndicator({
     let seg = [];
     let segColor = null;
     const flush = () => {
+      if (seg.length === 1) {
+        const point = seg[0];
+        const nextX = xAxis.convertToPixel(point.index + 1);
+        const fallbackWidth = 1;
+        const width =
+          Number.isFinite(nextX) && nextX !== point.x
+            ? Math.abs(nextX - point.x)
+            : fallbackWidth;
+        seg.push({ ...point, x: point.x + width });
+      }
       if (seg.length >= 2) {
         ctx.beginPath();
         ctx.moveTo(seg[0].x, seg[0].yUp);
@@ -109,6 +119,7 @@ registerIndicator({
       }
       const color = fillColorAt(kline.timestamp, signals);
       const point = {
+        index: i,
         x: xAxis.convertToPixel(i),
         yUp: yAxis.convertToPixel(data.upper),
         yLow: yAxis.convertToPixel(data.lower),

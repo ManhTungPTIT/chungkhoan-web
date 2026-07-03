@@ -1,6 +1,6 @@
 import "./styles/power.scss";
-import { useVn100 } from "../chart/hooks/useVn100";
-import { buildPowerData, filterVn100 } from "./untils/powerData";
+import { usePower } from "./hooks/usePower";
+import { buildPowerData } from "./untils/powerData";
 import PowerCircle from "./layouts/PowerCircle";
 
 const LEGEND = [
@@ -10,7 +10,7 @@ const LEGEND = [
 ];
 
 export default function PowerPage() {
-  const { data, isLoading, isError } = useVn100();
+  const { data, isLoading, isError } = usePower();
 
   if (isLoading) {
     return <div className="power-state">Đang tải dữ liệu…</div>;
@@ -19,7 +19,7 @@ export default function PowerPage() {
     return <div className="power-state">Không tải được dữ liệu</div>;
   }
 
-  const powerData = buildPowerData(filterVn100(data));
+  const powerData = buildPowerData(data);
   if (powerData.length === 0) {
     return <div className="power-state">Không có dữ liệu</div>;
   }

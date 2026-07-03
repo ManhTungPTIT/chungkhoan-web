@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPowerData, colorForCategory, filterVn100 } from "../powerData";
+import { buildPowerData, colorForCategory } from "../powerData";
 
 describe("colorForCategory", () => {
   it("trả đúng màu từng nhóm", () => {
@@ -134,34 +134,5 @@ describe("buildPowerData", () => {
   it("input không phải mảng → []", () => {
     expect(buildPowerData(null)).toEqual([]);
     expect(buildPowerData(undefined)).toEqual([]);
-  });
-});
-
-describe("filterVn100", () => {
-  it("giữ đúng các dòng cờ vn100 === true", () => {
-    const board = [
-      { symbol: "A", vn100: true },
-      { symbol: "B", vn100: false },
-      { symbol: "C", vn100: true },
-      { symbol: "D" }, // thiếu cờ (backend cũ) — coi như ngoài rổ
-    ];
-    expect(filterVn100(board).map((b) => b.symbol)).toEqual(["A", "C"]);
-  });
-
-  it("không dòng nào cờ true → trả nguyên board (degrade mềm)", () => {
-    const board = [
-      { symbol: "A", vn100: false },
-      { symbol: "B" },
-    ];
-    expect(filterVn100(board)).toBe(board);
-  });
-
-  it("input không phải mảng → []", () => {
-    expect(filterVn100(null)).toEqual([]);
-    expect(filterVn100(undefined)).toEqual([]);
-  });
-
-  it("mảng rỗng → []", () => {
-    expect(filterVn100([])).toEqual([]);
   });
 });
