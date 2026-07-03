@@ -167,7 +167,7 @@ function MainLayout() {
                 </li>
               </ul>
             </li>
-            <li className="navbar-item">
+            {/* <li className="navbar-item">
               <span>Thông tin</span>
             </li>
             <li className="navbar-item text-redirect">
@@ -193,7 +193,7 @@ function MainLayout() {
                 <IoBookOutline />
                 <span>Hướng dẫn</span>
               </a>
-            </li>
+            </li> */}
           </ul>
         </div>
       </div>

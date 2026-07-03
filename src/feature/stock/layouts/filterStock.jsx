@@ -63,7 +63,6 @@ function FilterStock() {
   const { data: sector = [] } = useSector();
   const { data: symbols = [] } = useSectorSymbol(codeCate);
   const { data: dataPanel = [] } = useVn100();
-  console.log(dataPanel);
 
   // Danh mục = "Tất cả" + nhóm ngành lấy từ API (tính lại khi sector đổi)
   const categories = useMemo(
