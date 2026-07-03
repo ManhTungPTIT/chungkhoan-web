@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPowerData, colorForCategory } from "../powerData";
+import { buildPowerData, colorForCategory, filterVn100 } from "../powerData";
 
 describe("colorForCategory", () => {
   it("trả đúng màu từng nhóm", () => {
@@ -35,17 +35,17 @@ describe("buildPowerData", () => {
     expect(buildPowerData(board, { purpleN: 0 })).toHaveLength(2);
   });
 
-  it("tím = top value, ưu tiên trước xanh/đỏ (dù tăng hay giảm)", () => {
+  it("tím = top value trong các mã TĂNG; mã giảm không vào tím dù value lớn", () => {
     const board = [
-      { symbol: "UP", change_pct: 5, value: 999 }, // value lớn nhất, đang tăng
-      { symbol: "DOWN", change_pct: -4, value: 888 }, // value nhì, đang giảm
+      { symbol: "UP", change_pct: 5, value: 999 }, // tăng, value lớn nhất → tím
+      { symbol: "DOWN", change_pct: -4, value: 888 }, // giảm → đỏ dù value nhì
       { symbol: "X", change_pct: 3, value: 1 },
       { symbol: "Y", change_pct: -3, value: 1 },
     ];
-    const out = buildPowerData(board, { topN: 40, purpleN: 2 });
+    const out = buildPowerData(board, { topN: 40, purpleN: 1 });
     const bySym = Object.fromEntries(out.map((d) => [d.symbol, d]));
     expect(bySym.UP.category).toBe("purple");
-    expect(bySym.DOWN.category).toBe("purple"); // tím dù đang giảm
+    expect(bySym.DOWN.category).toBe("red");
     expect(bySym.X.category).toBe("green");
     expect(bySym.Y.category).toBe("red");
   });
@@ -88,5 +88,34 @@ describe("buildPowerData", () => {
   it("input không phải mảng → []", () => {
     expect(buildPowerData(null)).toEqual([]);
     expect(buildPowerData(undefined)).toEqual([]);
+  });
+});
+
+describe("filterVn100", () => {
+  it("giữ đúng các dòng cờ vn100 === true", () => {
+    const board = [
+      { symbol: "A", vn100: true },
+      { symbol: "B", vn100: false },
+      { symbol: "C", vn100: true },
+      { symbol: "D" }, // thiếu cờ (backend cũ) — coi như ngoài rổ
+    ];
+    expect(filterVn100(board).map((b) => b.symbol)).toEqual(["A", "C"]);
+  });
+
+  it("không dòng nào cờ true → trả nguyên board (degrade mềm)", () => {
+    const board = [
+      { symbol: "A", vn100: false },
+      { symbol: "B" },
+    ];
+    expect(filterVn100(board)).toBe(board);
+  });
+
+  it("input không phải mảng → []", () => {
+    expect(filterVn100(null)).toEqual([]);
+    expect(filterVn100(undefined)).toEqual([]);
+  });
+
+  it("mảng rỗng → []", () => {
+    expect(filterVn100([])).toEqual([]);
   });
 });
