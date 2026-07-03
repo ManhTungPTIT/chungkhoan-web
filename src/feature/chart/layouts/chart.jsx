@@ -179,8 +179,10 @@ function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
   };
 
   const findTouch = (touches) => {
-    for (const touch of touches) {
-      if (touch.identifier === activeTouchId) return touch;
+    // TouchList không iterable bằng for...of trên nhiều trình duyệt mobile →
+    // duyệt theo chỉ số.
+    for (let i = 0; i < touches.length; i += 1) {
+      if (touches[i].identifier === activeTouchId) return touches[i];
     }
     return null;
   };
@@ -412,8 +414,10 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
   };
 
   const findActiveTouch = (touches) => {
-    for (const touch of touches) {
-      if (touch.identifier === activeId) return touch;
+    // TouchList không iterable bằng for...of trên nhiều trình duyệt mobile →
+    // duyệt theo chỉ số.
+    for (let i = 0; i < touches.length; i += 1) {
+      if (touches[i].identifier === activeId) return touches[i];
     }
     return null;
   };
@@ -424,7 +428,8 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
       crosshairActive = false;
       const range = getAxis()?.getRange?.();
       if (!range) return;
-      const [a, b] = event.touches;
+      const a = event.touches[0];
+      const b = event.touches[1];
       const dy = Math.abs(b.clientY - a.clientY);
       const dx = Math.abs(b.clientX - a.clientX);
       activeId = null;
@@ -475,7 +480,8 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
 
     if (event.touches.length === 2 && pinchStart) {
       clearLongPressTimer();
-      const [a, b] = event.touches;
+      const a = event.touches[0];
+      const b = event.touches[1];
       const dy = Math.max(Math.abs(b.clientY - a.clientY), 1);
       const dx = Math.max(Math.abs(b.clientX - a.clientX), 1);
       const verticalChange = Math.abs(dy - pinchStart.dy);
@@ -516,9 +522,9 @@ function enableMobilePriceTouchPan(chart, paneId = "candle_pane") {
       return;
     }
     let touch = null;
-    for (const t of event.changedTouches) {
-      if (t.identifier === activeId) {
-        touch = t;
+    for (let i = 0; i < event.changedTouches.length; i += 1) {
+      if (event.changedTouches[i].identifier === activeId) {
+        touch = event.changedTouches[i];
         break;
       }
     }

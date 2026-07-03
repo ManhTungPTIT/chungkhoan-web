@@ -400,7 +400,7 @@ export default function InfoUser() {
         </div>
       )}
 
-      {tab === "package" && user.role !== "admin" (
+      {tab === "package" && user.role !== "admin" && (
         <div className="iu-card iu-form iu-package">
           <div className="iu-package__head">
             <div>

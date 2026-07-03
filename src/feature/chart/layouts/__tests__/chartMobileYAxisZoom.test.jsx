@@ -523,6 +523,20 @@ describe("TradingChart mobile Y-axis zoom", () => {
     };
   }
 
+  // Giả lập DOM TouchList thật: array-like (length + chỉ số + item) NHƯNG KHÔNG
+  // iterable bằng for...of / spread / destructuring — như trên nhiều trình duyệt
+  // mobile. Dùng để bắt lỗi phụ thuộc Symbol.iterator của TouchList.
+  function nonIterableTouchList(...touches) {
+    const list = {
+      length: touches.length,
+      item: (i) => touches[i] ?? null,
+    };
+    touches.forEach((touch, index) => {
+      list[index] = touch;
+    });
+    return list;
+  }
+
   // Giữ 500ms tại (40,80) rồi nhấc tay → crosshair được ghim tại {x:30, y:60}.
   function pinCrosshair({ touchStartHandler, touchEndHandler }) {
     const touch = {
@@ -685,6 +699,47 @@ describe("TradingChart mobile Y-axis zoom", () => {
     expect(setCrosshair).toHaveBeenLastCalledWith({
       x: 35,
       y: 120,
+      paneId: "candle_pane",
+    });
+  });
+
+  it("follows the finger vertically during a hold-drag when touches are a non-iterable TouchList", () => {
+    vi.useFakeTimers();
+    const { setCrosshair, touchStartHandler, touchMoveHandler } =
+      setupMobileCrosshairChart();
+    const start = {
+      identifier: 1,
+      clientX: 40,
+      clientY: 80,
+      screenX: 40,
+      screenY: 80,
+    };
+
+    // Giữ lâu để crosshair xuất hiện (rect top=20 → y = 80-20 = 60).
+    touchStartHandler(makeTouchEvent(nonIterableTouchList(start)));
+    vi.advanceTimersByTime(500);
+    expect(setCrosshair).toHaveBeenLastCalledWith({
+      x: 30,
+      y: 60,
+      paneId: "candle_pane",
+    });
+
+    // Vẫn giữ, kéo dọc xuống (clientY 80 → 160) với TouchList KHÔNG iterable.
+    const moved = { ...start, clientY: 160 };
+    const moveEvent = {
+      touches: nonIterableTouchList(moved),
+      changedTouches: nonIterableTouchList(moved),
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
+      stopImmediatePropagation: vi.fn(),
+    };
+    touchMoveHandler(moveEvent);
+
+    // Crosshair phải di theo trục Y (y = 160-20 = 140), không được đứng yên.
+    expect(moveEvent.preventDefault).toHaveBeenCalled();
+    expect(setCrosshair).toHaveBeenLastCalledWith({
+      x: 30,
+      y: 140,
       paneId: "candle_pane",
     });
   });
