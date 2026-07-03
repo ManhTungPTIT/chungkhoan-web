@@ -10,8 +10,12 @@ export function colorForCategory(category) {
 }
 
 // Dựng dữ liệu radar từ board VN100.
-// - Chọn topN mã theo |change_pct| lớn nhất.
-// - Trong đó, purpleN mã có 'value' lớn nhất → nhóm tím (ưu tiên trước).
+// - Chọn topN mã CÂN 2 PHE: nửa suất cho mã tăng, nửa cho mã giảm/đứng giá
+//   (mỗi phe theo |change_pct| lớn nhất); phe thiếu người thì nhường suất cho
+//   phe kia. Ngày thị trường đỏ mã giảm sâu không chèn hết suất của phe tăng
+//   (và ngược lại) — bảo đảm nhóm xanh/đỏ luôn hiện khi thị trường có mã.
+// - Trong các mã TĂNG đã chọn, purpleN mã có 'value' lớn nhất → nhóm tím
+//   (ưu tiên trước).
 // - Còn lại: tăng → xanh, giảm → đỏ (0 coi như xanh).
 // - magnitude = |change_pct| (độ dài tia).
 // - Sắp xếp quanh vòng tròn gom theo cung: green → purple → red,
@@ -31,9 +35,16 @@ export function buildPowerData(board, { topN = 40, purpleN = 10 } = {}) {
       };
     });
 
-  const selected = [...items]
-    .sort((a, b) => Math.abs(b.pct) - Math.abs(a.pct))
-    .slice(0, topN);
+  const byAbsPct = (a, b) => Math.abs(b.pct) - Math.abs(a.pct);
+  const gainers = items.filter((x) => x.pct > 0).sort(byAbsPct);
+  const decliners = items.filter((x) => x.pct <= 0).sort(byAbsPct);
+  const half = Math.floor(topN / 2);
+  const nGainers = Math.min(gainers.length, Math.max(half, topN - decliners.length));
+  const nDecliners = Math.min(decliners.length, topN - nGainers);
+  const selected = [
+    ...gainers.slice(0, nGainers),
+    ...decliners.slice(0, nDecliners),
+  ];
 
   const purpleSymbols = new Set(
     [...selected]

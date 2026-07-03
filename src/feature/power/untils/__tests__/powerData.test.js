@@ -12,10 +12,10 @@ describe("colorForCategory", () => {
 
 describe("buildPowerData", () => {
   it("chọn đúng topN theo |pct| và loại các mã yếu", () => {
-    // 45 mã: |pct| = 0..44 (mã i có pct = i, value nhỏ để không thành tím)
+    // 45 mã tăng: pct = 1..45 (mã i có pct = i+1, value nhỏ để không thành tím)
     const board = Array.from({ length: 45 }, (_, i) => ({
       symbol: `S${i}`,
-      change_pct: i,
+      change_pct: i + 1,
       value: 1,
     }));
     const out = buildPowerData(board, { topN: 40, purpleN: 0 });
@@ -25,6 +25,52 @@ describe("buildPowerData", () => {
     expect(syms.has("S0")).toBe(false);
     expect(syms.has("S4")).toBe(false);
     expect(syms.has("S44")).toBe(true);
+  });
+
+  it("ngày đỏ: chọn cân 2 phe — mã tăng không bị mã giảm sâu chèn hết suất", () => {
+    // 5 mã tăng nhẹ + 45 mã giảm sâu. Chọn theo |pct| thuần thì 40 suất đều
+    // là mã giảm → xanh biến mất. Chọn cân phe: đủ cả 5 mã tăng + 35 mã giảm.
+    const board = [
+      ...Array.from({ length: 5 }, (_, i) => ({
+        symbol: `G${i}`,
+        change_pct: 0.1 + i * 0.1,
+        value: 1,
+      })),
+      ...Array.from({ length: 45 }, (_, i) => ({
+        symbol: `R${i}`,
+        change_pct: -(i + 1),
+        value: 1,
+      })),
+    ];
+    const out = buildPowerData(board, { topN: 40, purpleN: 0 });
+    expect(out).toHaveLength(40);
+    expect(out.filter((d) => d.category === "green")).toHaveLength(5);
+    expect(out.filter((d) => d.category === "red")).toHaveLength(35);
+  });
+
+  it("hai phe đều đông → chia đôi suất topN, mỗi phe lấy |pct| lớn nhất", () => {
+    const board = [
+      ...Array.from({ length: 30 }, (_, i) => ({
+        symbol: `G${i}`,
+        change_pct: i + 1,
+        value: 1,
+      })),
+      ...Array.from({ length: 30 }, (_, i) => ({
+        symbol: `R${i}`,
+        change_pct: -(i + 1),
+        value: 1,
+      })),
+    ];
+    const out = buildPowerData(board, { topN: 40, purpleN: 0 });
+    expect(out).toHaveLength(40);
+    expect(out.filter((d) => d.pct > 0)).toHaveLength(20);
+    expect(out.filter((d) => d.pct < 0)).toHaveLength(20);
+    const syms = new Set(out.map((x) => x.symbol));
+    // mỗi phe giữ mã mạnh nhất, loại mã yếu nhất của chính phe đó
+    expect(syms.has("G29")).toBe(true);
+    expect(syms.has("R29")).toBe(true);
+    expect(syms.has("G0")).toBe(false);
+    expect(syms.has("R0")).toBe(false);
   });
 
   it("board < topN → lấy hết", () => {
