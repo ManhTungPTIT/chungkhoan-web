@@ -222,16 +222,32 @@ function normalizeNumber(value, fallback, min, max) {
 }
 
 function normalizeLineStyles(userLines = [], defaultLines = []) {
+  const lineShapes = new Set([
+    "straight",
+    "broken",
+    "step",
+    "step-break",
+    "diamond-step",
+    "frequency",
+    "cross",
+    "area",
+    "area-break",
+    "columns",
+    "circles",
+  ]);
+
   return defaultLines.map((fallback, index) => {
     const user =
       userLines.find((line) => line?.label === fallback.label) ??
       userLines[index] ??
       {};
+    const shape = lineShapes.has(user.shape) ? { shape: user.shape } : {};
     return {
       label: fallback.label,
       visible: asBool(user.visible, fallback.visible),
       color: normalizeColor(user.color, fallback.color),
       size: normalizeNumber(user.size, fallback.size, 1, 6),
+      ...shape,
       style: ["solid", "dashed"].includes(user.style)
         ? user.style
         : fallback.style,

@@ -150,4 +150,40 @@ describe("IndicatorPicker", () => {
 
     expect(dialog).toHaveClass("indicator-editor--palette-open");
   });
+
+  it("opens a line shape menu and saves the selected shape", () => {
+    const onSaveConfig = openEditor({ ICHIMOKU: true });
+    const dialog = screen.getByRole("dialog", { name: /Ichimoku/i });
+
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Định dạng" }));
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: /Tenkan hình dạng/i }),
+    );
+
+    expect(
+      within(dialog).getByRole("menu", { name: /Hình dạng đường/i }),
+    ).toBeTruthy();
+
+    fireEvent.click(
+      within(dialog).getByRole("menuitemradio", {
+        name: /Biểu đồ Đường bậc/i,
+      }),
+    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu" }));
+
+    expect(onSaveConfig).toHaveBeenCalledWith(
+      "ICHIMOKU",
+      expect.objectContaining({
+        styles: expect.objectContaining({
+          lines: expect.arrayContaining([
+            expect.objectContaining({
+              label: "Tenkan",
+              shape: "step",
+              style: "solid",
+            }),
+          ]),
+        }),
+      }),
+    );
+  });
 });

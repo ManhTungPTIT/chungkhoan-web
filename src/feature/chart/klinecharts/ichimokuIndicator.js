@@ -99,57 +99,67 @@ registerIndicator({
   calc: (dataList, { calcParams }) => calcIchimoku(dataList, calcParams),
   // Tô mây Kumo giữa Senkou A & B, chia màu theo dấu (A≥B xanh / A<B đỏ).
   // destination-over đặt mây sau nến; return false để thư viện vẽ 5 đường đè lên.
-  draw: ({ ctx, indicator, visibleRange, xAxis, yAxis }) => {
-    // Màu nền (mây) lấy từ config truyền qua extendData; thiếu → màu mặc định.
-    const cloud = indicator.extendData?.cloud;
-    if (cloud?.visible === false) return false; // ẩn mây, vẫn để thư viện vẽ 5 đường
-    const cloudUp = hexToRgba(cloud?.colors?.[0], CLOUD_ALPHA) ?? CLOUD_UP;
-    const cloudDown = hexToRgba(cloud?.colors?.[1], CLOUD_ALPHA) ?? CLOUD_DOWN;
-
-    const result = indicator.result;
-    ctx.save();
-    ctx.globalCompositeOperation = "destination-over";
-
-    let seg = [];
-    let segColor = null;
-    const flush = () => {
-      if (seg.length >= 2) {
-        ctx.beginPath();
-        ctx.moveTo(seg[0].x, seg[0].yA);
-        for (let k = 1; k < seg.length; k++) ctx.lineTo(seg[k].x, seg[k].yA);
-        for (let k = seg.length - 1; k >= 0; k--) ctx.lineTo(seg[k].x, seg[k].yB);
-        ctx.closePath();
-        ctx.fillStyle = segColor;
-        ctx.fill();
-      }
-      seg = [];
-    };
-
-    const from = Math.max(0, visibleRange.realFrom ?? visibleRange.from);
-    const to = Math.min(result.length, visibleRange.realTo ?? visibleRange.to);
-    for (let i = from; i < to; i++) {
-      const data = result[i];
-      if (!data || data.spanA == null || data.spanB == null) {
-        flush();
-        segColor = null;
-        continue;
-      }
-      const color = data.spanA >= data.spanB ? cloudUp : cloudDown;
-      const point = {
-        x: xAxis.convertToPixel(i),
-        yA: yAxis.convertToPixel(data.spanA),
-        yB: yAxis.convertToPixel(data.spanB),
-      };
-      if (segColor !== null && color !== segColor) {
-        seg.push(point); // điểm nối: khép đoạn cũ tại nến chuyển màu
-        flush();
-      }
-      segColor = color;
-      seg.push(point);
-    }
-    flush();
-
-    ctx.restore();
-    return false;
-  },
+  draw: drawIchimokuCloud,
 });
+
+export function drawIchimokuCloud({
+  ctx,
+  indicator,
+  visibleRange,
+  xAxis,
+  yAxis,
+}) {
+  // Màu nền (mây) lấy từ config truyền qua extendData; thiếu → màu mặc định.
+  const cloud = indicator.extendData?.cloud;
+  if (cloud?.visible === false) return false; // ẩn mây, vẫn để thư viện vẽ 5 đường
+  const cloudUp = hexToRgba(cloud?.colors?.[0], CLOUD_ALPHA) ?? CLOUD_UP;
+  const cloudDown = hexToRgba(cloud?.colors?.[1], CLOUD_ALPHA) ?? CLOUD_DOWN;
+
+  const result = indicator.result;
+  ctx.save();
+  ctx.globalCompositeOperation = "destination-over";
+
+  let seg = [];
+  let segColor = null;
+  const flush = () => {
+    if (seg.length >= 2) {
+      ctx.beginPath();
+      ctx.moveTo(seg[0].x, seg[0].yA);
+      for (let k = 1; k < seg.length; k++) ctx.lineTo(seg[k].x, seg[k].yA);
+      for (let k = seg.length - 1; k >= 0; k--) {
+        ctx.lineTo(seg[k].x, seg[k].yB);
+      }
+      ctx.closePath();
+      ctx.fillStyle = segColor;
+      ctx.fill();
+    }
+    seg = [];
+  };
+
+  const from = Math.max(0, visibleRange.realFrom ?? visibleRange.from);
+  const to = Math.min(result.length, visibleRange.realTo ?? visibleRange.to);
+  for (let i = from; i < to; i++) {
+    const data = result[i];
+    if (!data || data.spanA == null || data.spanB == null) {
+      flush();
+      segColor = null;
+      continue;
+    }
+    const color = data.spanA >= data.spanB ? cloudUp : cloudDown;
+    const point = {
+      x: xAxis.convertToPixel(i),
+      yA: yAxis.convertToPixel(data.spanA),
+      yB: yAxis.convertToPixel(data.spanB),
+    };
+    if (segColor !== null && color !== segColor) {
+      seg.push(point); // điểm nối: khép đoạn cũ tại nến chuyển màu
+      flush();
+    }
+    segColor = color;
+    seg.push(point);
+  }
+  flush();
+
+  ctx.restore();
+  return false;
+}

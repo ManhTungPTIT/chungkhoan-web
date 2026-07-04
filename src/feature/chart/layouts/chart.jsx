@@ -2,10 +2,14 @@ import { useEffect, useRef } from "react";
 import { init, dispose, DomPosition } from "klinecharts/dist/index.esm.js";
 import "../klinecharts/bbSignalIndicator";
 import "../klinecharts/mcdxIndicator";
-import "../klinecharts/rsiIndicator";
-import "../klinecharts/ichimokuIndicator";
+import { drawRsiBackground } from "../klinecharts/rsiIndicator";
+import { drawIchimokuCloud } from "../klinecharts/ichimokuIndicator";
 import "../klinecharts/adxIndicator";
 import "../klinecharts/signalMarkerOverlay";
+import {
+  drawConfiguredStepLines,
+  isStepLineShape,
+} from "../klinecharts/stepLineIndicator";
 import {
   ALL_INDICATORS,
   getIndicatorDefinition,
@@ -45,27 +49,81 @@ function getIndicatorLineStyles(name, indicatorConfigs) {
 
   const config = normalizeIndicatorConfigs(indicatorConfigs)[name];
   const styleLines = config?.styles?.lines ?? [];
-  return styleLines.map((line, index) => {
+  return styleLines.map((line) => {
+    const hideDefaultLine = line.visible && isStepLineShape(line.shape);
     return {
       style: line.style,
       smooth: false,
-      size: line.visible ? line.size : 0,
+      size: line.visible && !hideDefaultLine ? line.size : 0,
       dashedValue: line.style === "dashed" ? [4, 4] : [2, 2],
-      color: line.visible ? line.color : "rgba(0,0,0,0)",
+      color:
+        line.visible && !hideDefaultLine ? line.color : "rgba(0,0,0,0)",
+      ...(line.shape ? { shape: line.shape } : {}),
     };
   });
+}
+
+function getIndicatorStepLineStyles(name, indicatorConfigs) {
+  const rawConfig = indicatorConfigs?.[name];
+  if (!rawConfig?.styles?.lines?.length) {
+    return [];
+  }
+
+  const config = normalizeIndicatorConfigs(indicatorConfigs)[name];
+  const styleLines = config?.styles?.lines ?? [];
+  const stepLines = styleLines.map((line) => {
+    if (!line.visible || !isStepLineShape(line.shape)) return null;
+    return {
+      style: line.style,
+      smooth: false,
+      size: line.size,
+      dashedValue: line.style === "dashed" ? [4, 4] : [2, 2],
+      color: line.color,
+      shape: line.shape,
+    };
+  });
+  return stepLines.some(Boolean) ? stepLines : [];
+}
+
+function getBaseIndicatorDraw(name) {
+  if (name === "ICHIMOKU") return drawIchimokuCloud;
+  if (name === "RSI") return drawRsiBackground;
+  return null;
+}
+
+function createStepLineDraw(name) {
+  const baseDraw = getBaseIndicatorDraw(name);
+  return (context) => {
+    baseDraw?.(context);
+    drawConfiguredStepLines(context);
+    return false;
+  };
+}
+
+function withStepLineExtra(name, indicatorConfigs, extra = {}) {
+  const stepLineStyles = getIndicatorStepLineStyles(name, indicatorConfigs);
+  if (!stepLineStyles.length) return extra;
+  return {
+    ...extra,
+    extendData: {
+      ...(extra.extendData ?? {}),
+      stepLineStyles,
+    },
+    draw: createStepLineDraw(name),
+  };
 }
 
 function getIndicatorCreateValue(name, indicatorConfigs, extra = {}) {
   const params = getIndicatorParams(name, indicatorConfigs);
   const lineStyles = getIndicatorLineStyles(name, indicatorConfigs);
-  const hasExtra = Object.keys(extra).length > 0;
+  const indicatorExtra = withStepLineExtra(name, indicatorConfigs, extra);
+  const hasExtra = Object.keys(indicatorExtra).length > 0;
   if (params.length > 0 || lineStyles.length > 0 || hasExtra) {
     return {
       name,
       ...(params.length > 0 ? { calcParams: params } : {}),
       ...(lineStyles.length > 0 ? { styles: { lines: lineStyles } } : {}),
-      ...extra,
+      ...indicatorExtra,
     };
   }
   return name;

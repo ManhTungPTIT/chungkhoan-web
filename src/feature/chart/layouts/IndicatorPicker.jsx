@@ -22,9 +22,18 @@ const TABS = [
   { key: "display", label: "Hiển thị", Icon: TbEye },
 ];
 
-const LINE_STYLES = [
-  { value: "solid", label: "Liền" },
-  { value: "dashed", label: "Đứt" },
+const LINE_SHAPES = [
+  { value: "straight", label: "Đường thẳng", chartStyle: "solid" },
+  { value: "broken", label: "Các đường gãy", chartStyle: "dashed" },
+  { value: "step", label: "Biểu đồ Đường bậc", chartStyle: "solid" },
+  { value: "step-break", label: "Đường có bậc và ngắt quãng", chartStyle: "dashed" },
+  { value: "diamond-step", label: "Bước đường có hình thoi", chartStyle: "solid" },
+  { value: "frequency", label: "Biểu đồ tần suất", chartStyle: "solid" },
+  { value: "cross", label: "Chéo nhau", chartStyle: "solid" },
+  { value: "area", label: "Biểu đồ vùng", chartStyle: "solid" },
+  { value: "area-break", label: "Vùng gãy", chartStyle: "dashed" },
+  { value: "columns", label: "Các cột", chartStyle: "solid" },
+  { value: "circles", label: "Các vòng tròn", chartStyle: "solid" },
 ];
 
 const PALETTE_COLORS = [
@@ -39,6 +48,12 @@ const PALETTE_COLORS = [
 ];
 
 const LINE_SIZE_OPTIONS = [1, 2, 3, 4];
+
+function getLineShape(shape) {
+  return (
+    LINE_SHAPES.find((option) => option.value === shape) ?? LINE_SHAPES[0]
+  );
+}
 
 function clamp(number, min, max) {
   return Math.min(Math.max(number, min), max);
@@ -170,6 +185,74 @@ function ColorPalettePopover({
   );
 }
 
+function LineShapeIcon({ shape }) {
+  return (
+    <span className={`indicator-line-shape-icon indicator-line-shape-icon--${shape}`} aria-hidden="true">
+      <span />
+      <span />
+      <span />
+      <span />
+    </span>
+  );
+}
+
+function LineShapePicker({
+  label,
+  shape,
+  open,
+  onToggle,
+  onSelect,
+}) {
+  const selected = getLineShape(shape);
+
+  return (
+    <div className="indicator-line-shape">
+      <button
+        aria-label={`${label} hình dạng`}
+        aria-expanded={open}
+        className="indicator-line-shape__trigger"
+        title="Hình dạng đường"
+        type="button"
+        onClick={onToggle}
+      >
+        <LineShapeIcon shape={selected.value} />
+      </button>
+      {open && (
+        <div
+          aria-label="Hình dạng đường"
+          className="indicator-line-shape__menu"
+          role="menu"
+        >
+          <div className="indicator-line-shape__price-row">
+            <span>Đường Giá</span>
+            <button
+              aria-label="Đường Giá"
+              aria-pressed="false"
+              className="indicator-line-shape__toggle"
+              type="button"
+            >
+              <span />
+            </button>
+          </div>
+          {LINE_SHAPES.map((option) => (
+            <button
+              aria-checked={selected.value === option.value}
+              className={selected.value === option.value ? "is-active" : ""}
+              key={option.value}
+              role="menuitemradio"
+              type="button"
+              onClick={() => onSelect(option)}
+            >
+              <LineShapeIcon shape={option.value} />
+              <span>{option.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function getIndicatorConfig(indicator, configs) {
   const defaults = buildDefaultIndicatorConfigs([indicator]);
   return normalizeIndicatorConfigs(
@@ -196,6 +279,7 @@ function IndicatorEditor({
   );
   const [draftConfig, setDraftConfig] = useState(initialConfig);
   const [activePalette, setActivePalette] = useState(null);
+  const [activeShapeMenu, setActiveShapeMenu] = useState(null);
   const [newDynamicParam, setNewDynamicParam] = useState(
     String(indicator.params?.[0]?.defaultValue ?? 1),
   );
@@ -214,6 +298,7 @@ function IndicatorEditor({
   useEffect(() => {
     setDraftConfig(initialConfig);
     setActivePalette(null);
+    setActiveShapeMenu(null);
     setNewDynamicParam(String(indicator.params?.[0]?.defaultValue ?? 1));
   }, [initialConfig, indicator]);
 
@@ -296,7 +381,7 @@ function IndicatorEditor({
     <div className="indicator-editor__backdrop" onMouseDown={onClose}>
       <section
         aria-label={indicator.label}
-        className={`indicator-editor${activePalette ? " indicator-editor--palette-open" : ""}`}
+        className={`indicator-editor${activePalette || activeShapeMenu !== null ? " indicator-editor--palette-open" : ""}`}
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >
@@ -423,13 +508,14 @@ function IndicatorEditor({
                         className="indicator-editor__swatch"
                         title="Màu"
                         type="button"
-                        onClick={() =>
+                        onClick={() => {
+                          setActiveShapeMenu(null);
                           setActivePalette((current) =>
                             current?.type === "line" && current.index === index
                               ? null
                               : { type: "line", index },
-                          )
-                        }
+                          );
+                        }}
                       >
                         <span
                           className="indicator-editor__swatch-color"
@@ -455,23 +541,22 @@ function IndicatorEditor({
                           />
                         )}
                     </div>
-                    <select
-                      aria-label={`${line.label} kiểu nét`}
-                      value={line.style}
-                      onChange={(event) =>
-                        updateLineStyle(
-                          index,
-                          "style",
-                          event.target.value,
-                        )
-                      }
-                    >
-                      {LINE_STYLES.map((style) => (
-                        <option key={style.value} value={style.value}>
-                          {style.label}
-                        </option>
-                      ))}
-                    </select>
+                    <LineShapePicker
+                      label={line.label}
+                      shape={line.shape}
+                      open={activeShapeMenu === index}
+                      onToggle={() => {
+                        setActivePalette(null);
+                        setActiveShapeMenu((current) =>
+                          current === index ? null : index,
+                        );
+                      }}
+                      onSelect={(option) => {
+                        updateLineStyle(index, "shape", option.value);
+                        updateLineStyle(index, "style", option.chartStyle);
+                        setActiveShapeMenu(null);
+                      }}
+                    />
                     <input
                       aria-label={`${line.label} độ dày`}
                       type="number"
@@ -513,15 +598,16 @@ function IndicatorEditor({
                             className="indicator-editor__swatch"
                             title="Màu"
                             type="button"
-                            onClick={() =>
+                            onClick={() => {
+                              setActiveShapeMenu(null);
                               setActivePalette((current) =>
                                 current?.type === "fill" &&
                                 current.index === index &&
                                 current.colorIndex === colorIndex
                                   ? null
                                   : { type: "fill", index, colorIndex },
-                              )
-                            }
+                              );
+                            }}
                           >
                             <span
                               className="indicator-editor__swatch-color"

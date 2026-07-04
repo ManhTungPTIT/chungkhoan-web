@@ -3,7 +3,6 @@
   flex-direction: column;
   align-items: end;
   gap: 0.45rem;
-  padding: 0.5rem 3rem 0.65rem 0.75rem;
   background: #fff;
 }
 
@@ -46,7 +45,7 @@
 }
 
 .signal-card {
-  width: min(940px, calc(100% - 0.75rem));
+  width: min(840px, calc(100% - 0.75rem));
   box-sizing: border-box;
   padding: 0;
   overflow: hidden;
@@ -64,8 +63,8 @@
 
 .signal-card__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 8.2rem;
-  min-height: 7.2rem;
+  grid-template-columns: minmax(0, 1fr) 7.2rem;
+  min-height: 5.6rem;
 }
 
 .signal-card__main {
@@ -80,17 +79,17 @@
 }
 
 .signal-card__row--top {
-  grid-template-columns: minmax(8.3rem, 1.25fr) 1.7rem repeat(
+  grid-template-columns: minmax(7.4rem, 1.25fr) 1.5rem repeat(
       3,
-      minmax(6.5rem, 1fr)
+      minmax(5.4rem, 1fr)
     );
   align-items: center;
   border-bottom: 1px solid #eef2f7;
 }
 
 .signal-card__row--bottom {
-  grid-template-columns: minmax(8.2rem, 1.05fr) minmax(8rem, 1fr) minmax(
-      12rem,
+  grid-template-columns: minmax(7.2rem, 1.05fr) minmax(6.8rem, 1fr) minmax(
+      10.5rem,
       1.7fr
     );
   align-items: center;
@@ -98,7 +97,7 @@
 
 .signal-card__brand {
   min-width: 0;
-  padding: 0.75rem 1rem 0.6rem;
+  padding: 0.5rem 0.7rem 0.4rem;
 }
 
 .signal-card__brand p {
@@ -133,7 +132,7 @@
   display: flex;
   min-width: 0;
   height: 100%;
-  padding: 0.6rem 0.85rem;
+  padding: 0.4rem 0.6rem;
   flex-direction: column;
   justify-content: center;
 }
@@ -164,7 +163,7 @@
 .signal-card__metric strong {
   display: block;
   overflow: hidden;
-  margin-top: 0.35rem;
+  margin-top: 0.2rem;
   color: #1d2939;
   font-size: 0.95rem;
   font-weight: 800;
@@ -193,7 +192,7 @@
 }
 
 .signal-card__metric--icon strong {
-  margin-top: 0.28rem;
+  margin-top: 0.16rem;
 }
 
 .signal-card__metric--targets strong {
@@ -207,9 +206,15 @@
   display: grid;
   align-content: center;
   justify-items: center;
-  gap: 0.32rem;
-  padding: 0.75rem 0.85rem;
+  gap: 0.22rem;
+  padding: 0.5rem 0.6rem;
   text-align: center;
+}
+
+.signal-card__summary-item {
+  display: grid;
+  justify-items: center;
+  gap: 0.18rem;
 }
 
 .signal-card__summary span {
@@ -531,7 +536,8 @@
   }
 
   .draw-tool-trigger,
-  .indicator-picker__trigger {
+  .indicator-picker__trigger,
+  .btPanel {
     min-height: 32px;
     padding: 4px 9px;
     font-size: 0.78rem;
@@ -545,7 +551,7 @@
 
   .signal-card__body {
     grid-template-columns: minmax(0, 1fr);
-    min-height: 6.9rem;
+    min-height: 5.6rem;
   }
 
   .signal-card__row--top {
@@ -574,13 +580,13 @@
   }
 
   .signal-card__metric {
-    min-height: 3.65rem;
-    padding: 0.44rem 0.46rem;
+    min-height: 3rem;
+    padding: 0.32rem 0.4rem;
   }
 
   .signal-card__metric span {
     overflow: visible;
-    font-size: clamp(0.48rem, 1.95vw, 0.58rem);
+    font-size: clamp(0.52rem, 2.1vw, 0.62rem);
     line-height: 1.16;
     text-overflow: clip;
     white-space: normal;
@@ -589,7 +595,7 @@
   .signal-card__metric strong {
     overflow: visible;
     margin-top: 0.22rem;
-    font-size: clamp(0.62rem, 2.35vw, 0.78rem);
+    font-size: clamp(0.68rem, 2.7vw, 0.9rem);
     line-height: 1.16;
     text-overflow: clip;
     white-space: normal;
@@ -607,11 +613,10 @@
 
   .signal-card__summary {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 0.16rem 0.34rem;
-    padding: 0.42rem 0.5rem;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 0;
+    padding: 0.45rem 0.15rem;
     border-top: 1px solid #eef2f7;
   }
 
@@ -619,76 +624,50 @@
     display: none;
   }
 
+  // Mỗi cặp nhãn-giá trị nằm ngang, chia đều 3 phần bề rộng, có gạch ngăn
+  .signal-card__summary-item {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .signal-card__summary-item + .signal-card__summary-item {
+    border-left: 1px solid #e5e7eb;
+  }
+
   .signal-card__summary span {
-    font-size: clamp(0.5rem, 1.95vw, 0.6rem);
+    font-size: clamp(0.54rem, 2.1vw, 0.64rem);
   }
 
   .signal-card__summary strong {
-    font-size: clamp(0.68rem, 2.6vw, 0.82rem);
+    font-size: clamp(0.72rem, 2.8vw, 0.88rem);
   }
 }
 .btPanel {
-    display: inline-flex; // bố cục nằm ngang: icon | gạch | chữ
-    align-items: center;
-    gap: 0.2rem;
-    padding: 0.25rem 0.5rem;
-    cursor: pointer;
-    border-radius: 14px;
-    // Viền gradient: nền trắng (padding-box) + gradient ở border-box
-    border: 2px solid transparent;
-    background:
-      linear-gradient(#fff, #fff) padding-box,
-      linear-gradient(135deg, #3b82f6, #8b3df5) border-box;
-    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25);
-    transition:
-      transform 0.15s ease,
-      box-shadow 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 4px 10px;
+  border: 1px solid var(--border, #d6dae3);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
 
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 22px rgba(99, 102, 241, 0.35);
-    }
-    &:active {
-      transform: translateY(0);
-    }
-
-    // Panel ẩn => nút co lại, chỉ còn icon phễu
-    &.btPanelHidden {
-      gap: 0;
-      padding: 0.4rem;
-      justify-content: center;
-      .btPanel__divider,
-      .btPanel__text {
-        display: none;
-      }
-    }
-
-    .btPanel__icon {
-      width: 1.35rem;
-      height: 1.35rem;
-      fill: url(#funnelGrad); // dùng gradient đã định nghĩa trong JSX
-    }
-
-    .btPanel__divider {
-      width: 1px;
-      align-self: stretch;
-      margin: 0.1rem 0;
-      background: linear-gradient(#3b82f6, #8b3df5);
-      opacity: 0.45;
-    }
-
-    .btPanel__text {
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      font-size: 0.95rem; // Chữ gradient
-      background: linear-gradient(135deg, #3b82f6, #8b3df5);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      color: transparent;
-    }
+  &[data-active="true"] {
+    border-color: #a5b4fc;
+    background: #eef2ff;
   }
+
+  .btPanel__icon {
+    width: 1.15rem;
+    height: 1.15rem;
+    color: #2b7fff;
+  }
+}
 .container_panel {
   display: flex;
   flex-direction: column;

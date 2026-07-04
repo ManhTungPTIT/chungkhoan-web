@@ -238,22 +238,14 @@ function TradingView() {
               onSaveConfig={saveIndicatorConfig}
             />
             <button
-          className={`btPanel ${openPanel ? "" : "btPanelHidden"}`}
-          onClick={() => setOpenPanel((v) => !v)}
-        >
-          {/* Định nghĩa gradient để tô màu cho icon SVG */}
-          <svg width="0" height="0" style={{ position: "absolute" }}>
-            <defs>
-              <linearGradient id="funnelGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" />
-                <stop offset="100%" stopColor="#8b3df5" />
-              </linearGradient>
-            </defs>
-          </svg>
-          <PiFunnel className="btPanel__icon" />
-          <span className="btPanel__divider" />
-          <span className="btPanel__text">Bộ lọc</span>
-        </button>
+              type="button"
+              className="btPanel"
+              aria-label="Bộ lọc"
+              onClick={() => setOpenPanel((v) => !v)}
+              data-active={openPanel ? "true" : "false"}
+            >
+              <PiFunnel className="btPanel__icon" />
+            </button>
           </div>
           <section
             className={`signal-card signal-card--${isBuySignal ? "buy" : "sell"}`}
@@ -311,12 +303,18 @@ function TradingView() {
                 className="signal-card__summary"
                 style={{ "--color-signal": COLORCODE.color }}
               >
-                <span>{isBuySignal ? "Đã tăng" : "Tránh giảm"}</span>
-                <strong>{pricePct}</strong>
-                <span>Vùng</span>
-                <strong>{COLORCODE.action}</strong>
-                <span>{isBuySignal ? "Nắm giữ" : "Đứng ngoài"}</span>
-                <strong>{dayCount} phiên</strong>
+                <div className="signal-card__summary-item">
+                  <span>{isBuySignal ? "Đã tăng" : "Tránh giảm"}</span>
+                  <strong>{pricePct}</strong>
+                </div>
+                <div className="signal-card__summary-item">
+                  <span>Vùng</span>
+                  <strong>{COLORCODE.action}</strong>
+                </div>
+                <div className="signal-card__summary-item">
+                  <span>{isBuySignal ? "Nắm giữ" : "Đứng ngoài"}</span>
+                  <strong>{dayCount} phiên</strong>
+                </div>
               </aside>
             </div>
           </section>

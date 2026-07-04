@@ -88,69 +88,78 @@ registerIndicator({
   calc: (dataList, { calcParams }) => calcRSIValues(dataList, calcParams),
   // Vẽ nền + vùng quá mua/quá bán; chạy TRƯỚC các figure nên đường RSI và
   // ngưỡng luôn đè lên trên; return false để thư viện vẫn vẽ 4 đường figure.
-  draw: ({ ctx, bounding, yAxis, xAxis, visibleRange, indicator }) => {
-    const result = indicator.result ?? [];
-    if (!result.length) return false;
-    try {
-      const y70 = yAxis.convertToPixel(70);
-      const y30 = yAxis.convertToPixel(30);
-
-      // Gom đường RSI trong vùng nhìn thấy thành các đoạn liên tục
-      // (ngắt đoạn tại nến thiếu RSI — vùng warm-up).
-      const from = Math.max(0, visibleRange.realFrom ?? visibleRange.from);
-      const to = Math.min(
-        result.length,
-        visibleRange.realTo ?? visibleRange.to,
-      );
-      const segments = [];
-      let points = [];
-      for (let i = from; i < to; i++) {
-        const rsi = result[i]?.rsi;
-        if (rsi == null) {
-          if (points.length > 1) segments.push(points);
-          points = [];
-          continue;
-        }
-        points.push({
-          x: xAxis.convertToPixel(i),
-          y: yAxis.convertToPixel(rsi),
-        });
-      }
-      if (points.length > 1) segments.push(points);
-
-      // Tô đa giác giữa đường RSI và ngưỡng, CLIP trong nửa mặt phẳng tương
-      // ứng: phần đường nằm ngoài nửa đó bị cắt bỏ nên chỉ đúng vùng vượt
-      // ngưỡng được tô (điểm cắt ngưỡng tự khớp, không cần nội suy).
-      const fillBeyondLevel = (clipTop, clipHeight, levelY, color) => {
-        if (clipHeight <= 0 || segments.length === 0) return;
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(0, clipTop, bounding.width, clipHeight);
-        ctx.clip();
-        ctx.fillStyle = color;
-        segments.forEach((seg) => {
-          ctx.beginPath();
-          ctx.moveTo(seg[0].x, seg[0].y);
-          for (let k = 1; k < seg.length; k++) ctx.lineTo(seg[k].x, seg[k].y);
-          ctx.lineTo(seg[seg.length - 1].x, levelY);
-          ctx.lineTo(seg[0].x, levelY);
-          ctx.closePath();
-          ctx.fill();
-        });
-        ctx.restore();
-      };
-      fillBeyondLevel(0, y70, y70, OVERBOUGHT_FILL_COLOR); // trên ngưỡng 70
-      fillBeyondLevel(y30, bounding.height - y30, y30, OVERSOLD_FILL_COLOR); // dưới 30
-
-      // Nền tím nhạt giữa hai ngưỡng 30–70; destination-over đặt sau tất cả.
-      ctx.save();
-      ctx.globalCompositeOperation = "destination-over";
-      ctx.fillStyle = BAND_FILL_COLOR;
-      ctx.fillRect(0, Math.min(y70, y30), bounding.width, Math.abs(y30 - y70));
-      ctx.restore();
-    } catch {
-      // Trục chưa sẵn sàng → bỏ qua phần tô, các đường vẫn vẽ bình thường.
-    }
-    return false;
-  },
+  draw: drawRsiBackground,
 });
+
+export function drawRsiBackground({
+  ctx,
+  bounding,
+  yAxis,
+  xAxis,
+  visibleRange,
+  indicator,
+}) {
+  const result = indicator.result ?? [];
+  if (!result.length) return false;
+  try {
+    const y70 = yAxis.convertToPixel(70);
+    const y30 = yAxis.convertToPixel(30);
+
+    // Gom đường RSI trong vùng nhìn thấy thành các đoạn liên tục
+    // (ngắt đoạn tại nến thiếu RSI — vùng warm-up).
+    const from = Math.max(0, visibleRange.realFrom ?? visibleRange.from);
+    const to = Math.min(
+      result.length,
+      visibleRange.realTo ?? visibleRange.to,
+    );
+    const segments = [];
+    let points = [];
+    for (let i = from; i < to; i++) {
+      const rsi = result[i]?.rsi;
+      if (rsi == null) {
+        if (points.length > 1) segments.push(points);
+        points = [];
+        continue;
+      }
+      points.push({
+        x: xAxis.convertToPixel(i),
+        y: yAxis.convertToPixel(rsi),
+      });
+    }
+    if (points.length > 1) segments.push(points);
+
+    // Tô đa giác giữa đường RSI và ngưỡng, CLIP trong nửa mặt phẳng tương
+    // ứng: phần đường nằm ngoài nửa đó bị cắt bỏ nên chỉ đúng vùng vượt
+    // ngưỡng được tô (điểm cắt ngưỡng tự khớp, không cần nội suy).
+    const fillBeyondLevel = (clipTop, clipHeight, levelY, color) => {
+      if (clipHeight <= 0 || segments.length === 0) return;
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, clipTop, bounding.width, clipHeight);
+      ctx.clip();
+      ctx.fillStyle = color;
+      segments.forEach((seg) => {
+        ctx.beginPath();
+        ctx.moveTo(seg[0].x, seg[0].y);
+        for (let k = 1; k < seg.length; k++) ctx.lineTo(seg[k].x, seg[k].y);
+        ctx.lineTo(seg[seg.length - 1].x, levelY);
+        ctx.lineTo(seg[0].x, levelY);
+        ctx.closePath();
+        ctx.fill();
+      });
+      ctx.restore();
+    };
+    fillBeyondLevel(0, y70, y70, OVERBOUGHT_FILL_COLOR); // trên ngưỡng 70
+    fillBeyondLevel(y30, bounding.height - y30, y30, OVERSOLD_FILL_COLOR); // dưới 30
+
+    // Nền tím nhạt giữa hai ngưỡng 30–70; destination-over đặt sau tất cả.
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = BAND_FILL_COLOR;
+    ctx.fillRect(0, Math.min(y70, y30), bounding.width, Math.abs(y30 - y70));
+    ctx.restore();
+  } catch {
+    // Trục chưa sẵn sàng → bỏ qua phần tô, các đường vẫn vẽ bình thường.
+  }
+  return false;
+}
