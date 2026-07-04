@@ -148,6 +148,18 @@ function addIndicator(chart, name, indicatorConfigs) {
   }
 }
 
+function getOrderedActiveIndicators(activeKey) {
+  const names = activeKey.split(",").filter(Boolean);
+  const isCandlePaneIndicator = (name) =>
+    getIndicatorDefinition(name)?.pane === "candle_pane";
+
+  return [
+    ...names.filter(isCandlePaneIndicator),
+    ...names.filter((name) => name === "VOL"),
+    ...names.filter((name) => name !== "VOL" && !isCandlePaneIndicator(name)),
+  ];
+}
+
 const YAXIS_DOUBLE_TAP_MS = 500;
 
 // Zoom dải giá trị bằng MỘT NGÓN kéo dọc trên trục Y — dành cho điện thoại.
@@ -781,13 +793,10 @@ export default function TradingChart({
 
     // Chỉ báo do người dùng chọn
     const paneIds = new Set(["candle_pane"]);
-    activeKey
-      .split(",")
-      .filter(Boolean)
-      .forEach((name) => {
-        const paneId = addIndicator(chart, name, indicatorConfigs);
-        if (paneId) paneIds.add(paneId);
-      });
+    getOrderedActiveIndicators(activeKey).forEach((name) => {
+      const paneId = addIndicator(chart, name, indicatorConfigs);
+      if (paneId) paneIds.add(paneId);
+    });
 
     // Bollinger + fill xanh/đỏ theo tín hiệu — signals truyền qua extendData
     chart.createIndicator({ name: "BBS", extendData: signals }, true, {

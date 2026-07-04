@@ -197,7 +197,22 @@ function asBool(value, fallback = true) {
 }
 
 function normalizeColor(value, fallback) {
-  return /^#[0-9a-f]{6}$/i.test(String(value)) ? value : fallback;
+  const color = String(value).trim();
+  if (/^#[0-9a-f]{6}$/i.test(color)) return color;
+
+  const rgbaMatch = color.match(
+    /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0|1|0?\.\d+)\s*\)$/i,
+  );
+  if (!rgbaMatch) return fallback;
+
+  const [red, green, blue] = rgbaMatch.slice(1, 4).map(Number);
+  const alpha = Number(rgbaMatch[4]);
+  const validRgb = [red, green, blue].every(
+    (component) => Number.isInteger(component) && component >= 0 && component <= 255,
+  );
+  if (!validRgb || alpha < 0 || alpha > 1) return fallback;
+
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
 
 function normalizeNumber(value, fallback, min, max) {

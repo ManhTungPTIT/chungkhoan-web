@@ -21,8 +21,8 @@ export async function deleteUser(id) {
   return data;
 }
 
-export async function setPackage(id, days) {
-  const { data } = await axiosAdmin.patch(`/user/${id}/package`, { days });
+export async function setPackage(id,titles, days) {
+  const { data } = await axiosAdmin.patch(`/user/${id}/package`, { titles, days });
   return data;
 }
 

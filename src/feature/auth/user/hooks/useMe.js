@@ -34,8 +34,8 @@ export function useUpdateMe() {
 export function useRequestPackage() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ days }) => {
-      const { data } = await axiosClient.post("/user/packageRequest", { days });
+    mutationFn: async ({ titles,days }) => {
+      const { data } = await axiosClient.post("/user/packageRequest", { titles, days });
       return data?.data ?? data;
     },
     onSuccess: () => {

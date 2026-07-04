@@ -319,6 +319,7 @@
       .ms-auth-avatar {
         display: flex;
         text-align: center;
+        
       }
       button {
         border: 1px solid white;
@@ -334,6 +335,9 @@
         color: black;
       }
     }
+  .ms-auth > span{
+    color: #86B9D3;
+  }
   }
   .ms-body {
     border-top: 1px solid rgba(255, 255, 255, 0.12);

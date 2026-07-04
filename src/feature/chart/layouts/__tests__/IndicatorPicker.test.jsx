@@ -98,4 +98,56 @@ describe("IndicatorPicker", () => {
       }),
     );
   });
+
+  it("opens a palette popover for line colors and saves palette edits", () => {
+    const onSaveConfig = openEditor({ ICHIMOKU: true });
+    const dialog = screen.getByRole("dialog", { name: /Ichimoku/i });
+
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Định dạng" }));
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: /Tenkan bảng màu/i }),
+    );
+
+    expect(within(dialog).getByRole("grid", { name: /Bảng màu/i })).toBeTruthy();
+
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: /Chọn màu #F23645/i }),
+    );
+    fireEvent.change(within(dialog).getByRole("slider", { name: /Độ mờ/i }), {
+      target: { value: "50" },
+    });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: /Độ dày 3/i }),
+    );
+    fireEvent.click(within(dialog).getByRole("button", { name: "Lưu" }));
+
+    expect(onSaveConfig).toHaveBeenCalledWith(
+      "ICHIMOKU",
+      expect.objectContaining({
+        styles: expect.objectContaining({
+          lines: expect.arrayContaining([
+            expect.objectContaining({
+              label: "Tenkan",
+              color: "rgba(242, 54, 69, 0.5)",
+              size: 3,
+            }),
+          ]),
+        }),
+      }),
+    );
+  });
+
+  it("marks the editor as palette-open while a color popover is visible", () => {
+    openEditor({ ICHIMOKU: true });
+    const dialog = screen.getByRole("dialog", { name: /Ichimoku/i });
+
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Định dạng" }));
+    expect(dialog).not.toHaveClass("indicator-editor--palette-open");
+
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: /Tenkan bảng màu/i }),
+    );
+
+    expect(dialog).toHaveClass("indicator-editor--palette-open");
+  });
 });

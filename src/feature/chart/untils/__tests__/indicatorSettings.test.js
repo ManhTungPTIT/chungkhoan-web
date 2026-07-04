@@ -216,4 +216,21 @@ describe("indicatorSettings", () => {
       max: 24,
     });
   });
+
+  it("preserves safe rgba colors for opacity-enabled style edits", () => {
+    const configs = normalizeIndicatorConfigs({
+      EMA: {
+        params: [5, 13],
+        styles: {
+          lines: [
+            { color: "rgba(242, 54, 69, 0.5)", size: 2, style: "solid" },
+          ],
+        },
+      },
+    });
+
+    expect(configs.EMA.styles.lines[0]).toEqual(
+      expect.objectContaining({ color: "rgba(242, 54, 69, 0.5)" }),
+    );
+  });
 });

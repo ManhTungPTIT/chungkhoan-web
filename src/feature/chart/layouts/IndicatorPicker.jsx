@@ -27,6 +27,149 @@ const LINE_STYLES = [
   { value: "dashed", label: "Đứt" },
 ];
 
+const PALETTE_COLORS = [
+  "#FFFFFF", "#D1D5DB", "#9CA3AF", "#6B7280", "#4B5563", "#374151", "#1F2937", "#111827", "#030712", "#000000",
+  "#F23645", "#FF9800", "#FFEB3B", "#4CAF50", "#009688", "#00BCD4", "#2962FF", "#673AB7", "#9C27B0", "#E91E63",
+  "#F8B4BD", "#FFE0A3", "#FFF9B1", "#C8E6C9", "#B2DFDB", "#B2EBF2", "#BBDEFB", "#D1C4E9", "#E1BEE7", "#F8BBD0",
+  "#F48FB1", "#FFCC80", "#FFF176", "#A5D6A7", "#80CBC4", "#80DEEA", "#90CAF9", "#B39DDB", "#CE93D8", "#F06292",
+  "#EF5350", "#FFB74D", "#FFEE58", "#81C784", "#4DB6AC", "#4DD0E1", "#64B5F6", "#9575CD", "#BA68C8", "#EC407A",
+  "#FF4D5E", "#FFA726", "#FDD835", "#66BB6A", "#26A69A", "#26C6DA", "#2F6BFF", "#7E57C2", "#AB47BC", "#D81B60",
+  "#C62828", "#F57C00", "#FBC02D", "#388E3C", "#00796B", "#0097A7", "#0D47A1", "#512DA8", "#7B1FA2", "#C2185B",
+  "#8E1724", "#E65100", "#FF8F00", "#1B5E20", "#004D40", "#006064", "#0B2F89", "#311B92", "#4A148C", "#880E4F",
+];
+
+const LINE_SIZE_OPTIONS = [1, 2, 3, 4];
+
+function clamp(number, min, max) {
+  return Math.min(Math.max(number, min), max);
+}
+
+function componentToHex(value) {
+  return value.toString(16).padStart(2, "0").toUpperCase();
+}
+
+function rgbToHex(red, green, blue) {
+  return `#${componentToHex(red)}${componentToHex(green)}${componentToHex(blue)}`;
+}
+
+function hexToRgb(hex) {
+  const value = String(hex).replace("#", "");
+  return {
+    red: parseInt(value.slice(0, 2), 16),
+    green: parseInt(value.slice(2, 4), 16),
+    blue: parseInt(value.slice(4, 6), 16),
+  };
+}
+
+function parseColor(value) {
+  const raw = String(value ?? "").trim();
+  if (/^#[0-9a-f]{6}$/i.test(raw)) return { hex: raw.toUpperCase(), opacity: 100 };
+
+  const rgbaMatch = raw.match(
+    /^rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(0|1|0?\.\d+)\s*\)$/i,
+  );
+  if (rgbaMatch) {
+    const red = clamp(Number(rgbaMatch[1]), 0, 255);
+    const green = clamp(Number(rgbaMatch[2]), 0, 255);
+    const blue = clamp(Number(rgbaMatch[3]), 0, 255);
+    const alpha = clamp(Number(rgbaMatch[4]), 0, 1);
+    return {
+      hex: rgbToHex(red, green, blue),
+      opacity: Math.round(alpha * 100),
+    };
+  }
+
+  return { hex: "#2962FF", opacity: 100 };
+}
+
+function formatColor(hex, opacity) {
+  const safeHex = /^#[0-9a-f]{6}$/i.test(String(hex)) ? hex.toUpperCase() : "#2962FF";
+  const safeOpacity = clamp(Number(opacity), 0, 100);
+  if (safeOpacity >= 100) return safeHex;
+  const { red, green, blue } = hexToRgb(safeHex);
+  const alpha = Number((safeOpacity / 100).toFixed(2));
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
+function ColorPalettePopover({
+  label,
+  color,
+  size,
+  onChangeColor,
+  onChangeSize,
+}) {
+  const { hex, opacity } = parseColor(color);
+
+  const setColor = (nextHex) => onChangeColor(formatColor(nextHex, opacity));
+  const setOpacity = (nextOpacity) => onChangeColor(formatColor(hex, nextOpacity));
+
+  return (
+    <div className="indicator-color-popover" role="dialog" aria-label={`${label} bảng màu`}>
+      <div
+        aria-label="Bảng màu"
+        className="indicator-color-popover__grid"
+        role="grid"
+      >
+        {PALETTE_COLORS.map((swatch, index) => (
+          <button
+            aria-label={`Chọn màu ${swatch}`}
+            aria-pressed={hex === swatch}
+            className="indicator-color-popover__swatch"
+            key={`${swatch}-${index}`}
+            style={{ background: swatch }}
+            type="button"
+            onClick={() => setColor(swatch)}
+          />
+        ))}
+      </div>
+
+      <div className="indicator-color-popover__custom">
+        <TbPlus />
+        <input
+          aria-label={`${label} màu tùy chỉnh`}
+          type="color"
+          value={hex}
+          onChange={(event) => setColor(event.target.value)}
+        />
+      </div>
+
+      <label className="indicator-color-popover__field">
+        <span>Độ mờ</span>
+        <div className="indicator-color-popover__range">
+          <input
+            aria-label="Độ mờ"
+            type="range"
+            min="0"
+            max="100"
+            value={opacity}
+            onChange={(event) => setOpacity(event.target.value)}
+          />
+          <strong>{opacity}%</strong>
+        </div>
+      </label>
+
+      {onChangeSize && (
+        <div className="indicator-color-popover__field">
+          <span>Độ dày</span>
+          <div className="indicator-color-popover__sizes">
+            {LINE_SIZE_OPTIONS.map((option) => (
+              <button
+                aria-label={`Độ dày ${option}`}
+                className={Number(size) === option ? "is-active" : ""}
+                key={option}
+                type="button"
+                onClick={() => onChangeSize(option)}
+              >
+                <span style={{ borderTopWidth: `${option}px` }} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function getIndicatorConfig(indicator, configs) {
   const defaults = buildDefaultIndicatorConfigs([indicator]);
   return normalizeIndicatorConfigs(
@@ -52,6 +195,7 @@ function IndicatorEditor({
     [indicator, configs],
   );
   const [draftConfig, setDraftConfig] = useState(initialConfig);
+  const [activePalette, setActivePalette] = useState(null);
   const [newDynamicParam, setNewDynamicParam] = useState(
     String(indicator.params?.[0]?.defaultValue ?? 1),
   );
@@ -69,6 +213,7 @@ function IndicatorEditor({
 
   useEffect(() => {
     setDraftConfig(initialConfig);
+    setActivePalette(null);
     setNewDynamicParam(String(indicator.params?.[0]?.defaultValue ?? 1));
   }, [initialConfig, indicator]);
 
@@ -151,7 +296,7 @@ function IndicatorEditor({
     <div className="indicator-editor__backdrop" onMouseDown={onClose}>
       <section
         aria-label={indicator.label}
-        className="indicator-editor"
+        className={`indicator-editor${activePalette ? " indicator-editor--palette-open" : ""}`}
         role="dialog"
         onMouseDown={(event) => event.stopPropagation()}
       >
@@ -272,20 +417,44 @@ function IndicatorEditor({
                       />
                       <span>{line.label}</span>
                     </label>
-                    <label className="indicator-editor__swatch" title="Màu">
-                      <input
-                        aria-label={`${line.label} màu`}
-                        type="color"
-                        value={line.color}
-                        onChange={(event) =>
-                          updateLineStyle(
-                            index,
-                            "color",
-                            event.target.value,
+                    <div className="indicator-editor__color-cell">
+                      <button
+                        aria-label={`${line.label} bảng màu`}
+                        className="indicator-editor__swatch"
+                        title="Màu"
+                        type="button"
+                        onClick={() =>
+                          setActivePalette((current) =>
+                            current?.type === "line" && current.index === index
+                              ? null
+                              : { type: "line", index },
                           )
                         }
-                      />
-                    </label>
+                      >
+                        <span
+                          className="indicator-editor__swatch-color"
+                          style={{ background: line.color }}
+                        />
+                        <span
+                          className={`indicator-editor__swatch-line indicator-editor__swatch-line--${line.style}`}
+                          style={{ color: line.color }}
+                        />
+                      </button>
+                      {activePalette?.type === "line" &&
+                        activePalette.index === index && (
+                          <ColorPalettePopover
+                            label={line.label}
+                            color={line.color}
+                            size={line.size}
+                            onChangeColor={(value) =>
+                              updateLineStyle(index, "color", value)
+                            }
+                            onChangeSize={(value) =>
+                              updateLineStyle(index, "size", value)
+                            }
+                          />
+                        )}
+                    </div>
                     <select
                       aria-label={`${line.label} kiểu nét`}
                       value={line.style}
@@ -317,10 +486,6 @@ function IndicatorEditor({
                         )
                       }
                     />
-                    <span
-                      className={`indicator-editor__preview indicator-editor__preview--${line.style}`}
-                      style={{ color: line.color }}
-                    />
                   </div>
                 ))}
               {hasFills &&
@@ -342,20 +507,39 @@ function IndicatorEditor({
                         key={colorIndex}
                       >
                         <span>Màu {colorIndex}</span>
-                        <label className="indicator-editor__swatch" title="Màu">
-                          <input
-                            aria-label={`${fill.label} màu ${colorIndex}`}
-                            type="color"
-                            value={color}
-                            onChange={(event) =>
-                              updateFillColor(
-                                index,
-                                colorIndex,
-                                event.target.value,
+                        <div className="indicator-editor__color-cell">
+                          <button
+                            aria-label={`${fill.label} màu ${colorIndex} bảng màu`}
+                            className="indicator-editor__swatch"
+                            title="Màu"
+                            type="button"
+                            onClick={() =>
+                              setActivePalette((current) =>
+                                current?.type === "fill" &&
+                                current.index === index &&
+                                current.colorIndex === colorIndex
+                                  ? null
+                                  : { type: "fill", index, colorIndex },
                               )
                             }
-                          />
-                        </label>
+                          >
+                            <span
+                              className="indicator-editor__swatch-color"
+                              style={{ background: color }}
+                            />
+                          </button>
+                          {activePalette?.type === "fill" &&
+                            activePalette.index === index &&
+                            activePalette.colorIndex === colorIndex && (
+                              <ColorPalettePopover
+                                label={`${fill.label} màu ${colorIndex}`}
+                                color={color}
+                                onChangeColor={(value) =>
+                                  updateFillColor(index, colorIndex, value)
+                                }
+                              />
+                            )}
+                        </div>
                       </div>
                     ))}
                   </div>

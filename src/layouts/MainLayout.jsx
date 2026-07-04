@@ -19,6 +19,7 @@ import { FiDollarSign } from "react-icons/fi";
 import { IoLogOutOutline } from "react-icons/io5";
 import { LoginUserService } from "../feature/auth/user/services/loginUserService";
 import { useMe } from "../feature/auth/user/hooks/useMe";
+import { activePackageTitle } from "../feature/auth/user/untils/packageDisplay";
 import { GiLion } from "react-icons/gi";
 import "../feature/chart/index.scss";
 import logo from "../assets/logo-auth.png"
@@ -37,10 +38,13 @@ function MainLayout() {
   // Hồ sơ lấy từ API (/user/me) — nguồn chuẩn; localStorage chỉ là fallback hiển
   // thị tức thời. Login có thể không lưu user nên không dựa hẳn vào localStorage.
   const { data: me } = useMe();
+  console.log("data", me)
   const fullName =
     me?.fullName || data?.state?.user?.fullName || "Quản trị viên";
   const role = me?.role || data?.state?.user?.role;
-
+  // Gói đang dùng: packageRequest đã duyệt trong /user/me; fallback packageTitle
+  // lưu lúc login khi API chưa về (xem packageDisplay.js).
+  const packageTitle = activePackageTitle(me, data?.state?.user);
   // Đăng xuất: thu hồi refresh token ở BE + xoá token cục bộ rồi về /login.
   // Best-effort — service tự xoá token & chuyển trang kể cả khi API lỗi.
   const handleLogout = () => {
@@ -74,11 +78,13 @@ function MainLayout() {
             >
               <FaUserCircle style={{ width: "1.5rem", height: "1.5rem" }} />
             <span>{fullName}</span>
+            
             </div>
             <button onClick={handleLogout}>
               <IoLogOutOutline />
             </button>
           </a>
+          {packageTitle && <span>VIP {packageTitle}</span>}
         </div>
         <div className="ms-body">
           <ul className="ms-body-navbar">

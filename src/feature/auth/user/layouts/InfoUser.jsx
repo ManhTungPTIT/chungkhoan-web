@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {  useNavigate } from "react-router-dom";
+import {  data, useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiPhone, FiSave, FiKey, FiPackage } from "react-icons/fi";
 import { detectAccountType } from "../untils/accountType";
 import { useMe, useRequestPackage } from "../hooks/useMe";
@@ -69,7 +69,6 @@ export default function InfoUser() {
   const { data: apiUser, isLoading, isError } = useMe();
   const user = apiUser ?? readStoredUser();
 
-
   const [form, setForm] = useState(() => {
     const u = readStoredUser() ?? {};
     return {
@@ -83,6 +82,7 @@ export default function InfoUser() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [selectedPackageDays, setSelectedPackageDays] = useState(90);
+  const [selectedPackageTitles, setSelectedPackageTitles] = useState("90 ngày");
   const [packageRequest, setPackageRequest] = useState(
     () => user?.packageRequest ?? readStoredUser()?.packageRequest ?? null,
   );
@@ -209,11 +209,16 @@ export default function InfoUser() {
   const handleRequestPackage = () => {
     setPackageError("");
     setPackageSaved(false);
+    // Hook/BE nhận { titles, days } — gửi sai tên field (title) sẽ bị BE trả 400.
     requestPackage.mutate(
-      { days: selectedPackageDays },
+      {
+        titles: selectedPackageTitles,
+        days: selectedPackageDays,
+      },
       {
         onSuccess: (response) => {
           const nextRequest = response?.packageRequest ?? response ?? {
+            titles: selectedPackageTitles,
             days: selectedPackageDays,
             status: "pending",
             requestedAt: new Date().toISOString(),
@@ -409,6 +414,14 @@ export default function InfoUser() {
                 Chọn gói bạn muốn sử dụng. Yêu cầu sẽ được gửi cho admin duyệt trước khi kích hoạt.
               </p>
             </div>
+            <div className="iu-package__status iu-package__status--current">
+              <span>Gói đang dùng</span>
+              <strong>
+                {packageRequest?.status === "approved" && packageRequest.titles
+                  ? packageRequest.titles
+                  : "Chưa có"}
+              </strong>
+            </div>
             <div className="iu-package__status">
               <span>Hết hạn</span>
               <strong>{formatDate(user.expiresAt)}</strong>
@@ -417,7 +430,8 @@ export default function InfoUser() {
 
           {packageRequest?.status === "pending" && (
             <div className="iu-msg iu-msg--pending">
-              Gói {packageRequest.days} ngày đang chờ admin duyệt.
+              Gói {packageRequest.titles ?? `${packageRequest.days} ngày`} đang
+              chờ admin duyệt.
             </div>
           )}
 
@@ -431,6 +445,7 @@ export default function InfoUser() {
                 }`}
                 onClick={() => {
                   setSelectedPackageDays(pkg.days);
+                  setSelectedPackageTitles(pkg.title);
                   setPackageError("");
                   setPackageSaved(false);
                 }}

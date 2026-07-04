@@ -108,11 +108,16 @@ const PACKAGES = [
   { id: 90, label: "90", unit: "ngày" },
   { id: 180, label: "180", unit: "ngày" },
   { id: 365, label: "1", unit: "năm" },
+  { id: 730, label: "2", unit: "năm" },
+  { id: 1095, label: "3", unit: "năm" },
+  { id: 1825, label: "5", unit: "năm" },
 ];
 
 // ─── User Modal ───────────────────────────────────────────
-function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onSetPackage }) {
+// export để test trực tiếp phần chọn gói (không phải dựng cả trang ManagerUser).
+export function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onSetPackage }) {
   const [selectedPkg, setSelectedPkg] = useState(90);
+  const [selectedPkgTitle, setSelectedPkgTitle] = useState("90 ngày");
   const locked = user.status === "locked";
 
   const handleOverlayClick = () => onClose();
@@ -165,7 +170,10 @@ function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onSetPacka
               <div
                 key={pkg.id}
                 className={`pkg-card${selectedPkg === pkg.id ? " active" : ""}`}
-                onClick={() => setSelectedPkg(pkg.id)}
+                onClick={() => {
+                  setSelectedPkg(pkg.id);
+                  setSelectedPkgTitle(`${pkg.label} ${pkg.unit}`);
+                }}
               >
                 <div className="pkg-num">{pkg.label}</div>
                 <div className="pkg-unit">{pkg.unit}</div>
@@ -200,7 +208,7 @@ function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onSetPacka
           <button
             className="modal-footer-save"
             disabled={busy}
-            onClick={() => onSetPackage(selectedPkg)}
+            onClick={() => onSetPackage(selectedPkgTitle ,selectedPkg)}
           >
             Lưu gói {selectedPkg} ngày
           </button>
@@ -351,7 +359,7 @@ function PackageRequestsTable({ requests, busyId, onApprove, onReject }) {
                   <span className="u-name">{u.fullName || "Người dùng"}</span>
                 </td>
                 <td>{u.email || u.phoneNumber || "—"}</td>
-                <td>{request.days} ngày</td>
+                <td>{request.titles ?? `${request.days} ngày`}</td>
                 <td>{fmtDate(request.requestedAt ?? request.createdAt)}</td>
                 <td style={{ display: "flex", gap: "0.4rem" }}>
                   <button
@@ -580,7 +588,7 @@ export default function ManagerUser() {
           onLock={() => actOnUser(lockUser)}
           onUnlock={() => actOnUser(unlockUser)}
           onDelete={() => actOnUser(deleteUser)}
-          onSetPackage={(days) => actOnUser((id) => setPackage(id, days))}
+          onSetPackage={(titles, days) => actOnUser((id) => setPackage(id, titles, days))}
         />
       )}
     </div>

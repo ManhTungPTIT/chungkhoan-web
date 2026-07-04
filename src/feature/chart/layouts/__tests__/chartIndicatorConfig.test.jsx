@@ -157,6 +157,22 @@ describe("TradingChart indicator config", () => {
     expect(paneOptions.height).toBe(paneOptions.minHeight);
   });
 
+  it("creates VOL directly below the candle pane before other sub indicators", () => {
+    const chart = init();
+
+    render(<TradingChart candles={[]} signals={[]} activeKey="RSI,VOL,MACD" />);
+
+    const createdIndicatorNames = chart.createIndicator.mock.calls.map(
+      ([indicator]) =>
+        typeof indicator === "string" ? indicator : indicator?.name,
+    );
+    const volIndex = createdIndicatorNames.indexOf("VOL");
+
+    expect(volIndex).toBeGreaterThan(-1);
+    expect(volIndex).toBeLessThan(createdIndicatorNames.indexOf("RSI"));
+    expect(volIndex).toBeLessThan(createdIndicatorNames.indexOf("MACD"));
+  });
+
   it("uses configured params when creating Ichimoku on the candle pane", () => {
     const chart = init();
 
