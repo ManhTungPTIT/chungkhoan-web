@@ -82,6 +82,7 @@ function TimelineStock({activeTimeline, onSelect}) {
                    border: "none",
                    textAlign: "left",
                    whiteSpace: "nowrap",
+                   height: "2rem"
                  }}
                >
                  {ind.label}
