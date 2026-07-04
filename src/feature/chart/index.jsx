@@ -86,9 +86,10 @@ function TradingView() {
   // - đang hiện nến mã cũ trong lúc tải mã mới (isPlaceholderData), hoặc
   // - lần đầu mở, chưa có nến nào (candles.length === 0).
   // Mã đã cache (xem lại trong 5') → isFetching=false → không hiện overlay.
-  const isLoadingSymbol = isFetching && (isPlaceholderData || candles.length === 0);
+  const isLoadingSymbol =
+    isFetching && (isPlaceholderData || candles.length === 0);
   const { data: dataPanel = [] } = useVn100();
-  
+
   // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend.
   // useMemo giữ reference 'signals' ổn định: nếu tính inline mỗi render sẽ tạo
   // mảng mới → useEffect khởi tạo chart (deps có signals) chạy lại → dispose()+
@@ -206,7 +207,6 @@ function TradingView() {
           position: "relative",
           flex: 1,
           minWidth: 0,
-         
         }}
       >
         <div
@@ -265,36 +265,39 @@ function TradingView() {
                   </div>
                   <span className="signal-card__dot" aria-hidden="true" />
                   <div className="signal-card__metric">
+                    <span>Chốt lãi / Cắt lỗ</span>
+                    <strong style={{ color: "red" }}>{priceTarget}</strong>
+                  </div>
+                  <div className="signal-card__metric">
                     <span>Giá chuyển {COLORCODE.action}</span>
-                    <strong>{priceChange}</strong>
+                    <strong style={ {color: COLORCODE.color}}>{priceChange}</strong>
                   </div>
                   <div className="signal-card__metric">
                     <span>Giá hiện tại</span>
-                    <strong style={{color: "#FE92AB"}}>{priceCurrent}</strong>
+                    <strong>{priceCurrent}</strong>
                   </div>
-                  <div className="signal-card__metric">
-                    <span>Chốt lãi / Cắt lỗ</span>
-                    <strong style={{color: "red"}}>{priceTarget}</strong>
-                  </div>
+                  
                 </div>
 
                 <div className="signal-card__row signal-card__row--bottom">
+                  <div className="signal-card__metric signal-card__metric--icon signal-card__metric--targets">
+                    <FiTarget aria-hidden="true" />
+                    <span>Mục tiêu dự kiến</span>
+                    <strong style={{ color: "purple" }}>
+                      {target1} | {target2} | {target3}
+                    </strong>
+                  </div>
                   <div className="signal-card__metric signal-card__metric--icon">
                     <FiCalendar aria-hidden="true" />
                     <span>Ngày chuyển {COLORCODE.action}</span>
-                    <strong style={{ color: COLORCODE.color }}>{dayChangeConvert}</strong>
+                    <strong style={{ color: COLORCODE.color }}>
+                      {dayChangeConvert}
+                    </strong>
                   </div>
                   <div className="signal-card__metric signal-card__metric--icon">
                     <FiCalendar aria-hidden="true" />
                     <span>Ngày hiện tại</span>
                     <strong>{dayCurrent}</strong>
-                  </div>
-                  <div className="signal-card__metric signal-card__metric--icon signal-card__metric--targets">
-                    <FiTarget aria-hidden="true" />
-                    <span>Mục tiêu dự kiến</span>
-                    <strong style={{color: "purple"}}>
-                      {target1} | {target2} | {target3}
-                    </strong>
                   </div>
                 </div>
               </div>
@@ -309,7 +312,9 @@ function TradingView() {
                 </div>
                 <div className="signal-card__summary-item">
                   <span>Vùng</span>
-                  <strong style={{color: COLORCODE.color }}>{COLORCODE.action}</strong>
+                  <strong style={{ color: COLORCODE.color }}>
+                    {COLORCODE.action}
+                  </strong>
                 </div>
                 <div className="signal-card__summary-item">
                   <span>{isBuySignal ? "Nắm giữ" : "Đứng ngoài"}</span>
@@ -335,7 +340,6 @@ function TradingView() {
         )}
       </div>
       <div className="container_panel">
-        
         <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
           <Panel
             dataPanel={dataPanel}
