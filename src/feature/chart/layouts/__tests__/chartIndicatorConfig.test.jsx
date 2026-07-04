@@ -57,8 +57,8 @@ describe("TradingChart indicator config", () => {
         }),
         indicator: expect.objectContaining({
           lastValueMark: expect.objectContaining({
-            show: true,
-            text: expect.objectContaining({ show: true }),
+            show: false,
+            text: expect.objectContaining({ show: false }),
           }),
         }),
         separator: expect.objectContaining({

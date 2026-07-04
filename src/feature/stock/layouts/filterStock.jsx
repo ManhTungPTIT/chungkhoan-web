@@ -49,6 +49,18 @@ const convertDay = (value) => {
   return `${day}/${month}/${year}`;
 };
 
+function getSignalRank(row) {
+  if (row?.signal === "buy" && Number(row.signal_sessions) > 0) return 1;
+  if (row?.signal === "buy") return 0;
+  if (row?.signal === "hold") return 1;
+  if (row?.signal === "sell") return 2;
+  return 3;
+}
+
+export function sortRowsBySignal(rows) {
+  return [...rows].sort((a, b) => getSignalRank(a) - getSignalRank(b));
+}
+
 function FilterStock() {
   const [category, setCategory] = useState(CATEGORIES[0].name);
   const [codeCate, setCodeCate] = useState(1);
@@ -103,7 +115,9 @@ function FilterStock() {
     return list.filter((s) => s.symbol?.includes(keyword));
   }, [search, symbols, dataPanel, codeCate]);
 
-  const totalPages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const sortedRows = useMemo(() => sortRowsBySignal(rows), [rows]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize));
 
   // Khi đổi bộ lọc khiến số trang giảm, kéo trang hiện tại về trong khoảng hợp lệ
   useEffect(() => {
@@ -134,9 +148,9 @@ function FilterStock() {
       ro.disconnect();
       window.removeEventListener("resize", recompute);
     };
-  }, [rows.length]);
+  }, [sortedRows.length]);
 
-  const pagedRows = rows.slice((page - 1) * pageSize, page * pageSize);
+  const pagedRows = sortedRows.slice((page - 1) * pageSize, page * pageSize);
   const pageNumbers = getPageNumbers(page, totalPages);
 
   return (

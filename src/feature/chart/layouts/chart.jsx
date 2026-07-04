@@ -6,6 +6,7 @@ import { drawRsiBackground } from "../klinecharts/rsiIndicator";
 import { drawIchimokuCloud } from "../klinecharts/ichimokuIndicator";
 import "../klinecharts/adxIndicator";
 import "../klinecharts/signalMarkerOverlay";
+import { attachIndicatorAxisLabels } from "../klinecharts/indicatorAxisLabels";
 import {
   drawConfiguredStepLines,
   isStepLineShape,
@@ -828,9 +829,12 @@ export default function TradingChart({
         tooltip: { showRule: "none" }, // ẩn dòng Time, Open, High, Low, Close, Volume
       },
       indicator: {
+        // PHẢI tắt lastValueMark của thư viện: nhãn giá trị chỉ báo do
+        // attachIndicatorAxisLabels tự vẽ (có chống chồng lấn, né nhãn giá
+        // nến). Bật lại đây sẽ vẽ ĐÔI nhãn và chúng lại đè lên nhau.
         lastValueMark: {
-          show: true,
-          text: { show: true },
+          show: false,
+          text: { show: false },
         },
         tooltip: { showRule: "none" }, // ẩn dòng EMA(10,20,50), BOLL(20,2)...
       },
@@ -879,8 +883,14 @@ export default function TradingChart({
       enablePriceAxisPan(chart, paneId),
       enableMobilePriceTouchPan(chart, paneId),
     ]);
+    // Nhãn giá trị cuối của chỉ báo trên trục giá, tự né nhau (thay cho
+    // lastValueMark của thư viện vốn để nhãn chồng lên nhau)
+    const detachAxisLabels = [...paneIds].map((paneId) =>
+      attachIndicatorAxisLabels(chart, paneId),
+    );
 
     return () => {
+      detachAxisLabels.forEach((detach) => detach());
       disableMobilePaneGestures.forEach((disable) => disable());
       ro.disconnect();
       dispose(container);

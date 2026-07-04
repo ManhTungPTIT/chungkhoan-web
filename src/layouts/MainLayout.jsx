@@ -38,7 +38,7 @@ function MainLayout() {
   // Hồ sơ lấy từ API (/user/me) — nguồn chuẩn; localStorage chỉ là fallback hiển
   // thị tức thời. Login có thể không lưu user nên không dựa hẳn vào localStorage.
   const { data: me } = useMe();
-  console.log("data", me)
+  
   const fullName =
     me?.fullName || data?.state?.user?.fullName || "Quản trị viên";
   const role = me?.role || data?.state?.user?.role;

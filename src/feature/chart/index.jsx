@@ -309,7 +309,7 @@ function TradingView() {
                 </div>
                 <div className="signal-card__summary-item">
                   <span>Vùng</span>
-                  <strong>{COLORCODE.action}</strong>
+                  <strong style={{color: COLORCODE.color }}>{COLORCODE.action}</strong>
                 </div>
                 <div className="signal-card__summary-item">
                   <span>{isBuySignal ? "Nắm giữ" : "Đứng ngoài"}</span>
