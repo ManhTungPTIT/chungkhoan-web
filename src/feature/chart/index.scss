@@ -45,7 +45,7 @@
 }
 
 .signal-card {
-  width: min(840px, calc(100% - 0.75rem));
+  width: min(720px, calc(100% - 0.75rem));
   box-sizing: border-box;
   padding: 0;
   overflow: hidden;
@@ -63,8 +63,8 @@
 
 .signal-card__body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 7.2rem;
-  min-height: 5.6rem;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 4.8rem;
 }
 
 .signal-card__main {
@@ -132,14 +132,13 @@
   display: flex;
   min-width: 0;
   height: 100%;
-  padding: 0.4rem 0.6rem;
+  padding: 0.28rem 0.45rem;
   flex-direction: column;
   justify-content: center;
 }
 
 .signal-card__metric + .signal-card__metric::before,
-.signal-card__dot + .signal-card__metric::before,
-.signal-card__summary::before {
+.signal-card__dot + .signal-card__metric::before {
   content: "";
   position: absolute;
   top: 22%;
@@ -163,7 +162,7 @@
 .signal-card__metric strong {
   display: block;
   overflow: hidden;
-  margin-top: 0.2rem;
+  margin-top: 0.1rem;
   color: #1d2939;
   font-size: 0.95rem;
   font-weight: 800;
@@ -178,9 +177,9 @@
 
 .signal-card__metric--icon {
   display: grid;
-  grid-template-columns: 1.15rem minmax(0, 1fr);
+  grid-template-columns: 1rem minmax(0, 1fr);
   grid-template-rows: auto auto;
-  column-gap: 0.55rem;
+  column-gap: 0.35rem;
   align-content: center;
 }
 
@@ -192,43 +191,57 @@
 }
 
 .signal-card__metric--icon strong {
-  margin-top: 0.16rem;
+  margin-top: 0.08rem;
 }
 
+.signal-card__metric--targets{
+  text-align: left;
+}
 .signal-card__metric--targets strong {
   overflow: visible;
   text-overflow: clip;
   white-space: normal;
 }
 
+// Dải ngang full-width: NHÃN + giá trị nằm cùng dòng, căn giữa (theo mẫu)
 .signal-card__summary {
   position: relative;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 0.22rem;
-  padding: 0.5rem 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.5rem;
+  padding: 0.5rem 0.9rem;
+  border-top: 1px solid #e4e7f4;
   text-align: center;
 }
 
 .signal-card__summary-item {
-  display: grid;
-  justify-items: center;
-  gap: 0.18rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .signal-card__summary span {
-  color: #4c1d95;
-  font-size: 0.66rem;
+  color: #1e1b4b;
+  font-size: 0.74rem;
   font-weight: 800;
+  letter-spacing: 0.04em;
   line-height: 1.15;
+  text-transform: uppercase;
 }
 
 .signal-card__summary strong {
-  color: var(--color-signal);
-  font-size: 1rem;
+  color: var(--color-signal, #2563eb);
+  font-size: 1.15rem;
   font-weight: 900;
   line-height: 1.05;
+  text-transform: uppercase;
+}
+
+// Giá trị "Vùng" màu tím như mẫu
+.signal-card__summary-item:nth-child(2) strong {
+  color: #6d28d9;
 }
 
 .panel {
@@ -519,8 +532,6 @@
   .information {
     align-items: stretch;
     gap: 0.35rem;
-    padding: 0.35rem 0.4rem 0.45rem;
-    border-bottom: 1px solid #eef2f7;
   }
 
   .information__toolbar {
@@ -580,8 +591,8 @@
   }
 
   .signal-card__metric {
-    min-height: 3rem;
-    padding: 0.32rem 0.4rem;
+    min-height: 2.6rem;
+    padding: 0.24rem 0.3rem;
   }
 
   .signal-card__metric span {
@@ -612,30 +623,12 @@
   }
 
   .signal-card__summary {
-    display: flex;
-    align-items: stretch;
-    justify-content: space-between;
-    gap: 0;
-    padding: 0.45rem 0.15rem;
-    border-top: 1px solid #eef2f7;
+    gap: 0.25rem 0.7rem;
+    padding: 0.45rem 0.5rem;
   }
 
-  .signal-card__summary::before {
-    display: none;
-  }
-
-  // Mỗi cặp nhãn-giá trị nằm ngang, chia đều 3 phần bề rộng, có gạch ngăn
   .signal-card__summary-item {
-    flex: 1 1 0;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-  }
-
-  .signal-card__summary-item + .signal-card__summary-item {
-    border-left: 1px solid #e5e7eb;
+    gap: 0.3rem;
   }
 
   .signal-card__summary span {
