@@ -111,15 +111,15 @@
   margin-right: 0.85rem;
 }
 
-.signal-card__row--top .signal-card__metric:nth-child(3) {
+.signal-card__row--top .signal-card__metric--exit {
   grid-column: 2 / 3;
 }
 
-.signal-card__row--top .signal-card__metric:nth-child(4) {
+.signal-card__row--top .signal-card__metric--change {
   grid-column: 3 / 4;
 }
 
-.signal-card__row--top .signal-card__metric:nth-child(5) {
+.signal-card__row--top .signal-card__metric--current {
   grid-column: 4 / 5;
 }
 

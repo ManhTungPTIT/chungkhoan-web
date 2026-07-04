@@ -264,15 +264,17 @@ function TradingView() {
                     </p>
                   </div>
                   <span className="signal-card__dot" aria-hidden="true" />
-                  <div className="signal-card__metric">
-                    <span>Chốt lãi / Cắt lỗ</span>
-                    <strong style={{ color: "red" }}>{priceTarget}</strong>
-                  </div>
-                  <div className="signal-card__metric">
+                  {isBuySignal && (
+                    <div className="signal-card__metric signal-card__metric--exit">
+                      <span>Chốt lãi / Cắt lỗ</span>
+                      <strong style={{ color: "red" }}>{priceTarget}</strong>
+                    </div>
+                  )}
+                  <div className="signal-card__metric signal-card__metric--change">
                     <span>Giá chuyển {COLORCODE.action}</span>
-                    <strong style={ {color: COLORCODE.color}}>{priceChange}</strong>
+                    <strong style={{ color: COLORCODE.color }}>{priceChange}</strong>
                   </div>
-                  <div className="signal-card__metric">
+                  <div className="signal-card__metric signal-card__metric--current">
                     <span>Giá hiện tại</span>
                     <strong>{priceCurrent}</strong>
                   </div>
