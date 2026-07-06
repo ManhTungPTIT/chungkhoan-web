@@ -992,21 +992,26 @@ export default function TradingChart({
       dispose(container);
       chartRef.current = null;
     };
-  }, [activeKey, indicatorConfigs]);
+  }, [candles, signals, activeKey, indicatorConfigs]);
 
-  useEffect(() => {
-    const chart = chartRef.current;
-    if (!chart) return;
-    // Refetch 5s chỉ nạp data mới vào instance hiện có, không init/dispose chart.
-    chart.applyNewData(toKLineData(candles));
-  }, [candles]);
-
-  useEffect(() => {
-    const chart = chartRef.current;
-    if (!chart) return;
-    syncBbsIndicator(chart, signals);
-    syncSignalOverlays(chart, signals);
-  }, [signals]);
+  /*
+   * Tạm comment phần giữ nguyên chart khi dữ liệu thay đổi.
+   * Khi cần bật lại: đưa dependency init effect về [activeKey, indicatorConfigs]
+   * và mở lại 2 effect dưới để refetch chỉ update data/signals trên chart hiện có.
+   *
+   * useEffect(() => {
+   *   const chart = chartRef.current;
+   *   if (!chart) return;
+   *   chart.applyNewData(toKLineData(candles));
+   * }, [candles]);
+   *
+   * useEffect(() => {
+   *   const chart = chartRef.current;
+   *   if (!chart) return;
+   *   syncBbsIndicator(chart, signals);
+   *   syncSignalOverlays(chart, signals);
+   * }, [signals]);
+   */
 
   // Vào chế độ vẽ một overlay; groupId "draw" để xoá riêng hình vẽ (không đụng marker)
   const startDraw = (name) =>
