@@ -154,7 +154,7 @@ describe("MCDX indicator drawing", () => {
     rects.forEach((rect) => {
       expect(rect.y).toBeGreaterThanOrEqual(0);
       expect(rect.y + rect.height).toBeLessThanOrEqual(120);
-      expect(rect.width).toBe(12);
+      expect(rect.width).toBeCloseTo(12.88);
     });
   });
 });

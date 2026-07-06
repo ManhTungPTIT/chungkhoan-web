@@ -49,16 +49,37 @@
 .symbol-search {
   height: 2rem;
   min-height: 30px;
-  width: clamp(7.5rem, 12vw, 10rem);
+  width: 2rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0 0.55rem;
+  justify-content: center;
   border: 1px solid var(--border, #d6dae3);
   border-radius: 6px;
   background: #fff;
   color: #1d2939;
   box-sizing: border-box;
+  overflow: hidden;
+  transition: width 0.18s ease;
+
+  &[data-open="true"] {
+    width: clamp(7.5rem, 12vw, 10rem);
+    justify-content: flex-start;
+    padding-right: 0.55rem;
+  }
+
+  .symbol-search__button {
+    flex: 0 0 2rem;
+    width: 2rem;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+  }
 
   .symbol-search__icon {
     flex: 0 0 auto;
@@ -712,7 +733,11 @@
   }
 
   .symbol-search {
-    width: min(8.5rem, 42vw);
+    width: 2rem;
+
+    &[data-open="true"] {
+      width: min(8.5rem, 42vw);
+    }
   }
 
   .signal-card__summary {

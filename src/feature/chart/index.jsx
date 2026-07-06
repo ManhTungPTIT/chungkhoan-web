@@ -73,6 +73,8 @@ function TradingView() {
     () => searchParams.get("symbol")?.toUpperCase() || "VNINDEX",
   );
   const [symbolSearch, setSymbolSearch] = useState("");
+  const [showSymbolSearch, setShowSymbolSearch] = useState(false);
+  const symbolSearchRef = useRef(null);
 
   //Khung thời gian; mặc định là khung 1 ngày (single-select)
   const [activeTimeline, setActiveTimeline] = useState("1d");
@@ -80,10 +82,16 @@ function TradingView() {
 
   const handleSymbolSearch = (e) => {
     e.preventDefault();
+    if (!showSymbolSearch) {
+      setShowSymbolSearch(true);
+      setTimeout(() => symbolSearchRef.current?.focus(), 0);
+      return;
+    }
     const symbol = symbolSearch.trim().toUpperCase();
     if (!symbol) return;
     setChaneCode(symbol);
     setSymbolSearch("");
+    setShowSymbolSearch(false);
   };
 
   const {
@@ -247,14 +255,33 @@ function TradingView() {
               onToggle={toggleIndicator}
               onSaveConfig={saveIndicatorConfig}
             />
-            <form className="symbol-search" onSubmit={handleSymbolSearch}>
-              <FiSearch className="symbol-search__icon" aria-hidden="true" />
-              <input
-                value={symbolSearch}
-                onChange={(e) => setSymbolSearch(e.target.value)}
-                placeholder="Nhập mã"
-                translate="no"
-              />
+            <form
+              className="symbol-search"
+              data-open={showSymbolSearch ? "true" : "false"}
+              onSubmit={handleSymbolSearch}
+            >
+              <button
+                type="submit"
+                className="symbol-search__button"
+                aria-label="Tìm mã cổ phiếu"
+              >
+                <FiSearch className="symbol-search__icon" aria-hidden="true" />
+              </button>
+              {showSymbolSearch && (
+                <input
+                  ref={symbolSearchRef}
+                  value={symbolSearch}
+                  onChange={(e) => setSymbolSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setSymbolSearch("");
+                      setShowSymbolSearch(false);
+                    }
+                  }}
+                  placeholder="Nhập mã"
+                  translate="no"
+                />
+              )}
             </form>
             <button
               type="button"

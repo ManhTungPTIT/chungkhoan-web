@@ -8,6 +8,7 @@ import { wilderRsiSeries } from "../untils/wilderRsi";
 const DEFAULT_MCDX_PARAMS = [50, 50, 1.5, 40, 30, 0.7, 20, 10];
 const SHARK_SMA_PERIOD = 10;
 const MCDX_MAX_VALUE = 20;
+const MCDX_BAR_WIDTH_RATIO = 0.92;
 
 // SMA có warm-up: chưa đủ `period` giá trị thì lấy trung bình phần đã có,
 // để đường Shark hiện cùng lúc với cột banker thay vì trễ thêm 10 nến.
@@ -60,10 +61,13 @@ function clampMCDXValue(value) {
 }
 
 function getMCDXBarWidth(barSpace) {
-  if (Number.isFinite(barSpace?.halfGapBar)) {
-    return Math.max(1, barSpace.halfGapBar * 2);
+  if (Number.isFinite(barSpace?.bar)) {
+    return Math.max(1, barSpace.bar * MCDX_BAR_WIDTH_RATIO);
   }
-  return Math.max(1, (barSpace?.bar ?? 1) * 0.8);
+  if (Number.isFinite(barSpace?.halfGapBar)) {
+    return Math.max(1, barSpace.halfGapBar * 2 * MCDX_BAR_WIDTH_RATIO);
+  }
+  return 1;
 }
 
 function clipY(y, height) {
