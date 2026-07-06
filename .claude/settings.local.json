@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const s=fs.readFileSync\\('./node_modules/klinecharts/dist/index.esm.js','utf8'\\);let i=s.indexOf\\('prototype.destroy = function'\\);while\\(i>=0\\){let chunk=s.slice\\(i,i+400\\);if\\(chunk.includes\\('k-line-chart-id'\\)||chunk.includes\\('removeAttribute'\\)||chunk.includes\\('innerHTML'\\)\\){console.log\\('@',i\\);console.log\\(chunk\\);console.log\\('===='\\);}i=s.indexOf\\('prototype.destroy = function',i+1\\);}\")",
+      "Bash(curl -s -m 8 -o /dev/null -w \"intraday HTTP %{http_code} in %{time_total}s\\\\n\" \"http://localhost:8000/intraday?symbol=VNINDEX\")",
+      "Bash(curl -s -m 8 -o /dev/null -w \"vn100 HTTP %{http_code} in %{time_total}s\\\\n\" \"http://localhost:8000/vn100\")",
+      "PowerShell(npm run build)"
+    ]
+  }
+}

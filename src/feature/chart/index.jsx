@@ -1,7 +1,7 @@
 import "./index.scss";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { FiCalendar, FiTarget } from "react-icons/fi";
+import { FiCalendar, FiSearch, FiTarget } from "react-icons/fi";
 import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
@@ -72,10 +72,19 @@ function TradingView() {
   const [chanelCode, setChaneCode] = useState(
     () => searchParams.get("symbol")?.toUpperCase() || "VNINDEX",
   );
+  const [symbolSearch, setSymbolSearch] = useState("");
 
   //Khung thời gian; mặc định là khung 1 ngày (single-select)
   const [activeTimeline, setActiveTimeline] = useState("1d");
   const onSelectTimeline = (name) => setActiveTimeline(name);
+
+  const handleSymbolSearch = (e) => {
+    e.preventDefault();
+    const symbol = symbolSearch.trim().toUpperCase();
+    if (!symbol) return;
+    setChaneCode(symbol);
+    setSymbolSearch("");
+  };
 
   const {
     data: candles = [],
@@ -185,9 +194,10 @@ function TradingView() {
   const pricePct =
     (((priceCurrent - priceChange) / priceChange) * 100).toFixed(2) + "%";
   const dayCount = countTradingSessions(dayChange, today);
-  const target1 = (priceChange * 1.2).toFixed(2);
-  const target2 = (priceChange * 1.4).toFixed(2);
-  const target3 = (priceChange * 1.8).toFixed(2);
+  // Mua: mục tiêu tăng (nhân hệ số); Bán: vùng đáy dự kiến (chia hệ số)
+  const target1 = (isBuySignal ? priceChange * 1.2 : priceChange / 1.2).toFixed(2);
+  const target2 = (isBuySignal ? priceChange * 1.4 : priceChange / 1.4).toFixed(2);
+  const target3 = (isBuySignal ? priceChange * 1.8 : priceChange / 1.8).toFixed(2);
 
   return (
     <div
@@ -237,6 +247,15 @@ function TradingView() {
               onToggle={toggleIndicator}
               onSaveConfig={saveIndicatorConfig}
             />
+            <form className="symbol-search" onSubmit={handleSymbolSearch}>
+              <FiSearch className="symbol-search__icon" aria-hidden="true" />
+              <input
+                value={symbolSearch}
+                onChange={(e) => setSymbolSearch(e.target.value)}
+                placeholder="Nhập mã"
+                translate="no"
+              />
+            </form>
             <button
               type="button"
               className="btPanel"
@@ -284,7 +303,8 @@ function TradingView() {
                 <div className="signal-card__row signal-card__row--bottom">
                   <div className="signal-card__metric signal-card__metric--icon signal-card__metric--targets">
                     <FiTarget aria-hidden="true" />
-                    <span>Mục tiêu dự kiến</span>
+                    <span>{ isBuySignal ? "Mục tiêu dự kiến" : "Vùng đáy dụ kiến"
+                      }</span>
                     <strong style={{ color: "purple" }}>
                       {target1} | {target2} | {target3}
                     </strong>

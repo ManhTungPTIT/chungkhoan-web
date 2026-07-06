@@ -16,11 +16,27 @@ describe("sortRowsBySignal", () => {
     expect(sortRowsBySignal(rows).map((row) => row.symbol)).toEqual([
       "BUY1",
       "BUY2",
-      "HOLD1",
       "HOLD2",
+      "HOLD1",
       "SELL1",
       "SELL2",
       "UNKNOWN",
+    ]);
+  });
+
+  it("sorts by signal_sessions ascending within each signal group, nulls last", () => {
+    const rows = [
+      { symbol: "H3", signal: "hold", signal_sessions: 3 },
+      { symbol: "HX", signal: "hold", signal_sessions: null },
+      { symbol: "H0", signal: "hold", signal_sessions: 0 },
+      { symbol: "H1", signal: "hold", signal_sessions: 1 },
+    ];
+
+    expect(sortRowsBySignal(rows).map((row) => row.symbol)).toEqual([
+      "H0",
+      "H1",
+      "H3",
+      "HX",
     ]);
   });
 });

@@ -57,8 +57,20 @@ function getSignalRank(row) {
   return 3;
 }
 
+// T+ dùng để xếp thứ tự trong cùng nhóm tín hiệu; thiếu dữ liệu → đẩy xuống cuối nhóm
+function getSessionOrder(row) {
+  const value = row?.signal_sessions;
+  if (value == null) return Number.MAX_SAFE_INTEGER;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+}
+
 export function sortRowsBySignal(rows) {
-  return [...rows].sort((a, b) => getSignalRank(a) - getSignalRank(b));
+  return [...rows].sort(
+    (a, b) =>
+      getSignalRank(a) - getSignalRank(b) ||
+      getSessionOrder(a) - getSessionOrder(b),
+  );
 }
 
 function FilterStock() {

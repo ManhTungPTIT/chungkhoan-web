@@ -23,6 +23,12 @@ const DRAGGABLE_SEPARATOR_SIZE = 1;
 const MOBILE_CROSSHAIR_DELAY = 500;
 const MOBILE_CROSSHAIR_MOVE_TOLERANCE = 8;
 const INDICATOR_PANE_HEIGHT = 120;
+const SUB_PANE_INDICATOR_TOOLTIP = {
+  showRule: "always",
+  showName: true,
+  showParams: true,
+};
+const EMPTY_INDICATOR_CONFIGS = {};
 
 function getFixedIndicatorPaneOptions() {
   return {
@@ -130,6 +136,101 @@ function getIndicatorCreateValue(name, indicatorConfigs, extra = {}) {
   return name;
 }
 
+function withSubPaneIndicatorTooltip(createValue) {
+  if (typeof createValue === "string") {
+    return {
+      name: createValue,
+      styles: { tooltip: SUB_PANE_INDICATOR_TOOLTIP },
+    };
+  }
+
+  return {
+    ...createValue,
+    styles: {
+      ...(createValue.styles ?? {}),
+      tooltip: SUB_PANE_INDICATOR_TOOLTIP,
+    },
+  };
+}
+
+function toKLineData(candles) {
+  return candles
+    .filter((c) => typeof c.time === "number")
+    .map((c) => ({
+      timestamp: c.time * 1000,
+      open: c.open,
+      high: c.high,
+      low: c.low,
+      close: c.close,
+      volume: c.volume,
+    }));
+}
+
+function syncSignalOverlays(chart, signals) {
+  chart.removeOverlay?.({ groupId: "signal" });
+  signals.forEach((s) => {
+    chart.createOverlay({
+      name: "signalMarker",
+      groupId: "signal",
+      points: [{ timestamp: s.time * 1000, value: s.price }],
+      extendData: s,
+      lock: true,
+    });
+  });
+}
+
+function syncBbsIndicator(chart, signals) {
+  chart.removeIndicator?.("candle_pane", "BBS");
+  chart.createIndicator(
+    { name: "BBS", extendData: signals },
+    true,
+    { id: "candle_pane" },
+  );
+}
+
+function getSubPaneIndicatorTitle(name) {
+  if (name === "VOL") return "Volume - Khối lượng";
+  const label = getIndicatorDefinition(name)?.label ?? name;
+  return label.replace(/\s+—\s+/g, " - ");
+}
+
+function attachSubPaneIndicatorLabels(chart, paneIndicators) {
+  return paneIndicators.map(({ paneId, name }) => {
+    const paneEl = chart.getDom?.(paneId, DomPosition.Main);
+    if (!paneEl) return () => {};
+
+    const labelEl = document.createElement("div");
+    labelEl.className = "chart-indicator-pane-label";
+    labelEl.textContent = getSubPaneIndicatorTitle(name);
+    Object.assign(labelEl.style, {
+      position: "absolute",
+      top: "6px",
+      left: "8px",
+      zIndex: "4",
+      pointerEvents: "none",
+      color: "#1d2939",
+      fontSize: "12px",
+      lineHeight: "16px",
+      fontFamily: "sans-serif",
+      fontWeight: "500",
+      background: "rgba(255, 255, 255, 0.72)",
+      borderRadius: "4px",
+      padding: "1px 4px",
+    });
+
+    const previousPosition = paneEl.style.position;
+    if (getComputedStyle(paneEl).position === "static") {
+      paneEl.style.position = "relative";
+    }
+    paneEl.appendChild(labelEl);
+
+    return () => {
+      labelEl.remove();
+      paneEl.style.position = previousPosition;
+    };
+  });
+}
+
 // Mây Kumo của Ichimoku do hàm draw tự tô (không phải line) → truyền màu nền
 // qua extendData để draw đọc. Thiếu config thì draw dùng màu mặc định.
 function getIchimokuCloudExtend(indicatorConfigs) {
@@ -181,13 +282,12 @@ function addIndicator(chart, name, indicatorConfigs) {
     return "candle_pane";
   }
   if (name === "VOL") {
-    // Bật tooltip riêng cho VOL: chỉ hiện giá trị khối lượng khi rê chuột
-    // (crosshair) qua cột, không ảnh hưởng tooltip các chỉ báo khác.
+    // Pane phụ luôn hiển thị dòng tên chỉ báo ở góc trên.
     return chart.createIndicator(
       {
         name: "VOL",
         calcParams: [],
-        styles: { tooltip: { showRule: "follow_cross" } },
+        styles: { tooltip: SUB_PANE_INDICATOR_TOOLTIP },
       },
       false,
       getFixedIndicatorPaneOptions(),
@@ -200,7 +300,7 @@ function addIndicator(chart, name, indicatorConfigs) {
     return "candle_pane";
   } else {
     return chart.createIndicator(
-      createValue,
+      withSubPaneIndicatorTooltip(createValue),
       false,
       getFixedIndicatorPaneOptions(),
     ); // pane riêng
@@ -752,10 +852,15 @@ export default function TradingChart({
   infoHeight = 0,
   activeKey = "",
   showDraw = false,
-  indicatorConfigs = {},
+  indicatorConfigs = EMPTY_INDICATOR_CONFIGS,
 }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null); // giữ instance để thanh công cụ vẽ gọi createOverlay
+  const candlesRef = useRef(candles);
+  const signalsRef = useRef(signals);
+
+  candlesRef.current = candles;
+  signalsRef.current = signals;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -841,40 +946,26 @@ export default function TradingChart({
     });
 
     // API trả time unix giây → KLineChart cần timestamp ms; bỏ bản ghi hỏng
-    const dataList = candles
-      .filter((c) => typeof c.time === "number")
-      .map((c) => ({
-        timestamp: c.time * 1000,
-        open: c.open,
-        high: c.high,
-        low: c.low,
-        close: c.close,
-        volume: c.volume,
-      }));
-    chart.applyNewData(dataList);
-
     // Chỉ báo do người dùng chọn
+    chart.applyNewData(toKLineData(candlesRef.current));
+
     const paneIds = new Set(["candle_pane"]);
+    const subPaneIndicators = [];
     getOrderedActiveIndicators(activeKey).forEach((name) => {
       const paneId = addIndicator(chart, name, indicatorConfigs);
-      if (paneId) paneIds.add(paneId);
+      if (paneId) {
+        paneIds.add(paneId);
+        if (paneId !== "candle_pane") {
+          subPaneIndicators.push({ paneId, name });
+        }
+      }
     });
 
     // Bollinger + fill xanh/đỏ theo tín hiệu — signals truyền qua extendData
-    chart.createIndicator({ name: "BBS", extendData: signals }, true, {
-      id: "candle_pane",
-    });
+    syncBbsIndicator(chart, signalsRef.current);
+    syncSignalOverlays(chart, signalsRef.current);
 
     // Markers mua/bán
-    signals.forEach((s) => {
-      chart.createOverlay({
-        name: "signalMarker",
-        points: [{ timestamp: s.time * 1000, value: s.price }],
-        extendData: s,
-        lock: true,
-      });
-    });
-
     // KLineChart v9 không tự autoSize theo container
     const ro = new ResizeObserver(() => chart.resize());
     ro.observe(container);
@@ -888,15 +979,34 @@ export default function TradingChart({
     const detachAxisLabels = [...paneIds].map((paneId) =>
       attachIndicatorAxisLabels(chart, paneId),
     );
+    const detachPaneLabels = attachSubPaneIndicatorLabels(
+      chart,
+      subPaneIndicators,
+    );
 
     return () => {
+      detachPaneLabels.forEach((detach) => detach());
       detachAxisLabels.forEach((detach) => detach());
       disableMobilePaneGestures.forEach((disable) => disable());
       ro.disconnect();
       dispose(container);
       chartRef.current = null;
     };
-  }, [candles, signals, activeKey, indicatorConfigs]);
+  }, [activeKey, indicatorConfigs]);
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    // Refetch 5s chỉ nạp data mới vào instance hiện có, không init/dispose chart.
+    chart.applyNewData(toKLineData(candles));
+  }, [candles]);
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    syncBbsIndicator(chart, signals);
+    syncSignalOverlays(chart, signals);
+  }, [signals]);
 
   // Vào chế độ vẽ một overlay; groupId "draw" để xoá riêng hình vẽ (không đụng marker)
   const startDraw = (name) =>

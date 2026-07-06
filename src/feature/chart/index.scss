@@ -46,6 +46,43 @@
   }
 }
 
+.symbol-search {
+  height: 2rem;
+  min-height: 30px;
+  width: clamp(7.5rem, 12vw, 10rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.55rem;
+  border: 1px solid var(--border, #d6dae3);
+  border-radius: 6px;
+  background: #fff;
+  color: #1d2939;
+  box-sizing: border-box;
+
+  .symbol-search__icon {
+    flex: 0 0 auto;
+    color: #667085;
+    font-size: 0.9rem;
+  }
+
+  input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #101828;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+
+    &::placeholder {
+      color: #98a2b3;
+      text-transform: none;
+    }
+  }
+}
+
 .signal-card {
   width: min(720px, calc(100% - 0.75rem));
   box-sizing: border-box;
@@ -589,6 +626,7 @@
 
   .draw-tool-trigger,
   .indicator-picker__trigger,
+  .symbol-search,
   .btPanel {
     height: 2rem;
     min-height: 32px;
@@ -671,6 +709,10 @@
 
   .signal-card__metric--icon svg {
     font-size: 0.78rem;
+  }
+
+  .symbol-search {
+    width: min(8.5rem, 42vw);
   }
 
   .signal-card__summary {

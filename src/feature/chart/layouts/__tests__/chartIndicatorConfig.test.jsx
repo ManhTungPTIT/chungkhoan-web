@@ -8,13 +8,16 @@ vi.mock("klinecharts/dist/index.esm.js", () => {
     setStyles: vi.fn(),
     applyNewData: vi.fn(),
     createIndicator: vi.fn(),
+    overrideIndicator: vi.fn(),
+    removeIndicator: vi.fn(),
     createOverlay: vi.fn(),
+    removeOverlay: vi.fn(),
     resize: vi.fn(),
     getDom: vi.fn(),
   };
 
   return {
-    DomPosition: { YAxis: "yAxis" },
+    DomPosition: { Main: "main", YAxis: "yAxis" },
     dispose: vi.fn(),
     init: vi.fn(() => chart),
     registerIndicator: vi.fn(),
@@ -82,6 +85,49 @@ describe("TradingChart indicator config", () => {
     expect(styles.separator.size).toBeGreaterThan(0);
   });
 
+  it("keeps the chart instance when candles refresh", () => {
+    const chart = init();
+    init.mockClear();
+
+    const firstCandles = [
+      { time: 1700000000, open: 10, high: 12, low: 9, close: 11, volume: 100 },
+    ];
+    const nextCandles = [
+      ...firstCandles,
+      { time: 1700000060, open: 11, high: 13, low: 10, close: 12, volume: 120 },
+    ];
+
+    const { rerender } = render(
+      <TradingChart candles={firstCandles} signals={[]} activeKey="VOL" />,
+    );
+    init.mockClear();
+    chart.applyNewData.mockClear();
+
+    rerender(
+      <TradingChart candles={nextCandles} signals={[]} activeKey="VOL" />,
+    );
+
+    expect(init).not.toHaveBeenCalled();
+    expect(chart.applyNewData).toHaveBeenCalledWith([
+      {
+        timestamp: 1700000000 * 1000,
+        open: 10,
+        high: 12,
+        low: 9,
+        close: 11,
+        volume: 100,
+      },
+      {
+        timestamp: 1700000060 * 1000,
+        open: 11,
+        high: 13,
+        low: 10,
+        close: 12,
+        volume: 120,
+      },
+    ]);
+  });
+
   it("uses configured params when creating EMA", () => {
     const chart = init();
 
@@ -120,7 +166,17 @@ describe("TradingChart indicator config", () => {
       ([indicator]) => indicator?.name === "RSI",
     )[2];
     expect(chart.createIndicator).toHaveBeenCalledWith(
-      { name: "RSI", calcParams: [21] },
+      expect.objectContaining({
+        name: "RSI",
+        calcParams: [21],
+        styles: expect.objectContaining({
+          tooltip: {
+            showRule: "always",
+            showName: true,
+            showParams: true,
+          },
+        }),
+      }),
       false,
       expect.objectContaining({
         dragEnabled: false,
@@ -144,7 +200,11 @@ describe("TradingChart indicator config", () => {
         name: "VOL",
         calcParams: [],
         styles: expect.objectContaining({
-          tooltip: { showRule: "follow_cross" },
+          tooltip: {
+            showRule: "always",
+            showName: true,
+            showParams: true,
+          },
         }),
       }),
       false,
@@ -155,6 +215,24 @@ describe("TradingChart indicator config", () => {
       }),
     );
     expect(paneOptions.height).toBe(paneOptions.minHeight);
+  });
+
+  it("shows a fixed label on sub indicator panes", () => {
+    const chart = init();
+    const volPane = document.createElement("div");
+
+    chart.createIndicator.mockImplementation((indicator) =>
+      indicator?.name === "VOL" ? "vol_pane" : undefined,
+    );
+    chart.getDom.mockImplementation((paneId, position) =>
+      paneId === "vol_pane" && position === "main" ? volPane : null,
+    );
+
+    render(<TradingChart candles={[]} signals={[]} activeKey="VOL" />);
+
+    expect(volPane.querySelector(".chart-indicator-pane-label")?.textContent).toBe(
+      "Volume - Khối lượng",
+    );
   });
 
   it("creates VOL directly below the candle pane before other sub indicators", () => {
