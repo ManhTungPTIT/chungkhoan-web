@@ -13,8 +13,34 @@
   justify-content: end;
   gap: 0.6rem;
   max-width: 100%;
+
+  --chart-toolbar-button-height: 34px;
+  --chart-toolbar-button-width: 100px;
 }
 
+.timeline-stock__trigger,
+.draw-tool-trigger,
+.indicator-picker__trigger {
+  width: var(--chart-toolbar-button-width);
+  height: var(--chart-toolbar-button-height);
+  min-width: var(--chart-toolbar-button-width);
+  min-height: var(--chart-toolbar-button-height);
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 10px;
+  border: 1px solid var(--border, #d6dae3);
+  border-radius: 6px;
+  background: #fff;
+  color: #1d2939;
+  font-size: 0.8rem;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  vertical-align: middle;
+}
 .information__symbol {
   margin: 0;
   color: #6d28d9;
@@ -25,20 +51,6 @@
 }
 
 .draw-tool-trigger {
-  height: 2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 30px;
-  padding: 4px 10px;
-  border: 1px solid var(--border, #d6dae3);
-  border-radius: 6px;
-  background: #fff;
-  color: #1d2939;
-  font-size: 0.8rem;
-  cursor: pointer;
-  white-space: nowrap;
-
   &[data-active="true"] {
     border-color: #a5b4fc;
     background: #eef2ff;
@@ -634,22 +646,32 @@
   }
 
   .information__toolbar {
+    --chart-toolbar-button-height: 32px;
+    --chart-toolbar-button-width: 96px;
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 0.35rem;
   }
-
   .information__symbol {
     margin: 0;
     text-align: left;
     font-size: clamp(1.15rem, 5vw, 1.45rem);
   }
 
+  .timeline-stock__trigger,
   .draw-tool-trigger,
-  .indicator-picker__trigger,
+  .indicator-picker__trigger {
+    width: 96px;
+    min-width: 96px;
+    height: 32px;
+    min-height: 32px;
+    padding: 0 9px;
+    font-size: 0.78rem;
+  }
+
   .symbol-search,
   .btPanel {
-    height: 2rem;
+    height: 32px;
     min-height: 32px;
     padding: 4px 9px;
     font-size: 0.78rem;
@@ -838,6 +860,24 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+// Banner báo poll dữ liệu 5s đang thất bại (backend chết/mất mạng): chart vẫn
+// hiện nến cũ (keepPreviousData) nên phải có tín hiệu rõ là data KHÔNG cập nhật.
+.chart-data-error {
+  position: absolute;
+  bottom: 3.5rem; // nổi trên trục thời gian, không đè toolbar phía trên
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  padding: 0.35rem 0.8rem;
+  border-radius: 6px;
+  background: #b91c1c;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.2);
+  pointer-events: none; // không chặn tương tác với chart bên dưới
 }
 
 .timeline-active {

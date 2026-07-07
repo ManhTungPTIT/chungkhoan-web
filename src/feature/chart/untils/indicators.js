@@ -22,6 +22,29 @@ export function calcEMA(candles, period) {
   }));
 }
 
+// SMA trên mảng số thuần — out[j] ánh xạ tới values[period-1+j]
+export function smaOf(values, period) {
+  if (values.length < period) return [];
+  let sum = values.slice(0, period).reduce((a, b) => a + b, 0);
+  const out = [sum / period];
+  for (let i = period; i < values.length; i++) {
+    sum += values[i] - values[i - period];
+    out.push(sum / period);
+  }
+  return out;
+}
+
+// SMA có gắn timestamp — result[j] ánh xạ tới candles[period-1+j]
+export function calcSMA(candles, period) {
+  return smaOf(
+    candles.map((c) => c.close),
+    period,
+  ).map((value, j) => ({
+    time: candles[period - 1 + j].time,
+    value,
+  }));
+}
+
 // MACD(12,26,9)
 // macdLine[j] → candles[25+j]
 // signal[j]   → candles[33+j]
@@ -114,13 +137,13 @@ function toDateString(time) {
  * Máy trạng thái đảm bảo tín hiệu xen kẽ buy → sell → buy, không bỏ sót
  * lệnh ra. Cần ít nhất 35 nến để vòng lặp chạy (k bắt đầu tại 34).
  *
- * Ánh xạ index (như calcEMA/calcMACD sản xuất):
- *   ma20[k-19].value     = MA20 tại nến k
+ * Ánh xạ index (như calcSMA/calcMACD sản xuất):
+ *   ma20[k-19].value     = SMA20 tại nến k
  *   macdLine[k-25].value = MACD tại nến k
  *   signal[k-33].value   = Signal tại nến k
  */
 export function generateSignals(candles) {
-  const ma20 = calcEMA(candles, 20);
+  const ma20 = calcSMA(candles, 20);
   const { macdLine, signal } = calcMACD(candles);
   const signals = [];
 
@@ -162,7 +185,7 @@ export function generateSignals(candles) {
 }
 
 export function generateSignalsT(candles) {
-  const ma10 = calcEMA(candles, 10);
+  const ma10 = calcSMA(candles, 10);
   const { macdLine, signal } = calcMACD(candles);
   const signals = [];
 
@@ -204,7 +227,7 @@ export function generateSignalsT(candles) {
 }
 
 export function generateSignalsLong(candles) {
-  const ma50 = calcEMA(candles, 50);
+  const ma50 = calcSMA(candles, 50);
   const { macdLine, signal } = calcMACD(candles);
   const signals = [];
 

@@ -23,6 +23,7 @@ const DRAGGABLE_SEPARATOR_SIZE = 1;
 const MOBILE_CROSSHAIR_DELAY = 500;
 const MOBILE_CROSSHAIR_MOVE_TOLERANCE = 8;
 const INDICATOR_PANE_HEIGHT = 120;
+const PRICE_AXIS_SIZE = 76;
 const SUB_PANE_INDICATOR_TOOLTIP = {
   showRule: "always",
   showName: true,
@@ -153,17 +154,32 @@ function withSubPaneIndicatorTooltip(createValue) {
   };
 }
 
-function toKLineData(candles) {
+function toChartTimestamp(time) {
+  if (!Number.isFinite(time)) return null;
+  return time > 1e12 ? Math.floor(time) : time * 1000;
+}
+
+function toKLineData(candles = []) {
   return candles
-    .filter((c) => typeof c.time === "number")
-    .map((c) => ({
-      timestamp: c.time * 1000,
-      open: c.open,
-      high: c.high,
-      low: c.low,
-      close: c.close,
-      volume: c.volume,
-    }));
+    .map((c) => {
+      const timestamp = toChartTimestamp(c.time);
+      return {
+        timestamp,
+        open: Number(c.open),
+        high: Number(c.high),
+        low: Number(c.low),
+        close: Number(c.close),
+        volume: Number.isFinite(Number(c.volume)) ? Number(c.volume) : 0,
+      };
+    })
+    .filter(
+      (c) =>
+        Number.isFinite(c.timestamp) &&
+        Number.isFinite(c.open) &&
+        Number.isFinite(c.high) &&
+        Number.isFinite(c.low) &&
+        Number.isFinite(c.close),
+    );
 }
 
 function syncSignalOverlays(chart, signals) {
@@ -319,6 +335,92 @@ function getOrderedActiveIndicators(activeKey) {
   ];
 }
 
+/*
+ * Tạm comment phần preserve viewport nâng cao vì đang gây trắng trang trên runtime.
+ * Đoạn này dùng API nội bộ của KLineCharts để lưu/khôi phục range trục giá.
+ * Sau khi app ổn định, có thể bật lại từng phần và test console browser trước.
+ * function getPanePriceRangeSnapshot(chart, paneIds) {
+  const snapshot = [];
+  paneIds.forEach((paneId) => {
+    try {
+      const axis = chart.getDrawPaneById?.(paneId)?.getAxisComponent?.();
+      const range = axis?.getRange?.();
+      if (axis && range && range.realFrom !== range.realTo) {
+        snapshot.push({ paneId, range });
+      }
+    } catch {
+      // Internal KLineCharts API changed; skip restoring this pane.
+    }
+  });
+  return snapshot;
+}
+
+ * function restorePanePriceRangeSnapshot(chart, snapshot) {
+  snapshot.forEach(({ paneId, range }) => {
+    try {
+      const axis = chart.getDrawPaneById?.(paneId)?.getAxisComponent?.();
+      if (!axis) return;
+      axis.setAutoCalcTickFlag?.(false);
+      axis.setRange?.(range);
+    } catch {
+      // Internal KLineCharts API changed; leave native autoscale behavior.
+    }
+  });
+}
+
+ */
+
+// Cùng một stream dữ liệu đang chảy (tick/append realtime) hay dataset bị THAY
+// THẾ (lần tải đầu, đổi mã, đổi khung)? So nến đầu + nến tại vị trí cuối của
+// data hiện có: tick chỉ đổi giá trị nến cuối, append chỉ thêm nến mới phía sau.
+function isSameLiveDataStream(currentData, nextData) {
+  if (currentData.length === 0 || nextData.length === 0) return false;
+  if (currentData[0]?.timestamp !== nextData[0]?.timestamp) return false;
+  if (nextData.length < currentData.length) return false;
+
+  const lastCurrentIndex = currentData.length - 1;
+  return (
+    nextData[lastCurrentIndex]?.timestamp ===
+    currentData[lastCurrentIndex]?.timestamp
+  );
+}
+
+// Bật lại auto-fit trục giá của các pane — gọi khi dataset bị thay thế để lần
+// vẽ kế tiếp trục ôm dải giá của data mới (mã mới có thể ở dải giá khác hẳn).
+function refitPaneAxes(chart, paneIds) {
+  paneIds.forEach((paneId) => {
+    try {
+      chart
+        .getDrawPaneById?.(paneId)
+        ?.getAxisComponent?.()
+        ?.setAutoCalcTickFlag?.(true);
+    } catch {
+      // API nội bộ đổi → để autoscale mặc định của lib tự lo
+    }
+  });
+}
+
+// Update data trên chart hiện có, không dispose/init lại chart (data realtime
+// vào chart mà không làm trắng trang).
+function updateChartData(chart, candles, paneIds = []) {
+  const data = toKLineData(candles);
+  if (data.length === 0 && (chart.getDataList?.()?.length ?? 0) > 0) {
+    return;
+  }
+  const replacesStream =
+    data.length > 0 &&
+    !isSameLiveDataStream(chart.getDataList?.() ?? [], data);
+  // Dataset thay thế (lần tải đầu / đổi mã / đổi khung) → bật lại auto-fit để
+  // trục ôm dải giá mới; tick cùng stream thì giữ nguyên khung giá người dùng
+  // đang xem (kể cả khung đã pan/zoom).
+  if (replacesStream) refitPaneAxes(chart, paneIds);
+  chart.applyNewData(data);
+  chart.resize?.();
+  requestAnimationFrame(() => {
+    chart.resize?.();
+    chart.adjustPaneViewport?.(false, true, true, true);
+  });
+}
 const YAXIS_DOUBLE_TAP_MS = 500;
 
 // Zoom dải giá trị bằng MỘT NGÓN kéo dọc trên trục Y — dành cho điện thoại.
@@ -449,32 +551,47 @@ function enableMobileYAxisTouchZoom(chart, paneId = "candle_pane") {
   };
 }
 
-// Cho phép VUỐT DỌC trên thân biểu đồ để PAN khung giá (di chuyển lên/xuống),
-// giữ nguyên mức zoom. KLineChart đã hỗ trợ sẵn pan trục Y ở pane chính, nhưng
-// CHỈ khi auto-fit (autoCalcTickFlag) tắt + scrollZoom bật (mặc định bật). Vì vậy
-// ta đợi chart fit giá lần đầu (range hợp lệ) rồi tắt auto-fit để giữ đúng khung
-// giá ban đầu và bật pan. Double-click/double-tap vào trục giá sẽ bật lại auto-fit.
-// Dùng API runtime nội bộ (getDrawPaneById/getAxisComponent) — bọc try/catch để
-// an toàn nếu klinecharts đổi nội bộ ở bản khác.
+// Cho phép KÉO DỌC bằng chuột để PAN khung giá (giữ nguyên mức zoom). KLineChart
+// hỗ trợ sẵn pan trục Y ở pane chính nhưng CHỈ khi auto-fit (autoCalcTickFlag)
+// tắt + scrollZoom bật (mặc định bật). Trước đây tắt auto-fit bằng poll rAF "đợi
+// fit xong" — race với draw trễ của lib (>30 frame sau applyNewData) và với
+// resize (mở panel) nên hay đóng băng nhầm range cũ → data mới vẽ ngoài khung
+// nhìn, chart trắng. Nay đóng băng LƯỜI: chỉ tắt auto-fit đúng lúc người dùng
+// ĐẶT CHUỘT xuống pane/trục giá (range lúc đó chắc chắn là range đã fit đang
+// hiển thị) — mọi lúc khác trục tự auto-fit theo data. Double-click vào trục
+// giá vẫn bật lại auto-fit (hành vi gốc của klinecharts). Touch không cần lo:
+// các handler mobile tự setRange (setRange của lib tự tắt auto-fit).
 function enablePriceAxisPan(chart, paneId = "candle_pane") {
-  let rafId = 0;
-  let tries = 0;
-  const apply = () => {
-    tries += 1;
+  const targets = [
+    chart.getDom?.(paneId, DomPosition.Main),
+    chart.getDom?.(paneId, DomPosition.YAxis),
+  ].filter(Boolean);
+  if (targets.length === 0) return () => {};
+
+  const freeze = () => {
     try {
       const axis = chart.getDrawPaneById?.(paneId)?.getAxisComponent?.();
       const range = axis?.getRange?.();
-      if (axis && range && range.realFrom !== range.realTo) {
+      const hasData = (chart.getDataList?.()?.length ?? 0) > 0;
+      // Chart rỗng có range "hợp lệ" giả (calcRange trả mặc định 0–10 khi không
+      // có nến) — không đóng băng lúc đó.
+      if (axis && hasData && range && range.realFrom !== range.realTo) {
         axis.setAutoCalcTickFlag(false); // giữ khung giá hiện tại → cho phép pan
-        return;
       }
     } catch {
-      return; // API nội bộ không còn → bỏ qua, không làm hỏng chart
+      // API nội bộ không còn → bỏ qua, không làm hỏng chart
     }
-    if (tries < 30) rafId = requestAnimationFrame(apply); // đợi tới khi fit xong
   };
-  rafId = requestAnimationFrame(apply);
-  return () => cancelAnimationFrame(rafId);
+
+  // capture: chạy trước handler kéo của klinecharts trong cùng cú nhấn chuột.
+  targets.forEach((el) =>
+    el.addEventListener("mousedown", freeze, { capture: true }),
+  );
+  return () => {
+    targets.forEach((el) =>
+      el.removeEventListener("mousedown", freeze, { capture: true }),
+    );
+  };
 }
 
 // Đặt crosshair theo point có sẵn; trả về point nếu thành công để caller lưu
@@ -856,6 +973,7 @@ export default function TradingChart({
 }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null); // giữ instance để thanh công cụ vẽ gọi createOverlay
+  const paneIdsRef = useRef(new Set(["candle_pane"]));
   const candlesRef = useRef(candles);
   const signalsRef = useRef(signals);
 
@@ -878,6 +996,7 @@ export default function TradingChart({
         tickLine: { show: false, color: "transparent", size: 0, length: 0 },
       },
       yAxis: {
+        size: PRICE_AXIS_SIZE,
         axisLine: { show: false, color: "transparent", size: 0 },
         tickLine: { show: false, color: "transparent", size: 0, length: 0 },
       },
@@ -948,6 +1067,7 @@ export default function TradingChart({
     // API trả time unix giây → KLineChart cần timestamp ms; bỏ bản ghi hỏng
     // Chỉ báo do người dùng chọn
     chart.applyNewData(toKLineData(candlesRef.current));
+    chart.resize?.();
 
     const paneIds = new Set(["candle_pane"]);
     const subPaneIndicators = [];
@@ -960,6 +1080,7 @@ export default function TradingChart({
         }
       }
     });
+    paneIdsRef.current = paneIds;
 
     // Bollinger + fill xanh/đỏ theo tín hiệu — signals truyền qua extendData
     syncBbsIndicator(chart, signalsRef.current);
@@ -992,27 +1113,23 @@ export default function TradingChart({
       dispose(container);
       chartRef.current = null;
     };
-  }, [candles, signals, activeKey, indicatorConfigs]);
+  // CHANGE: không phụ thuộc candles/signals để tránh dispose/init chart khi data realtime poll.
+  }, [activeKey, indicatorConfigs]);
 
-  /*
-   * Tạm comment phần giữ nguyên chart khi dữ liệu thay đổi.
-   * Khi cần bật lại: đưa dependency init effect về [activeKey, indicatorConfigs]
-   * và mở lại 2 effect dưới để refetch chỉ update data/signals trên chart hiện có.
-   *
-   * useEffect(() => {
-   *   const chart = chartRef.current;
-   *   if (!chart) return;
-   *   chart.applyNewData(toKLineData(candles));
-   * }, [candles]);
-   *
-   * useEffect(() => {
-   *   const chart = chartRef.current;
-   *   if (!chart) return;
-   *   syncBbsIndicator(chart, signals);
-   *   syncSignalOverlays(chart, signals);
-   * }, [signals]);
-   */
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    // CHANGE: candles mới chỉ update data trên chart hiện có, không tạo chart mới.
+    updateChartData(chart, candles, [...paneIdsRef.current]);
+  }, [candles]);
 
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+    // CHANGE: signals mới chỉ sync overlay/indicator, không init lại chart.
+    syncBbsIndicator(chart, signals);
+    syncSignalOverlays(chart, signals);
+  }, [signals]);
   // Vào chế độ vẽ một overlay; groupId "draw" để xoá riêng hình vẽ (không đụng marker)
   const startDraw = (name) =>
     chartRef.current?.createOverlay({ name, groupId: "draw" });

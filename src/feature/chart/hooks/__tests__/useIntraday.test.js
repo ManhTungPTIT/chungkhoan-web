@@ -131,6 +131,10 @@ describe("normalizeCandle", () => {
     const out = normalizeCandle({ time: 1732752000, close: "1" });
     expect(out.time).toBe(1732752000);
   });
+  it("chuyển time unix mili-giây về unix giây", () => {
+    const out = normalizeCandle({ time: 1732752000000, close: "1" });
+    expect(out.time).toBe(1732752000);
+  });
 
   it("ép OHLC chuỗi thành number", () => {
     const out = normalizeCandle({

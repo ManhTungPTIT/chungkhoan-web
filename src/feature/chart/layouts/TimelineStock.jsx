@@ -25,6 +25,7 @@ function TimelineStock({activeTimeline, onSelect}) {
      <div style={{ position: "relative", zIndex: 20 }}>
        <button
          type="button"
+         className="timeline-stock__trigger"
          onClick={() => setOpen((o) => !o)}
          style={{
            display: "inline-flex",

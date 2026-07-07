@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { FiCalendar, FiSearch, FiTarget } from "react-icons/fi";
 import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
+import DataStatusBanner from "../chart/layouts/DataStatusBanner";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
 import TimelineStock from "../chart/layouts/TimelineStock";
 import {
@@ -25,6 +26,8 @@ const SIGNAL_GENERATORS = {
 };
 import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
+import { useQuotes } from "./hooks/useQuotes";
+import { useLiveCandles } from "./hooks/useLiveCandles";
 import { useVn100 } from "./hooks/useVn100";
 import { color } from "echarts";
 
@@ -68,13 +71,34 @@ function TradingView() {
   const [openPanel, setOpenPanel] = useState(false);
   // Cho phép mở thẳng một mã qua /?symbol=XXX (vd click từ bản đồ nhiệt);
   // không có param thì giữ mặc định VNINDEX.
-  const [searchParams] = useSearchParams();
-  const [chanelCode, setChaneCode] = useState(
-    () => searchParams.get("symbol")?.toUpperCase() || "VNINDEX",
-  );
+  const [searchParams, setSearchParams] = useSearchParams();
+  const symbolFromUrl = searchParams.get("symbol")?.trim().toUpperCase();
+  const [chanelCode, setChaneCode] = useState(() => symbolFromUrl || "VNINDEX");
   const [symbolSearch, setSymbolSearch] = useState("");
   const [showSymbolSearch, setShowSymbolSearch] = useState(false);
   const symbolSearchRef = useRef(null);
+
+  useEffect(() => {
+    const nextSymbol = symbolFromUrl || "VNINDEX";
+    setChaneCode((current) => (current === nextSymbol ? current : nextSymbol));
+
+    if (!symbolFromUrl) {
+      setSymbolSearch("");
+      setShowSymbolSearch(false);
+      setOpenPanel(false);
+    }
+  }, [symbolFromUrl]);
+
+  const selectSymbol = (symbol) => {
+    const nextSymbol = String(symbol ?? "").trim().toUpperCase();
+    if (!nextSymbol) return;
+    setChaneCode(nextSymbol);
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set("symbol", nextSymbol);
+      return next;
+    });
+  };
 
   //Khung thời gian; mặc định là khung 1 ngày (single-select)
   const [activeTimeline, setActiveTimeline] = useState("1d");
@@ -89,16 +113,29 @@ function TradingView() {
     }
     const symbol = symbolSearch.trim().toUpperCase();
     if (!symbol) return;
-    setChaneCode(symbol);
+    selectSymbol(symbol);
+    setOpenPanel(true);
     setSymbolSearch("");
     setShowSymbolSearch(false);
   };
 
   const {
-    data: candles = [],
+    data: historyCandles,
     isFetching,
     isPlaceholderData,
+    isError: isHistoryError,
   } = useIntraday(chanelCode, activeTimeline);
+  // Giá realtime: 1 endpoint /quotes chung cho mọi mã, poll 5s. Merge giá
+  // của mã đang xem vào nến cuối (hoặc append nến mới khi sang khung mới).
+  // Đang hiện nến placeholder của mã CŨ thì không merge giá mã mới vào.
+  const { data: quotes, isError: isQuotesError } = useQuotes();
+  const liveQuote = isPlaceholderData ? null : (quotes?.[chanelCode] ?? null);
+  const candles = useLiveCandles(
+    historyCandles,
+    liveQuote,
+    chanelCode,
+    activeTimeline,
+  );
   // Chỉ hiện overlay khi biểu đồ CHƯA phải data của mã đang chọn:
   // - đang hiện nến mã cũ trong lúc tải mã mới (isPlaceholderData), hoặc
   // - lần đầu mở, chưa có nến nào (candles.length === 0).
@@ -330,7 +367,7 @@ function TradingView() {
                 <div className="signal-card__row signal-card__row--bottom">
                   <div className="signal-card__metric signal-card__metric--icon signal-card__metric--targets">
                     <FiTarget aria-hidden="true" />
-                    <span>{ isBuySignal ? "Mục tiêu dự kiến" : "Vùng đáy dụ kiến"
+                    <span>{ isBuySignal ? "Mục tiêu dự kiến" : "Vùng đáy dự kiến"
                       }</span>
                     <strong style={{ color: "purple" }}>
                       {target1} | {target2} | {target3}
@@ -387,12 +424,17 @@ function TradingView() {
             <span className="chart-loading__text">Đang tải {chanelCode}…</span>
           </div>
         )}
+        <DataStatusBanner
+          isError={isHistoryError || isQuotesError}
+          hasData={candles.length > 0}
+        />
       </div>
       <div className="container_panel">
         <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
           <Panel
             dataPanel={dataPanel}
-            onSelectSymbol={(symbol) => setChaneCode(symbol)}
+            highlightedSymbol={chanelCode}
+            onSelectSymbol={selectSymbol}
           />
         </div>
       </div>
@@ -401,3 +443,4 @@ function TradingView() {
 }
 
 export default TradingView;
+

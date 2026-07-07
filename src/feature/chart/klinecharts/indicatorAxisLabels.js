@@ -9,6 +9,7 @@ const LABEL_HEIGHT = 18;
 const LABEL_GAP = 2;
 const LABEL_FONT = "600 12px Helvetica Neue, Helvetica, Arial, sans-serif";
 const LABEL_PADDING_X = 6;
+const MIN_AXIS_LABEL_WIDTH = 76;
 // Palette default của klinecharts — dùng khi indicator không khai báo màu line
 const DEFAULT_LINE_COLORS = [
   "#FF9600",
@@ -160,7 +161,7 @@ function render(canvas, ctx, items, width, height) {
     if (item.fixed) return; // nhãn giá nến do klinecharts tự vẽ
     const text = formatAxisPrice(item.value, item.precision);
     const textWidth = ctx.measureText(text).width;
-    const boxWidth = Math.min(width, textWidth + LABEL_PADDING_X * 2);
+    const boxWidth = Math.max(MIN_AXIS_LABEL_WIDTH, textWidth + LABEL_PADDING_X * 2);
     const top = item.y - LABEL_HEIGHT / 2;
     ctx.beginPath();
     if (typeof ctx.roundRect === "function") {
@@ -185,6 +186,7 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
   if (getComputedStyle(axisElement).position === "static") {
     axisElement.style.position = "relative";
   }
+  axisElement.style.minWidth = `${MIN_AXIS_LABEL_WIDTH}px`;
   const canvas = document.createElement("canvas");
   Object.assign(canvas.style, {
     position: "absolute",
