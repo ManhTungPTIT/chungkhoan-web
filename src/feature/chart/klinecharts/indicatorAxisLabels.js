@@ -3,7 +3,7 @@
 // nhau là nhãn chồng lên nhau. Module này tự vẽ nhãn lên một canvas phủ
 // trên widget yAxis và đẩy các nhãn tách nhau ra khi trùng vị trí, đồng
 // thời né nhãn giá nến hiện tại (do thư viện vẽ, không di chuyển được).
-import { DomPosition } from "klinecharts/dist/index.esm.js";
+import { ActionType, DomPosition } from "klinecharts/dist/index.esm.js";
 
 const LABEL_HEIGHT = 18;
 const LABEL_GAP = 2;
@@ -202,6 +202,15 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
 
   let rafId = 0;
   let lastSignature = "";
+  let crosshairY = null;
+  const handleCrosshairChange = (crosshair) => {
+    crosshairY =
+      crosshair?.paneId === paneId && Number.isFinite(crosshair.y)
+        ? crosshair.y
+        : null;
+    lastSignature = "";
+  };
+  chart.subscribeAction?.(ActionType.OnCrosshairChange, handleCrosshairChange);
   const tick = () => {
     rafId = requestAnimationFrame(tick);
     const width = axisElement.clientWidth;
@@ -216,7 +225,9 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
     // Pane nến: lấy nhãn giá hiện tại (thư viện vẽ, đứng yên) làm mốc,
     // các nhãn chỉ báo xếp dần lên trên / xuống dưới quanh mốc này
     let anchorY = null;
-    if (paneId === "candle_pane") {
+    if (crosshairY !== null) {
+      anchorY = crosshairY;
+    } else if (paneId === "candle_pane") {
       const dataList = chart.getDataList?.() ?? [];
       const lastClose = dataList[dataList.length - 1]?.close;
       if (Number.isFinite(lastClose)) {
@@ -244,6 +255,7 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
 
   return () => {
     cancelAnimationFrame(rafId);
+    chart.unsubscribeAction?.(ActionType.OnCrosshairChange, handleCrosshairChange);
     canvas.remove();
   };
 }

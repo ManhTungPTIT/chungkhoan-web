@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+﻿import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import MainLayout from "../MainLayout";
@@ -50,6 +50,14 @@ describe("MainLayout — điều hướng phần thông tin người dùng", () 
     fireEvent.click(screen.getByText("Nguyen Van A"));
 
     expect(screen.getByText("TRANG THÔNG TIN")).toBeTruthy();
+  });
+  it("không crash khi auth-storage trong localStorage bị hỏng", () => {
+    localStorage.setItem("auth-storage", "{bad-json");
+
+    renderLayout();
+
+    expect(screen.getByText("Nguyen Van A")).toBeTruthy();
+    expect(screen.getByText(/TRANG/)).toBeTruthy();
   });
 });
 

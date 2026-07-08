@@ -1,4 +1,4 @@
-import "./index.scss";
+﻿import "./index.scss";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FiCalendar, FiSearch, FiTarget } from "react-icons/fi";

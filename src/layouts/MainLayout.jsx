@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { MdStackedLineChart } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
@@ -24,6 +24,15 @@ import { GiLion } from "react-icons/gi";
 import "../feature/chart/index.scss";
 import logo from "../assets/logo-auth.png"
 
+function readStoredAuth() {
+  try {
+    return JSON.parse(localStorage.getItem("auth-storage"));
+  } catch {
+    localStorage.removeItem("auth-storage");
+    return null;
+  }
+}
+
 function MainLayout() {
   const navigate = useNavigate();
   const { logout } = LoginUserService();
@@ -34,7 +43,7 @@ function MainLayout() {
   // Dropdown gộp "Bản đồ nhiệt", "Bản đồ sức mạnh dòng tiền", "Toàn cảnh thị trường"
   const [mapMenuOpen, setMapMenuOpen] = useState(false);
 
-  const data = JSON.parse(localStorage.getItem("auth-storage"));
+  const data = readStoredAuth();
   // Hồ sơ lấy từ API (/user/me) — nguồn chuẩn; localStorage chỉ là fallback hiển
   // thị tức thời. Login có thể không lưu user nên không dựa hẳn vào localStorage.
   const { data: me } = useMe();
