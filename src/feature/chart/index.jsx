@@ -78,6 +78,7 @@ function TradingView() {
   const [symbolSearch, setSymbolSearch] = useState("");
   const [showSymbolSearch, setShowSymbolSearch] = useState(false);
   const symbolSearchRef = useRef(null);
+  const symbolSearchFormRef = useRef(null);
 
   useEffect(() => {
     const nextSymbol = symbolFromUrl || "VNINDEX";
@@ -113,13 +114,27 @@ function TradingView() {
       return;
     }
     const symbol = symbolSearch.trim().toUpperCase();
-    if (!symbol) return;
+    if (!symbol) {
+      setSymbolSearch("");
+      setShowSymbolSearch(false);
+      return;
+    }
     selectSymbol(symbol);
     setOpenPanel(true);
     setSymbolSearch("");
     setShowSymbolSearch(false);
   };
 
+  useEffect(() => {
+    if (!showSymbolSearch) return;
+    const onPointerDown = (event) => {
+      if (symbolSearchFormRef.current?.contains(event.target)) return;
+      if (symbolSearch.trim()) return;
+      setShowSymbolSearch(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [showSymbolSearch, symbolSearch]);
   const {
     data: historyCandles,
     isFetching,
@@ -310,6 +325,7 @@ function TradingView() {
               onSaveConfig={saveIndicatorConfig}
             />
             <form
+              ref={symbolSearchFormRef}
               className="symbol-search"
               data-open={showSymbolSearch ? "true" : "false"}
               onSubmit={handleSymbolSearch}
