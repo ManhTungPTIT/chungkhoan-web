@@ -82,7 +82,7 @@ function Panel({ dataPanel = [], highlightedSymbol = "", onSelectSymbol }) {
       </thead>
       <tbody ref={tbodyRef} translate="no" onScroll={handleScroll}>
         {sortedPanel.map((item, index) => {
-          console.log(item)
+          
           // Chỉ hiển thị tín hiệu THẬT từ backend (item.signal). Mã chưa có
           // tín hiệu → "—" trung tính, không đoán theo change_pct.
           const sig = signalDisplay(item.signal);
