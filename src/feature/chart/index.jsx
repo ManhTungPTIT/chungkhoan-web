@@ -240,15 +240,26 @@ function TradingView() {
 
   const priceCurrent =
     candles.length > 0 ? candles[candles.length - 1].close : "--";
+  const hasNumericSignalPrice =
+    lastSignal && Number.isFinite(Number(priceChange)) && Number(priceChange) !== 0;
+  const hasNumericCurrentPrice = Number.isFinite(Number(priceCurrent));
 
   //Goi y nam giu
   const pricePct =
-    (((priceCurrent - priceChange) / priceChange) * 100).toFixed(2) + "%";
+    hasNumericSignalPrice && hasNumericCurrentPrice
+      ? (((Number(priceCurrent) - Number(priceChange)) / Number(priceChange)) * 100).toFixed(2) + "%"
+      : "--";
   const dayCount = countTradingSessions(dayChange, today);
-  // Mua: mục tiêu tăng (nhân hệ số); Bán: vùng đáy dự kiến (chia hệ số)
-  const target1 = (isBuySignal ? priceChange * 1.2 : priceChange / 1.2).toFixed(2);
-  const target2 = (isBuySignal ? priceChange * 1.4 : priceChange / 1.4).toFixed(2);
-  const target3 = (isBuySignal ? priceChange * 1.8 : priceChange / 1.8).toFixed(2);
+  // Mua: muc tieu tang; Ban: vung day du kien
+  const target1 = hasNumericSignalPrice
+    ? (isBuySignal ? Number(priceChange) * 1.2 : Number(priceChange) / 1.2).toFixed(2)
+    : "--";
+  const target2 = hasNumericSignalPrice
+    ? (isBuySignal ? Number(priceChange) * 1.4 : Number(priceChange) / 1.4).toFixed(2)
+    : "--";
+  const target3 = hasNumericSignalPrice
+    ? (isBuySignal ? Number(priceChange) * 1.8 : Number(priceChange) / 1.8).toFixed(2)
+    : "--";
 
   return (
     <div

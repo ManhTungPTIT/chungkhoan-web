@@ -335,17 +335,18 @@ function getOrderedActiveIndicators(activeKey) {
   ];
 }
 
-/*
- * Tạm comment phần preserve viewport nâng cao vì đang gây trắng trang trên runtime.
- * Đoạn này dùng API nội bộ của KLineCharts để lưu/khôi phục range trục giá.
- * Sau khi app ổn định, có thể bật lại từng phần và test console browser trước.
- * function getPanePriceRangeSnapshot(chart, paneIds) {
+function getPanePriceRangeSnapshot(chart, paneIds) {
   const snapshot = [];
   paneIds.forEach((paneId) => {
     try {
       const axis = chart.getDrawPaneById?.(paneId)?.getAxisComponent?.();
       const range = axis?.getRange?.();
-      if (axis && range && range.realFrom !== range.realTo) {
+      if (
+        axis &&
+        axis.getAutoCalcTickFlag?.() === false &&
+        range &&
+        range.realFrom !== range.realTo
+      ) {
         snapshot.push({ paneId, range });
       }
     } catch {
@@ -355,7 +356,7 @@ function getOrderedActiveIndicators(activeKey) {
   return snapshot;
 }
 
- * function restorePanePriceRangeSnapshot(chart, snapshot) {
+function restorePanePriceRangeSnapshot(chart, snapshot) {
   snapshot.forEach(({ paneId, range }) => {
     try {
       const axis = chart.getDrawPaneById?.(paneId)?.getAxisComponent?.();
@@ -367,8 +368,6 @@ function getOrderedActiveIndicators(activeKey) {
     }
   });
 }
-
- */
 
 // Cùng một stream dữ liệu đang chảy (tick/append realtime) hay dataset bị THAY
 // THẾ (lần tải đầu, đổi mã, đổi khung)? So nến đầu + nến tại vị trí cuối của
@@ -407,19 +406,26 @@ function updateChartData(chart, candles, paneIds = []) {
   if (data.length === 0 && (chart.getDataList?.()?.length ?? 0) > 0) {
     return;
   }
-  const replacesStream =
-    data.length > 0 &&
-    !isSameLiveDataStream(chart.getDataList?.() ?? [], data);
-  // Dataset thay thế (lần tải đầu / đổi mã / đổi khung) → bật lại auto-fit để
-  // trục ôm dải giá mới; tick cùng stream thì giữ nguyên khung giá người dùng
-  // đang xem (kể cả khung đã pan/zoom).
-  if (replacesStream) refitPaneAxes(chart, paneIds);
+  const currentData = chart.getDataList?.() ?? [];
+  const sameStream = data.length > 0 && isSameLiveDataStream(currentData, data);
+  const priceRangeSnapshot = sameStream
+    ? getPanePriceRangeSnapshot(chart, paneIds)
+    : [];
+
+  // Reset auto-fit only when the dataset is replaced (initial load, symbol/timeframe change).
+  // Same-stream realtime ticks keep the user price range only after manual zoom/pan.
+  if (!sameStream && data.length > 0) refitPaneAxes(chart, paneIds);
   chart.applyNewData(data);
-  chart.resize?.();
-  requestAnimationFrame(() => {
+
+  if (sameStream) {
+    if (priceRangeSnapshot.length > 0) {
+      restorePanePriceRangeSnapshot(chart, priceRangeSnapshot);
+      chart.adjustPaneViewport?.(false, true, true, true);
+    }
+  } else {
     chart.resize?.();
-    chart.adjustPaneViewport?.(false, true, true, true);
-  });
+    requestAnimationFrame(() => chart.resize?.());
+  }
 }
 const YAXIS_DOUBLE_TAP_MS = 500;
 
