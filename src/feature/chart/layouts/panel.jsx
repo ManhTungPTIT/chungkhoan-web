@@ -82,6 +82,7 @@ function Panel({ dataPanel = [], highlightedSymbol = "", onSelectSymbol }) {
       </thead>
       <tbody ref={tbodyRef} translate="no" onScroll={handleScroll}>
         {sortedPanel.map((item, index) => {
+          console.log(item)
           // Chỉ hiển thị tín hiệu THẬT từ backend (item.signal). Mã chưa có
           // tín hiệu → "—" trung tính, không đoán theo change_pct.
           const sig = signalDisplay(item.signal);
@@ -102,7 +103,7 @@ function Panel({ dataPanel = [], highlightedSymbol = "", onSelectSymbol }) {
                 {item.symbol}
               </td>
               <td className={label === "HOLD" || label === "SELL" ?  sig.className : "buy" }>{label}</td>
-              <td className="price">{(item.price / 1000).toFixed(2)}</td>
+              <td className="price">{(item.signal_price)}</td>
               <td className={isPositive ? "percent_hold" : "percent_sell"}>
                 {item.change_pct}
               </td>
