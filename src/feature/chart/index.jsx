@@ -27,6 +27,7 @@ const SIGNAL_GENERATORS = {
 import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
 import { useQuotes } from "./hooks/useQuotes";
+import { useQuoteStream } from "./hooks/useQuoteStream";
 import { useLiveCandles } from "./hooks/useLiveCandles";
 import { useVn100 } from "./hooks/useVn100";
 import { color } from "echarts";
@@ -129,7 +130,12 @@ function TradingView() {
   // của mã đang xem vào nến cuối (hoặc append nến mới khi sang khung mới).
   // Đang hiện nến placeholder của mã CŨ thì không merge giá mã mới vào.
   const { data: quotes, isError: isQuotesError } = useQuotes();
-  const liveQuote = isPlaceholderData ? null : (quotes?.[chanelCode] ?? null);
+  // Giá realtime từ WS /ws/quotes (tick tức thì); rớt/chưa có tick → null
+  // → rơi về quote poll 5s bên dưới. Mọi lỗi stream đều degrade về poll.
+  const streamQuote = useQuoteStream(chanelCode);
+  const liveQuote = isPlaceholderData
+    ? null
+    : (streamQuote ?? quotes?.[chanelCode] ?? null);
   const candles = useLiveCandles(
     historyCandles,
     liveQuote,
