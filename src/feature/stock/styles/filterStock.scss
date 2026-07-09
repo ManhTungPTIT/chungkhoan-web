@@ -1,12 +1,20 @@
 .filter-stock {
+  --filter-text: #6b6375;
+  --filter-text-h: #08060d;
+  --filter-bg: #fff;
+  --filter-border: #e5e4e7;
+  --filter-accent-bg: rgba(170, 59, 255, 0.1);
+  --filter-shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
   width: 100%;
   margin: 0 auto;
   padding: 16px;
   box-sizing: border-box;
   text-align: left;
   font-family: var(--sans);
-
-  // ===== Tiêu đề + thời gian cập nhật =====
+  color: var(--filter-text-h);
+  background: var(--filter-bg);
   &__header {
     display: flex;
     align-items: baseline;
@@ -19,23 +27,19 @@
     margin: 0;
     font-size: 24px;
     font-weight: 700;
-    color: var(--text-h);
+    color: var(--filter-text-h);
   }
 
   &__updated {
     font-size: 14px;
-    color: var(--text);
+    color: var(--filter-text);
     white-space: nowrap;
   }
-
-  // ===== Thanh công cụ: dropdown + ô tìm kiếm =====
   &__toolbar {
     display: flex;
     gap: 16px;
     margin-bottom: 16px;
   }
-
-  // ----- Dropdown chọn danh mục -----
   &__dropdown {
     position: relative;
     flex: 0 0 320px;
@@ -48,9 +52,9 @@
       gap: 8px;
       padding: 12px 16px;
       font-size: 15px;
-      color: var(--text-h);
-      background: var(--bg);
-      border: 1px solid var(--border);
+      color: var(--filter-text-h);
+      background: var(--filter-bg);
+      border: 1px solid var(--filter-border);
       border-radius: 8px;
       cursor: pointer;
       transition: border-color 0.15s;
@@ -60,13 +64,13 @@
       }
 
       .placeholder {
-        color: var(--text-h);
+        color: var(--filter-text-h);
       }
 
       .chevron {
         flex-shrink: 0;
         font-size: 18px;
-        color: var(--text);
+        color: var(--filter-text);
         transition: transform 0.15s;
       }
 
@@ -86,10 +90,10 @@
       margin: 0;
       padding: 6px;
       list-style: none;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      background: var(--filter-bg);
+      border: 1px solid var(--filter-border);
       border-radius: 8px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--filter-shadow);
 
       &::-webkit-scrollbar {
         width: 8px;
@@ -107,19 +111,19 @@
       gap: 12px;
       padding: 10px 12px;
       font-size: 15px;
-      color: var(--text-h);
+      color: var(--filter-text-h);
       border-radius: 6px;
       cursor: pointer;
 
       &:hover {
-        background: var(--accent-bg);
+        background: var(--filter-accent-bg);
       }
 
       .dropdown-radio {
         flex-shrink: 0;
         width: 18px;
         height: 18px;
-        border: 2px solid var(--border);
+        border: 2px solid var(--filter-border);
         border-radius: 50%;
         position: relative;
       }
@@ -141,22 +145,20 @@
       }
     }
   }
-
-  // ----- Ô tìm kiếm -----
   &__search {
     flex: 1;
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 0 16px;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    background: var(--filter-bg);
+    border: 1px solid var(--filter-border);
     border-radius: 8px;
 
     .search-icon {
       flex-shrink: 0;
       font-size: 18px;
-      color: var(--text);
+      color: var(--filter-text);
     }
 
     input {
@@ -168,15 +170,13 @@
       background: transparent;
       padding: 12px 0;
       font-size: 15px;
-      color: var(--text-h);
+      color: var(--filter-text-h);
 
       &::placeholder {
-        color: var(--text);
+        color: var(--filter-text);
       }
     }
   }
-
-  // ===== Bảng dữ liệu =====
   &__table {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -193,12 +193,10 @@
       font-size: 14px;
       font-weight: 700;
       text-transform: uppercase;
-      color: var(--text-h);
-      border-bottom: 2px solid var(--border);
+      color: var(--filter-text-h);
+      border-bottom: 2px solid var(--filter-border);
       white-space: nowrap;
     }
-
-    // Nhãn cột + icon sắp xếp/lọc nằm cùng hàng (như ảnh thiết kế)
     .th-cell {
       display: flex;
       align-items: center;
@@ -214,7 +212,7 @@
     .th-filter {
       flex-shrink: 0;
       font-size: 15px;
-      color: var(--text);
+      color: var(--filter-text);
       opacity: 0.7;
     }
 
@@ -223,8 +221,8 @@
       padding: 0 12px;
       height: 72px;
       font-size: 15px;
-      color: var(--text-h);
-      border-bottom: 1px solid var(--border);
+      color: var(--filter-text-h);
+      border-bottom: 1px solid var(--filter-border);
       vertical-align: middle;
     }
 
@@ -237,8 +235,6 @@
     .col-signal {
       padding: 0;
     }
-
-    // Lãi/Lỗ (%): xanh khi tăng, đỏ khi giảm
     .col-pnl {
       font-weight: 600;
 
@@ -275,8 +271,6 @@
       }
     }
   }
-
-  // ===== Phân trang =====
   &__pagination {
     display: flex;
     align-items: center;
@@ -293,8 +287,8 @@
       font-size: 15px;
       font-weight: 500;
       color: #4361ee;
-      background: var(--bg);
-      border: 1px solid var(--border);
+      background: var(--filter-bg);
+      border: 1px solid var(--filter-border);
       border-radius: 8px;
       cursor: pointer;
       transition:
@@ -312,7 +306,7 @@
       }
 
       &--arrow {
-        color: var(--text);
+        color: var(--filter-text);
         font-size: 18px;
       }
 
@@ -330,9 +324,6 @@
     &__dropdown {
       flex: 1 1 auto;
     }
-
-    // Màn hình nhỏ: giữ bề rộng tối thiểu cho bảng rồi cuộn ngang,
-    // tránh các cột bị bóp khiến chữ đè lên nhau.
     &__table table {
       min-width: 640px;
     }
@@ -354,3 +345,4 @@
     }
   }
 }
+

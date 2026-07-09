@@ -678,6 +678,11 @@
     font-size: 0.68rem;
   }
 
+  .btPanel .btPanel__icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
   .signal-card {
     width: 100%;
     border-radius: 8px;
@@ -794,16 +799,19 @@
   }
 }
 .btPanel {
+  width: var(--chart-toolbar-button-height, 34px);
+  height: var(--chart-toolbar-button-height, 34px);
+  min-width: var(--chart-toolbar-button-height, 34px);
+  min-height: var(--chart-toolbar-button-height, 34px);
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 30px;
-  padding: 4px 10px;
+  padding: 0;
   border: 1px solid var(--border, #d6dae3);
   border-radius: 8px;
   background: #fff;
   cursor: pointer;
-
   &[data-active="true"] {
     border-color: #a5b4fc;
     background: #eef2ff;
