@@ -77,4 +77,36 @@ describe("updateChartData", () => {
     });
     expect(chart.applyNewData).not.toHaveBeenCalled();
   });
+
+  // Đổi mã: hai chuỗi nến NGÀY của hai mã khác nhau (VNINDEX → ACB) trùng
+  // KHÍT timestamp theo từng index (cùng lịch phiên) và cùng độ dài, chỉ khác
+  // GIÁ. Không được nhận nhầm là "cùng stream tick" rồi chỉ update nến cuối —
+  // phải applyNewData thay toàn bộ, nếu không nến mã cũ còn vẽ đè lên mã mới.
+  it("replaces the whole dataset when switching symbols (same timestamps, different prices)", () => {
+    const chart = {
+      getDataList: vi.fn(() => [
+        { timestamp: 1000, open: 1269, high: 1275, low: 1260, close: 1270, volume: 1 },
+        { timestamp: 2000, open: 1270, high: 1280, low: 1265, close: 1278, volume: 1 },
+        { timestamp: 3000, open: 1278, high: 1290, low: 1276, close: 1288, volume: 1 },
+      ]),
+      updateData: vi.fn(),
+      applyNewData: vi.fn(),
+      resize: vi.fn(),
+      getDrawPaneById: vi.fn(),
+      adjustPaneViewport: vi.fn(),
+    };
+
+    updateChartData(
+      chart,
+      [
+        { time: 1, open: 18.4, high: 18.5, low: 18.2, close: 18.4, volume: 1 },
+        { time: 2, open: 18.4, high: 18.6, low: 18.1, close: 18.0, volume: 1 },
+        { time: 3, open: 18.0, high: 18.2, low: 17.8, close: 17.9, volume: 1 },
+      ],
+      ["candle_pane"],
+    );
+
+    expect(chart.applyNewData).toHaveBeenCalledTimes(1);
+    expect(chart.updateData).not.toHaveBeenCalled();
+  });
 });

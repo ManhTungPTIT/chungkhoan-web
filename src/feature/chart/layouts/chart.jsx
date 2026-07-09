@@ -372,9 +372,26 @@ function restorePanePriceRangeSnapshot(chart, snapshot) {
 // Cùng một stream dữ liệu đang chảy (tick/append realtime) hay dataset bị THAY
 // THẾ (lần tải đầu, đổi mã, đổi khung)? So nến đầu + nến tại vị trí cuối của
 // data hiện có: tick chỉ đổi giá trị nến cuối, append chỉ thêm nến mới phía sau.
+//
+// CHỈ so timestamp là KHÔNG đủ: hai mã khác nhau ở cùng khung NGÀY có chuỗi nến
+// trùng khít timestamp theo từng index (cùng lịch phiên) và cùng độ dài — vd
+// VNINDEX (~1270) và ACB (~18) đều 375 nến, cùng first/last ts. Khi đó check
+// timestamp báo "cùng stream" nhầm → chỉ update nến cuối, để nến mã cũ vẽ đè
+// lên mã mới. Nến ĐẦU không bao giờ đổi trong một stream sống (tick chỉ chạm
+// nến cuối, append chỉ thêm phía sau) nên GIÁ nến đầu phân biệt được đổi mã.
+function isSameFirstCandle(a, b) {
+  return (
+    a?.open === b?.open &&
+    a?.high === b?.high &&
+    a?.low === b?.low &&
+    a?.close === b?.close
+  );
+}
+
 function isSameLiveDataStream(currentData, nextData) {
   if (currentData.length === 0 || nextData.length === 0) return false;
   if (currentData[0]?.timestamp !== nextData[0]?.timestamp) return false;
+  if (!isSameFirstCandle(currentData[0], nextData[0])) return false;
   if (nextData.length < currentData.length) return false;
 
   const lastCurrentIndex = currentData.length - 1;
