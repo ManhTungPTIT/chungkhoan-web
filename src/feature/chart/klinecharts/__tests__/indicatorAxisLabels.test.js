@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   formatAxisPrice,
+  getAxisLabelWidth,
+  getRequiredAxisLabelWidth,
   layoutAroundAnchor,
   resolveLabelPositions,
 } from "../indicatorAxisLabels";
@@ -105,3 +107,23 @@ describe("formatAxisPrice", () => {
     expect(formatAxisPrice(1234567, 0)).toBe("1,234,567");
   });
 });
+
+describe("getAxisLabelWidth", () => {
+  it("expands beyond the minimum width for long price labels", () => {
+    expect(getAxisLabelWidth(48)).toBe(60);
+    expect(getAxisLabelWidth(10)).toBe(40);
+  });
+});
+
+describe("getRequiredAxisLabelWidth", () => {
+  it("uses the widest visible label across the pane", () => {
+    const items = [
+      { value: 1849.83, precision: 2 },
+      { value: 16.3, precision: 2 },
+      { value: 9999.99, precision: 2, fixed: true },
+    ];
+
+    expect(getRequiredAxisLabelWidth(items, (text) => text.length * 6)).toBe(60);
+  });
+});
+

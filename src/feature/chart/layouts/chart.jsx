@@ -23,7 +23,7 @@ const DRAGGABLE_SEPARATOR_SIZE = 1;
 const MOBILE_CROSSHAIR_DELAY = 500;
 const MOBILE_CROSSHAIR_MOVE_TOLERANCE = 8;
 const INDICATOR_PANE_HEIGHT = 120;
-const PRICE_AXIS_SIZE = 76;
+const PRICE_AXIS_SIZE = "auto";
 const SUB_PANE_INDICATOR_TOOLTIP = {
   showRule: "always",
   showName: true,

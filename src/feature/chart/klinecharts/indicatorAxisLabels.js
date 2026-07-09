@@ -9,7 +9,50 @@ const LABEL_HEIGHT = 18;
 const LABEL_GAP = 2;
 const LABEL_FONT = "600 12px Helvetica Neue, Helvetica, Arial, sans-serif";
 const LABEL_PADDING_X = 6;
-const MIN_AXIS_LABEL_WIDTH = 76;
+const MIN_AXIS_LABEL_WIDTH = 40;
+const AXIS_LABEL_WIDTH_REQUESTS_KEY = "__leoAxisLabelWidthRequests";
+const AXIS_LABEL_APPLIED_WIDTH_KEY = "__leoAxisLabelAppliedWidth";
+
+export function getAxisLabelWidth(textWidth) {
+  return Math.ceil(Math.max(MIN_AXIS_LABEL_WIDTH, textWidth + LABEL_PADDING_X * 2));
+}
+
+export function getRequiredAxisLabelWidth(items, measureTextWidth) {
+  return items.reduce((maxWidth, item) => {
+    if (item.fixed) return maxWidth;
+    const text = formatAxisPrice(item.value, item.precision);
+    return Math.max(maxWidth, getAxisLabelWidth(measureTextWidth(text)));
+  }, MIN_AXIS_LABEL_WIDTH);
+}
+
+function syncChartAxisLabelWidth(chart, paneId, requiredWidth) {
+  const requests = chart[AXIS_LABEL_WIDTH_REQUESTS_KEY] ?? new Map();
+  requests.set(paneId, requiredWidth);
+  chart[AXIS_LABEL_WIDTH_REQUESTS_KEY] = requests;
+
+  const nextWidth = Math.max(MIN_AXIS_LABEL_WIDTH, ...requests.values());
+  if (chart[AXIS_LABEL_APPLIED_WIDTH_KEY] === nextWidth) return false;
+  chart[AXIS_LABEL_APPLIED_WIDTH_KEY] = nextWidth;
+  chart.setStyles?.({ yAxis: { size: nextWidth } });
+  return true;
+}
+
+function removeChartAxisLabelWidth(chart, paneId) {
+  const requests = chart[AXIS_LABEL_WIDTH_REQUESTS_KEY];
+  if (!requests) return;
+  requests.delete(paneId);
+  if (requests.size === 0) {
+    chart[AXIS_LABEL_APPLIED_WIDTH_KEY] = undefined;
+    chart.setStyles?.({ yAxis: { size: "auto" } });
+    return;
+  }
+  const nextWidth = Math.max(MIN_AXIS_LABEL_WIDTH, ...requests.values());
+  if (chart[AXIS_LABEL_APPLIED_WIDTH_KEY] !== nextWidth) {
+    chart[AXIS_LABEL_APPLIED_WIDTH_KEY] = nextWidth;
+    chart.setStyles?.({ yAxis: { size: nextWidth } });
+  }
+}
+
 // Palette default của klinecharts — dùng khi indicator không khai báo màu line
 const DEFAULT_LINE_COLORS = [
   "#FF9600",
@@ -161,7 +204,7 @@ function render(canvas, ctx, items, width, height) {
     if (item.fixed) return; // nhãn giá nến do klinecharts tự vẽ
     const text = formatAxisPrice(item.value, item.precision);
     const textWidth = ctx.measureText(text).width;
-    const boxWidth = Math.max(MIN_AXIS_LABEL_WIDTH, textWidth + LABEL_PADDING_X * 2);
+    const boxWidth = getAxisLabelWidth(textWidth);
     const top = item.y - LABEL_HEIGHT / 2;
     ctx.beginPath();
     if (typeof ctx.roundRect === "function") {
@@ -242,6 +285,20 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
     }
     items.sort((a, b) => a.y - b.y);
 
+    ctx.font = LABEL_FONT;
+    const requiredAxisWidth = getRequiredAxisLabelWidth(
+      items,
+      (text) => ctx.measureText(text).width,
+    );
+    const minWidth = `${requiredAxisWidth}px`;
+    if (axisElement.style.minWidth !== minWidth) {
+      axisElement.style.minWidth = minWidth;
+    }
+    if (syncChartAxisLabelWidth(chart, paneId, requiredAxisWidth)) {
+      lastSignature = "";
+      return;
+    }
+
     const signature =
       `${width}x${height}|${anchorY === null ? "" : Math.round(anchorY)}|` +
       items
@@ -259,3 +316,4 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
     canvas.remove();
   };
 }
+
