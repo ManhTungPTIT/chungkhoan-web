@@ -401,7 +401,7 @@ function refitPaneAxes(chart, paneIds) {
 
 // Update data trên chart hiện có, không dispose/init lại chart (data realtime
 // vào chart mà không làm trắng trang).
-function updateChartData(chart, candles, paneIds = []) {
+export function updateChartData(chart, candles, paneIds = []) {
   const data = toKLineData(candles);
   if (data.length === 0 && (chart.getDataList?.()?.length ?? 0) > 0) {
     return;
@@ -412,10 +412,16 @@ function updateChartData(chart, candles, paneIds = []) {
     ? getPanePriceRangeSnapshot(chart, paneIds)
     : [];
 
-  // Reset auto-fit only when the dataset is replaced (initial load, symbol/timeframe change).
-  // Same-stream realtime ticks keep the user price range only after manual zoom/pan.
-  if (!sameStream && data.length > 0) refitPaneAxes(chart, paneIds);
-  chart.applyNewData(data);
+  if (sameStream && typeof chart.updateData === "function") {
+    for (let i = currentData.length - 1; i < data.length; i += 1) {
+      chart.updateData(data[i]);
+    }
+  } else {
+    // Reset auto-fit only when the dataset is replaced (initial load, symbol/timeframe change).
+    // Same-stream realtime ticks keep the user price range only after manual zoom/pan.
+    if (!sameStream && data.length > 0) refitPaneAxes(chart, paneIds);
+    chart.applyNewData(data);
+  }
 
   if (sameStream) {
     if (priceRangeSnapshot.length > 0) {

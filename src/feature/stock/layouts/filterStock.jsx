@@ -243,7 +243,7 @@ function FilterStock() {
                 <tr key={s.symbol}>
                   <td className="col-code">{s.symbol}</td>
                   <td className="col-signal">
-                    <span className={`badge badge--${sig.className}`}>
+                    <span className={`badge badge--${sig.label === "BUY" && Number(s.signal_sessions) > 0 ?  sig.className : "buy"}`}>
                       {sig.label === "BUY" && Number(s.signal_sessions) > 0
                         ? "Nắm giữ"
                         : sig.label}
