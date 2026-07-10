@@ -12,24 +12,35 @@ const INTERVAL_SECONDS = {
 
 const DAY = 24 * 60 * 60;
 
+// Nến ngày/tuần/tháng neo theo NGÀY GIAO DỊCH giờ VN (UTC+7): vnstock đóng dấu
+// nến ngày tại nửa đêm giờ VN (= 17:00 UTC hôm trước), còn quote realtime khi
+// thiếu time riêng lại rơi về thời điểm snapshot "bây giờ" (giờ UTC trong phiên).
+// Nếu chia khung theo ngày UTC thì một ngày giao dịch VN bị tách làm hai khung
+// → sinh nến "ma". Cộng offset VN trước khi floor để cả hai về cùng khung, rồi
+// trừ lại offset để mốc trả về vẫn là nửa đêm giờ VN (khớp stamp của nến ngày).
+const VN_OFFSET = 7 * 60 * 60;
+
 // Đầu khung nến chứa thời điểm `time` (unix giây) theo interval.
 // Token interval khớp TimelineStock/BE: 1m 5m 15m 30m 1h 1d 1w 1mth.
 export function bucketStart(time, interval) {
   const seconds = INTERVAL_SECONDS[interval];
-  if (seconds) return Math.floor(time / seconds) * seconds;
+  // Khung nội ngày (phút/giờ): floor theo giây, độc lập múi giờ.
+  if (seconds && interval !== "1d") return Math.floor(time / seconds) * seconds;
+
+  const vn = time + VN_OFFSET; // quy về "giờ VN" trước khi cắt khung theo ngày
 
   if (interval === "1w") {
     // Tuần bắt đầu thứ Hai. Epoch (01/01/1970) là thứ Năm → ngày thứ d kể từ
     // epoch cách thứ Hai gần nhất trước đó (d + 3) % 7 ngày.
-    const days = Math.floor(time / DAY);
-    return (days - ((days + 3) % 7)) * DAY;
+    const days = Math.floor(vn / DAY);
+    return (days - ((days + 3) % 7)) * DAY - VN_OFFSET;
   }
   if (interval === "1mth") {
-    const d = new Date(time * 1000);
-    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) / 1000;
+    const d = new Date(vn * 1000);
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1) / 1000 - VN_OFFSET;
   }
-  // Interval lạ → coi như khung ngày để không crash
-  return Math.floor(time / DAY) * DAY;
+  // "1d" và interval lạ → khung ngày giờ VN
+  return Math.floor(vn / DAY) * DAY - VN_OFFSET;
 }
 
 /**

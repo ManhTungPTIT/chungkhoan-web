@@ -14,9 +14,4 @@ export function isHolding(item) {
   return item?.signal === "buy" && Boolean(item?.signal_hold);
 }
 
-// Chuỗi cột T+: chỉ hiện số khi đã có ≥1 phiên MỞ sau ngày báo; chưa có (0/null/
-// chưa qua giờ mở) → "-". Khớp yêu cầu: trước phiên chưa cộng, sau phiên mới cộng.
-export function formatTPlus(sessions) {
-  const n = Number(sessions);
-  return Number.isFinite(n) && n >= 1 ? `T+${n}` : "-";
-}
+

@@ -10,7 +10,7 @@ import "../styles/filterStock.scss";
 import useSector from "../hooks/useSector";
 import useSectorSymbol from "../hooks/useSectorSymbol";
 import { useVn100 } from "../../chart/hooks/useVn100";
-import { signalDisplay, isHolding, formatTPlus } from "../../chart/untils/signalDisplay";
+import { signalDisplay, isHolding } from "../../chart/untils/signalDisplay";
 
 // Cấu hình cột header
 const COLUMNS = [
@@ -256,7 +256,8 @@ function FilterStock() {
                   >
                     {Number.isFinite(pct) ? `${pct}%` : "--"}
                   </td>
-                  <td>{formatTPlus(s.signal_sessions)}</td>
+                  <td>
+                    T+{(s.signal_sessions)}</td>
                 </tr>
               );
             })}

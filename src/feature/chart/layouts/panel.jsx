@@ -1,6 +1,6 @@
 import { useRef, useCallback, useEffect, useMemo } from "react";
 import "../styles/panel.scss";
-import { signalDisplay, isHolding, formatTPlus } from "../untils/signalDisplay";
+import { signalDisplay, isHolding } from "../untils/signalDisplay";
 
 // Nhãn tín hiệu hiển thị thực tế của một mã (khớp với logic render bên dưới).
 function displaySignal(item) {
@@ -105,7 +105,7 @@ function Panel({ dataPanel = [], highlightedSymbol = "", onSelectSymbol }) {
               <td className={isPositive ? "percent_hold" : "percent_sell"}>
                 {item.change_pct}
               </td>
-              <td>{formatTPlus(item.signal_sessions)}</td>
+              <td>T+{item.signal_sessions}</td>
             </tr>
           );
         })}

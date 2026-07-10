@@ -15,6 +15,11 @@ const candle = (time, close, extra = {}) => ({
 // 2026-07-07 03:04:05 UTC (10:04:05 giờ VN, trong phiên)
 const T = Date.UTC(2026, 6, 7, 3, 4, 5) / 1000;
 
+// Nửa đêm giờ VN (UTC+7) của một ngày, tính bằng giây unix. Nến ngày/tuần/tháng
+// từ vnstock được đóng dấu tại mốc này (vd 2026-07-10 → 2026-07-09 17:00 UTC).
+const VN_OFFSET = 7 * 60 * 60;
+const vnMidnight = (y, m, d) => Date.UTC(y, m, d) / 1000 - VN_OFFSET;
+
 describe("bucketStart", () => {
   it("khung phút/giờ: floor về đầu khung", () => {
     expect(bucketStart(T, "1m")).toBe(Date.UTC(2026, 6, 7, 3, 4) / 1000);
@@ -24,21 +29,21 @@ describe("bucketStart", () => {
     expect(bucketStart(T, "1h")).toBe(Date.UTC(2026, 6, 7, 3) / 1000);
   });
 
-  it("khung ngày: floor về 00:00 UTC (khớp normalizeCandle của nến 'YYYY-MM-DD')", () => {
-    expect(bucketStart(T, "1d")).toBe(Date.UTC(2026, 6, 7) / 1000);
+  it("khung ngày: floor về nửa đêm giờ VN của ngày giao dịch (khớp stamp nến ngày vnstock)", () => {
+    expect(bucketStart(T, "1d")).toBe(vnMidnight(2026, 6, 7));
   });
 
-  it("khung tuần: floor về thứ Hai đầu tuần", () => {
+  it("khung tuần: floor về thứ Hai đầu tuần (nửa đêm giờ VN)", () => {
     // 2026-07-07 là thứ Ba → tuần bắt đầu thứ Hai 2026-07-06
-    expect(bucketStart(T, "1w")).toBe(Date.UTC(2026, 6, 6) / 1000);
+    expect(bucketStart(T, "1w")).toBe(vnMidnight(2026, 6, 6));
     // Chính thứ Hai thì giữ nguyên ngày
     expect(bucketStart(Date.UTC(2026, 6, 6, 5) / 1000, "1w")).toBe(
-      Date.UTC(2026, 6, 6) / 1000,
+      vnMidnight(2026, 6, 6),
     );
   });
 
-  it("khung tháng: floor về ngày 1 đầu tháng", () => {
-    expect(bucketStart(T, "1mth")).toBe(Date.UTC(2026, 6, 1) / 1000);
+  it("khung tháng: floor về ngày 1 đầu tháng (nửa đêm giờ VN)", () => {
+    expect(bucketStart(T, "1mth")).toBe(vnMidnight(2026, 6, 1));
   });
 });
 
@@ -77,7 +82,7 @@ describe("mergeQuoteIntoCandles — sang khung mới", () => {
     const out = mergeQuoteIntoCandles([last], { price: 104, time: T }, "1d");
     expect(out).toHaveLength(2);
     expect(out[1]).toMatchObject({
-      time: Date.UTC(2026, 6, 7) / 1000,
+      time: vnMidnight(2026, 6, 7),
       open: 104,
       high: 104,
       low: 104,
@@ -126,7 +131,7 @@ describe("mergeQuoteIntoCandles — dữ liệu xấu", () => {
   it("seeds a temporary candle from quote when history is empty", () => {
     expect(mergeQuoteIntoCandles([], { price: 100, time: T, volume: 900 }, "1d")).toEqual([
       {
-        time: Date.UTC(2026, 6, 7) / 1000,
+        time: vnMidnight(2026, 6, 7),
         open: 100,
         high: 100,
         low: 100,
@@ -134,5 +139,29 @@ describe("mergeQuoteIntoCandles — dữ liệu xấu", () => {
         volume: 900,
       },
     ]);
+  });
+});
+
+describe("mergeQuoteIntoCandles — nến ngày neo nửa đêm giờ VN (regression nến ma lệch múi giờ)", () => {
+  it("quote buổi chiều VN cùng ngày giao dịch với nến ngày (neo 17:00 UTC hôm trước) → CẬP NHẬT, không append nến ma", () => {
+    // Nến ngày 2026-07-10 như /intraday trả về: đóng dấu nửa đêm giờ VN
+    // = 2026-07-09 17:00 UTC. OHLC/volume lấy đúng số thật của VND.
+    const today = candle(vnMidnight(2026, 6, 10), 18, {
+      open: 18.3,
+      high: 18.45,
+      low: 17.85,
+      volume: 17714300,
+    });
+    // Quote snapshot 2026-07-10 09:07 UTC = 16:07 giờ VN (sau ATC), KHÔNG có
+    // time riêng → dùng chính thời điểm snapshot này (giờ UTC của hôm nay).
+    const quoteTime = Date.UTC(2026, 6, 10, 9, 7) / 1000;
+    const out = mergeQuoteIntoCandles(
+      [today],
+      { price: 18, time: quoteTime, volume: 17714300 },
+      "1d",
+    );
+    // Cùng một ngày giao dịch VN → cập nhật nến hôm nay, KHÔNG sinh nến thứ 2.
+    expect(out).toHaveLength(1);
+    expect(out[0].time).toBe(today.time);
   });
 });
