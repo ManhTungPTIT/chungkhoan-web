@@ -5,7 +5,9 @@ describe("sortRowsBySignal", () => {
   it("groups rows by buy, hold, then sell signal order", () => {
     const rows = [
       { symbol: "SELL1", signal: "sell", signal_sessions: 0 },
-      { symbol: "HOLD1", signal: "buy", signal_sessions: 3 },
+      // Nắm giữ = buy đã qua ngày báo → backend set signal_hold (không còn suy từ
+      // signal_sessions > 0). BUY tươi không có cờ này.
+      { symbol: "HOLD1", signal: "buy", signal_hold: true, signal_sessions: 3 },
       { symbol: "BUY1", signal: "buy", signal_sessions: 0 },
       { symbol: "UNKNOWN", signal: null, signal_sessions: null },
       { symbol: "BUY2", signal: "buy", signal_sessions: null },

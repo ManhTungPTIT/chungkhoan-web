@@ -10,7 +10,7 @@ import "../styles/filterStock.scss";
 import useSector from "../hooks/useSector";
 import useSectorSymbol from "../hooks/useSectorSymbol";
 import { useVn100 } from "../../chart/hooks/useVn100";
-import { signalDisplay } from "../../chart/untils/signalDisplay";
+import { signalDisplay, isHolding, formatTPlus } from "../../chart/untils/signalDisplay";
 
 // Cấu hình cột header
 const COLUMNS = [
@@ -50,7 +50,7 @@ const convertDay = (value) => {
 };
 
 function getSignalRank(row) {
-  if (row?.signal === "buy" && Number(row.signal_sessions) > 0) return 1;
+  if (isHolding(row)) return 1;
   if (row?.signal === "buy") return 0;
   if (row?.signal === "hold") return 1;
   if (row?.signal === "sell") return 2;
@@ -243,10 +243,8 @@ function FilterStock() {
                 <tr key={s.symbol}>
                   <td className="col-code">{s.symbol}</td>
                   <td className="col-signal">
-                    <span className={`badge badge--${sig.label === "BUY" && Number(s.signal_sessions) > 0 ?  sig.className : "buy"}`}>
-                      {sig.label === "BUY" && Number(s.signal_sessions) > 0
-                        ? "Nắm giữ"
-                        : sig.label}
+                    <span className={`badge badge--${isHolding(s) ? sig.className : "buy"}`}>
+                      {isHolding(s) ? "Nắm giữ" : sig.label}
                     </span>
                   </td>
                   {/* Backend VN100 chưa trả ngày báo/giá báo/T+ → tạm "--" */}
@@ -258,7 +256,7 @@ function FilterStock() {
                   >
                     {Number.isFinite(pct) ? `${pct}%` : "--"}
                   </td>
-                  <td>T+{s.signal_sessions ?? "--"}</td>
+                  <td>{formatTPlus(s.signal_sessions)}</td>
                 </tr>
               );
             })}
