@@ -111,39 +111,32 @@ function collectLabels(chart, paneId) {
 // Nhãn giá nến của thư viện có padding riêng, cao hơn nhãn chỉ báo
 export const ANCHOR_CLEARANCE = 22;
 
+function getItemHeight(item) {
+  return item.height ?? LABEL_HEIGHT;
+}
+
+function getCenterDistance(a, b) {
+  return getItemHeight(a) / 2 + getItemHeight(b) / 2 + LABEL_GAP;
+}
+
 // Xếp nhãn quanh MỐC là nhãn giá hiện tại (anchorY, do thư viện vẽ, đứng
 // yên): nhãn phía trên mốc dồn dần lên, phía dưới dồn dần xuống, giữ đúng
 // thứ tự giá và cách nhau tối thiểu 1 bậc — không nhãn nào đè lên mốc.
 export function layoutAroundAnchor(items, anchorY, paneHeight) {
-  const step = LABEL_HEIGHT + LABEL_GAP;
-  const half = LABEL_HEIGHT / 2;
-  const clearance = ANCHOR_CLEARANCE / 2 + LABEL_GAP + half;
-
-  const above = items
-    .filter((item) => item.y <= anchorY)
-    .sort((a, b) => b.y - a.y);
-  const below = items
-    .filter((item) => item.y > anchorY)
-    .sort((a, b) => a.y - b.y);
-
-  let boundAbove = anchorY - clearance;
-  above.forEach((item) => {
-    item.y = Math.max(Math.min(item.y, boundAbove), half);
-    boundAbove = item.y - step;
-  });
-
-  let boundBelow = anchorY + clearance;
-  below.forEach((item) => {
-    item.y = Math.min(Math.max(item.y, boundBelow), paneHeight - half);
-    boundBelow = item.y + step;
-  });
+  const anchor = {
+    y: anchorY,
+    fixed: true,
+    height: ANCHOR_CLEARANCE,
+    __anchor: true,
+  };
+  const arranged = [...items, anchor].sort((a, b) => a.y - b.y);
+  resolveLabelPositions(arranged, paneHeight);
   return items;
 }
 
 // Đẩy các nhãn tách nhau ra tối thiểu 1 bậc (nhãn fixed đứng yên), kẹp trong
 // pane. items phải đã sort tăng theo y. Dùng cho pane không có nhãn giá nến.
 export function resolveLabelPositions(items, paneHeight) {
-  const step = LABEL_HEIGHT + LABEL_GAP;
   const half = LABEL_HEIGHT / 2;
   const maxY = paneHeight - half;
 
@@ -155,17 +148,19 @@ export function resolveLabelPositions(items, paneHeight) {
   // Quét xuôi: mỗi nhãn cách nhãn trên tối thiểu 1 bậc. Gặp nhãn fixed bị
   // lấn thì dồn ngược chuỗi nhãn phía trên lên (dừng ở nhãn fixed khác/biên).
   for (let i = 1; i < items.length; i++) {
-    const minY = items[i - 1].y + step;
+    const minY = items[i - 1].y + getCenterDistance(items[i - 1], items[i]);
     if (items[i].y >= minY) continue;
     if (!items[i].fixed) {
       items[i].y = minY;
       continue;
     }
-    let requiredY = items[i].y - step;
+    let requiredY = items[i].y - getCenterDistance(items[i - 1], items[i]);
     for (let j = i - 1; j >= 0; j--) {
       if (items[j].fixed || items[j].y <= requiredY) break;
       items[j].y = Math.max(requiredY, half);
-      requiredY = items[j].y - step;
+      if (j > 0) {
+        requiredY = items[j].y - getCenterDistance(items[j - 1], items[j]);
+      }
     }
   }
 
@@ -173,11 +168,13 @@ export function resolveLabelPositions(items, paneHeight) {
   let limit = maxY;
   for (let j = items.length - 1; j >= 0; j--) {
     if (items[j].fixed) {
-      limit = items[j].y - step;
+      limit =
+        j > 0 ? items[j].y - getCenterDistance(items[j - 1], items[j]) : half;
       continue;
     }
     if (items[j].y > limit) items[j].y = Math.max(limit, half);
-    limit = items[j].y - step;
+    limit =
+      j > 0 ? items[j].y - getCenterDistance(items[j - 1], items[j]) : half;
   }
   return items;
 }
@@ -268,14 +265,14 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
     // Pane nến: lấy nhãn giá hiện tại (thư viện vẽ, đứng yên) làm mốc,
     // các nhãn chỉ báo xếp dần lên trên / xuống dưới quanh mốc này
     let anchorY = null;
-    if (crosshairY !== null) {
-      anchorY = crosshairY;
-    } else if (paneId === "candle_pane") {
+    if (paneId === "candle_pane") {
       const dataList = chart.getDataList?.() ?? [];
       const lastClose = dataList[dataList.length - 1]?.close;
       if (Number.isFinite(lastClose)) {
         anchorY = convertValueToY(chart, paneId, lastClose);
       }
+    } else if (crosshairY !== null) {
+      anchorY = crosshairY;
     }
     if (anchorY !== null) {
       layoutAroundAnchor(items, anchorY, height);

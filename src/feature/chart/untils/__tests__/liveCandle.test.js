@@ -142,6 +142,59 @@ describe("mergeQuoteIntoCandles — dữ liệu xấu", () => {
   });
 });
 
+describe("mergeQuoteIntoCandles — chặn nến ma khi nối phiên ngày mới (regression signal lệch panel)", () => {
+  // Nến ngày T6 2026-07-10 (close 8.5) như /intraday AAS trả về.
+  const friday = candle(vnMidnight(2026, 6, 10), 8.5, {
+    open: 8.9,
+    high: 8.9,
+    low: 8.4,
+    volume: 2166900,
+  });
+
+  it("quote trước giờ mở cửa T2 = giá chốt T6 (price === close nến cuối) → KHÔNG nối nến ma", () => {
+    // Snapshot sáng T2 2026-07-13 08:00 VN, chưa có khớp mới → /quotes vẫn trả
+    // nguyên giá chốt T6 (8.5). Nối vào = nến phẳng O=H=L=C sao chép phiên trước
+    // → generateSignals lật SELL giả (lệch panel BE vốn giữ BUY). Phải bỏ qua.
+    const candles = [friday];
+    const quoteTime = Date.UTC(2026, 6, 13, 1, 0) / 1000; // 08:00 VN, trước 09:00
+    const out = mergeQuoteIntoCandles(
+      candles,
+      { price: 8.5, time: quoteTime, volume: 2166900 },
+      "1d",
+    );
+    expect(out).toBe(candles); // reference cũ y nguyên → không nến ma, không re-render
+  });
+
+  it("quote cuối tuần (T7/CN) dù giá khác cũng KHÔNG nối nến ma (không thể có phiên mới)", () => {
+    const candles = [friday];
+    const satTime = Date.UTC(2026, 6, 11, 3, 0) / 1000; // T7 2026-07-11 10:00 VN
+    const out = mergeQuoteIntoCandles(candles, { price: 8.7, time: satTime }, "1d");
+    expect(out).toBe(candles);
+  });
+
+  it("quote TRONG phiên T2 giá đã đổi (price !== close) → NỐI nến hôm nay bình thường", () => {
+    const candles = [friday];
+    const monTime = Date.UTC(2026, 6, 13, 3, 0) / 1000; // T2 10:00 VN, trong phiên
+    const out = mergeQuoteIntoCandles(candles, { price: 8.6, time: monTime }, "1d");
+    expect(out).toHaveLength(2);
+    expect(out[1]).toMatchObject({
+      time: vnMidnight(2026, 6, 13),
+      open: 8.6,
+      high: 8.6,
+      low: 8.6,
+      close: 8.6,
+    });
+  });
+
+  it("khung nội ngày (1m) KHÔNG bị chặn dù giá trùng — nến phút mới vẫn hình thành", () => {
+    const prevMinute = candle(Date.UTC(2026, 6, 13, 3, 2) / 1000, 8.5);
+    const monTime = Date.UTC(2026, 6, 13, 3, 4) / 1000;
+    const out = mergeQuoteIntoCandles([prevMinute], { price: 8.5, time: monTime }, "1m");
+    expect(out).toHaveLength(2);
+    expect(out[1].time).toBe(Date.UTC(2026, 6, 13, 3, 4) / 1000);
+  });
+});
+
 describe("mergeQuoteIntoCandles — nến ngày neo nửa đêm giờ VN (regression nến ma lệch múi giờ)", () => {
   it("quote buổi chiều VN cùng ngày giao dịch với nến ngày (neo 17:00 UTC hôm trước) → CẬP NHẬT, không append nến ma", () => {
     // Nến ngày 2026-07-10 như /intraday trả về: đóng dấu nửa đêm giờ VN
