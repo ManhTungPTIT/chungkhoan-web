@@ -12,15 +12,15 @@ export function detectAccountType(value) {
   return "invalid";
 }
 
-// Trả về phần payload tài khoản: { email } | { phoneNumber } | null.
-export function buildAccountPayload(value) {
+// Trả về phần payload tài khoản theo loại tài khoản đang chọn:
+// - "VPS" | "TCBS" → { broker, brokerAccount } (số tài khoản chứng khoán).
+// - còn lại ("email", mặc định) → gõ tự do: có "@" → { email }, khác → { phoneNumber }.
+// Rỗng → null. Đăng nhập/đăng ký dùng chung để input map về cùng một field.
+export function buildAccountPayload(value, accountType = "email") {
   const v = (value ?? "").trim();
-  switch (detectAccountType(v)) {
-    case "email":
-      return { email: v };
-    case "phone":
-      return { phoneNumber: v };
-    default:
-      return null;
+  if (!v) return null;
+  if (accountType === "VPS" || accountType === "TCBS") {
+    return { broker: accountType, brokerAccount: v };
   }
+  return v.includes("@") ? { email: v } : { phoneNumber: v };
 }

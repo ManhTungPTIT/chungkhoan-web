@@ -5,7 +5,6 @@ import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF, FaApple } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { LoginUserService } from "../services/loginUserService";
-import { buildAccountPayload } from "../untils/accountType";
 import { mapLoginError } from "../untils/loginError";
 
 export default function LoginForm({ onSwitchTab }) {
@@ -23,8 +22,6 @@ export default function LoginForm({ onSwitchTab }) {
   const validate = () => {
     const newErrors = {};
     if (!account.trim()) newErrors.account = "Vui lòng nhập trường này";
-    else if (!buildAccountPayload(account))
-      newErrors.account = "Vui lòng nhập email hoặc số điện thoại hợp lệ";
     if (!password.trim()) newErrors.password = "Vui lòng nhập trường này";
     return newErrors;
   };
@@ -37,7 +34,7 @@ export default function LoginForm({ onSwitchTab }) {
 
     try {
       await login(
-        { ...buildAccountPayload(account), password: password.trim() },
+        { account: account.trim(), password: password.trim() },
         remember,
       );
       navigate("/");
@@ -61,7 +58,7 @@ export default function LoginForm({ onSwitchTab }) {
             <FiUser className="input-icon" />
             <input
               type="text"
-              placeholder="Email hoặc số điện thoại"
+              placeholder="Email, số điện thoại hoặc số tài khoản chứng khoán"
               value={account}
               onChange={(e) => {
                 setAccount(e.target.value);

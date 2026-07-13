@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { FiUser, FiAtSign, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { IoCloseCircle, IoCheckmarkCircle } from "react-icons/io5";
 import { RegisterUserService } from "../services/registerUserService";
-import { buildAccountPayload } from "../untils/accountType";
 
 export default function RegisterForm({ onSwitchTab }) {
   const [fullName, setFullName] = useState("");
-  const [account, setAccount] = useState("");
+  const [broker, setBroker] = useState("");
+  const [brokerAccount, setBrokerAccount] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -25,9 +25,8 @@ export default function RegisterForm({ onSwitchTab }) {
   const validate = () => {
     const newErrors = {};
     if (!fullName.trim()) newErrors.fullName = "Vui lòng nhập trường này";
-    if (!account.trim()) newErrors.account = "Vui lòng nhập trường này";
-    else if (!buildAccountPayload(account))
-      newErrors.account = "Vui lòng nhập email hoặc số điện thoại hợp lệ";
+    if (!brokerAccount.trim())
+      newErrors.brokerAccount = "Vui lòng nhập số tài khoản";
     if (!password.trim()) newErrors.password = "Vui lòng nhập trường này";
     else if (password.length < 8)
       newErrors.password = "Mật khẩu tối thiểu 8 ký tự";
@@ -55,7 +54,8 @@ export default function RegisterForm({ onSwitchTab }) {
       await register({
         fullName: fullName.trim(),
         password: password.trim(),
-        ...buildAccountPayload(account),
+        broker,
+        brokerAccount: brokerAccount.trim(),
       });
       setShowSuccess(true);
     } catch (err) {
@@ -97,19 +97,36 @@ export default function RegisterForm({ onSwitchTab }) {
         </div>
 
         <div className="field-group">
-          <div className={`input-wrap ${errors.account ? "error" : ""}`}>
-            <FiAtSign className="input-icon" />
+          <div className="broker-toggle" role="group" aria-label="Chon san giao dich">
+            {["VPS", "TCBS"].map((item) => (
+              <label key={item} className={broker === item ? "is-active" : ""}>
+                <input
+                  type="checkbox"
+                  checked={broker === item}
+                  onChange={() => setBroker((current) => (current === item ? "" : item))}
+                />
+                {item}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="field-group">
+          <div className={`input-wrap ${errors.brokerAccount ? "error" : ""}`}>
+            <FiUser className="input-icon" />
             <input
               type="text"
-              placeholder="Email hoặc số điện thoại"
-              value={account}
+              placeholder="Email, số điện thoại hoặc số tài khoản chứng khoán"
+              value={brokerAccount}
               onChange={(e) => {
-                setAccount(e.target.value);
-                clearError("account");
+                setBrokerAccount(e.target.value);
+                clearError("brokerAccount");
               }}
             />
           </div>
-          {errors.account && <span className="error-msg">{errors.account}</span>}
+          {errors.brokerAccount && (
+            <span className="error-msg">{errors.brokerAccount}</span>
+          )}
         </div>
 
         <div className="field-group">

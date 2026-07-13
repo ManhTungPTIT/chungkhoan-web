@@ -278,6 +278,125 @@
       }
     }
 
+
+
+    .expiry-picker {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+
+      &.active {
+        border-color: rgb(7, 104, 159);
+        box-shadow: 0 0 0 3px rgba(7, 104, 159, 0.08);
+      }
+    }
+
+    .expiry-picker-trigger {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 0.55rem;
+      border: none;
+      background: #fff;
+      color: #111827;
+      padding: 0.7rem 0.75rem;
+      cursor: pointer;
+      text-align: left;
+
+      span {
+        color: #6b7280;
+        font-size: 0.82rem;
+        font-weight: 600;
+      }
+
+      strong {
+        color: rgb(7, 104, 159);
+        font-size: 0.86rem;
+      }
+
+      svg {
+        color: #6b7280;
+      }
+    }
+
+    .expiry-calendar {
+      border-top: 1px solid #eef0f3;
+      padding: 0.75rem;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .expiry-calendar-head {
+      display: grid;
+      grid-template-columns: 2.2rem 1fr 2.2rem;
+      align-items: center;
+      margin-bottom: 0.65rem;
+
+      button {
+        border: none;
+        background: transparent;
+        color: #111827;
+        cursor: pointer;
+        font-size: 1.8rem;
+        line-height: 1;
+        padding: 0.2rem;
+      }
+
+      strong {
+        text-align: center;
+        font-size: 1rem;
+        color: #111827;
+      }
+    }
+
+    .expiry-calendar-weekdays,
+    .expiry-calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.25rem;
+    }
+
+    .expiry-calendar-weekdays {
+      margin-bottom: 0.35rem;
+      background: #f7f7f7;
+      border-radius: 8px;
+      padding: 0.25rem 0;
+
+      span {
+        text-align: center;
+        color: #737373;
+        font-size: 0.78rem;
+      }
+    }
+
+    .expiry-calendar-grid {
+      button {
+        aspect-ratio: 1;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: #111827;
+        cursor: pointer;
+        font-size: 0.92rem;
+
+        &:hover:not(:disabled) {
+          background: #eef2ff;
+        }
+
+        &:disabled {
+          cursor: default;
+        }
+
+        &.is-selected {
+          background: #2d2d2d;
+          color: #fff;
+          font-weight: 700;
+        }
+      }
+    }
+
     .modal-action-btn {
       width: 100%;
       padding: 0.55rem;

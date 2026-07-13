@@ -39,6 +39,12 @@ const initialsOf = (name) =>
 
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("vi-VN") : "—");
 
+// Định danh hiển thị: email → SĐT → "Sàn · Số TK" (user đăng ký bằng TK chứng khoán).
+const identityOf = (u) =>
+  u.email ||
+  u.phoneNumber ||
+  (u.broker && u.brokerAccount ? `${u.broker} · ${u.brokerAccount}` : "—");
+
 const avatarIdx = (name) =>
   ((name || "?").charCodeAt(0) % AVATAR_COLORS.length) + 1;
 
@@ -104,26 +110,161 @@ function Status({ status, expiresAt }) {
 
 // ─── Time packages ────────────────────────────────────────
 const PACKAGES = [
-  { id: 30, label: "30", unit: "ngày" },
-  { id: 90, label: "90", unit: "ngày" },
-  { id: 180, label: "180", unit: "ngày" },
-  { id: 365, label: "1", unit: "năm" },
-  { id: 730, label: "2", unit: "năm" },
-  { id: 1095, label: "3", unit: "năm" },
-  { id: 1825, label: "5", unit: "năm" },
+  { id: 30, label: "30", unit: "ng\u00e0y" },
+  { id: 90, label: "90", unit: "ng\u00e0y" },
+  { id: 180, label: "180", unit: "ng\u00e0y" },
+  { id: 365, label: "1", unit: "n\u0103m" },
+  { id: 730, label: "2", unit: "n\u0103m" },
+  { id: 1095, label: "3", unit: "n\u0103m" },
+  { id: 1825, label: "5", unit: "n\u0103m" },
 ];
 
-// ─── User Modal ───────────────────────────────────────────
-// export để test trực tiếp phần chọn gói (không phải dựng cả trang ManagerUser).
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MONTH_NAMES = [
+  "Th\u00e1ng M\u1ed9t",
+  "Th\u00e1ng Hai",
+  "Th\u00e1ng Ba",
+  "Th\u00e1ng T\u01b0",
+  "Th\u00e1ng N\u0103m",
+  "Th\u00e1ng S\u00e1u",
+  "Th\u00e1ng B\u1ea3y",
+  "Th\u00e1ng T\u00e1m",
+  "Th\u00e1ng Ch\u00edn",
+  "Th\u00e1ng M\u01b0\u1eddi",
+  "Th\u00e1ng M\u01b0\u1eddi M\u1ed9t",
+  "Th\u00e1ng M\u01b0\u1eddi Hai",
+];
+const WEEKDAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+const toDateInputValue = (value) => {
+  const date = value ? new Date(value) : new Date();
+  if (Number.isNaN(date.getTime())) return "";
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const dateFromInputValue = (value) => {
+  if (!value) return null;
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+const endOfDayIso = (value) => {
+  const date = dateFromInputValue(value);
+  if (!date) return null;
+  date.setHours(23, 59, 59, 999);
+  return date.toISOString();
+};
+
+const addDays = (date, days) => {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+};
+
+const daysUntil = (value) => {
+  const date = dateFromInputValue(value);
+  if (!date) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+  return Math.max(1, Math.ceil((date.getTime() - today.getTime()) / DAY_MS));
+};
+
+const sameDate = (a, b) =>
+  a &&
+  b &&
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
+
+function ExpiryCalendar({ value, month, onMonthChange, onSelect }) {
+  const selectedDate = dateFromInputValue(value);
+  const monthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+  const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+  const leadingDays = (monthStart.getDay() + 6) % 7;
+  const days = Array.from({ length: leadingDays + monthEnd.getDate() }, (_, index) => {
+    const day = index - leadingDays + 1;
+    return day > 0 ? new Date(month.getFullYear(), month.getMonth(), day) : null;
+  });
+
+  return (
+    <div className="expiry-calendar">
+      <div className="expiry-calendar-head">
+        <button
+          type="button"
+          onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+          aria-label={"Th\u00e1ng tr\u01b0\u1edbc"}
+        >
+          &lt;
+        </button>
+        <strong>{MONTH_NAMES[month.getMonth()]} {month.getFullYear()}</strong>
+        <button
+          type="button"
+          onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+          aria-label={"Th\u00e1ng sau"}
+        >
+          &gt;
+        </button>
+      </div>
+      <div className="expiry-calendar-weekdays">
+        {WEEKDAYS.map((day) => (
+          <span key={day}>{day}</span>
+        ))}
+      </div>
+      <div className="expiry-calendar-grid">
+        {days.map((date, index) => (
+          <button
+            key={date ? date.toISOString() : `blank-${index}`}
+            type="button"
+            className={date && sameDate(date, selectedDate) ? "is-selected" : ""}
+            disabled={!date}
+            onClick={() => onSelect(toDateInputValue(date))}
+          >
+            {date ? date.getDate() : ""}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onSetPackage }) {
+  const defaultExpiryDate = toDateInputValue(user.expiresAt || addDays(new Date(), 90));
   const [selectedPkg, setSelectedPkg] = useState(90);
-  const [selectedPkgTitle, setSelectedPkgTitle] = useState("90 ngày");
+  const [selectedPkgTitle, setSelectedPkgTitle] = useState("90 ng\u00e0y");
+  const [packageMode, setPackageMode] = useState("preset");
+  const [selectedExpiryDate, setSelectedExpiryDate] = useState(defaultExpiryDate);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const date = dateFromInputValue(defaultExpiryDate) || new Date();
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  });
   const locked = user.status === "locked";
+  const customDays = daysUntil(selectedExpiryDate);
 
   const handleOverlayClick = () => onClose();
 
   const handleDelete = () => {
-    if (window.confirm(`Xóa tài khoản "${user.fullName}"?`)) onDelete();
+    if (window.confirm(`X\u00f3a t\u00e0i kho\u1ea3n "${user.fullName}"?`)) onDelete();
+  };
+
+  const handleSelectExpiryDate = (value) => {
+    const date = dateFromInputValue(value);
+    setSelectedExpiryDate(value);
+    setPackageMode("date");
+    setCalendarOpen(false);
+    if (date) setCalendarMonth(new Date(date.getFullYear(), date.getMonth(), 1));
+  };
+
+  const handleSavePackage = () => {
+    if (packageMode === "date") {
+      onSetPackage(`\u0110\u1ebfn ${fmtDate(selectedExpiryDate)}`, customDays, endOfDayIso(selectedExpiryDate));
+      return;
+    }
+    onSetPackage(selectedPkgTitle, selectedPkg);
   };
 
   return (
@@ -135,42 +276,41 @@ export function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onS
         <div className="modal-header">
           <Avatar init={initialsOf(user.fullName)} idx={avatarIdx(user.fullName)} size={64} />
           <div className="modal-name">{user.fullName}</div>
-          <div className="modal-code">{user.email || user.phoneNumber || "—"}</div>
+          <div className="modal-code">{identityOf(user)}</div>
         </div>
 
-        {/* Thông tin */}
         <div className="modal-section">
-          <div className="modal-section-title">Thông tin</div>
+          <div className="modal-section-title">{"Th\u00f4ng tin"}</div>
           <div className="modal-info-row">
-            <span>Trạng thái</span>
+            <span>{"Tr\u1ea1ng th\u00e1i"}</span>
             <Status status={user.status} expiresAt={user.expiresAt} />
           </div>
           <div className="modal-info-row">
-            <span>Ngày tạo</span>
+            <span>{"Ng\u00e0y t\u1ea1o"}</span>
             <span>{fmtDate(user.createdAt)}</span>
           </div>
           <div className="modal-info-row">
-            <span>Lần cuối hoạt động</span>
+            <span>{"L\u1ea7n cu\u1ed1i ho\u1ea1t \u0111\u1ed9ng"}</span>
             <span>{fmtDate(user.lastActive)}</span>
           </div>
           <div className="modal-info-row">
-            <span><MdAccessTime style={{ verticalAlign: "middle" }} /> Hết hạn</span>
-            <strong>{user.expiresAt ? fmtDate(user.expiresAt) : "Không giới hạn"}</strong>
+            <span><MdAccessTime style={{ verticalAlign: "middle" }} /> {"H\u1ebft h\u1ea1n"}</span>
+            <strong>{user.expiresAt ? fmtDate(user.expiresAt) : "Kh\u00f4ng gi\u1edbi h\u1ea1n"}</strong>
           </div>
         </div>
 
-        {/* Gói thời hạn */}
         <div className="modal-section">
           <div className="modal-section-title">
             <BsCalendarEvent style={{ verticalAlign: "middle", marginRight: 6 }} />
-            Chọn gói thời hạn
+            {"Ch\u1ecdn g\u00f3i th\u1eddi h\u1ea1n"}
           </div>
           <div className="modal-packages">
             {PACKAGES.map((pkg) => (
               <div
                 key={pkg.id}
-                className={`pkg-card${selectedPkg === pkg.id ? " active" : ""}`}
+                className={`pkg-card${packageMode === "preset" && selectedPkg === pkg.id ? " active" : ""}`}
                 onClick={() => {
+                  setPackageMode("preset");
                   setSelectedPkg(pkg.id);
                   setSelectedPkgTitle(`${pkg.label} ${pkg.unit}`);
                 }}
@@ -180,37 +320,61 @@ export function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onS
               </div>
             ))}
           </div>
+
+          <div className={`expiry-picker${packageMode === "date" ? " active" : ""}`}>
+            <button
+              type="button"
+              className="expiry-picker-trigger"
+              onClick={() => {
+                setPackageMode("date");
+                setCalendarOpen((open) => !open);
+              }}
+            >
+              <span>{"Ng\u00e0y h\u1ebft h\u1ea1n"}</span>
+              <strong>{fmtDate(selectedExpiryDate)}</strong>
+              <BsCalendarEvent />
+            </button>
+
+            {calendarOpen && (
+              <ExpiryCalendar
+                value={selectedExpiryDate}
+                month={calendarMonth}
+                onMonthChange={setCalendarMonth}
+                onSelect={handleSelectExpiryDate}
+              />
+            )}
+          </div>
         </div>
 
-        {/* Thao tác tài khoản */}
         <div className="modal-section">
-          <div className="modal-section-title">Thao tác tài khoản</div>
+          <div className="modal-section-title">{"Thao t\u00e1c t\u00e0i kho\u1ea3n"}</div>
           <button
             className="modal-action-btn lock"
             disabled={busy}
             onClick={locked ? onUnlock : onLock}
           >
             {locked ? <FaLockOpen /> : <FaLock />}{" "}
-            {locked ? "Mở khóa tài khoản" : "Khóa tài khoản"}
+            {locked ? "M\u1edf kh\u00f3a t\u00e0i kho\u1ea3n" : "Kh\u00f3a t\u00e0i kho\u1ea3n"}
           </button>
           <button
             className="modal-action-btn delete"
             disabled={busy}
             onClick={handleDelete}
           >
-            <FaTrashAlt /> Xóa tài khoản
+            <FaTrashAlt /> {"X\u00f3a t\u00e0i kho\u1ea3n"}
           </button>
         </div>
 
-        {/* Footer */}
         <div className="modal-footer">
-          <button className="modal-footer-cancel" onClick={onClose}>Hủy</button>
+          <button className="modal-footer-cancel" onClick={onClose}>{"H\u1ee7y"}</button>
           <button
             className="modal-footer-save"
             disabled={busy}
-            onClick={() => onSetPackage(selectedPkgTitle ,selectedPkg)}
+            onClick={handleSavePackage}
           >
-            Lưu gói {selectedPkg} ngày
+            {packageMode === "date"
+              ? `L\u01b0u \u0111\u1ebfn ${fmtDate(selectedExpiryDate)}`
+              : `L\u01b0u g\u00f3i ${selectedPkgTitle}`}
           </button>
         </div>
       </div>
@@ -218,7 +382,7 @@ export function UserModal({ user, busy, onClose, onLock, onUnlock, onDelete, onS
   );
 }
 
-// ─── Card ─────────────────────────────────────────────────
+// Card
 function Card({ label, value, icon, color }) {
   return (
     <div className="card">
@@ -253,7 +417,7 @@ function UsersTable({ users, onAction, emptyText }) {
       <thead>
         <tr>
           <th>Khách hàng</th>
-          <th>Email / SĐT</th>
+          <th>Email / SĐT / Số TK</th>
           <th>Trạng thái</th>
           <th>Hết hạn</th>
           <th>Thao tác</th>
@@ -266,7 +430,7 @@ function UsersTable({ users, onAction, emptyText }) {
               <Avatar init={initialsOf(u.fullName)} idx={avatarIdx(u.fullName)} />
               <span className="u-name">{u.fullName}</span>
             </td>
-            <td>{u.email || u.phoneNumber || "—"}</td>
+            <td>{identityOf(u)}</td>
             <td><Status status={u.status} expiresAt={u.expiresAt} /></td>
             <td>{u.expiresAt ? fmtDate(u.expiresAt) : "Không giới hạn"}</td>
             <td>
@@ -305,7 +469,7 @@ function PendingUsersTable({ users, busyId, onApprove, onReject }) {
               <Avatar init={initialsOf(u.fullName)} idx={avatarIdx(u.fullName)} />
               <span className="u-name">{u.fullName}</span>
             </td>
-            <td>{u.email || u.phoneNumber || "—"}</td>
+            <td>{identityOf(u)}</td>
             <td>{fmtDate(u.createdAt)}</td>
             <td style={{ display: "flex", gap: "0.4rem" }}>
               <button
@@ -342,7 +506,7 @@ function PackageRequestsTable({ requests, busyId, onApprove, onReject }) {
         <thead>
           <tr>
             <th>Khách hàng</th>
-            <th>Email / Số điện thoại</th>
+            <th>Email / SĐT / Số TK</th>
             <th>Gói yêu cầu</th>
             <th>Ngày yêu cầu</th>
             <th>Thao tác</th>
@@ -358,7 +522,7 @@ function PackageRequestsTable({ requests, busyId, onApprove, onReject }) {
                   <Avatar init={initialsOf(u.fullName)} idx={avatarIdx(u.fullName)} />
                   <span className="u-name">{u.fullName || "Người dùng"}</span>
                 </td>
-                <td>{u.email || u.phoneNumber || "—"}</td>
+                <td>{identityOf(u)}</td>
                 <td>{request.titles ?? `${request.days} ngày`}</td>
                 <td>{fmtDate(request.requestedAt ?? request.createdAt)}</td>
                 <td style={{ display: "flex", gap: "0.4rem" }}>
@@ -502,13 +666,16 @@ export default function ManagerUser() {
 
   const lockedUsers = users.filter((u) => u.status === "locked");
   const expiringUsers = users.filter(isExpiringSoon);
+  const vpsUsers = users.filter((u) => u.broker === "VPS");
+  const tcbsUsers = users.filter((u) => u.broker === "TCBS");
   const q = search.trim().toLowerCase();
   const searchedUsers = users.filter((u) => {
     if (!q) return true;
     return (
       (u.fullName || "").toLowerCase().includes(q) ||
       (u.email || "").toLowerCase().includes(q) ||
-      (u.phoneNumber || "").toLowerCase().includes(q)
+      (u.phoneNumber || "").toLowerCase().includes(q) ||
+      (u.brokerAccount || "").toLowerCase().includes(q)
     );
   });
 
@@ -519,7 +686,8 @@ export default function ManagerUser() {
     { id: 4, label: "Tài khoản sắp hết hạn", cnt: String(expiringUsers.length) },
     { id: 5, label: "Nâng hạn mức", cnt: String(expiringUsers.length) },
     { id: 6, label: "Gói chờ duyệt", cnt: String(packageRequests.length) },
-    
+    { id: 7, label: "VPS", cnt: String(vpsUsers.length) },
+    { id: 8, label: "TCBS", cnt: String(tcbsUsers.length) },
   ];
 
   return (
@@ -580,6 +748,22 @@ export default function ManagerUser() {
         />
       )}
 
+      {activeTab === 7 && (
+        <UsersTable
+          users={vpsUsers}
+          onAction={setSelectedUser}
+          emptyText="Không có tài khoản VPS nào."
+        />
+      )}
+
+      {activeTab === 8 && (
+        <UsersTable
+          users={tcbsUsers}
+          onAction={setSelectedUser}
+          emptyText="Không có tài khoản TCBS nào."
+        />
+      )}
+
       {selectedUser && (
         <UserModal
           user={selectedUser}
@@ -588,7 +772,7 @@ export default function ManagerUser() {
           onLock={() => actOnUser(lockUser)}
           onUnlock={() => actOnUser(unlockUser)}
           onDelete={() => actOnUser(deleteUser)}
-          onSetPackage={(titles, days) => actOnUser((id) => setPackage(id, titles, days))}
+          onSetPackage={(titles, days, expiresAt) => actOnUser((id) => setPackage(id, titles, days, expiresAt))}
         />
       )}
     </div>

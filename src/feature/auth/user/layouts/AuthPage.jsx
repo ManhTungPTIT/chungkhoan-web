@@ -1,20 +1,49 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  FiTrendingUp,
-  FiActivity,
-  FiBell,
-  FiShield,
-  FiTarget,
-} from "react-icons/fi";
-import { GiLion } from "react-icons/gi";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import "../styles/auth.scss";
 
+const logoImages = Object.values(
+  import.meta.glob("../../../../assets/logo_*.{png,jpg,jpeg,webp}", {
+    eager: true,
+    query: "?url",
+    import: "default",
+  })
+);
+
 export default function AuthPage({ initialTab = "login" }) {
   const [tab, setTab] = useState(initialTab);
+  const [heroImageIndex, setHeroImageIndex] = useState(3);
+  const [previousHeroImageIndex, setPreviousHeroImageIndex] = useState(null);
   const navigate = useNavigate();
+  const heroImage = logoImages[heroImageIndex];
+  const previousHeroImage =
+    previousHeroImageIndex === null ? null : logoImages[previousHeroImageIndex];
+
+  useEffect(() => {
+    if (logoImages.length <= 1) return undefined;
+
+    console.log(logoImages)
+    const timer = window.setInterval(() => {
+      setHeroImageIndex((index) => {
+        setPreviousHeroImageIndex(index);
+        return (index + 1) % logoImages.length;
+      });
+    }, 5000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    if (previousHeroImageIndex === null) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setPreviousHeroImageIndex(null);
+    }, 700);
+
+    return () => window.clearTimeout(timer);
+  }, [previousHeroImageIndex]);
 
   // Đổi tab đồng thời đổi URL để vẫn bookmark được /login hoặc /register
   const switchTab = (next) => {
@@ -25,6 +54,24 @@ export default function AuthPage({ initialTab = "login" }) {
   return (
     <div className="auth-page">
       <aside className="auth-hero">
+        {previousHeroImage ? (
+          <img
+            key={`previous-${previousHeroImageIndex}`}
+            className="auth-hero-slide auth-hero-slide--exit"
+            src={previousHeroImage}
+            alt=""
+            aria-hidden="true"
+          />
+        ) : null}
+        {heroImage ? (
+          <img
+            key={heroImage}
+            className="auth-hero-slide auth-hero-slide--enter"
+            src={heroImage}
+            alt=""
+            aria-hidden="true"
+          />
+        ) : null}
         <div className="auth-brand">
         </div>
 
