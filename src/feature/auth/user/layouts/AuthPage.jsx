@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
 import "../styles/auth.scss";
@@ -14,26 +15,39 @@ const logoImages = Object.values(
 
 export default function AuthPage({ initialTab = "login" }) {
   const [tab, setTab] = useState(initialTab);
-  const [heroImageIndex, setHeroImageIndex] = useState(3);
+  const [heroImageIndex, setHeroImageIndex] = useState(
+    Math.min(3, Math.max(logoImages.length - 1, 0))
+  );
   const [previousHeroImageIndex, setPreviousHeroImageIndex] = useState(null);
+  const [slideDirection, setSlideDirection] = useState("next");
   const navigate = useNavigate();
   const heroImage = logoImages[heroImageIndex];
   const previousHeroImage =
     previousHeroImageIndex === null ? null : logoImages[previousHeroImageIndex];
+  const canControlHero = logoImages.length > 1;
+
+  const changeHeroImage = useCallback((direction) => {
+    if (logoImages.length <= 1) return;
+
+    setSlideDirection(direction);
+    setHeroImageIndex((index) => {
+      setPreviousHeroImageIndex(index);
+      return direction === "next"
+        ? (index + 1) % logoImages.length
+        : (index - 1 + logoImages.length) % logoImages.length;
+    });
+  }, []);
 
   useEffect(() => {
     if (logoImages.length <= 1) return undefined;
 
     console.log(logoImages)
     const timer = window.setInterval(() => {
-      setHeroImageIndex((index) => {
-        setPreviousHeroImageIndex(index);
-        return (index + 1) % logoImages.length;
-      });
+      changeHeroImage("next");
     }, 5000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [changeHeroImage]);
 
   useEffect(() => {
     if (previousHeroImageIndex === null) return undefined;
@@ -57,7 +71,7 @@ export default function AuthPage({ initialTab = "login" }) {
         {previousHeroImage ? (
           <img
             key={`previous-${previousHeroImageIndex}`}
-            className="auth-hero-slide auth-hero-slide--exit"
+            className={`auth-hero-slide auth-hero-slide--exit-${slideDirection}`}
             src={previousHeroImage}
             alt=""
             aria-hidden="true"
@@ -66,16 +80,33 @@ export default function AuthPage({ initialTab = "login" }) {
         {heroImage ? (
           <img
             key={heroImage}
-            className="auth-hero-slide auth-hero-slide--enter"
+            className={`auth-hero-slide auth-hero-slide--enter-${slideDirection}`}
             src={heroImage}
             alt=""
             aria-hidden="true"
           />
         ) : null}
-        <div className="auth-brand">
-        </div>
-
-       
+        {canControlHero ? (
+          <div className="auth-hero-controls" aria-label="Điều khiển ảnh giới thiệu">
+            <button
+              type="button"
+              className="auth-hero-control"
+              onClick={() => changeHeroImage("prev")}
+              aria-label="Ảnh trước"
+            >
+              <FiChevronLeft aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="auth-hero-control"
+              onClick={() => changeHeroImage("next")}
+              aria-label="Ảnh tiếp theo"
+            >
+              <FiChevronRight aria-hidden="true" />
+            </button>
+          </div>
+        ) : null}
+        <div className="auth-brand"></div>
       </aside>
 
       <main className="auth-panel">

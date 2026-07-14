@@ -5,11 +5,14 @@
 // thời né nhãn giá nến hiện tại (do thư viện vẽ, không di chuyển được).
 import { ActionType, DomPosition } from "klinecharts/dist/index.esm.js";
 
-const LABEL_HEIGHT = 18;
+const LABEL_HEIGHT = 14;
 const LABEL_GAP = 2;
-const LABEL_FONT = "600 12px Helvetica Neue, Helvetica, Arial, sans-serif";
-const LABEL_PADDING_X = 6;
-const MIN_AXIS_LABEL_WIDTH = 40;
+const LABEL_FONT = "600 11px Helvetica Neue, Helvetica, Arial, sans-serif";
+const LABEL_PADDING_X = 1;
+const MIN_AXIS_LABEL_WIDTH = 30;
+const CROSSHAIR_LABEL_COLOR = "#111827";
+const MILLION = 1_000_000;
+const LABEL_SHIFT_LEFT = 4;
 const AXIS_LABEL_WIDTH_REQUESTS_KEY = "__leoAxisLabelWidthRequests";
 const AXIS_LABEL_APPLIED_WIDTH_KEY = "__leoAxisLabelAppliedWidth";
 
@@ -20,7 +23,7 @@ export function getAxisLabelWidth(textWidth) {
 export function getRequiredAxisLabelWidth(items, measureTextWidth) {
   return items.reduce((maxWidth, item) => {
     if (item.fixed) return maxWidth;
-    const text = formatAxisPrice(item.value, item.precision);
+    const text = formatAxisLabel(item);
     return Math.max(maxWidth, getAxisLabelWidth(measureTextWidth(text)));
   }, MIN_AXIS_LABEL_WIDTH);
 }
@@ -70,13 +73,26 @@ export function formatAxisPrice(value, precision = 2) {
   return dec ? `${grouped}.${dec}` : grouped;
 }
 
-// Gom giá trị cuối của mọi figure dạng line thuộc các indicator trong pane
-function collectLabels(chart, paneId) {
+function formatAxisLabel(item) {
+  if (item.unit === "million") {
+    return `${(item.value / MILLION).toFixed(item.precision ?? 2)}M`;
+  }
+  return formatAxisPrice(item.value, item.precision);
+}
+
+function getPaneIndicators(chart, paneId) {
   const found = chart.getIndicatorByPaneId(paneId);
   if (!found) return [];
-  const indicators =
-    typeof found.values === "function" ? [...found.values()] : [found];
+  return typeof found.values === "function" ? [...found.values()] : [found];
+}
 
+function isVolumePane(chart, paneId) {
+  return getPaneIndicators(chart, paneId).some((indicator) => indicator?.name === "VOL");
+}
+
+// Gom giá trị cuối của mọi figure dạng line thuộc các indicator trong pane
+function collectLabels(chart, paneId) {
+  const indicators = getPaneIndicators(chart, paneId);
   const labels = [];
   indicators.forEach((indicator) => {
     if (!indicator || SKIP_INDICATORS.has(indicator.name)) return;
@@ -185,7 +201,59 @@ function convertValueToY(chart, paneId, value) {
   return Number.isFinite(y) ? y : null;
 }
 
-function render(canvas, ctx, items, width, height) {
+function convertYToValue(chart, paneId, y) {
+  try {
+    const axis = chart.getDrawPaneById?.(paneId)?.getAxisComponent?.();
+    const value = axis?.convertFromPixel?.(y);
+    return Number.isFinite(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+// Chặn trên của trục giá trị (from/to), dùng để tính bề rộng trục thay cho
+// giá trị crosshair đang di chuyển. Giá trị dưới con trỏ luôn nằm trong
+// [from, to] nên bề rộng nhãn tại 2 biên này CHẶN TRÊN bề rộng mọi nhãn có
+// thể xuất hiện khi rê chuột — ổn định qua từng frame, chỉ đổi khi
+// zoom/pan/data thay đổi. Dùng giá trị crosshair trực tiếp (như code cũ)
+// khiến bề rộng trục đổi liên tục theo từng pixel chuột trên pane VOL (số
+// khối lượng nhảy nhiều bậc số hơn giá) → chart.setStyles bị gọi liên tục,
+// gây giật khi rê qua chỉ báo VOL.
+function getAxisRangeBoundaryLabels(chart, paneId, isVolPane) {
+  try {
+    const axis = chart.getDrawPaneById?.(paneId)?.getAxisComponent?.();
+    const range = axis?.getRange?.();
+    if (!range) return [];
+    return [range.from, range.to]
+      .filter((value) => Number.isFinite(value))
+      .map((value) => ({
+        value,
+        precision: 2,
+        ...(isVolPane ? { unit: "million" } : {}),
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function drawAxisLabel(ctx, item) {
+  const text = formatAxisLabel(item);
+  const textWidth = ctx.measureText(text).width;
+  const boxWidth = getAxisLabelWidth(textWidth);
+  const top = item.y - LABEL_HEIGHT / 2;
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(0, top, boxWidth, LABEL_HEIGHT, 2);
+  } else {
+    ctx.rect(0, top, boxWidth, LABEL_HEIGHT);
+  }
+  ctx.fillStyle = item.color;
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.fillText(text, LABEL_PADDING_X, item.y + 0.5);
+}
+
+function render(canvas, ctx, items, width, height, topLabels = []) {
   const dpr = window.devicePixelRatio || 1;
   const deviceWidth = Math.round(width * dpr);
   const deviceHeight = Math.round(height * dpr);
@@ -199,21 +267,9 @@ function render(canvas, ctx, items, width, height) {
   ctx.textBaseline = "middle";
   items.forEach((item) => {
     if (item.fixed) return; // nhãn giá nến do klinecharts tự vẽ
-    const text = formatAxisPrice(item.value, item.precision);
-    const textWidth = ctx.measureText(text).width;
-    const boxWidth = getAxisLabelWidth(textWidth);
-    const top = item.y - LABEL_HEIGHT / 2;
-    ctx.beginPath();
-    if (typeof ctx.roundRect === "function") {
-      ctx.roundRect(0, top, boxWidth, LABEL_HEIGHT, 2);
-    } else {
-      ctx.rect(0, top, boxWidth, LABEL_HEIGHT);
-    }
-    ctx.fillStyle = item.color;
-    ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.fillText(text, LABEL_PADDING_X, item.y + 0.5);
+    drawAxisLabel(ctx, item);
   });
+  topLabels.forEach((label) => drawAxisLabel(ctx, label));
 }
 
 // Gắn canvas nhãn vào yAxis của một pane; trả về hàm gỡ.
@@ -226,13 +282,15 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
   if (getComputedStyle(axisElement).position === "static") {
     axisElement.style.position = "relative";
   }
+  axisElement.style.overflow = "visible";
+  axisElement.parentElement?.style.setProperty("overflow", "visible");
   axisElement.style.minWidth = `${MIN_AXIS_LABEL_WIDTH}px`;
   const canvas = document.createElement("canvas");
   Object.assign(canvas.style, {
     position: "absolute",
-    left: "0",
+    left: `-${LABEL_SHIFT_LEFT}px`,
     top: "0",
-    width: "100%",
+    width: `calc(90% + ${LABEL_SHIFT_LEFT}px)`,
     height: "100%",
     pointerEvents: "none",
     zIndex: "2",
@@ -265,11 +323,26 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
     // Pane nến: lấy nhãn giá hiện tại (thư viện vẽ, đứng yên) làm mốc,
     // các nhãn chỉ báo xếp dần lên trên / xuống dưới quanh mốc này
     let anchorY = null;
+    const isVolPane = isVolumePane(chart, paneId);
+    let crosshairLabel = null;
+    if (crosshairY !== null) {
+      const crosshairValue = convertYToValue(chart, paneId, crosshairY);
+      if (crosshairValue !== null) {
+        crosshairLabel = {
+          value: crosshairValue,
+          y: crosshairY,
+          color: CROSSHAIR_LABEL_COLOR,
+          precision: 2,
+          ...(isVolPane ? { unit: "million" } : {}),
+        };
+      }
+    }
     if (paneId === "candle_pane") {
       const dataList = chart.getDataList?.() ?? [];
       const lastClose = dataList[dataList.length - 1]?.close;
       if (Number.isFinite(lastClose)) {
         anchorY = convertValueToY(chart, paneId, lastClose);
+
       }
     } else if (crosshairY !== null) {
       anchorY = crosshairY;
@@ -283,9 +356,16 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
     items.sort((a, b) => a.y - b.y);
 
     ctx.font = LABEL_FONT;
-    const requiredAxisWidth = getRequiredAxisLabelWidth(
-      items,
-      (text) => ctx.measureText(text).width,
+    const topLabels = [crosshairLabel].filter(Boolean);
+    const boundaryLabels = getAxisRangeBoundaryLabels(chart, paneId, isVolPane);
+    const requiredAxisWidth = Math.max(
+      getRequiredAxisLabelWidth(items, (text) => ctx.measureText(text).width),
+      MIN_AXIS_LABEL_WIDTH,
+      ...boundaryLabels.map((label) =>
+        getAxisLabelWidth(
+          ctx.measureText(formatAxisLabel(label)).width,
+        ),
+      ),
     );
     const minWidth = `${requiredAxisWidth}px`;
     if (axisElement.style.minWidth !== minWidth) {
@@ -298,12 +378,14 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
 
     const signature =
       `${width}x${height}|${anchorY === null ? "" : Math.round(anchorY)}|` +
+      topLabels.map((label) => `${label.color}:${label.value}@${Math.round(label.y)}`).join(",") +
+      "|" +
       items
         .map((item) => `${item.color}:${item.value}@${Math.round(item.y)}`)
         .join(",");
     if (signature === lastSignature) return;
     lastSignature = signature;
-    render(canvas, ctx, items, width, height);
+    render(canvas, ctx, items, width, height, topLabels);
   };
   rafId = requestAnimationFrame(tick);
 

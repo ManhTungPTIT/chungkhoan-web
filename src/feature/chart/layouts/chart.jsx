@@ -204,6 +204,22 @@ function syncBbsIndicator(chart, signals) {
   );
 }
 
+function getSignalsSignature(signals = []) {
+  return signals
+    .map((signal) =>
+      [signal?.time, signal?.type, signal?.price, signal?.priceTarget].join(":"),
+    )
+    .join("|");
+}
+
+function syncSignalsIfChanged(chart, signals, signatureRef) {
+  const signature = getSignalsSignature(signals);
+  if (signatureRef.current === signature) return;
+  signatureRef.current = signature;
+  syncBbsIndicator(chart, signals);
+  syncSignalOverlays(chart, signals);
+}
+
 function getSubPaneIndicatorTitle(name) {
   if (name === "VOL") return "Volume - Khối lượng";
   const label = getIndicatorDefinition(name)?.label ?? name;
@@ -1005,6 +1021,7 @@ export default function TradingChart({
   const paneIdsRef = useRef(new Set(["candle_pane"]));
   const candlesRef = useRef(candles);
   const signalsRef = useRef(signals);
+  const signalsSignatureRef = useRef(null);
 
   candlesRef.current = candles;
   signalsRef.current = signals;
@@ -1049,7 +1066,11 @@ export default function TradingChart({
             color: "rgba(17, 24, 39, 0.55)",
           },
           text: {
-            show: true,
+            // Price label on the horizontal crosshair is drawn by
+            // attachIndicatorAxisLabels so VOL can be formatted as M and sit
+            // above indicator labels. Keeping the native one on creates a
+            // second black label at the same y position.
+            show: false,
             color: "#fff",
             backgroundColor: "#111827",
           },
@@ -1111,7 +1132,10 @@ export default function TradingChart({
     });
     paneIdsRef.current = paneIds;
 
-    // Bollinger + fill xanh/đỏ theo tín hiệu — signals truyền qua extendData
+    // Bollinger + fill xanh/đỏ theo tín hiệu — signals truyền qua extendData.
+    // Ghi signature ngay lúc init để effect signals không tháo/tạo lại BBS lần nữa
+    // khi nội dung tín hiệu không đổi sau một tick realtime.
+    signalsSignatureRef.current = getSignalsSignature(signalsRef.current);
     syncBbsIndicator(chart, signalsRef.current);
     syncSignalOverlays(chart, signalsRef.current);
 
@@ -1155,9 +1179,10 @@ export default function TradingChart({
   useEffect(() => {
     const chart = chartRef.current;
     if (!chart) return;
-    // CHANGE: signals mới chỉ sync overlay/indicator, không init lại chart.
-    syncBbsIndicator(chart, signals);
-    syncSignalOverlays(chart, signals);
+    // CHANGE: signals mới chỉ sync overlay/indicator khi nội dung tín hiệu đổi.
+    // Nếu mỗi tick giá chỉ làm candles/signals đổi reference nhưng tín hiệu giống hệt,
+    // remove/create BBS liên tục sẽ khiến pane/trục giá bị giật.
+    syncSignalsIfChanged(chart, signals, signalsSignatureRef);
   }, [signals]);
   // Vào chế độ vẽ một overlay; groupId "draw" để xoá riêng hình vẽ (không đụng marker)
   const startDraw = (name) =>
@@ -1170,6 +1195,7 @@ export default function TradingChart({
         position: "relative",
         width: "100%",
         height: `calc(100dvh - ${infoHeight}px)`,
+        
       }}
     >
       {/* Thanh công cụ vẽ — ngang, trượt vào/ra theo showDraw */}

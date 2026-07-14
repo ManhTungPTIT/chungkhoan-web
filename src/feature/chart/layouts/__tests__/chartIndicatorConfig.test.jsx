@@ -73,7 +73,7 @@ describe("TradingChart indicator config", () => {
           show: true,
           horizontal: expect.objectContaining({
             line: expect.objectContaining({ show: true }),
-            text: expect.objectContaining({ show: true }),
+            text: expect.objectContaining({ show: false }),
           }),
           vertical: expect.objectContaining({
             line: expect.objectContaining({ show: true }),

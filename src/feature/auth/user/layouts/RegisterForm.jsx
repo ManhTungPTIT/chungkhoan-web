@@ -2,9 +2,11 @@ import { useState } from "react";
 import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { IoCloseCircle, IoCheckmarkCircle } from "react-icons/io5";
 import { RegisterUserService } from "../services/registerUserService";
+import { buildAccountPayload } from "../untils/accountType";
 
 export default function RegisterForm({ onSwitchTab }) {
   const [fullName, setFullName] = useState("");
+  const [accountMethod, setAccountMethod] = useState("contact");
   const [broker, setBroker] = useState("");
   const [brokerAccount, setBrokerAccount] = useState("");
   const [password, setPassword] = useState("");
@@ -22,11 +24,25 @@ export default function RegisterForm({ onSwitchTab }) {
     if (errors[field]) setErrors((p) => ({ ...p, [field]: false }));
   };
 
+  const selectAccountMethod = (next) => {
+    setAccountMethod(next);
+    clearError("brokerAccount");
+    clearError("broker");
+    if (next === "contact") setBroker("");
+  };
+
   const validate = () => {
     const newErrors = {};
     if (!fullName.trim()) newErrors.fullName = "Vui lòng nhập trường này";
-    if (!brokerAccount.trim())
-      newErrors.brokerAccount = "Vui lòng nhập số tài khoản";
+    if (!brokerAccount.trim()) {
+      newErrors.brokerAccount =
+        accountMethod === "broker"
+          ? "Vui lòng nhập số tài khoản chứng khoán"
+          : "Vui lòng nhập email hoặc số điện thoại";
+    }
+    if (accountMethod === "broker" && !broker) {
+      newErrors.broker = "Vui lòng chọn công ty chứng khoán";
+    }
     if (!password.trim()) newErrors.password = "Vui lòng nhập trường này";
     else if (password.length < 8)
       newErrors.password = "Mật khẩu tối thiểu 8 ký tự";
@@ -50,12 +66,16 @@ export default function RegisterForm({ onSwitchTab }) {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
+    const accountPayload = buildAccountPayload(
+      brokerAccount,
+      accountMethod === "broker" ? broker : "email",
+    );
+
     try {
       await register({
         fullName: fullName.trim(),
         password: password.trim(),
-        broker,
-        brokerAccount: brokerAccount.trim(),
+        ...accountPayload,
       });
       setShowSuccess(true);
     } catch (err) {
@@ -73,7 +93,7 @@ export default function RegisterForm({ onSwitchTab }) {
 
   return (
     <>
-    <div className="auth-logo"></div>
+      <div className="auth-logo"></div>
       <h3 className="auth-welcome">Tạo tài khoản</h3>
       <p className="auth-welcome-sub">Đăng ký để bắt đầu cùng LEOSTOCK</p>
 
@@ -97,26 +117,31 @@ export default function RegisterForm({ onSwitchTab }) {
         </div>
 
         <div className="field-group">
-          <div className="broker-toggle" role="group" aria-label="Chon san giao dich">
-            {["VPS", "TCBS"].map((item) => (
-              <label key={item} className={broker === item ? "is-active" : ""}>
-                <input
-                  type="checkbox"
-                  checked={broker === item}
-                  onChange={() => setBroker((current) => (current === item ? "" : item))}
-                />
-                {item}
-              </label>
-            ))}
+          <div className="account-method-toggle" role="group" aria-label="Chọn cách đăng ký">
+            <button
+              type="button"
+              className={accountMethod === "contact" ? "is-active" : ""}
+              onClick={() => selectAccountMethod("contact")}
+            >
+              Email / Số điện thoại
+            </button>
+            <button
+              type="button"
+              className={accountMethod === "broker" ? "is-active" : ""}
+              onClick={() => selectAccountMethod("broker")}
+            >
+              Số TK chứng khoán
+            </button>
           </div>
-        </div>
-
-        <div className="field-group">
           <div className={`input-wrap ${errors.brokerAccount ? "error" : ""}`}>
             <FiUser className="input-icon" />
             <input
               type="text"
-              placeholder="Email, số điện thoại hoặc số tài khoản chứng khoán"
+              placeholder={
+                accountMethod === "broker"
+                  ? "Nhập số tài khoản chứng khoán"
+                  : "Nhập email hoặc số điện thoại"
+              }
               value={brokerAccount}
               onChange={(e) => {
                 setBrokerAccount(e.target.value);
@@ -127,6 +152,29 @@ export default function RegisterForm({ onSwitchTab }) {
           {errors.brokerAccount && (
             <span className="error-msg">{errors.brokerAccount}</span>
           )}
+        </div>
+
+        <div
+          className={`field-group broker-field ${accountMethod === "broker" ? "is-visible" : ""}`}
+          aria-hidden={accountMethod !== "broker"}
+        >
+          <div className="broker-toggle" role="group" aria-label="Chọn công ty chứng khoán">
+            {["VPS", "TCBS"].map((item) => (
+              <label key={item} className={broker === item ? "is-active" : ""}>
+                <input
+                  type="checkbox"
+                  checked={broker === item}
+                  disabled={accountMethod !== "broker"}
+                  onChange={() => {
+                    setBroker((current) => (current === item ? "" : item));
+                    clearError("broker");
+                  }}
+                />
+                {item}
+              </label>
+            ))}
+          </div>
+          {errors.broker && <span className="error-msg">{errors.broker}</span>}
         </div>
 
         <div className="field-group">

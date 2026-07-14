@@ -7,8 +7,8 @@ import {
   resolveLabelPositions,
 } from "../indicatorAxisLabels";
 
-const STEP = 20; // LABEL_HEIGHT 18 + LABEL_GAP 2
-const CLEARANCE = 22; // ANCHOR_CLEARANCE/2 + GAP + LABEL_HEIGHT/2
+const STEP = 18; // LABEL_HEIGHT 16 + LABEL_GAP 2
+const CLEARANCE = 21; // ANCHOR_CLEARANCE/2 + GAP + LABEL_HEIGHT/2
 
 describe("layoutAroundAnchor", () => {
   it("giữ nguyên nhãn đã cách xa mốc", () => {
@@ -51,7 +51,7 @@ describe("layoutAroundAnchor", () => {
   it("kẹp nhãn dưới trong phạm vi pane", () => {
     const items = [{ y: 500, color: "blue" }];
     layoutAroundAnchor(items, 200, 400);
-    expect(items[0].y).toBe(391); // 400 - nửa chiều cao nhãn
+    expect(items[0].y).toBe(392); // 400 - nửa chiều cao nhãn
   });
 });
 
@@ -95,8 +95,8 @@ describe("resolveLabelPositions", () => {
       { y: 500, fixed: false },
     ];
     resolveLabelPositions(items, 400);
-    expect(items[0].y).toBeGreaterThanOrEqual(9); // nửa chiều cao nhãn
-    expect(items[1].y).toBeLessThanOrEqual(391);
+    expect(items[0].y).toBeGreaterThanOrEqual(8); // nửa chiều cao nhãn
+    expect(items[1].y).toBeLessThanOrEqual(392);
   });
 });
 
@@ -110,8 +110,8 @@ describe("formatAxisPrice", () => {
 
 describe("getAxisLabelWidth", () => {
   it("expands beyond the minimum width for long price labels", () => {
-    expect(getAxisLabelWidth(48)).toBe(60);
-    expect(getAxisLabelWidth(10)).toBe(40);
+    expect(getAxisLabelWidth(48)).toBe(56);
+    expect(getAxisLabelWidth(10)).toBe(34);
   });
 });
 
@@ -123,7 +123,7 @@ describe("getRequiredAxisLabelWidth", () => {
       { value: 9999.99, precision: 2, fixed: true },
     ];
 
-    expect(getRequiredAxisLabelWidth(items, (text) => text.length * 6)).toBe(60);
+    expect(getRequiredAxisLabelWidth(items, (text) => text.length * 6)).toBe(56);
   });
 });
 

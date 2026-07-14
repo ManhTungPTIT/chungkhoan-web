@@ -102,7 +102,7 @@ describe("subscribeQuote", () => {
     expect(lastWs().sent).toEqual([{ action: "subscribe", symbol: "FPT" }]); // re-subscribe
   });
 
-  it("unsubscribe cuối của mã → gửi unsubscribe; hết mã → đóng WS, không reconnect", () => {
+  it("unsubscribe cuối của mã → gửi unsubscribe; hết mã → đóng sau grace 30s, không reconnect", () => {
     const un1 = subscribeQuote("FPT", vi.fn());
     const un2 = subscribeQuote("FPT", vi.fn());
     const ws = lastWs();
@@ -116,8 +116,34 @@ describe("subscribeQuote", () => {
       { action: "subscribe", symbol: "FPT" },
       { action: "unsubscribe", symbol: "FPT" },
     ]);
-    expect(ws.readyState).toBe(3); // đã đóng
+    expect(ws.readyState).toBe(1); // CHƯA đóng ngay: còn trong grace period
+
+    vi.advanceTimersByTime(30000); // hết grace → đóng hẳn
+    expect(ws.readyState).toBe(3);
     vi.advanceTimersByTime(60000);
     expect(FakeWebSocket.instances).toHaveLength(1); // không tự mở lại
+  });
+
+  it("đổi mã (unsubscribe mã cũ rồi subscribe mã mới ngay) tái dùng CÙNG socket, không mở mới", () => {
+    const un1 = subscribeQuote("FPT", vi.fn());
+    lastWs().open();
+    expect(FakeWebSocket.instances).toHaveLength(1);
+
+    // React đổi mã: cleanup effect mã cũ rồi chạy effect mã mới liền nhau
+    un1();
+    const un2 = subscribeQuote("VCB", vi.fn());
+
+    expect(FakeWebSocket.instances).toHaveLength(1); // KHÔNG mở socket mới
+    expect(lastWs().readyState).toBe(1); // socket cũ vẫn mở (grace period đã bị hủy)
+    expect(lastWs().sent).toEqual([
+      { action: "subscribe", symbol: "FPT" },
+      { action: "unsubscribe", symbol: "FPT" },
+      { action: "subscribe", symbol: "VCB" },
+    ]);
+
+    // không có hẹn đóng nào còn treo vì đã có mã mới
+    vi.advanceTimersByTime(30000);
+    expect(lastWs().readyState).toBe(1);
+    un2();
   });
 });
