@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiCreditCard, FiEdit3, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { IoCloseCircle, IoCheckmarkCircle } from "react-icons/io5";
 import { RegisterUserService } from "../services/registerUserService";
 import { buildAccountPayload } from "../untils/accountType";
@@ -100,7 +100,7 @@ export default function RegisterForm({ onSwitchTab }) {
       <form onSubmit={handleSubmit} noValidate>
         <div className="field-group">
           <div className={`input-wrap ${errors.fullName ? "error" : ""}`}>
-            <FiUser className="input-icon" />
+            <FiEdit3 className="input-icon" />
             <input
               type="text"
               placeholder="Họ và tên"
@@ -134,7 +134,11 @@ export default function RegisterForm({ onSwitchTab }) {
             </button>
           </div>
           <div className={`input-wrap ${errors.brokerAccount ? "error" : ""}`}>
-            <FiUser className="input-icon" />
+            {accountMethod === "broker" ? (
+              <FiCreditCard className="input-icon" />
+            ) : (
+              <FiMail className="input-icon" />
+            )}
             <input
               type="text"
               placeholder={

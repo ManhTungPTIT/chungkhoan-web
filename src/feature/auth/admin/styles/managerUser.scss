@@ -167,7 +167,7 @@
   position: relative;
   background: #f5f4ed;
   border-radius: 16px;
-  width: 30vw;
+  width: min(480px, calc(100vw - 2rem));
   max-height: 90vh;
   overflow-y: auto;
   padding: 1.5rem 1.25rem 1.25rem;
@@ -245,7 +245,7 @@
 
     .modal-packages {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
       gap: 0.5rem;
 
       .pkg-card {
@@ -332,6 +332,7 @@
       display: grid;
       grid-template-columns: 2.2rem 1fr 2.2rem;
       align-items: center;
+      gap: 0.35rem;
       margin-bottom: 0.65rem;
 
       button {
@@ -348,6 +349,8 @@
         text-align: center;
         font-size: 1rem;
         color: #111827;
+        min-width: 0;
+        line-height: 1.25;
       }
     }
 
@@ -374,6 +377,7 @@
     .expiry-calendar-grid {
       button {
         aspect-ratio: 1;
+        min-width: 0;
         border: none;
         border-radius: 10px;
         background: transparent;
@@ -492,5 +496,99 @@
     background: #fee2e2;
     color: #991b1b;
     &:hover:not(:disabled) { background: #fecaca; }
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    align-items: flex-start;
+    padding: 0.75rem;
+    overflow-y: auto;
+  }
+
+  .user-modal {
+    width: 100%;
+    max-height: calc(100dvh - 1.5rem);
+    padding: 1.25rem 0.75rem 0.75rem;
+    border-radius: 14px;
+    gap: 0.65rem;
+
+    .modal-section {
+      padding: 0.8rem 0.7rem;
+      border-radius: 10px;
+    }
+
+    .modal-header {
+      .modal-name,
+      .modal-code {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        text-align: center;
+      }
+    }
+
+    .modal-info-row {
+      gap: 0.75rem;
+
+      span,
+      strong {
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+    }
+
+    .modal-packages {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+
+      .pkg-card {
+        min-height: 4.6rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
+
+    .expiry-picker-trigger {
+      grid-template-columns: minmax(0, 1fr) auto;
+
+      span {
+        line-height: 1.2;
+      }
+    }
+
+    .expiry-calendar {
+      padding: 0.6rem 0.45rem;
+      box-shadow: none;
+    }
+
+    .expiry-calendar-head {
+      grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+
+      button {
+        font-size: 1.35rem;
+      }
+
+      strong {
+        font-size: 0.9rem;
+      }
+    }
+
+    .expiry-calendar-weekdays,
+    .expiry-calendar-grid {
+      gap: 0.15rem;
+    }
+
+    .expiry-calendar-weekdays span {
+      font-size: 0.68rem;
+    }
+
+    .expiry-calendar-grid button {
+      border-radius: 8px;
+      font-size: 0.78rem;
+    }
+
+    .modal-footer {
+      flex-direction: column;
+    }
   }
 }
