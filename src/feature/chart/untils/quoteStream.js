@@ -104,7 +104,7 @@ function connect() {
     let msg;
     try {
       msg = JSON.parse(event.data);
-      
+      console.log(msg)
     } catch {
       return; // frame hỏng → bỏ, giữ kết nối
     }
