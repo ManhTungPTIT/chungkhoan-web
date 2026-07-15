@@ -44,7 +44,7 @@ export default function AuthPage({ initialTab = "login" }) {
     console.log(logoImages)
     const timer = window.setInterval(() => {
       changeHeroImage("next");
-    }, 5000);
+    }, 8000);
 
     return () => window.clearInterval(timer);
   }, [changeHeroImage]);
