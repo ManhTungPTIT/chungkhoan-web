@@ -1,9 +1,10 @@
 import { normalizeQuote } from "./normalizeQuote";
 
 // Singleton WebSocket tới BE /ws/quotes — MỘT kết nối cho mọi hook/mã.
-// Rớt → báo null cho mọi listener (hook trả null → index.jsx rơi về poll 5s)
-// rồi tự nối lại với backoff 1,2,4…30s; nối lại được thì re-subscribe toàn bộ
-// mã đang theo dõi. Hết listener → giữ thêm một khoảng ngắn (grace) rồi mới đóng.
+// Rớt → báo null cho mọi listener (hook trả null, chờ tick tiếp theo sau khi
+// nối lại) rồi tự nối lại với backoff 1,2,4…30s; nối lại được thì re-subscribe
+// toàn bộ mã đang theo dõi. Hết listener → giữ thêm một khoảng ngắn (grace)
+// rồi mới đóng.
 
 const FIRST_RECONNECT_DELAY_MS = 1000;
 const MAX_RECONNECT_DELAY_MS = 30000;
@@ -41,7 +42,7 @@ function send(action, symbol) {
 }
 
 // Phiên giao dịch HOSE: Thứ 2–6, 09:00–15:00 (giờ VN, Asia/Ho_Chi_Minh). Ngoài
-// khung này thị trường đứng yên → không cần WebSocket; UI vẫn có dữ liệu qua poll.
+// khung này thị trường đứng yên → không cần WebSocket (xem connect()).
 function isMarketOpen(now = new Date()) {
   const parts = Object.fromEntries(
     new Intl.DateTimeFormat("en-GB", {
@@ -95,8 +96,13 @@ function scheduleIdleClose() {
 function connect() {
   if (ws || reconnectTimer) return;
   // Ngoài giờ giao dịch: KHÔNG mở socket (tránh spam handshake lỗi trên console),
-  // chỉ hẹn kiểm lại — tới giờ mở phiên vòng sau sẽ tự nối.
+  // chỉ hẹn kiểm lại — tới giờ mở phiên vòng sau sẽ tự nối. Báo notifyStatus(true)
+  // (KHÔNG phải đang kết nối thật) để useQuoteConnectionStatus không hiện banner
+  // "mất kết nối" suốt ngoài giờ GD (đêm/cuối tuần/lễ) — trước đây REST poll che
+  // vấn đề này vì luôn trả dữ liệu bất kể giờ giấc; WS cố ý không mở off-hours
+  // nên cần tín hiệu riêng để phân biệt "đóng cửa" với "lỗi thật".
   if (!isMarketOpen()) {
+    notifyStatus(true);
     scheduleReconnect(MARKET_CLOSED_RETRY_MS);
     return;
   }

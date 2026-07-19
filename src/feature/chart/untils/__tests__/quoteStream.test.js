@@ -184,4 +184,13 @@ describe("subscribeConnectionStatus", () => {
     lastWs().open();
     expect(cb).not.toHaveBeenCalled();
   });
+
+  it("thị trường đóng cửa → báo connected=true (không phải lỗi), KHÔNG mở socket", () => {
+    vi.setSystemTime(new Date("2026-07-18T20:00:00+07:00")); // Thứ Bảy tối
+    const cb = vi.fn();
+    subscribeQuote("FPT", vi.fn()); // gọi connect() nhưng market đóng
+    subscribeConnectionStatus(cb);
+    expect(cb).toHaveBeenCalledWith(true);
+    expect(FakeWebSocket.instances).toHaveLength(0);
+  });
 });
