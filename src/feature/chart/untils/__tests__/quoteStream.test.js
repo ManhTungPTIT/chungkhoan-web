@@ -33,6 +33,7 @@ class FakeWebSocket {
 }
 
 let subscribeQuote;
+let subscribeConnectionStatus;
 
 beforeEach(async () => {
   vi.useFakeTimers();
@@ -40,7 +41,7 @@ beforeEach(async () => {
   FakeWebSocket.instances = [];
   // module giữ state singleton → nạp module MỚI cho mỗi test
   vi.resetModules();
-  ({ subscribeQuote } = await import("../quoteStream"));
+  ({ subscribeQuote, subscribeConnectionStatus } = await import("../quoteStream"));
 });
 
 afterEach(() => {
@@ -145,5 +146,42 @@ describe("subscribeQuote", () => {
     vi.advanceTimersByTime(30000);
     expect(lastWs().readyState).toBe(1);
     un2();
+  });
+});
+
+describe("subscribeConnectionStatus", () => {
+  it("gọi ngay với trạng thái hiện tại (false khi chưa kết nối)", () => {
+    const cb = vi.fn();
+    subscribeConnectionStatus(cb);
+    expect(cb).toHaveBeenCalledWith(false);
+  });
+
+  it("báo true khi WS mở, false khi WS rớt", () => {
+    // isMarketOpen() chặn connect() ngoài giờ GD (kể cả cuối tuần) → cố định
+    // giờ hệ thống vào 1 phiên GD thật (thứ Hai 10h VN) để test không phụ
+    // thuộc ngày/giờ chạy CI.
+    vi.setSystemTime(new Date("2026-07-13T10:00:00+07:00"));
+    const cb = vi.fn();
+    subscribeQuote("FPT", vi.fn()); // mở WS
+    subscribeConnectionStatus(cb);
+    cb.mockClear();
+
+    lastWs().open();
+    expect(cb).toHaveBeenCalledWith(true);
+
+    lastWs().close();
+    expect(cb).toHaveBeenCalledWith(false);
+  });
+
+  it("hủy đăng ký → không nhận thông báo nữa", () => {
+    vi.setSystemTime(new Date("2026-07-13T10:00:00+07:00")); // xem lý do ở test trên
+    const cb = vi.fn();
+    const unsubscribe = subscribeConnectionStatus(cb);
+    unsubscribe();
+    cb.mockClear();
+
+    subscribeQuote("FPT", vi.fn());
+    lastWs().open();
+    expect(cb).not.toHaveBeenCalled();
   });
 });

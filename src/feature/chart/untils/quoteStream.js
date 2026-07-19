@@ -21,6 +21,13 @@ let reconnectTimer = null;
 let reconnectDelay = FIRST_RECONNECT_DELAY_MS;
 let idleTimer = null; // hẹn đóng khi hết mã; đổi mã kịp thời sẽ hủy hẹn này
 const listeners = new Map(); // symbol (hoa) -> Set<callback>
+const statusListeners = new Set(); // callback(isConnected: boolean)
+let connected = false;
+
+function notifyStatus(isConnected) {
+  connected = isConnected;
+  for (const cb of statusListeners) cb(isConnected);
+}
 
 function wsUrl() {
   // VITE_PYTHON_API_URL đã gồm /api/python → chỉ thay scheme http->ws
@@ -97,6 +104,7 @@ function connect() {
 
   ws.onopen = () => {
     reconnectDelay = FIRST_RECONNECT_DELAY_MS; // nối được → reset backoff
+    notifyStatus(true);
     for (const symbol of listeners.keys()) send("subscribe", symbol);
   };
 
@@ -117,6 +125,7 @@ function connect() {
 
   ws.onclose = () => {
     ws = null;
+    notifyStatus(false);
     // Báo mất kết nối để hook trả null → UI fallback về poll ngay lập tức
     for (const set of listeners.values()) for (const cb of set) cb(null);
     if (listeners.size === 0) return; // không ai xem → khỏi nối lại
@@ -169,6 +178,17 @@ export function subscribeQuote(symbol, callback) {
       scheduleIdleClose();
     }
   };
+}
+
+/**
+ * Theo dõi trạng thái kết nối WS (KHÔNG theo mã — 1 kết nối dùng chung).
+ * callback nhận true khi vừa mở/nối lại, false khi vừa rớt. Gọi ngay với
+ * trạng thái hiện tại lúc đăng ký. Trả về hàm hủy đăng ký.
+ */
+export function subscribeConnectionStatus(callback) {
+  statusListeners.add(callback);
+  callback(connected);
+  return () => statusListeners.delete(callback);
 }
 
 // Vite HMR (chỉ DEV): khi module bị nạp lại, đóng socket + hủy hẹn của bản cũ
