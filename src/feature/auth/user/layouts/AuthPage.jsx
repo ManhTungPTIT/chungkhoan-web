@@ -41,7 +41,7 @@ export default function AuthPage({ initialTab = "login" }) {
   useEffect(() => {
     if (logoImages.length <= 1) return undefined;
 
-    console.log(logoImages)
+    
     const timer = window.setInterval(() => {
       changeHeroImage("next");
     }, 8000);
