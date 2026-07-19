@@ -72,6 +72,6 @@ export function useIntraday(symbol = "VNINDEX", interval = "1d") {
     // giai đoạn này isPlaceholderData=true để UI hiện overlay "đang cập nhật".
     placeholderData: keepPreviousData,
     // KHÔNG refetchInterval: lịch sử chỉ tải 1 lần/mã; giá realtime đi qua
-    // useQuotes (1 endpoint chung mọi mã) và merge bằng useLiveCandles.
+    // WS /ws/quotes (useQuoteStream) và merge bằng useLiveCandles.
   });
 }

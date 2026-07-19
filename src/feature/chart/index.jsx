@@ -26,9 +26,9 @@ const SIGNAL_GENERATORS = {
 };
 import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
-import { useQuotes } from "./hooks/useQuotes";
 import { useQuoteStream } from "./hooks/useQuoteStream";
 import { useLiveCandles } from "./hooks/useLiveCandles";
+import { useQuoteConnectionStatus } from "./hooks/useQuoteConnectionStatus";
 import { useVn100 } from "./hooks/useVn100";
 import { color } from "echarts";
 
@@ -141,16 +141,14 @@ function TradingView() {
     isPlaceholderData,
     isError: isHistoryError,
   } = useIntraday(chanelCode, activeTimeline);
-  // Giá realtime: 1 endpoint /quotes chung cho mọi mã, poll 5s. Merge giá
-  // của mã đang xem vào nến cuối (hoặc append nến mới khi sang khung mới).
+  // Giá realtime CHỈ từ WS /ws/quotes (tick tức thì) — không còn REST poll
+  // dự phòng: WS (DNSE v2) đã ổn định, poll chỉ còn là gọi API thừa mỗi 5s.
   // Đang hiện nến placeholder của mã CŨ thì không merge giá mã mới vào.
-  const { data: quotes, isError: isQuotesError } = useQuotes();
-  // Giá realtime từ WS /ws/quotes (tick tức thì); rớt/chưa có tick → null
-  // → rơi về quote poll 5s bên dưới. Mọi lỗi stream đều degrade về poll.
   const streamQuote = useQuoteStream(chanelCode);
-  const liveQuote = isPlaceholderData
-    ? null
-    : (streamQuote ?? quotes?.[chanelCode] ?? null);
+  const liveQuote = isPlaceholderData ? null : streamQuote;
+  // true khi WS mất kết nối LIÊN TỤC ≥5s (debounce) — báo banner lỗi mà
+  // không nhấp nháy theo mỗi lần backoff reconnect bình thường.
+  const isQuoteDisconnected = useQuoteConnectionStatus();
   const candles = useLiveCandles(
     historyCandles,
     liveQuote,
@@ -458,7 +456,7 @@ function TradingView() {
           </div>
         )}
         <DataStatusBanner
-          isError={isHistoryError || isQuotesError}
+          isError={isHistoryError || isQuoteDisconnected}
           hasData={candles.length > 0}
         />
       </div>

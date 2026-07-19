@@ -126,7 +126,8 @@ function connect() {
   ws.onclose = () => {
     ws = null;
     notifyStatus(false);
-    // Báo mất kết nối để hook trả null → UI fallback về poll ngay lập tức
+    // Báo mất kết nối để hook trả null; useQuoteConnectionStatus báo banner
+    // lỗi nếu mất kết nối liên tục ≥5s (xem debounce trong hook đó).
     for (const set of listeners.values()) for (const cb of set) cb(null);
     if (listeners.size === 0) return; // không ai xem → khỏi nối lại
     // Ngoài giờ → chỉ kiểm lại thưa (không mở socket); trong giờ → backoff 1,2,4…30s

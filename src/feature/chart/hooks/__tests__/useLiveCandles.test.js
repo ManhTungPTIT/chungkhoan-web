@@ -1,57 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
-import axios from "axios";
-import { fetchQuotes } from "../useQuotes";
 import { useLiveCandles } from "../useLiveCandles";
-
-vi.mock("axios");
-
-describe("fetchQuotes", () => {
-  beforeEach(() => {
-    vi.mocked(axios.get).mockReset();
-  });
-
-  it("gọi /quotes và trả map symbol (uppercase) → quote đã normalize", async () => {
-    vi.mocked(axios.get).mockResolvedValue({
-      data: {
-        data: {
-          aaa: { price: "10.5", volume: "100", time: 1751856245 },
-          BBB: { price: "20", time: 1751856245 },
-          BAD: { price: "nan", time: 1751856245 },
-        },
-      },
-    });
-    const out = await fetchQuotes();
-    expect(axios.get).toHaveBeenCalledWith(expect.stringContaining("/quotes"));
-    expect(out).toEqual({
-      AAA: { price: 10.5, volume: 100, time: 1751856245 },
-      BBB: { price: 20, time: 1751856245 },
-    });
-  });
-
-  it("payload BE thật: time snapshot ở ngoài, item không có time → vẫn nhận đủ", async () => {
-    vi.mocked(axios.get).mockResolvedValue({
-      data: {
-        time: "2026-07-07T10:30:00+07:00",
-        data: {
-          AAA: { price: 62.9, volume: 1500000 },
-          VNINDEX: { price: 1280.5, volume: 890000000 },
-          CHUAKHOP: { price: 0, volume: 0 },
-        },
-      },
-    });
-    const snapshotUnix = Date.UTC(2026, 6, 7, 3, 30) / 1000;
-    expect(await fetchQuotes()).toEqual({
-      AAA: { price: 62.9, volume: 1500000, time: snapshotUnix },
-      VNINDEX: { price: 1280.5, volume: 890000000, time: snapshotUnix },
-    });
-  });
-
-  it("payload thiếu data → map rỗng, không crash", async () => {
-    vi.mocked(axios.get).mockResolvedValue({ data: {} });
-    expect(await fetchQuotes()).toEqual({});
-  });
-});
 
 describe("useLiveCandles", () => {
   const T0 = Date.UTC(2026, 6, 7) / 1000; // nến ngày 07/07

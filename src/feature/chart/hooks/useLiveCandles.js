@@ -4,7 +4,7 @@ import { mergeQuoteIntoCandles } from "../untils/liveCandle";
 const EMPTY = [];
 
 /**
- * Gộp giá realtime (useQuotes) vào lịch sử nến (useIntraday) và TÍCH LUỸ
+ * Gộp giá realtime (WS /ws/quotes qua useQuoteStream) vào lịch sử nến (useIntraday) và TÍCH LUỸ
  * kết quả giữa các tick: nến đang hình thành giữ được high/low trong khung,
  * các nến đã append phía client không mất đi khi tick mới tới.
  *
