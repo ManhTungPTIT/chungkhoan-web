@@ -16,6 +16,9 @@ const EMPTY = [];
  * double-render không tạo khác biệt.
  */
 export function useLiveCandles(baseCandles, quote, symbol, interval) {
+  // baseCandles === undefined nghĩa là lịch sử CHƯA tải xong (khác [] đã tải
+  // xong nhưng không có nến) — chưa có gì để merge, tránh seed nến ảo từ quote.
+  const isLoading = baseCandles === undefined;
   const base = baseCandles ?? EMPTY;
   const ref = useRef(null);
 
@@ -28,7 +31,7 @@ export function useLiveCandles(baseCandles, quote, symbol, interval) {
     ref.current = { base, symbol, interval, merged: base };
   }
 
-  if (quote) {
+  if (quote && !isLoading) {
     ref.current.merged = mergeQuoteIntoCandles(
       ref.current.merged,
       quote,
