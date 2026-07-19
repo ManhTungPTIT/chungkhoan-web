@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { normalizeQuote } from "../untils/normalizeQuote";
 
 // Snapshot giá hiện tại của TẤT CẢ mã trong MỘT request — thay cho việc mỗi
 // client refetch cả lịch sử /intraday mỗi 5s. BE chạy job nền gọi nguồn dữ
@@ -14,25 +15,6 @@ import axios from "axios";
 //             (BE đã quy đổi: cổ phiếu nghìn đồng, index điểm); <= 0 bị loại
 //   - volume: KL cộng dồn trong ngày (tùy chọn)
 //   - time (từng mã, tùy chọn): unix giây hoặc chuỗi parse được bởi new Date()
-
-export function normalizeQuote(item, fallbackTime) {
-  if (!item) return null;
-  const price = Number(item.price);
-  const rawTime = item.time ?? fallbackTime;
-  const time =
-    typeof rawTime === "number"
-      ? rawTime
-      : Math.floor(new Date(rawTime).getTime() / 1000);
-  if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(time))
-    return null;
-
-  const volume = Number(item.volume);
-  return {
-    price,
-    time,
-    ...(Number.isFinite(volume) ? { volume } : {}),
-  };
-}
 
 export const fetchQuotes = async () => {
   const { data } = await axios.get(

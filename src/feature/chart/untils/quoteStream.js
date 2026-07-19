@@ -1,4 +1,4 @@
-import { normalizeQuote } from "../hooks/useQuotes";
+import { normalizeQuote } from "./normalizeQuote";
 
 // Singleton WebSocket tới BE /ws/quotes — MỘT kết nối cho mọi hook/mã.
 // Rớt → báo null cho mọi listener (hook trả null → index.jsx rơi về poll 5s)
