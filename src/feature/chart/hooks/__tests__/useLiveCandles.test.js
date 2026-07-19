@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useLiveCandles } from "../useLiveCandles";
+import { bucketStart } from "../../untils/liveCandle";
 
 describe("useLiveCandles", () => {
   const T0 = Date.UTC(2026, 6, 7) / 1000; // nến ngày 07/07
@@ -64,5 +65,28 @@ describe("useLiveCandles", () => {
       useLiveCandles(undefined, tick(105, 0), "AAA", "1d"),
     );
     expect(result.current).toEqual([]);
+  });
+
+  it("undefined → mảng rỗng ổn định; sau đó candles = [] (tải xong) → seed nến từ quote", () => {
+    const quoteTick = tick(105, 0);
+    const { result, rerender } = renderHook(
+      ({ candles, quote }) => useLiveCandles(candles, quote, "AAA", "1d"),
+      { initialProps: { candles: undefined, quote: quoteTick } },
+    );
+    // Phase 1: candles undefined (đang tải) → mảng rỗng ổn định, quote không được merge
+    expect(result.current).toEqual([]);
+
+    // Phase 2: candles = [] (tải xong, genuinely rỗng) → quote được merge, tạo nến mới
+    rerender({ candles: [], quote: quoteTick });
+    expect(result.current).toHaveLength(1);
+    expect(result.current[0]).toMatchObject({
+      open: 105,
+      high: 105,
+      low: 105,
+      close: 105,
+      volume: 0,
+    });
+    // Verify time using bucketStart
+    expect(result.current[0].time).toBe(bucketStart(quoteTick.time, "1d"));
   });
 });
