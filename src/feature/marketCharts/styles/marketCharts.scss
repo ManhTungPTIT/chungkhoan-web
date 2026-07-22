@@ -90,7 +90,9 @@
 }
 
 .market-chart-pair__panel--top-gain > .top-gain,
-.market-chart-pair__panel--top-gain > .top-gain-t3 {
+.market-chart-pair__panel--top-gain > .top-gain-t3,
+.market-chart-pair__panel--top-gain > .foreign-buy,
+.market-chart-pair__panel--top-gain > .foreign-sell {
   height: 100%;
   min-height: 100%;
   padding: 0;
@@ -98,12 +100,16 @@
 }
 
 .market-chart-pair__panel--top-gain .top-gain__page-header,
-.market-chart-pair__panel--top-gain .top-gain-t3__page-header {
+.market-chart-pair__panel--top-gain .top-gain-t3__page-header,
+.market-chart-pair__panel--top-gain .foreign-buy__page-header,
+.market-chart-pair__panel--top-gain .foreign-sell__page-header {
   display: none;
 }
 
 .market-chart-pair__panel--top-gain .top-gain__card,
-.market-chart-pair__panel--top-gain .top-gain-t3__card {
+.market-chart-pair__panel--top-gain .top-gain-t3__card,
+.market-chart-pair__panel--top-gain .foreign-buy__card,
+.market-chart-pair__panel--top-gain .foreign-sell__card {
   max-width: none;
   height: 100%;
   margin: 0;

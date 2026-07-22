@@ -27,6 +27,8 @@ const TopGainT3Page = lazy(() => import('../feature/topGainT3'));
 const TopGainWeekPage = lazy(() => import('../feature/topGainWeek'));
 const FlowSurgePage = lazy(() => import('../feature/flowSurge'));
 const IndexOverviewPage = lazy(() => import('../feature/indexOverview'));
+const ForeignBuyPage = lazy(() => import('../feature/foreignBuy'));
+const ForeignSellPage = lazy(() => import('../feature/foreignSell'));
 
 function AppRoute() {
   // Đổi vùng admin ↔ user thì tự logout (xem hook).
@@ -56,7 +58,7 @@ function AppRoute() {
       <Route element={<PrivateRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/" element={<TradingView />} />
-          <Route path="/home" element = {<HomePage/>}/>
+          <Route path="/home" element={<HomePage />} />
           <Route path="/chart/filter" element={<FilterStock />} />
           <Route path="/info" element={<InfoUser />} />
           <Route
@@ -156,6 +158,26 @@ function AppRoute() {
                 fallback={<div style={{ padding: "2rem" }}>Đang tải Chỉ số chung 3 sàn…</div>}
               >
                 <IndexOverviewPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/foreign-buy"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Giá trị nước ngoài mua ròng cao nhất…</div>}
+              >
+                <ForeignBuyPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/foreign-sell"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Giá trị nước ngoài bán ròng cao nhất…</div>}
+              >
+                <ForeignSellPage />
               </Suspense>
             }
           />

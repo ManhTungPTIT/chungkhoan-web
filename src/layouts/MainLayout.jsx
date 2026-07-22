@@ -55,7 +55,7 @@ function MainLayout() {
   // Hồ sơ lấy từ API (/user/me) — nguồn chuẩn; localStorage chỉ là fallback hiển
   // thị tức thời. Login có thể không lưu user nên không dựa hẳn vào localStorage.
   const { data: me } = useMe();
-  
+
   const fullName =
     me?.fullName || data?.state?.user?.fullName || "Quản trị viên";
   const role = me?.role || data?.state?.user?.role;
@@ -79,8 +79,8 @@ function MainLayout() {
       </button>
       <div className={`mainSidebar${showSidebar ? " hidden" : ""}`}>
         <div className="ms-header">
-          <div style={{display: "flex", marginTop: "0.3rem"}}>
-            <img className="logo" src={logo} alt="ảnh logo"/>
+          <div style={{ display: "flex", marginTop: "0.3rem" }}>
+            <img className="logo" src={logo} alt="ảnh logo" />
           </div>
           <button onClick={() => setShowSidebar(!showSidebar)}>
             <GiHamburgerMenu />
@@ -94,8 +94,8 @@ function MainLayout() {
               onClick={() => navigate("/info")}
             >
               <FaUserCircle style={{ width: "1.5rem", height: "1.5rem" }} />
-            <span>{fullName}</span>
-            
+              <span>{fullName}</span>
+
             </div>
             <button onClick={handleLogout}>
               <IoLogOutOutline />
@@ -142,9 +142,8 @@ function MainLayout() {
               </a>
             </li>
             <li
-              className={`navbar-item text-redirect power-parent${
-                mapMenuOpen ? " is-open" : ""
-              }`}
+              className={`navbar-item text-redirect power-parent${mapMenuOpen ? " is-open" : ""
+                }`}
               onClick={() => {
                 setMapMenuOpen((v) => !v);
                 setMarketChartMenuOpen(false);
@@ -194,9 +193,8 @@ function MainLayout() {
               </ul>
             </li>
             <li
-              className={`navbar-item text-redirect power-parent${
-                marketChartMenuOpen ? " is-open" : ""
-              }`}
+              className={`navbar-item text-redirect power-parent${marketChartMenuOpen ? " is-open" : ""
+                }`}
               onClick={() => {
                 setMarketChartMenuOpen((v) => !v);
                 setMapMenuOpen(false);
@@ -215,9 +213,8 @@ function MainLayout() {
             </li>
             <li
               id="market-chart-submenu"
-              className={`navbar-submenu${
-                marketChartMenuOpen ? " is-open" : ""
-              }`}
+              className={`navbar-submenu${marketChartMenuOpen ? " is-open" : ""
+                }`}
             >
               <ul>
                 <li
@@ -295,6 +292,30 @@ function MainLayout() {
                 >
                   <a>
                     <span>Chỉ số chung 3 sàn</span>
+                  </a>
+                </li>
+
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#foreign-buy");
+                  }}
+                >
+                  <a>
+                    <span>Giá trị nước ngoài mua ròng cao nhất</span>
+                  </a>
+                </li>
+
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#foreign-sell");
+                  }}
+                >
+                  <a>
+                    <span>Giá trị nước ngoài bán ròng cao nhất</span>
                   </a>
                 </li>
               </ul>

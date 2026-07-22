@@ -1,0 +1,40 @@
+.foreign-buy {
+  --fb-ink: #111a2c;
+  --fb-muted: #697386;
+  --fb-line: #e7ebf0;
+  --fb-purple: #7b0c9d;
+  --fb-gold: #f2ae10;
+  --fb-green: #078244;
+  --fb-red: #f20d32;
+  --fb-row-h: 1.75rem;
+  min-height: 100%; padding: clamp(1rem, 2.8vw, 2.5rem); color: var(--fb-ink); background: #f7f8fb;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+.foreign-buy * { box-sizing: border-box; }
+.foreign-buy__card { max-width: 1100px; margin: auto; padding: clamp(.8rem, 2vw, 1.5rem); overflow: hidden; background: #fff; border: 1px solid #e7eaf0; border-radius: 1rem; box-shadow: 0 12px 34px rgba(19, 28, 50, .08); }
+.foreign-buy__heading { display: flex; justify-content: center; text-align: center; }
+.foreign-buy__heading h1 { margin: .22rem 0 0; font-size: clamp(1rem, 1.35vw, 1.35rem); font-weight: 800; letter-spacing: -.02em; line-height: 1.25; }
+.foreign-buy__legend { display: flex; justify-content: center; flex-wrap: wrap; gap: .7rem 2.2rem; padding: 1rem 0; color: #414c5d; font-size: .74rem; }
+.foreign-buy__legend-item { display: inline-flex; align-items: center; gap: .45rem; }
+.foreign-buy__legend-swatch { width: 1.35rem; height: .42rem; border-radius: 1rem; background: currentColor; }
+.foreign-buy__legend-swatch--purple { background: var(--fb-purple); }.foreign-buy__legend-swatch--green { background: var(--fb-green); }.foreign-buy__legend-swatch--red { background: var(--fb-red); }
+.foreign-buy__legend-swatch--gold { position: relative; width: 1.5rem; height: 1px; background: var(--fb-gold); }.foreign-buy__legend-swatch--gold::after { position: absolute; top: 50%; left: 50%; width: .5rem; height: .5rem; border-radius: 50%; background: var(--fb-gold); content: ""; transform: translate(-50%, -50%); }
+.foreign-buy__state { padding: 3rem 1rem; text-align: center; color: var(--fb-muted); }.foreign-buy__state--error { color: #b3261e; }.foreign-buy__state button { border: 0; background: none; color: inherit; text-decoration: underline; cursor: pointer; }
+.foreign-buy__chart { overflow-x: auto; padding: .1rem 0 .35rem; }
+.foreign-buy__panel-titles, .foreign-buy__axis-row, .foreign-buy__plot { display: grid; grid-template-columns: minmax(8.5rem, 1.3fr) minmax(6.5rem, 1fr) minmax(4.5rem, .7fr) minmax(4.5rem, .7fr); column-gap: .4rem; }
+.foreign-buy__panel-titles { margin-top: .2rem; }.foreign-buy__panel-titles span { justify-self: stretch; text-align: center; padding: .25rem .15rem; border-radius: .2rem; color: #fff; font-size: .48rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }.foreign-buy__panel-titles span:nth-child(1) { background: var(--fb-purple); }.foreign-buy__panel-titles span:nth-child(2) { background: var(--fb-gold); }.foreign-buy__panel-titles span:nth-child(3) { background: var(--fb-green); }.foreign-buy__panel-titles span:nth-child(4) { background: var(--fb-red); }
+.foreign-buy__axis-row { min-height: 2.2rem; align-items: end; }.foreign-buy__axis { display: flex; justify-content: space-between; padding: 0 .05rem .4rem; color: #687387; font-size: .52rem; font-weight: 650; }.foreign-buy__axis--value { padding-left: 2.55rem; color: #682382; }.foreign-buy__axis--price { color: #b67b00; }.foreign-buy__axis--up { color: #087a41; }.foreign-buy__axis--down { color: #da1837; }
+.foreign-buy__plot { position: relative; }.foreign-buy__column { position: relative; min-width: 0; }.foreign-buy__column::before { position: absolute; top: 0; bottom: 0; left: 2.55rem; border-left: 1px solid rgba(215, 221, 229, .75); content: ""; }.foreign-buy__center-line::before, .foreign-buy__up-bars::before, .foreign-buy__down-bars::before { left: 0; }
+.foreign-buy__bar-row { display: flex; align-items: center; height: var(--fb-row-h); gap: .42rem; border-top: 1px dashed #eef0f4; }.foreign-buy__bar-track { position: relative; flex: 1; height: .43rem; overflow: hidden; border-radius: 999px; background: #f2edf5; }.foreign-buy__bar-track span { display: block; height: 100%; min-width: 2px; border-radius: inherit; }
+.foreign-buy__value-bars .foreign-buy__bar-track span { margin-left: auto; background: var(--fb-purple); }.foreign-buy__symbol { display: inline-flex; align-items: center; width: 2.3rem; flex: 0 0 2.3rem; gap: .15rem; font-size: .62rem; }.foreign-buy__symbol svg { color: #fff; background: #5d1ca7; border-radius: 50%; padding: .1rem; font-size: .7rem; flex-shrink: 0; }.foreign-buy__bar-row em { min-width: 1.7rem; color: #596477; font-size: .56rem; font-style: normal; font-weight: 700; }
+.foreign-buy__center-line { overflow: visible; }.foreign-buy__mid-line { position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed #cbd2db; }.foreign-buy__line-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }.foreign-buy__line-svg path { fill: none; stroke: var(--fb-gold); stroke-width: 1.25; vector-effect: non-scaling-stroke; }.foreign-buy__point { fill: var(--fb-gold); stroke: #fff; stroke-width: 1.3; vector-effect: non-scaling-stroke; }.foreign-buy__price-label { position: absolute; z-index: 2; color: #bf8500; font-size: .54rem; font-weight: 800; line-height: 1; pointer-events: none; transform: translate(.25rem, -50%); white-space: nowrap; }.foreign-buy__price-label--left { transform: translate(calc(-100% - .25rem), -50%); }
+.foreign-buy__up-bars .foreign-buy__bar-track { background: #eaf6ee; }.foreign-buy__up-bars .foreign-buy__bar-track span { background: var(--fb-green); }.foreign-buy__up-bars em { color: #067238; }.foreign-buy__down-bars .foreign-buy__bar-track { display: flex; justify-content: flex-end; background: #fce9ed; }.foreign-buy__down-bars .foreign-buy__bar-track span { background: var(--fb-red); }.foreign-buy__down-bars em { color: #d30d31; text-align: right; }
+.foreign-buy__footer { margin-top: .55rem; padding-top: .7rem; border-top: 1px solid var(--fb-line); color: var(--fb-muted); font-size: .68rem; font-style: italic; }
+@media (max-width: 1400px) {
+  .foreign-buy__card { padding: 1rem; }
+  .foreign-buy__panel-titles, .foreign-buy__axis-row, .foreign-buy__plot { column-gap: .4rem; }
+  .foreign-buy__panel-titles span { font-size: .5rem; padding: .25rem .2rem; }
+  .foreign-buy__axis { font-size: .56rem; }
+  .foreign-buy__bar-row em { font-size: .56rem; min-width: 1.8rem; }
+}
+@media (max-width: 760px) { .foreign-buy { padding: .75rem; }.foreign-buy__card { padding: 1rem .75rem; }.foreign-buy__heading h1 { font-size: 1rem; }.foreign-buy__legend { justify-content: flex-start; } }

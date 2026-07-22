@@ -9,6 +9,8 @@ import TopGainWeekChart from "../topGainWeek/layouts/TopGainWeekChart";
 import FlowSurgeChart from "../flowSurge/layouts/FlowSurgeChart";
 import IndexOverviewChart from "../indexOverview/layouts/IndexOverviewChart";
 import MarketStatusChart from "../marketStatus/layouts/MarketStatusChart";
+import ForeignBuyChart from "../foreignBuy/layouts/ForeignBuyChart";
+import ForeignSellChart from "../foreignSell/layouts/ForeignSellChart";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -39,6 +41,8 @@ export default function MarketChartsPage() {
   const flowSurgeRef = useRef(null);
   const indexOverviewRef = useRef(null);
   const marketStatusRef = useRef(null);
+  const foreignBuyRef = useRef(null);
+  const foreignSellRef = useRef(null);
 
   useEffect(() => {
     const targetRef = {
@@ -50,6 +54,8 @@ export default function MarketChartsPage() {
       "#flow-surge": flowSurgeRef,
       "#index-overview": indexOverviewRef,
       "#market-status": marketStatusRef,
+      "#foreign-buy": foreignBuyRef,
+      "#foreign-sell": foreignSellRef,
     }[location.hash] ?? null;
 
     if (!targetRef?.current) return undefined;
@@ -138,6 +144,24 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ diễn biến thị trường"
       >
         <MarketStatusChart />
+      </section>
+
+      <section
+        ref={foreignBuyRef}
+        id="foreign-buy"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ giá trị nước ngoài mua ròng cao nhất"
+      >
+        <ForeignBuyChart />
+      </section>
+
+      <section
+        ref={foreignSellRef}
+        id="foreign-sell"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ giá trị nước ngoài bán ròng cao nhất"
+      >
+        <ForeignSellChart />
       </section>
     </main>
   );
