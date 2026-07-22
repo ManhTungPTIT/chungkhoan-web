@@ -19,6 +19,14 @@ import { useLogoutOnAreaSwitch } from './useLogoutOnAreaSwitch';
 // không nằm trong bundle khởi động.
 const HeatmapPage = lazy(() => import('../feature/heatmap'));
 const PowerPage = lazy(() => import('../feature/power'));
+const TplusWavePage = lazy(() => import('../feature/tplusWave'));
+const PotentialFlowPage = lazy(() => import('../feature/potentialFlow'));
+const MarketChartsPage = lazy(() => import('../feature/marketCharts'));
+const TopGainT2Page = lazy(() => import('../feature/topGainT2'));
+const TopGainT3Page = lazy(() => import('../feature/topGainT3'));
+const TopGainWeekPage = lazy(() => import('../feature/topGainWeek'));
+const FlowSurgePage = lazy(() => import('../feature/flowSurge'));
+const IndexOverviewPage = lazy(() => import('../feature/indexOverview'));
 
 function AppRoute() {
   // Đổi vùng admin ↔ user thì tự logout (xem hook).
@@ -68,6 +76,86 @@ function AppRoute() {
                 fallback={<div style={{ padding: "2rem" }}>Đang tải vòng tròn quyền lực…</div>}
               >
                 <PowerPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/market"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải cặp biểu đồ thị trường…</div>}
+              >
+                <MarketChartsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/tplus-wave"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải radar sóng T+…</div>}
+              >
+                <TplusWavePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/potential-flow"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải biểu đồ mã tiềm năng…</div>}
+              >
+                <PotentialFlowPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/top-gain-t2"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Top tăng T+2…</div>}
+              >
+                <TopGainT2Page />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/top-gain-t3"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Top tăng T+3…</div>}
+              >
+                <TopGainT3Page />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/top-gain-week"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Top tăng tuần…</div>}
+              >
+                <TopGainWeekPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/flow-surge"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Dòng tiền đột biến…</div>}
+              >
+                <FlowSurgePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/index-overview"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Chỉ số chung 3 sàn…</div>}
+              >
+                <IndexOverviewPage />
               </Suspense>
             }
           />

@@ -1,5 +1,5 @@
-﻿import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { MdStackedLineChart } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { FaUserCircle } from "react-icons/fa";
@@ -35,13 +35,21 @@ function readStoredAuth() {
 
 function MainLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { logout } = LoginUserService();
   // Mobile: sidebar thu gọn sẵn để nội dung chiếm trọn màn; desktop mở sẵn
   const [showSidebar, setShowSidebar] = useState(
     typeof window !== "undefined" && window.innerWidth <= 768,
   );
-  // Dropdown gộp "Bản đồ nhiệt", "Bản đồ sức mạnh dòng tiền", "Toàn cảnh thị trường"
+  // Dropdown gộp các bản đồ thị trường; các biểu đồ thị trường nằm trong menu riêng
   const [mapMenuOpen, setMapMenuOpen] = useState(false);
+  const [marketChartMenuOpen, setMarketChartMenuOpen] = useState(false);
+  useEffect(() => {
+    if (location.pathname === "/chart/market") return;
+
+    setMapMenuOpen(false);
+    setMarketChartMenuOpen(false);
+  }, [location.pathname, location.search, location.hash]);
 
   const data = readStoredAuth();
   // Hồ sơ lấy từ API (/user/me) — nguồn chuẩn; localStorage chỉ là fallback hiển
@@ -137,7 +145,10 @@ function MainLayout() {
               className={`navbar-item text-redirect power-parent${
                 mapMenuOpen ? " is-open" : ""
               }`}
-              onClick={() => setMapMenuOpen((v) => !v)}
+              onClick={() => {
+                setMapMenuOpen((v) => !v);
+                setMarketChartMenuOpen(false);
+              }}
             >
               <a className="break-word">
                 <MdGridView />
@@ -178,6 +189,112 @@ function MainLayout() {
                 >
                   <a>
                     <span>Bản đồ toàn cảnh thị trường</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li
+              className={`navbar-item text-redirect power-parent${
+                marketChartMenuOpen ? " is-open" : ""
+              }`}
+              onClick={() => {
+                setMarketChartMenuOpen((v) => !v);
+                setMapMenuOpen(false);
+                navigate("/chart/market#potential-flow");
+              }}
+            >
+              <a
+                className="break-word"
+                aria-expanded={marketChartMenuOpen}
+                aria-controls="market-chart-submenu"
+              >
+                <MdStackedLineChart />
+                <span>Biểu đồ thị trường</span>
+                <MdExpandMore className="navbar-caret" />
+              </a>
+            </li>
+            <li
+              id="market-chart-submenu"
+              className={`navbar-submenu${
+                marketChartMenuOpen ? " is-open" : ""
+              }`}
+            >
+              <ul>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#tplus-wave");
+                  }}
+                >
+                  <a>
+                    <span>Radar sóng tăng T+</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#potential-flow");
+                  }}
+                >
+                  <a>
+                    <span>Mã cổ phiếu tiềm năng</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#top-gain-t2");
+                  }}
+                >
+                  <a>
+                    <span>Top tăng cao nhất T+2</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#top-gain-t3");
+                  }}
+                >
+                  <a>
+                    <span>Top tăng cao nhất T+3</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#top-gain-week");
+                  }}
+                >
+                  <a>
+                    <span>Top tăng cao nhất tuần</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#flow-surge");
+                  }}
+                >
+                  <a>
+                    <span>Dòng tiền tăng đột biến hôm nay</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#index-overview");
+                  }}
+                >
+                  <a>
+                    <span>Chỉ số chung 3 sàn</span>
                   </a>
                 </li>
               </ul>

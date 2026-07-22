@@ -1,4 +1,4 @@
-﻿import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import MainLayout from "../MainLayout";
@@ -35,6 +35,7 @@ function renderLayout() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<div>TRANG CHỦ</div>} />
           <Route path="/info" element={<div>TRANG THÔNG TIN</div>} />
+          <Route path="/chart/market" element={<div>BIỂU ĐỒ GHÉP</div>} />
         </Route>
       </Routes>
     </MemoryRouter>,
@@ -58,6 +59,44 @@ describe("MainLayout — điều hướng phần thông tin người dùng", () 
 
     expect(screen.getByText("Nguyen Van A")).toBeTruthy();
     expect(screen.getByText(/TRANG/)).toBeTruthy();
+  });
+});
+
+describe("MainLayout — mở cặp biểu đồ đầu tiên", () => {
+  it("điều hướng đến cặp biểu đồ đầu tiên khi bấm tab biểu đồ thị trường", () => {
+    renderLayout();
+
+    fireEvent.click(screen.getByText("Biểu đồ thị trường"));
+
+    expect(screen.getByText("BIỂU ĐỒ GHÉP")).toBeTruthy();
+  });
+});
+describe("MainLayout — menu biểu đồ thị trường", () => {
+  it("trượt ra danh sách hai biểu đồ khi bấm vào mục biểu đồ thị trường", () => {
+    renderLayout();
+
+    fireEvent.click(screen.getByText("Biểu đồ thị trường"));
+
+    expect(screen.getByText("Radar sóng tăng T+")).toBeTruthy();
+    expect(screen.getByText("Mã cổ phiếu tiềm năng")).toBeTruthy();
+    expect(screen.getByText("Top tăng cao nhất T+2")).toBeTruthy();
+    expect(screen.getByText("Top tăng cao nhất T+3")).toBeTruthy();
+    expect(screen.getByText("Top tăng cao nhất tuần")).toBeTruthy();
+    expect(screen.getByText("Dòng tiền tăng đột biến hôm nay")).toBeTruthy();
+    expect(screen.getByText("Chỉ số chung 3 sàn")).toBeTruthy();
+  });
+});
+
+describe("MainLayout — đóng menu khi chuyển tab", () => {
+  it("đóng các menu bản đồ và biểu đồ khi chuyển sang tab khác", () => {
+    renderLayout();
+
+    fireEvent.click(screen.getByText("Bản đồ thị trường"));
+    expect(document.querySelector(".navbar-submenu.is-open")).toBeTruthy();
+
+    fireEvent.click(screen.getByText("Trang chủ"));
+
+    expect(document.querySelector(".navbar-submenu.is-open")).toBeNull();
   });
 });
 

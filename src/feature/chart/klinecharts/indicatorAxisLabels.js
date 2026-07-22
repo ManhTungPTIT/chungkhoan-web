@@ -3,7 +3,7 @@
 // nhau là nhãn chồng lên nhau. Module này tự vẽ nhãn lên một canvas phủ
 // trên widget yAxis và đẩy các nhãn tách nhau ra khi trùng vị trí, đồng
 // thời né nhãn giá nến hiện tại (do thư viện vẽ, không di chuyển được).
-import { ActionType, DomPosition } from "klinecharts/dist/index.esm.js";
+import { DomPosition } from "klinecharts/dist/index.esm.js";
 
 const LABEL_HEIGHT = 14;
 const LABEL_GAP = 2;
@@ -211,6 +211,22 @@ function convertYToValue(chart, paneId, y) {
   }
 }
 
+// Đọc trực tiếp crosshair hiện tại từ chart thay vì cache qua action
+// OnCrosshairChange: khi chuột rời khỏi chart, klinecharts reset crosshair
+// về {} (không paneId) nhưng KHÔNG bắn action (ChartImp.crosshairChange chỉ
+// execute khi crosshair.paneId là string) — cache qua action bị kẹt ở giá
+// trị cuối, khiến nhãn giá đen không bao giờ biến mất khi rê chuột ra ngoài.
+function getLiveCrosshairY(chart, paneId) {
+  try {
+    const crosshair = chart.getChartStore?.()?.getTooltipStore?.()?.getCrosshair?.();
+    return crosshair?.paneId === paneId && Number.isFinite(crosshair.y)
+      ? crosshair.y
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 // Chặn trên của trục giá trị (from/to), dùng để tính bề rộng trục thay cho
 // giá trị crosshair đang di chuyển. Giá trị dưới con trỏ luôn nằm trong
 // [from, to] nên bề rộng nhãn tại 2 biên này CHẶN TRÊN bề rộng mọi nhãn có
@@ -300,15 +316,6 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
 
   let rafId = 0;
   let lastSignature = "";
-  let crosshairY = null;
-  const handleCrosshairChange = (crosshair) => {
-    crosshairY =
-      crosshair?.paneId === paneId && Number.isFinite(crosshair.y)
-        ? crosshair.y
-        : null;
-    lastSignature = "";
-  };
-  chart.subscribeAction?.(ActionType.OnCrosshairChange, handleCrosshairChange);
   const tick = () => {
     rafId = requestAnimationFrame(tick);
     const width = axisElement.clientWidth;
@@ -324,6 +331,9 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
     // các nhãn chỉ báo xếp dần lên trên / xuống dưới quanh mốc này
     let anchorY = null;
     const isVolPane = isVolumePane(chart, paneId);
+    // Đọc trực tiếp mỗi frame — không cache qua OnCrosshairChange, action này
+    // không bắn khi chuột rời chart nên cache sẽ kẹt ở giá trị cuối.
+    const crosshairY = getLiveCrosshairY(chart, paneId);
     let crosshairLabel = null;
     if (crosshairY !== null) {
       const crosshairValue = convertYToValue(chart, paneId, crosshairY);
@@ -391,7 +401,6 @@ export function attachIndicatorAxisLabels(chart, paneId = "candle_pane") {
 
   return () => {
     cancelAnimationFrame(rafId);
-    chart.unsubscribeAction?.(ActionType.OnCrosshairChange, handleCrosshairChange);
     canvas.remove();
   };
 }

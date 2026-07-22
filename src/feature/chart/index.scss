@@ -377,25 +377,33 @@
   display: flex;
   flex-direction: row;
   height: 100dvh;
+  min-height: 0;
   overflow: hidden;
 }
 .main-content {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
+  min-height: 0;
   height: 100dvh;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: #fff; // tông trắng cho phần nội dung (trừ sidebar)
   color: var(--text-h);
 }
 .mainSidebar {
   width: 14rem;
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
   flex-shrink: 0;
-  overflow: auto;
-  // Ẩn thanh scroll nhưng vẫn cuộn được
-  scrollbar-width: none; // Firefox
-  -ms-overflow-style: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  -ms-overflow-style: auto;
   &::-webkit-scrollbar {
-    display: none;
+    width: 6px;
   }
   transition: width 0.3s ease;
   background-color: #082d61; // navy — sidebar giữ tông tối
@@ -469,6 +477,9 @@
   }
   }
   .ms-body {
+    flex: 0 0 auto;
+    min-height: auto;
+    overflow: visible;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     margin-top: 0.5rem;
     .ms-body-navbar {

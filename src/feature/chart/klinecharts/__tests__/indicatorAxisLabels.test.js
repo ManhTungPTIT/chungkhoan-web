@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  attachIndicatorAxisLabels,
   formatAxisPrice,
   getAxisLabelWidth,
   getRequiredAxisLabelWidth,
@@ -124,6 +125,114 @@ describe("getRequiredAxisLabelWidth", () => {
     ];
 
     expect(getRequiredAxisLabelWidth(items, (text) => text.length * 6)).toBe(56);
+  });
+});
+
+describe("attachIndicatorAxisLabels crosshair label", () => {
+  let rafCallback;
+
+  function createFakeCtx() {
+    return {
+      measureText: vi.fn(() => ({ width: 10 })),
+      fillText: vi.fn(),
+      fillRect: vi.fn(),
+      beginPath: vi.fn(),
+      rect: vi.fn(),
+      fill: vi.fn(),
+      clearRect: vi.fn(),
+      setTransform: vi.fn(),
+    };
+  }
+
+  // Fake chart with a mutable crosshair "store" — mirrors klinecharts'
+  // TooltipStore, which klinecharts clears to {} on mouse leave WITHOUT
+  // invoking the OnCrosshairChange action (ChartImp.crosshairChange only
+  // executes the action when crosshair.paneId is a string).
+  function createFakeChart(crosshairState) {
+    const axisElement = document.createElement("div");
+    Object.defineProperty(axisElement, "clientWidth", {
+      value: 40,
+      configurable: true,
+    });
+    Object.defineProperty(axisElement, "clientHeight", {
+      value: 300,
+      configurable: true,
+    });
+    const axis = {
+      getRange: vi.fn(() => ({ from: 0, to: 100 })),
+      convertFromPixel: vi.fn((y) => 100 - y),
+    };
+    let crosshairChangeHandler = null;
+    const chart = {
+      getDom: vi.fn(() => axisElement),
+      subscribeAction: vi.fn((_type, handler) => {
+        crosshairChangeHandler = handler;
+      }),
+      unsubscribeAction: vi.fn(),
+      getIndicatorByPaneId: vi.fn(() => undefined),
+      getDataList: vi.fn(() => []),
+      getDrawPaneById: vi.fn(() => ({ getAxisComponent: () => axis })),
+      convertToPixel: vi.fn(() => ({ x: 0, y: 0 })),
+      getChartStore: vi.fn(() => ({
+        getTooltipStore: () => ({
+          getCrosshair: () => crosshairState,
+        }),
+      })),
+      // Real klinecharts fires this during mousemove while hovering the chart.
+      emitCrosshairChange: (crosshair) => crosshairChangeHandler?.(crosshair),
+    };
+    return chart;
+  }
+
+  beforeEach(() => {
+    rafCallback = null;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((cb) => {
+        rafCallback = cb;
+        return 1;
+      }),
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("clears the crosshair price label after the mouse leaves the chart", () => {
+    const fakeCtx = createFakeCtx();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
+      fakeCtx,
+    );
+
+    const crosshairState = { paneId: "candle_pane", y: 50 };
+    const chart = createFakeChart(crosshairState);
+
+    const detach = attachIndicatorAxisLabels(chart, "candle_pane");
+
+    // Mouse hovers the chart — klinecharts fires OnCrosshairChange with the pane's id.
+    chart.emitCrosshairChange({ paneId: "candle_pane", x: 20, y: 50 });
+    // First tick only syncs the axis label width and bails out early.
+    rafCallback();
+    // Second tick: mouse still over the chart → the black crosshair label draws.
+    rafCallback();
+    expect(fakeCtx.fillText).toHaveBeenCalled();
+    fakeCtx.clearRect.mockClear();
+    fakeCtx.fillText.mockClear();
+
+    // Mouse leaves the chart. klinecharts resets its internal crosshair store
+    // but never fires OnCrosshairChange for it (no paneId) — the label must
+    // still disappear because the axis-label loop re-reads live state each frame.
+    crosshairState.paneId = undefined;
+    crosshairState.y = undefined;
+    rafCallback();
+
+    expect(fakeCtx.clearRect).toHaveBeenCalled();
+    expect(fakeCtx.fillText).not.toHaveBeenCalled();
+
+    detach();
   });
 });
 

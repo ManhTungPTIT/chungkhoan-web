@@ -1,0 +1,78 @@
+.index-overview {
+  --io-purple: #6b1f9c;
+  --io-up: #1b7a3a;
+  --io-down: #e23b3b;
+  min-height: 100%;
+  box-sizing: border-box;
+  background: #f5f7fb;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+
+.index-overview * { box-sizing: border-box; }
+
+.index-overview__card {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1rem 1.2rem 1.4rem;
+  border: 1px solid #e2e6ee;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 18px 44px rgba(48, 36, 84, 0.09);
+}
+
+.index-overview__title {
+  margin: 0 0 0.6rem;
+  color: #4a1d75;
+  font-size: clamp(1.1rem, 2.4vw, 1.6rem);
+  font-weight: 850;
+  text-align: center;
+}
+
+.index-overview__legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.6rem;
+  margin-bottom: 0.4rem;
+  color: #5c667a;
+  font-size: 0.74rem;
+}
+.index-overview__legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.index-overview__swatch { width: 0.85rem; height: 0.85rem; border-radius: 0.2rem; }
+
+.index-overview__chart { width: 100%; height: 320px; }
+
+.index-overview__state { padding: 2.5rem 1rem; text-align: center; color: #748099; font-size: 0.9rem; }
+.index-overview__state--error { color: #b3261e; }
+.index-overview__state button { margin-left: 0.6rem; padding: 0.3rem 0.8rem; border: 1px solid #d8c8e7; border-radius: 0.5rem; background: #fbf9fe; color: var(--io-purple); cursor: pointer; }
+
+.index-overview__table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.index-overview__table th,
+.index-overview__table td {
+  padding: 0.55rem 0.6rem;
+  text-align: right;
+  border-bottom: 1px solid #eef1f5;
+}
+.index-overview__table th {
+  color: #fff;
+  background: #6b1f9c;
+  font-weight: 700;
+  font-size: 0.74rem;
+}
+.index-overview__table th:first-child,
+.index-overview__table td:first-child { text-align: left; }
+.index-overview__san { font-weight: 800; color: #2a3350; }
+.index-overview__purple { color: var(--io-purple); font-weight: 700; }
+.index-overview__table .is-up { color: var(--io-up); font-weight: 700; }
+.index-overview__table .is-down { color: var(--io-down); font-weight: 700; }
+
+@media (max-width: 620px) {
+  .index-overview { padding: 0.8rem; }
+  .index-overview__table { font-size: 0.74rem; }
+  .index-overview__chart { height: 260px; }
+}

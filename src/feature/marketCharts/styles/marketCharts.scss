@@ -1,0 +1,260 @@
+.market-chart-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.75rem;
+  min-height: calc(100vh - 60px);
+  padding: 0.75rem;
+  overflow: auto;
+  background: #f5f7fb;
+  container: market-chart-pair / inline-size;
+}
+
+.market-chart-pair__panel {
+  min-width: 0;
+  min-height: 44rem;
+  scroll-margin-top: 0.75rem;
+}
+
+.market-chart-pair__panel--potential > .potential-flow {
+  height: 100%;
+  min-height: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.market-chart-pair__panel--potential .potential-flow__page-header {
+  display: none;
+}
+
+.market-chart-pair__panel--potential .potential-flow__card {
+  max-width: none;
+  height: 100%;
+  margin: 0;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
+}
+
+.market-chart-pair__panel--potential .potential-flow__plot {
+  min-height: 29rem;
+}
+
+.market-chart-pair__panel--tplus {
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
+}
+
+.market-chart-pair__tplus-chart {
+  width: 100%;
+  height: 100%;
+  min-height: 44rem;
+}
+
+.market-chart-pair__tplus-chart > .tplus-wave-state,
+.market-chart-pair__state {
+  display: grid;
+  min-height: 44rem;
+  place-items: center;
+  padding: 1.5rem;
+  color: #566176;
+  text-align: center;
+}
+
+.market-chart-pair__tplus-chart > div {
+  width: 100%;
+  height: 100%;
+}
+
+.market-chart-pair__tplus-chart .echarts-for-react {
+  width: 100%;
+  height: 100%;
+}
+
+.market-chart-pair__panel--tplus .tplus-wave-page {
+  width: 100%;
+  height: 100%;
+  min-height: 44rem;
+  padding: 0;
+  background: transparent;
+}
+
+.market-chart-pair__panel--tplus .tplus-wave-chart {
+  width: 100%;
+  height: 100%;
+  min-height: 44rem;
+  border: 0;
+}
+
+.market-chart-pair__panel--top-gain > .top-gain,
+.market-chart-pair__panel--top-gain > .top-gain-t3 {
+  height: 100%;
+  min-height: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__page-header,
+.market-chart-pair__panel--top-gain .top-gain-t3__page-header {
+  display: none;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__card,
+.market-chart-pair__panel--top-gain .top-gain-t3__card {
+  max-width: none;
+  height: 100%;
+  margin: 0;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
+}
+
+.market-chart-pair__panel--top-gain .top-gain__plot,
+.market-chart-pair__panel--top-gain .top-gain-t3__plot {
+  min-height: 25rem;
+}
+.market-chart-pair__panel--potential .potential-flow__axis-row,
+.market-chart-pair__panel--potential .potential-flow__plot,
+.market-chart-pair__panel--top-gain .top-gain__axis-row,
+.market-chart-pair__panel--top-gain .top-gain__plot,
+.market-chart-pair__panel--top-gain .top-gain-t3__axis-row,
+.market-chart-pair__panel--top-gain .top-gain-t3__plot {
+  grid-template-columns:
+    minmax(3.6rem, 0.55fr)
+    minmax(6rem, 1fr)
+    minmax(9.5rem, 1.35fr)
+    minmax(6rem, 1fr);
+  column-gap: 0.4rem;
+}
+
+.market-chart-pair__panel--potential .potential-flow__column {
+  grid-template-rows: repeat(12, minmax(2.25rem, 1fr)) 2.25rem;
+}
+
+.market-chart-pair__panel--top-gain .top-gain,
+.market-chart-pair__panel--top-gain .top-gain-t3 {
+  --tg-row-h: 1.45rem;
+}
+.market-chart-pair__panel--top-gain > .top-gain-week,
+.market-chart-pair__panel--top-gain > .flow-surge {
+  height: 100%;
+  min-height: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.market-chart-pair__panel--top-gain .top-gain-week,
+.market-chart-pair__panel--top-gain .flow-surge {
+  --tg-row-h: 1.45rem;
+}
+
+.market-chart-pair__panel--top-gain .top-gain-week__card,
+.market-chart-pair__panel--top-gain .flow-surge__card {
+  max-width: none;
+  height: 100%;
+  margin: 0;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
+}
+
+.market-chart-pair__panel--top-gain .top-gain-week__titlebar,
+.market-chart-pair__panel--top-gain .flow-surge__titlebar {
+  height: 7.7rem;
+  min-height: 7.7rem;
+  align-items: center;
+}
+
+.market-chart-pair__panel--top-gain .top-gain-week__titlebar h2,
+.market-chart-pair__panel--top-gain .flow-surge__titlebar h2 {
+  line-height: 1.1;
+}
+
+.market-chart-pair__panel--top-gain .top-gain-week__chart {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.market-chart-pair__panel--top-gain .flow-surge__chart {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.market-chart-pair__panel--top-gain .top-gain-week__axis-row,
+.market-chart-pair__panel--top-gain .top-gain-week__plot,
+.market-chart-pair__panel--top-gain .flow-surge__axis-row,
+.market-chart-pair__panel--top-gain .flow-surge__plot {
+  grid-template-columns:
+    minmax(3.6rem, 0.55fr)
+    minmax(6rem, 1fr)
+    minmax(9.5rem, 1.35fr)
+    minmax(6rem, 1fr);
+  column-gap: 0.4rem;
+  min-width: 29rem;
+}
+
+.market-chart-pair__panel--top-gain .flow-surge__axis-row,
+.market-chart-pair__panel--top-gain .flow-surge__plot {
+  min-width: 0;
+  grid-template-columns:
+    minmax(3rem, 0.55fr)
+    minmax(4rem, 1fr)
+    minmax(0, 1.35fr)
+    minmax(4rem, 1fr);
+  column-gap: 0.3rem;
+}@container market-chart-pair (max-width: 1200px) {
+  .market-chart-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .market-chart-pair__panel {
+    min-height: 42rem;
+  }
+}
+.market-chart-pair__panel--potential .potential-flow__chart,
+.market-chart-pair__panel--top-gain .top-gain__chart,
+.market-chart-pair__panel--top-gain .top-gain-t3__chart {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.market-chart-pair__panel--potential .potential-flow__axis-row,
+.market-chart-pair__panel--potential .potential-flow__plot,
+.market-chart-pair__panel--top-gain .top-gain__axis-row,
+.market-chart-pair__panel--top-gain .top-gain__plot,
+.market-chart-pair__panel--top-gain .top-gain-t3__axis-row,
+.market-chart-pair__panel--top-gain .top-gain-t3__plot {
+  min-width: 29rem;
+}
+@media (max-width: 1050px) {
+  .market-chart-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .market-chart-pair__panel {
+    min-height: 42rem;
+  }
+}
+
+@media (max-width: 760px) {
+  .market-chart-pair {
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .market-chart-pair__panel,
+  .market-chart-pair__tplus-chart,
+  .market-chart-pair__panel--tplus .tplus-wave-page,
+  .market-chart-pair__panel--tplus .tplus-wave-chart {
+    min-height: 35rem;
+  }
+
+  .market-chart-pair__panel--potential .potential-flow__chart {
+    overflow-x: auto;
+  }
+}
