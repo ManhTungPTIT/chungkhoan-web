@@ -1,0 +1,76 @@
+.market-status {
+  --ms-ink: #172033;
+  --ms-muted: #748099;
+  --ms-line: #e6eaf1;
+  max-width: 720px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  border: 1px solid #e2e6ee;
+  border-radius: 1.05rem;
+  background: #fff;
+  box-shadow: 0 22px 50px rgba(48, 36, 84, 0.1);
+  color: var(--ms-ink);
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+
+.market-status * { box-sizing: border-box; }
+
+.market-status__header { text-align: center; margin-bottom: 0.6rem; }
+.market-status__header h2 {
+  margin: 0;
+  color: var(--ms-ink);
+  font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+  font-weight: 850;
+  letter-spacing: 0.01em;
+}
+
+.market-status__state { padding: 2.5rem 1rem; text-align: center; color: var(--ms-muted); font-size: 0.9rem; }
+.market-status__state--error { color: #b3261e; }
+.market-status__state button { margin-left: 0.6rem; padding: 0.3rem 0.8rem; border: 1px solid #d8c8e7; border-radius: 0.5rem; background: #fbf9fe; color: #7814a9; cursor: pointer; }
+
+.market-status__chart { width: 100%; height: clamp(220px, 32vw, 300px); }
+
+.market-status__legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.4rem;
+  padding: 0.4rem 0 1rem;
+  color: #5c667a;
+  font-size: 0.78rem;
+}
+.market-status__legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+.market-status__legend-item i { width: 0.65rem; height: 0.65rem; border-radius: 50%; }
+
+.market-status__stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.6rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--ms-line);
+}
+.market-status__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.6rem 0.3rem;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--stat-color) 10%, #fff);
+}
+.market-status__stat-icon {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.5rem;
+  color: #fff;
+  background: var(--stat-color);
+}
+.market-status__stat-label { font-size: 0.68rem; color: var(--ms-muted); text-align: center; }
+.market-status__stat-value { font-size: 1.05rem; font-weight: 800; color: var(--ms-ink); }
+
+@media (max-width: 640px) {
+  .market-status__stats { grid-template-columns: repeat(3, 1fr); }
+}

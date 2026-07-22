@@ -8,6 +8,7 @@ import TopGainT3Chart from "../topGainT3/layouts/TopGainT3Chart";
 import TopGainWeekChart from "../topGainWeek/layouts/TopGainWeekChart";
 import FlowSurgeChart from "../flowSurge/layouts/FlowSurgeChart";
 import IndexOverviewChart from "../indexOverview/layouts/IndexOverviewChart";
+import MarketStatusChart from "../marketStatus/layouts/MarketStatusChart";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -37,6 +38,7 @@ export default function MarketChartsPage() {
   const topGainWeekRef = useRef(null);
   const flowSurgeRef = useRef(null);
   const indexOverviewRef = useRef(null);
+  const marketStatusRef = useRef(null);
 
   useEffect(() => {
     const targetRef = {
@@ -47,6 +49,7 @@ export default function MarketChartsPage() {
       "#top-gain-week": topGainWeekRef,
       "#flow-surge": flowSurgeRef,
       "#index-overview": indexOverviewRef,
+      "#market-status": marketStatusRef,
     }[location.hash] ?? null;
 
     if (!targetRef?.current) return undefined;
@@ -126,6 +129,15 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ chỉ số chung 3 sàn"
       >
         <IndexOverviewChart />
+      </section>
+
+      <section
+        ref={marketStatusRef}
+        id="market-status"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ diễn biến thị trường"
+      >
+        <MarketStatusChart />
       </section>
     </main>
   );

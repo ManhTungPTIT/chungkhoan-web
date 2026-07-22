@@ -388,6 +388,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   background: #fff; // tông trắng cho phần nội dung (trừ sidebar)
   color: var(--text-h);
 }
@@ -399,7 +400,9 @@
   flex-shrink: 0;
   overflow-x: hidden;
   overflow-y: auto;
+  overflow-y: overlay;
   overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   -ms-overflow-style: auto;
   &::-webkit-scrollbar {
@@ -413,6 +416,8 @@
   color: white;
   &.hidden {
     width: 0;
+    overflow: hidden;
+    scrollbar-gutter: auto;
   }
   .ms-header {
     display: flex;

@@ -46,7 +46,7 @@
 .potential-flow__state button { margin-left: 0.6rem; padding: 0.3rem 0.8rem; border: 1px solid #d8c8e7; border-radius: 0.5rem; background: #fbf9fe; color: var(--pf-purple); cursor: pointer; }
 
 .potential-flow__chart { padding: 0 1rem 0.7rem; }
-.potential-flow__axis-row, .potential-flow__plot { display: grid; grid-template-columns: minmax(4.5rem, 0.58fr) minmax(8.5rem, 1fr) minmax(13rem, 1.6fr) minmax(8.5rem, 1fr); column-gap: 0.7rem; }
+.potential-flow__axis-row, .potential-flow__plot { display: grid; grid-template-columns: minmax(3rem, 0.55fr) minmax(4rem, 1fr) minmax(0, 1.35fr) minmax(4rem, 1fr); column-gap: 0.3rem; }
 .potential-flow__axis-row { align-items: end; min-height: 2.6rem; border-bottom: 1px solid var(--pf-line); color: #6b7486; font-size: 0.62rem; }
 .potential-flow__axis-caption { padding: 0 0 0.55rem 0.5rem; color: #4b5568; font-size: 0.62rem; font-weight: 800; }
 .potential-flow__axis { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 0.55rem; }
@@ -97,8 +97,8 @@
   .potential-flow__header-meta { text-align: left; }
   .potential-flow__titlebar { align-items: flex-start; flex-direction: column; }
   .potential-flow__selector { width: 100%; }
-  .potential-flow__chart { overflow-x: auto; padding-inline: 0.4rem; }
-  .potential-flow__axis-row, .potential-flow__plot { min-width: 680px; }
+  .potential-flow__chart { overflow-x: hidden; padding-inline: 0.4rem; }
+  .potential-flow__axis-row, .potential-flow__plot { min-width: 0; }
   .potential-flow__plot { min-height: 32rem; }
   .potential-flow__footer { align-items: flex-start; flex-direction: column; }
 }

@@ -40,7 +40,7 @@
 .top-gain__state button { margin-left: 0.6rem; padding: 0.3rem 0.8rem; border: 1px solid #d8c8e7; border-radius: 0.5rem; background: #fbf9fe; color: var(--tg-purple); cursor: pointer; }
 
 .top-gain__chart { padding: 0 1rem 0.7rem; }
-.top-gain__axis-row, .top-gain__plot { display: grid; grid-template-columns: minmax(4.5rem, 0.58fr) minmax(8.5rem, 1fr) minmax(13rem, 1.6fr) minmax(8.5rem, 1fr); column-gap: 0.7rem; }
+.top-gain__axis-row, .top-gain__plot { display: grid; grid-template-columns: minmax(3rem, 0.55fr) minmax(4rem, 1fr) minmax(0, 1.35fr) minmax(4rem, 1fr); column-gap: 0.3rem; }
 .top-gain__axis-row { align-items: end; min-height: 2.6rem; border-bottom: 1px solid var(--tg-line); color: #6b7486; font-size: 0.62rem; }
 .top-gain__axis-caption { padding: 0 0 0.55rem 0.5rem; color: #4b5568; font-size: 0.62rem; font-weight: 800; }
 .top-gain__axis { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 0.55rem; }
@@ -82,6 +82,6 @@
   .top-gain { padding: 0.85rem; }
   .top-gain__page-header { align-items: flex-start; flex-direction: column; gap: 0.8rem; }
   .top-gain__header-meta { text-align: left; }
-  .top-gain__chart { overflow-x: auto; padding-inline: 0.4rem; }
-  .top-gain__axis-row, .top-gain__plot { min-width: 680px; }
+  .top-gain__chart { overflow-x: hidden; padding-inline: 0.4rem; }
+  .top-gain__axis-row, .top-gain__plot { min-width: 0; }
 }

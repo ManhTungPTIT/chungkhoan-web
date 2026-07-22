@@ -1,0 +1,11 @@
+import * as echarts from "echarts";
+import { buildRadarOption } from "./src/feature/tplusWave/untils/tplusWaveOption.js";
+const payload={symbols:["ASP","PVI","CLI","VNM","TNI","MST"],series:{t2:[22,3,4,4,2,5],t3:[16,5,3,4,3,5],t5:[22,20,4,5,4,6]}};
+const chart=echarts.init(null,null,{renderer:"svg",ssr:true,width:900,height:720});
+chart.setOption(buildRadarOption(payload));
+const svg=chart.renderToSVGString();
+console.log("TITLE:", svg.includes("SÓNG TĂNG"));
+console.log("LEGEND T+2:", svg.includes("Tăng cao nhất T+2"));
+console.log("LEGEND T+5:", svg.includes("T+5"));
+console.log("polyline/path (grid+series):", (svg.match(/<(polyline|path|polygon)/g)||[]).length, "elements");
+console.log("len:", svg.length);

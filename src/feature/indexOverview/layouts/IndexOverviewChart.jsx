@@ -79,12 +79,6 @@ function IndexOverviewChart() {
       <section className="index-overview__card">
         <h2 className="index-overview__title">CHỈ SỐ CHUNG 3 SÀN</h2>
 
-        <div className="index-overview__legend">
-          <span><i className="index-overview__swatch" style={{ background: VALUE_COLOR }} />Giá trị khớp lệnh (nghìn tỷ)</span>
-          <span><i className="index-overview__swatch" style={{ background: DIEM_POS_COLOR }} />Điểm tăng giảm</span>
-          <span><i className="index-overview__swatch" style={{ background: PCT_POS_COLOR }} />% Tăng giảm</span>
-        </div>
-
         {isLoading && <div className="index-overview__state">Đang tải dữ liệu…</div>}
         {isError && (
           <div className="index-overview__state index-overview__state--error">
