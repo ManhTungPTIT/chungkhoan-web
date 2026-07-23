@@ -40,13 +40,13 @@ function MarketStatusChart() {
       series: [
         {
           type: "pie",
-          radius: ["0%", "72%"],
+          radius: ["0%", "96%"],
           center: ["50%", "50%"],
           label: {
             formatter: (p) => `{pct|${p.percent}%}\n{count|${p.value}}`,
             rich: {
-              pct: { fontSize: 15, fontWeight: 800, color: "#fff", lineHeight: 20 },
-              count: { fontSize: 12, color: "#fff", lineHeight: 16 },
+              pct: { fontSize: 20, fontWeight: 800, color: "#fff", lineHeight: 26 },
+              count: { fontSize: 15, color: "#fff", lineHeight: 19 },
             },
             position: "inside",
             color: "#fff",

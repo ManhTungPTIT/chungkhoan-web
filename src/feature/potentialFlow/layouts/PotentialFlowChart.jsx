@@ -66,6 +66,7 @@ function PotentialFlowChart() {
     const step = (view.priceMax - view.priceMin) / 4;
     return [0, 1, 2, 3, 4].map((i) => Math.round(view.priceMin + step * i));
   }, [view.priceMin, view.priceMax]);
+  const rightAxisTicks = useMemo(() => rightTicks(view.pctAxisMax), [view.pctAxisMax]);
 
   return (
     <main className="potential-flow">
@@ -85,7 +86,6 @@ function PotentialFlowChart() {
       <section className="potential-flow__card" aria-labelledby="potential-flow-title">
         <div className="potential-flow__titlebar">
           <div>
-            <span className="potential-flow__titlebar-kicker">COMBO CHART · DIVERGING BAR + LINE</span>
             <h2 id="potential-flow-title">CÁC MÃ CỔ PHIẾU TIỀM NĂNG LƯỚT SÓNG</h2>
           </div>
           <div className="potential-flow__selector">
@@ -121,14 +121,14 @@ function PotentialFlowChart() {
           <div className="potential-flow__chart">
             <div className="potential-flow__axis-row" aria-hidden="true">
               <span className="potential-flow__axis-caption">MÃ</span>
-              <div className="potential-flow__axis potential-flow__axis--left">
+              <div className="potential-flow__axis potential-flow__axis--left" style={{ "--axis-count": LEFT_TICKS.length }}>
                 {LEFT_TICKS.map((tick) => <span key={tick}>{tick}%</span>)}
               </div>
-              <div className="potential-flow__axis potential-flow__axis--center">
+              <div className="potential-flow__axis potential-flow__axis--center" style={{ "--axis-count": centerTicks.length }}>
                 {centerTicks.map((tick, i) => <span key={i}>{tick}</span>)}
               </div>
-              <div className="potential-flow__axis potential-flow__axis--right">
-                {rightTicks(view.pctAxisMax).map((tick) => <span key={tick}>{tick}%</span>)}
+              <div className="potential-flow__axis potential-flow__axis--right" style={{ "--axis-count": rightAxisTicks.length }}>
+                {rightAxisTicks.map((tick) => <span key={tick}>{tick}%</span>)}
               </div>
             </div>
 
@@ -158,20 +158,34 @@ function PotentialFlowChart() {
               </div>
 
               <div className="potential-flow__column potential-flow__center-line">
-                <div className="potential-flow__zero-line" />
-                <svg className="potential-flow__line-svg" viewBox={`0 0 100 ${rows.length * 100}`} preserveAspectRatio="none" role="img" aria-label="Đường giá hiện tại">
+                <div className="potential-flow__zero-line" style={{ height: `calc(var(--pf-row-h) * ${rows.length})` }} />
+                <svg className="potential-flow__line-svg"
+                  style={{ height: `calc(var(--pf-row-h) * ${rows.length})` }} viewBox={`0 0 100 ${rows.length * 100}`} preserveAspectRatio="none" role="img" aria-label="Đường giá hiện tại">
                   <path d={buildLinePath(rows)} />
+                </svg>
+                {/* Chấm + nhãn số nằm NGOÀI svg, định vị bằng CSS.
+                    Trong svg chúng bị preserveAspectRatio="none" kéo méo: trục X
+                    giãn theo bề rộng cột, trục Y nén theo chiều cao, hai hệ số
+                    lệch nhau vài lần nên chữ vừa méo vừa lùn dần khi bảng nhiều
+                    dòng, tới mức mất hẳn. Chỉ path ở lại svg — nó có
+                    non-scaling-stroke nên không dính vấn đề này. */}
+                <div className="potential-flow__points">
                   {rows.map((row, index) => {
                     const x = Math.min(100, Math.max(0, row.priceLinePct));
-                    const y = index * 100 + 50;
                     return (
-                      <g className="potential-flow__point" key={row.ma_ck}>
-                        <circle cx={x} cy={y} r="2.7" />
-                        <text x={x} y={y - 8} textAnchor={x > 78 ? "end" : "start"}>{formatNumber(row.gia_hien_tai)}</text>
-                      </g>
+                      <span
+                        className={`potential-flow__point${x > 72 ? " is-flipped" : ""}`}
+                        key={row.ma_ck}
+                        style={{
+                          left: `${x}%`,
+                          top: `calc(var(--pf-row-h) * ${index + 0.5})`,
+                        }}
+                      >
+                        <em>{formatNumber(row.gia_hien_tai)}</em>
+                      </span>
                     );
                   })}
-                </svg>
+                </div>
               </div>
 
               <div className="potential-flow__column potential-flow__right-bars">

@@ -24,6 +24,11 @@ import { GiLion } from "react-icons/gi";
 import "../feature/chart/index.scss";
 import logo from "../assets/logo-auth.png"
 
+// Path đích của từng submenu — dùng để biết đang đứng trong khu vực nào mà giữ
+// menu mở. Thêm mục con mới thì nhớ thêm path vào đây.
+const MAP_MENU_PATHS = ["/chart/heatmap", "/chart/power", "/home"];
+const MARKET_CHART_PATH = "/chart/market";
+
 function readStoredAuth() {
   try {
     return JSON.parse(localStorage.getItem("auth-storage"));
@@ -44,11 +49,14 @@ function MainLayout() {
   // Dropdown gộp các bản đồ thị trường; các biểu đồ thị trường nằm trong menu riêng
   const [mapMenuOpen, setMapMenuOpen] = useState(false);
   const [marketChartMenuOpen, setMarketChartMenuOpen] = useState(false);
+  // Rời khỏi khu vực của một submenu thì mới thu nó lại. Đừng đóng cả hai theo
+  // một điều kiện chung: mọi mục của "Biểu đồ thị trường" đều ở lại
+  // /chart/market nên nó không sao, còn mỗi mục của "Bản đồ thị trường" lại đi
+  // MỘT path khác nhau — điều kiện chung khiến bấm mục nào cũng thu menu ngay
+  // lập tức, không nhìn được các mục còn lại.
   useEffect(() => {
-    if (location.pathname === "/chart/market") return;
-
-    setMapMenuOpen(false);
-    setMarketChartMenuOpen(false);
+    if (!MAP_MENU_PATHS.includes(location.pathname)) setMapMenuOpen(false);
+    if (location.pathname !== MARKET_CHART_PATH) setMarketChartMenuOpen(false);
   }, [location.pathname, location.search, location.hash]);
 
   const data = readStoredAuth();
@@ -281,6 +289,94 @@ function MainLayout() {
                 >
                   <a>
                     <span>Dòng tiền tăng đột biến hôm nay</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#money-flow");
+                  }}
+                >
+                  <a>
+                    <span>Tỷ trọng dòng tiền theo ngành</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#put-through");
+                  }}
+                >
+                  <a>
+                    <span>Dòng tiền giao dịch thỏa thuận</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#bull-bear");
+                  }}
+                >
+                  <a>
+                    <span>Dòng tiền phe bò và phe gấu</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#price-band");
+                  }}
+                >
+                  <a>
+                    <span>Dòng tiền theo nhóm giá cổ phiếu</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#sector-flow-value");
+                  }}
+                >
+                  <a>
+                    <span>Giá trị khớp lệnh 5 phiên theo ngành</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#sector-flow-share");
+                  }}
+                >
+                  <a>
+                    <span>Tỷ trọng khớp lệnh 5 phiên theo ngành</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#sector-breadth");
+                  }}
+                >
+                  <a>
+                    <span>Xu hướng tích cực tiêu cực ngành</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#sector-change");
+                  }}
+                >
+                  <a>
+                    <span>Tổng hợp tăng giảm theo ngành</span>
                   </a>
                 </li>
                 <li

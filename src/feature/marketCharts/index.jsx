@@ -11,6 +11,14 @@ import IndexOverviewChart from "../indexOverview/layouts/IndexOverviewChart";
 import MarketStatusChart from "../marketStatus/layouts/MarketStatusChart";
 import ForeignBuyChart from "../foreignBuy/layouts/ForeignBuyChart";
 import ForeignSellChart from "../foreignSell/layouts/ForeignSellChart";
+import BullBearChart from "../bullBear/layouts/BullBearChart";
+import PriceBandChart from "../priceBand/layouts/PriceBandChart";
+import SectorFlowValueChart from "../sectorFlowValue/layouts/SectorFlowValueChart";
+import SectorFlowShareChart from "../sectorFlowShare/layouts/SectorFlowShareChart";
+import SectorBreadthChart from "../sectorBreadth/layouts/SectorBreadthChart";
+import SectorChangeChart from "../sectorChange/layouts/SectorChangeChart";
+import MoneyFlowPage from "../moneyflow";
+import PutThroughPage from "../putThrough";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -43,6 +51,14 @@ export default function MarketChartsPage() {
   const marketStatusRef = useRef(null);
   const foreignBuyRef = useRef(null);
   const foreignSellRef = useRef(null);
+  const moneyFlowRef = useRef(null);
+  const putThroughRef = useRef(null);
+  const bullBearRef = useRef(null);
+  const priceBandRef = useRef(null);
+  const sectorFlowValueRef = useRef(null);
+  const sectorFlowShareRef = useRef(null);
+  const sectorBreadthRef = useRef(null);
+  const sectorChangeRef = useRef(null);
 
   useEffect(() => {
     const targetRef = {
@@ -56,6 +72,14 @@ export default function MarketChartsPage() {
       "#market-status": marketStatusRef,
       "#foreign-buy": foreignBuyRef,
       "#foreign-sell": foreignSellRef,
+      "#money-flow": moneyFlowRef,
+      "#put-through": putThroughRef,
+      "#bull-bear": bullBearRef,
+      "#price-band": priceBandRef,
+      "#sector-flow-value": sectorFlowValueRef,
+      "#sector-flow-share": sectorFlowShareRef,
+      "#sector-breadth": sectorBreadthRef,
+      "#sector-change": sectorChangeRef,
     }[location.hash] ?? null;
 
     if (!targetRef?.current) return undefined;
@@ -162,6 +186,70 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ giá trị nước ngoài bán ròng cao nhất"
       >
         <ForeignSellChart />
+      </section>
+      <section
+        ref={moneyFlowRef}
+        id="money-flow"
+        className="market-chart-pair__panel market-chart-pair__panel--moneyflow"
+        aria-label="Money flow theo nganh"
+      >
+        <MoneyFlowPage />
+      </section>
+      <section
+        ref={putThroughRef}
+        id="put-through"
+        className="market-chart-pair__panel market-chart-pair__panel--treemap"
+        aria-label="Dòng tiền giao dịch thỏa thuận theo mã"
+      >
+        <PutThroughPage />
+      </section>
+      <section
+        ref={bullBearRef}
+        id="bull-bear"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ dòng tiền phe bò và phe gấu"
+      >
+        <BullBearChart />
+      </section>
+      <section
+        ref={priceBandRef}
+        id="price-band"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ dòng tiền theo nhóm giá cổ phiếu"
+      >
+        <PriceBandChart />
+      </section>
+      <section
+        ref={sectorFlowValueRef}
+        id="sector-flow-value"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
+      >
+        <SectorFlowValueChart />
+      </section>
+      <section
+        ref={sectorFlowShareRef}
+        id="sector-flow-share"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ tỷ trọng giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
+      >
+        <SectorFlowShareChart />
+      </section>
+      <section
+        ref={sectorBreadthRef}
+        id="sector-breadth"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ xu hướng dòng tiền tích cực tiêu cực theo ngành"
+      >
+        <SectorBreadthChart />
+      </section>
+      <section
+        ref={sectorChangeRef}
+        id="sector-change"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ tổng hợp tăng giảm theo ngành"
+      >
+        <SectorChangeChart />
       </section>
     </main>
   );

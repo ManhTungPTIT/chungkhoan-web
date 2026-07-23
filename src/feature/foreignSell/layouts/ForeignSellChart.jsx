@@ -46,10 +46,10 @@ function ForeignSellChart() {
                     <div className="foreign-sell__chart">
                         <div className="foreign-sell__panel-titles" aria-hidden="true"><span>GIÁ TRỊ BÁN RÒNG (TỶ)</span><span>ĐƯỜNG GIÁ HIỆN TẠI (NGHÌN)</span><span>MÃ TĂNG GIÁ (%)</span><span>MÃ GIẢM GIÁ (%)</span></div>
                         <div className="foreign-sell__axis-row" aria-hidden="true">
-                            <div className="foreign-sell__axis foreign-sell__axis--value">{valueTicks.map((tick, index) => <span key={index}>{fmt(tick)}</span>)}</div>
-                            <div className="foreign-sell__axis foreign-sell__axis--price">{priceTicks.map((tick, index) => <span key={index}>{fmt(tick)}</span>)}</div>
-                            <div className="foreign-sell__axis foreign-sell__axis--up">{pctTicks.map((tick, index) => <span key={index}>{fmt(tick)}%</span>)}</div>
-                            <div className="foreign-sell__axis foreign-sell__axis--down">{pctTicks.slice().reverse().map((tick, index) => <span key={index}>-{fmt(tick)}%</span>)}</div>
+                            <div className="foreign-sell__axis foreign-sell__axis--value" style={{ "--axis-count": valueTicks.length }}>{valueTicks.map((tick, index) => <span key={index}>{fmt(tick)}</span>)}</div>
+                            <div className="foreign-sell__axis foreign-sell__axis--price" style={{ "--axis-count": priceTicks.length }}>{priceTicks.map((tick, index) => <span key={index}>{fmt(tick)}</span>)}</div>
+                            <div className="foreign-sell__axis foreign-sell__axis--up" style={{ "--axis-count": pctTicks.length }}>{pctTicks.map((tick, index) => <span key={index}>{fmt(tick)}%</span>)}</div>
+                            <div className="foreign-sell__axis foreign-sell__axis--down" style={{ "--axis-count": pctTicks.length }}>{pctTicks.slice().reverse().map((tick, index) => <span key={index}>-{fmt(tick)}%</span>)}</div>
                         </div>
                         <div className="foreign-sell__plot">
                             <div className="foreign-sell__column foreign-sell__value-bars">{rows.map((row) => <div className="foreign-sell__bar-row" key={row.symbol}><strong className="foreign-sell__symbol"><FiActivity aria-hidden="true" />{row.symbol}</strong><div className="foreign-sell__bar-track"><span style={{ width: `${row.valueBarPct}%` }} /></div><em>{fmt(row.valueTy)}</em></div>)}</div>

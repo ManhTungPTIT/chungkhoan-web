@@ -40,6 +40,7 @@ function FlowSurgeChart() {
     const step = view.priceMax > 0 ? view.priceMax / 4 : 1;
     return [0, 1, 2, 3, 4].map((i) => Math.round(step * i));
   }, [view.priceMax]);
+  const rightAxisTicks = useMemo(() => rightTicks(view.pctAxisMax), [view.pctAxisMax]);
 
   return (
     <main className="flow-surge">
@@ -48,7 +49,6 @@ function FlowSurgeChart() {
       <section className="flow-surge__card" aria-labelledby="flow-surge-title">
         <div className="flow-surge__titlebar">
           <div>
-            <span className="flow-surge__titlebar-kicker">COMBO CHART · DIVERGING BAR + LINE</span>
             <h2 id="flow-surge-title">DÒNG TIỀN TĂNG ĐỘT BIẾN NỔI BẬT HÔM NAY</h2>
           </div>
         </div>
@@ -74,14 +74,14 @@ function FlowSurgeChart() {
           <div className="flow-surge__chart">
             <div className="flow-surge__axis-row" aria-hidden="true">
               <span className="flow-surge__axis-caption">MÃ</span>
-              <div className="flow-surge__axis flow-surge__axis--left">
+              <div className="flow-surge__axis flow-surge__axis--left" style={{ "--axis-count": LEFT_TICKS.length }}>
                 {LEFT_TICKS.map((tick) => <span key={tick}>{tick}%</span>)}
               </div>
-              <div className="flow-surge__axis flow-surge__axis--center">
+              <div className="flow-surge__axis flow-surge__axis--center" style={{ "--axis-count": centerTicks.length }}>
                 {centerTicks.map((tick, i) => <span key={i}>{tick}</span>)}
               </div>
-              <div className="flow-surge__axis flow-surge__axis--right">
-                {rightTicks(view.pctAxisMax).map((tick) => <span key={tick}>{tick}%</span>)}
+              <div className="flow-surge__axis flow-surge__axis--right" style={{ "--axis-count": rightAxisTicks.length }}>
+                {rightAxisTicks.map((tick) => <span key={tick}>{tick}%</span>)}
               </div>
             </div>
 
@@ -109,28 +109,40 @@ function FlowSurgeChart() {
               </div>
 
               <div className="flow-surge__column flow-surge__center-line">
-                <div className="flow-surge__zero-line" />
+                <div className="flow-surge__zero-line" style={{ height: `calc(var(--tg-row-h) * ${rows.length})` }} />
                 <svg
                   className="flow-surge__line-svg"
+                  style={{ height: `calc(var(--tg-row-h) * ${rows.length})` }}
                   viewBox={`0 0 100 ${rows.length * 100}`}
                   preserveAspectRatio="none"
                   role="img"
                   aria-label="Đường giá hiện tại"
                 >
                   <path d={buildLinePath(rows)} />
+                </svg>
+                {/* Chấm + nhãn số nằm NGOÀI svg, định vị bằng CSS.
+                    Trong svg chúng bị preserveAspectRatio="none" kéo méo: trục X
+                    giãn theo bề rộng cột, trục Y nén theo chiều cao, hai hệ số
+                    lệch nhau vài lần nên chữ vừa méo vừa lùn dần khi bảng nhiều
+                    dòng, tới mức mất hẳn. Chỉ path ở lại svg — nó có
+                    non-scaling-stroke nên không dính vấn đề này. */}
+                <div className="flow-surge__points">
                   {rows.map((row, index) => {
                     const x = Math.min(100, Math.max(0, row.priceLinePct));
-                    const y = index * 100 + 50;
                     return (
-                      <g className="flow-surge__point" key={row.symbol}>
-                        <circle cx={x} cy={y} r="2.6" />
-                        <text x={x} y={y - 8} textAnchor={x > 78 ? "end" : "start"}>
-                          {fmt(row.priceNghin)}
-                        </text>
-                      </g>
+                      <span
+                        className={`flow-surge__point${x > 72 ? " is-flipped" : ""}`}
+                        key={row.symbol}
+                        style={{
+                          left: `${x}%`,
+                          top: `calc(var(--tg-row-h) * ${index + 0.5})`,
+                        }}
+                      >
+                        <em>{fmt(row.priceNghin)}</em>
+                      </span>
                     );
                   })}
-                </svg>
+                </div>
               </div>
 
               <div className="flow-surge__column flow-surge__right-bars">

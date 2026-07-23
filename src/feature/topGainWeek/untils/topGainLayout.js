@@ -12,7 +12,7 @@ const num = (value) => {
 };
 
 export function buildTopGainView(rows) {
-  const safe = Array.isArray(rows) ? rows : [];
+  const safe = Array.isArray(rows) ? rows.filter((row) => { if (!row || typeof row.symbol !== "string" || !row.symbol.trim()) return false; const value = Number(row.gia_tri_khop_lenh); const price = Number(row.gia_hien_tai); const pct = Number(row.pct_tang); return value > 0 && price > 0 && Number.isFinite(pct); }) : [];
   const values = safe.map((r) => num(r.gia_tri_khop_lenh));
   const prices = safe.map((r) => num(r.gia_hien_tai));
   const pcts = safe.map((r) => num(r.pct_tang));

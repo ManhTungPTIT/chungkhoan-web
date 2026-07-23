@@ -1,0 +1,80 @@
+// Khung thẻ cho hai chart "theo ngành" (mỗi hàng một ngành): xu hướng tích cực
+// tiêu cực, và tổng hợp tăng giảm.
+
+.sector-rows {
+  --sr-ink: #172033;
+  --sr-muted: #748099;
+  --sr-line: #e6eaf1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(0.6rem, 1.4vw, 1.1rem);
+  border: 1px solid #e2e6ee;
+  border-radius: 1.05rem;
+  background: #fff;
+  box-shadow: 0 22px 50px rgba(48, 36, 84, 0.1);
+  color: var(--sr-ink);
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+
+.sector-rows * { box-sizing: border-box; }
+
+.sector-rows__header { text-align: center; margin-bottom: 0.5rem; }
+.sector-rows__header h2 {
+  margin: 0;
+  color: var(--sr-ink);
+  font-size: clamp(1rem, 2.1vw, 1.3rem);
+  font-weight: 850;
+}
+
+.sector-rows__state { padding: 2.5rem 1rem; text-align: center; color: var(--sr-muted); font-size: 0.9rem; }
+.sector-rows__state--error { color: #b3261e; }
+.sector-rows__state button {
+  margin-left: 0.6rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid #d8c8e7;
+  border-radius: 0.5rem;
+  background: #fbf9fe;
+  color: #7814a9;
+  cursor: pointer;
+}
+
+// Chiều cao do JS đặt theo SỐ HÀNG (xem ROW_H trong component) — 37 ngành mà để
+// chiều cao cố định thì các hàng dính vào nhau.
+.sector-rows__chart { width: 100%; }
+
+.sector-rows__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 1rem;
+  margin: 0 0 0.4rem;
+  padding: 0;
+  list-style: none;
+  color: #4a5568;
+  font-size: 0.7rem;
+}
+
+.sector-rows__legend li { display: flex; align-items: center; gap: 0.32rem; }
+
+.sector-rows__legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.sector-rows__note {
+  margin: 0.4rem 0 0;
+  text-align: center;
+  color: var(--sr-muted);
+  font-size: 0.74rem;
+}
+
+// Ký hiệu vòng tròn rỗng trong chú giải — khớp với marker của đường giá trung
+// bình trên đồ thị (chấm rỗng, không phải chấm đặc).
+.sector-rows__legend-ring {
+  background: #fff;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}

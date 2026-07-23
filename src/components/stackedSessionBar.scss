@@ -1,0 +1,125 @@
+.stacked-session {
+  --ss-ink: #172033;
+  --ss-muted: #748099;
+  --ss-line: #e6eaf1;
+  max-width: 760px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: clamp(1rem, 2.5vw, 2rem);
+  border: 1px solid #e2e6ee;
+  border-radius: 1.05rem;
+  background: #fff;
+  box-shadow: 0 22px 50px rgba(48, 36, 84, 0.1);
+  color: var(--ss-ink);
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+
+.stacked-session * { box-sizing: border-box; }
+
+.stacked-session__header { text-align: center; margin-bottom: 0.6rem; }
+.stacked-session__header h2 {
+  margin: 0;
+  color: var(--ss-ink);
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  font-weight: 850;
+}
+
+.stacked-session__state { padding: 2.5rem 1rem; text-align: center; color: var(--ss-muted); font-size: 0.9rem; }
+.stacked-session__state--error { color: #b3261e; }
+.stacked-session__state button {
+  margin-left: 0.6rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid #d8c8e7;
+  border-radius: 0.5rem;
+  background: #fbf9fe;
+  color: #7814a9;
+  cursor: pointer;
+}
+
+// Cao hơn các chart khác vì phải chứa chú giải ~37 ngành bên phải.
+.stacked-session__chart { width: 100%; height: clamp(360px, 42vw, 480px); }
+
+.stacked-session__note {
+  margin: 0.2rem 0 0.6rem;
+  text-align: center;
+  color: var(--ss-muted);
+  font-size: 0.78rem;
+}
+
+// Bảng số liệu gập lại: 37 ngành × 5 phiên mở sẵn sẽ dài hơn cả biểu đồ.
+.stacked-session__data summary {
+  cursor: pointer;
+  color: var(--ss-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.stacked-session__table-wrap { max-height: 20rem; overflow: auto; margin-top: 0.5rem; }
+
+// Phải tự reset: panel.scss có rule `table` không scope rò ra toàn app (xem chú
+// thích trong styles/treemapPage.scss).
+.stacked-session__table {
+  display: table;
+  width: 100%;
+  height: auto;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+
+  thead { display: table-header-group; }
+  tbody { display: table-row-group; overflow: visible; flex: none; }
+  tr { display: table-row; width: auto; table-layout: auto; text-transform: none; }
+
+  th,
+  td {
+    color: var(--ss-ink);
+    background: transparent;
+    padding: 0.25rem 0.45rem;
+    border-bottom: 1px solid var(--ss-line);
+    text-align: right;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  th[scope="col"] {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    color: var(--ss-muted);
+    font-weight: 600;
+  }
+
+  th[scope="row"],
+  th[scope="col"]:first-child { text-align: left; }
+
+  th[scope="row"] i {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    margin-right: 0.4rem;
+  }
+}
+
+// Chú giải HTML: 37 ngành xuống dòng thoải mái, không tranh chỗ với vùng vẽ như
+// legend dọc của ECharts.
+.stacked-session__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.8rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: #4a5568;
+  font-size: 0.68rem;
+}
+
+.stacked-session__legend li { display: flex; align-items: center; gap: 0.3rem; }
+
+.stacked-session__legend i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  flex: none;
+}

@@ -61,9 +61,6 @@ describe("buildTopGainView", () => {
     const view = buildTopGainView([
       { symbol: "X", gia_tri_khop_lenh: null, gia_hien_tai: undefined, pct_tang: "abc" },
     ]);
-    expect(view.rows[0].valueTy).toBe(0);
-    expect(view.rows[0].priceNghin).toBe(0);
-    expect(view.rows[0].pctTang).toBe(0);
-    expect(view.rows[0].priceLinePct).toBe(50);
+    expect(view.rows).toEqual([]);
   });
 });

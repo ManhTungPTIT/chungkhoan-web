@@ -13,7 +13,7 @@
 
 .market-chart-pair__panel {
   min-width: 0;
-  min-height: 44rem;
+  min-height: 34rem;
   scroll-margin-top: 0.75rem;
 }
 
@@ -51,13 +51,13 @@
 .market-chart-pair__tplus-chart {
   width: 100%;
   height: 100%;
-  min-height: 44rem;
+  min-height: 34rem;
 }
 
 .market-chart-pair__tplus-chart > .tplus-wave-state,
 .market-chart-pair__state {
   display: grid;
-  min-height: 44rem;
+  min-height: 34rem;
   place-items: center;
   padding: 1.5rem;
   color: #566176;
@@ -77,7 +77,7 @@
 .market-chart-pair__panel--tplus .tplus-wave-page {
   width: 100%;
   height: 100%;
-  min-height: 44rem;
+  min-height: 34rem;
   padding: 0;
   background: transparent;
 }
@@ -85,7 +85,7 @@
 .market-chart-pair__panel--tplus .tplus-wave-chart {
   width: 100%;
   height: 100%;
-  min-height: 44rem;
+  min-height: 34rem;
   border: 0;
 }
 
@@ -183,8 +183,8 @@
 }
 .market-chart-pair__panel--top-gain .top-gain-week__titlebar,
 .market-chart-pair__panel--top-gain .flow-surge__titlebar {
-  height: 7.7rem;
-  min-height: 7.7rem;
+  height: 6rem;
+  min-height: 6rem;
   align-items: center;
 }
 
@@ -230,13 +230,78 @@
   column-gap: 0.3rem;
 }
 
+.market-chart-pair__panel--moneyflow {
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+  border-radius: 0.75rem;
+  background: white;
+  box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
+}
+
+.market-chart-pair__panel--moneyflow > .tm-page,
+.market-chart-pair__panel--treemap > .tm-page {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  padding: 1rem;
+  border: 1px solid #d9d9d9;
+  border-radius: 0.75rem;
+  background: white;
+}
+
+.market-chart-pair__panel--moneyflow .tm-title,
+.market-chart-pair__panel--treemap .tm-title {
+  font-size: 1rem;
+}
+
+.market-chart-pair__panel--moneyflow .tm-chart,
+.market-chart-pair__panel--moneyflow .tm-table-wrap,
+.market-chart-pair__panel--treemap .tm-chart,
+.market-chart-pair__panel--treemap .tm-table-wrap {
+  min-height: 25rem;
+}
+
+.market-chart-pair__panel#bull-bear > .value-bar,
+.market-chart-pair__panel#price-band > .value-bar {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  border-radius: 0.75rem;
+}
+
+.market-chart-pair__panel#sector-flow-value > .stacked-session,
+.market-chart-pair__panel#sector-flow-share > .stacked-session {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0 1rem 1.2rem;
+  border-radius: 0.75rem;
+}
+
+// Hai chart 5 phiên nằm cạnh nhau nên vùng vẽ phải CÙNG chiều cao cố định, không
+// để nội dung tự quyết — nếu không, chart nào chú giải xuống dòng nhiều hơn sẽ
+// kéo thẻ dài hơn thẻ kia.
+.market-chart-pair__panel#sector-flow-value .stacked-session__chart,
+.market-chart-pair__panel#sector-flow-share .stacked-session__chart {
+  height: clamp(320px, 38vw, 420px);
+}
+
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__chart,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__chart {
+  height: clamp(280px, 34vw, 380px);
+}
+
 @container market-chart-pair (max-width: 1200px) {
   .market-chart-pair {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .market-chart-pair__panel {
-    min-height: 42rem;
+    min-height: 32rem;
   }
 }
 .market-chart-pair__panel--potential .potential-flow__chart,
@@ -262,7 +327,7 @@
   }
 
   .market-chart-pair__panel {
-    min-height: 42rem;
+    min-height: 32rem;
   }
 }
 
@@ -276,10 +341,296 @@
   .market-chart-pair__tplus-chart,
   .market-chart-pair__panel--tplus .tplus-wave-page,
   .market-chart-pair__panel--tplus .tplus-wave-chart {
-    min-height: 35rem;
+    min-height: 30rem;
   }
 
   .market-chart-pair__panel--potential .potential-flow__chart {
     overflow-x: hidden;
   }
+}
+.market-chart-pair__panel--header-gradient {
+  display: block;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__titlebar,
+.market-chart-pair__panel--top-gain .top-gain-t3__titlebar,
+.market-chart-pair__panel--top-gain .top-gain-week__titlebar,
+.market-chart-pair__panel--top-gain .flow-surge__titlebar,
+.market-chart-pair__panel--potential .potential-flow__titlebar {
+  min-height: 6rem;
+  padding: 1.2rem 1rem 1rem;
+  align-items: flex-end;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__titlebar h2,
+.market-chart-pair__panel--top-gain .top-gain-t3__titlebar h2,
+.market-chart-pair__panel--top-gain .top-gain-week__titlebar h2,
+.market-chart-pair__panel--top-gain .flow-surge__titlebar h2,
+.market-chart-pair__panel--potential .potential-flow__titlebar h2 {
+  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+}
+
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__card,
+.market-chart-pair__panel--top-gain > .market-status,
+.market-chart-pair__panel--top-gain > .foreign-buy .foreign-buy__card,
+.market-chart-pair__panel--top-gain > .foreign-sell .foreign-sell__card {
+  padding: 0 1rem 1.2rem;
+}
+
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__title,
+.market-chart-pair__panel--top-gain > .market-status .market-status__header,
+.market-chart-pair__panel--top-gain > .foreign-buy .foreign-buy__heading,
+.market-chart-pair__panel--top-gain > .foreign-sell .foreign-sell__heading,
+.market-chart-pair__panel#sector-flow-value .stacked-session__header,
+.market-chart-pair__panel#sector-flow-share .stacked-session__header {
+  display: flex;
+  min-height: 6rem;
+  align-items: flex-end;
+  justify-content: flex-start;
+  margin: 0 -1rem 0.6rem;
+  padding: 1.2rem 1rem 1rem;
+  color: #fff;
+  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+  text-align: left;
+}
+
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__title,
+.market-chart-pair__panel--top-gain > .market-status .market-status__header h2,
+.market-chart-pair__panel--top-gain > .foreign-buy .foreign-buy__heading h1,
+.market-chart-pair__panel--top-gain > .foreign-sell .foreign-sell__heading h1,
+.market-chart-pair__panel#sector-flow-value .stacked-session__header h2,
+.market-chart-pair__panel#sector-flow-share .stacked-session__header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  text-align: left;
+}
+
+.market-chart-pair .market-chart-pair__panel--top-gain > .index-overview .index-overview__title { text-align: left; }
+
+.market-chart-pair__panel--moneyflow > .tm-page,
+.market-chart-pair__panel--treemap > .tm-page {
+  padding: 0;
+}
+
+.market-chart-pair__panel--moneyflow .tm-head,
+.market-chart-pair__panel--treemap .tm-head {
+  min-height: 6rem;
+  align-items: flex-end;
+  margin: 0 0 0.6rem;
+  padding: 1.2rem 1rem 1rem;
+  color: #fff;
+  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+}
+
+.market-chart-pair__panel--moneyflow .tm-title,
+.market-chart-pair__panel--treemap .tm-title {
+  color: #fff;
+  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+}
+
+.market-chart-pair__panel--moneyflow .tm-toggle button,
+.market-chart-pair__panel--treemap .tm-toggle button {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+}
+
+.market-chart-pair .market-chart-pair__panel--tplus .tplus-wave-controls {
+  position: relative;
+  min-height: 6rem;
+  align-content: flex-end;
+  padding: 1.2rem 1rem 1rem;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+}
+.market-chart-pair .market-chart-pair__panel--tplus .tplus-wave-controls::before {
+  content: "RADAR SÓNG TĂNG T+";
+  flex: 0 0 100%;
+  margin-bottom: 0.6rem;
+  color: #fff;
+  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  font-weight: 850;
+  letter-spacing: 0.02em;
+}
+
+.market-chart-pair__data-labels {
+  font-weight: 800;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__badge,
+.market-chart-pair__panel--top-gain .top-gain-t3__badge,
+.market-chart-pair__panel--top-gain .top-gain-week__badge,
+.market-chart-pair__panel--top-gain .flow-surge__badge,
+.market-chart-pair__panel--top-gain .foreign-buy__symbol,
+.market-chart-pair__panel--top-gain .foreign-sell__symbol {
+  font-size: 0.86rem;
+  font-weight: 850;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__bar-row em,
+.market-chart-pair__panel--top-gain .top-gain-t3__bar-row em,
+.market-chart-pair__panel--top-gain .top-gain-week__bar-row em,
+.market-chart-pair__panel--top-gain .flow-surge__bar-row em,
+.market-chart-pair__panel--top-gain .top-gain__point em,
+.market-chart-pair__panel--top-gain .top-gain-t3__point em,
+.market-chart-pair__panel--top-gain .top-gain-week__point em,
+.market-chart-pair__panel--top-gain .flow-surge__point em {
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.market-chart-pair__panel--top-gain .foreign-buy__bar-row em,
+.market-chart-pair__panel--top-gain .foreign-sell__bar-row em,
+.market-chart-pair__panel--top-gain .foreign-buy__price-label,
+.market-chart-pair__panel--top-gain .foreign-sell__price-label {
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__symbol-row,
+.market-chart-pair__panel--top-gain .top-gain-t3__symbol-row,
+.market-chart-pair__panel--top-gain .top-gain-week__symbol-row,
+.market-chart-pair__panel--top-gain .flow-surge__symbol-row {
+  min-height: var(--tg-row-h);
+  height: var(--tg-row-h);
+  flex: 0 0 var(--tg-row-h);
+}
+
+
+/* Giữ mọi header gradient trong MarketCharts cùng chiều cao và bo góc. */
+.market-chart-pair__header-unified {
+  height: 8.5rem;
+  min-height: 8.5rem;
+  box-sizing: border-box;
+  align-items: center;
+  border-radius: 0.75rem 0.75rem 0 0;
+  overflow: hidden;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__titlebar,
+.market-chart-pair__panel--top-gain .top-gain-t3__titlebar,
+.market-chart-pair__panel--top-gain .top-gain-week__titlebar,
+.market-chart-pair__panel--top-gain .flow-surge__titlebar,
+.market-chart-pair__panel--potential .potential-flow__titlebar,
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__title,
+.market-chart-pair__panel--top-gain > .market-status .market-status__header,
+.market-chart-pair__panel--top-gain > .foreign-buy .foreign-buy__heading,
+.market-chart-pair__panel--top-gain > .foreign-sell .foreign-sell__heading,
+.market-chart-pair .market-chart-pair__panel--tplus .tplus-wave-controls,
+.market-chart-pair__panel--moneyflow .tm-head,
+.market-chart-pair__panel--treemap .tm-head,
+.market-chart-pair__panel#sector-flow-value .stacked-session__header,
+.market-chart-pair__panel#sector-flow-share .stacked-session__header {
+  height: 8.5rem;
+  min-height: 8.5rem;
+  box-sizing: border-box;
+  align-items: center;
+  border-radius: 0.75rem 0.75rem 0 0;
+  overflow: hidden;
+}
+
+.market-chart-pair__panel#bull-bear > .value-bar,
+.market-chart-pair__panel#price-band > .value-bar {
+  overflow: hidden;
+}
+
+
+/* Index overview trong MarketCharts dùng toàn bộ chiều rộng của panel. */
+.market-chart-pair__index-overview-full {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  min-height: 100%;
+  padding: 0;
+}
+
+.market-chart-pair__panel--top-gain > .index-overview {
+  padding: 0;
+}
+
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__card {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0 0 1.2rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__title {
+  display: flex;
+  width: 100%;
+  height: 8.5rem;
+  min-height: 8.5rem;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  margin: 0 0 0.6rem;
+  padding: 1.2rem 1rem 1rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  color: #fff;
+  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+  text-align: left;
+}
+
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__chart {
+  width: calc(100% - 2rem);
+  height: clamp(360px, 34vw, 400px);
+  margin: 0 1rem;
+}
+
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__legend,
+.market-chart-pair__panel--top-gain > .index-overview .index-overview__table {
+  width: calc(100% - 2rem);
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+
+/* Hai biểu đồ theo ngành dùng cùng card, header và chiều cao. */
+.market-chart-pair__panel#sector-breadth > .sector-rows,
+.market-chart-pair__panel#sector-change > .sector-rows {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0 1rem 1.2rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.market-chart-pair__panel#sector-breadth .sector-rows__header,
+.market-chart-pair__panel#sector-change .sector-rows__header {
+  display: flex;
+  width: calc(100% + 2rem);
+  height: 8.5rem;
+  min-height: 8.5rem;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  margin: 0 -1rem 0.6rem;
+  padding: 1.2rem 1rem 1rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  color: #fff;
+  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+  text-align: left;
+}
+
+.market-chart-pair__panel#sector-breadth .sector-rows__header h2,
+.market-chart-pair__panel#sector-change .sector-rows__header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  font-weight: 850;
+  text-align: left;
+}
+
+.market-chart-pair__panel#sector-breadth .sector-rows__chart,
+.market-chart-pair__panel#sector-change .sector-rows__chart {
+  width: 100%;
 }

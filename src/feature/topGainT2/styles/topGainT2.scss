@@ -32,7 +32,7 @@
 .top-gain__legend-item { display: inline-flex; align-items: center; gap: 0.42rem; }
 .top-gain__legend-swatch { width: 1.1rem; height: 0.36rem; border-radius: 1rem; }
 .top-gain__legend-swatch--purple { background: var(--tg-purple); }
-.top-gain__legend-swatch--gold { width: 0.7rem; height: 0.7rem; border: 2px solid var(--tg-gold); border-radius: 50%; }
+.top-gain__legend-swatch--gold { width: 0.6rem; height: 0.6rem; background: var(--tg-gold); border-radius: 50%; }
 .top-gain__legend-swatch--green { background: var(--tg-green); }
 
 .top-gain__state { padding: 2.5rem 1rem; text-align: center; color: var(--tg-muted); font-size: 0.9rem; }
@@ -41,9 +41,10 @@
 
 .top-gain__chart { padding: 0 1rem 0.7rem; }
 .top-gain__axis-row, .top-gain__plot { display: grid; grid-template-columns: minmax(3rem, 0.55fr) minmax(4rem, 1fr) minmax(0, 1.35fr) minmax(4rem, 1fr); column-gap: 0.3rem; }
-.top-gain__axis-row { align-items: end; min-height: 2.6rem; border-bottom: 1px solid var(--tg-line); color: #6b7486; font-size: 0.62rem; }
-.top-gain__axis-caption { padding: 0 0 0.55rem 0.5rem; color: #4b5568; font-size: 0.62rem; font-weight: 800; }
-.top-gain__axis { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 0.55rem; }
+.top-gain__axis-row { align-items: end; min-height: 2.6rem; border-bottom: 1px solid var(--tg-line); color: #6b7486; font-size: 0.72rem; font-weight: 700; }
+.top-gain__axis-caption { padding: 0 0 0.55rem 0.5rem; color: #4b5568; font-size: 0.74rem; font-weight: 850; }
+.top-gain__axis { display: grid; grid-template-columns: repeat(var(--axis-count), minmax(0, 1fr)); align-items: flex-end; padding-bottom: 0.55rem; }
+.top-gain__axis span { min-width: 0; text-align: center; white-space: nowrap; }
 .top-gain__axis--left { color: #8a57a8; }
 .top-gain__axis--right { color: #3b9660; }
 .top-gain__axis--center { color: #aa8c23; }
@@ -51,7 +52,7 @@
 .top-gain__column { position: relative; display: flex; flex-direction: column; min-width: 0; }
 .top-gain__symbols { border-right: 1px solid var(--tg-line); }
 .top-gain__symbol-row { display: flex; align-items: center; height: var(--tg-row-h); padding: 0 0.5rem; border-bottom: 1px solid #f0f2f5; }
-.top-gain__badge { display: inline-flex; align-items: center; gap: 0.35rem; color: #3e4657; font-size: 0.75rem; }
+.top-gain__badge { display: inline-flex; align-items: center; gap: 0.35rem; color: #3e4657; font-size: .88rem; }
 .top-gain__badge svg { width: 1.15rem; height: 1.15rem; padding: 0.22rem; border-radius: 50%; color: #fff; background: #5522a4; }
 .top-gain__badge strong { font-weight: 800; }
 .top-gain__summary-label { display: flex; align-items: center; height: var(--tg-row-h); padding-left: 0.5rem; border-top: 1px solid #dfe4eb; color: #525d70; font-size: 0.7rem; font-weight: 800; }
@@ -63,7 +64,7 @@
 .top-gain__left-bars .top-gain__bar-track span { background: linear-gradient(90deg, #b279d4, var(--tg-purple)); }
 .top-gain__right-bars .top-gain__bar-track { background: #edf7ef; }
 .top-gain__right-bars .top-gain__bar-track span { background: linear-gradient(90deg, #65c77f, var(--tg-green)); }
-.top-gain__bar-row em { flex: 0 0 2.85rem; color: #5b6373; font-size: 0.64rem; font-style: normal; text-align: left; }
+.top-gain__bar-row em { flex: 0 0 2.85rem; color: #5b6373; font-size: .74rem; font-style: normal; text-align: left; }
 .top-gain__left-bars .top-gain__bar-row em { order: -1; text-align: right; }
 .top-gain__right-bars .top-gain__bar-row em { color: #126f35; }
 .top-gain__summary-bar { display: flex; align-items: center; justify-content: flex-end; height: var(--tg-row-h); border-top: 1px solid #dfe4eb; color: #596477; font-size: 0.68rem; font-weight: 800; }
@@ -72,8 +73,33 @@
 .top-gain__zero-line { position: absolute; top: 0; bottom: var(--tg-row-h); left: 0; width: 1px; background: rgba(183, 150, 33, 0.45); }
 .top-gain__line-svg { position: absolute; inset: 0 0 var(--tg-row-h); width: 100%; height: calc(100% - var(--tg-row-h)); overflow: visible; }
 .top-gain__line-svg path { fill: none; stroke: var(--tg-gold); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
-.top-gain__point circle { fill: #fff; stroke: var(--tg-gold); stroke-width: 1.8; vector-effect: non-scaling-stroke; }
-.top-gain__point text { fill: #ad8610; font-size: 3.1px; font-weight: 700; paint-order: stroke; stroke: #fff; stroke-width: 0.65px; vector-effect: non-scaling-stroke; }
+// Lớp chấm + nhãn giá: HTML thuần, KHÔNG nằm trong svg (xem chú thích ở JSX).
+// Mỗi nhãn nằm gọn trong dải dòng của chính nó nên không bao giờ đè nhãn dòng
+// khác — khác hẳn cách cũ đặt chữ phía trên chấm.
+.top-gain__points { position: absolute; inset: 0 0 var(--tg-row-h); pointer-events: none; }
+.top-gain__point {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--tg-gold);
+}
+.top-gain__point em {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ad8610;
+  font-size: 0.6rem;
+  font-style: normal;
+  font-weight: 700;
+  white-space: nowrap;
+  // Viền trắng mảnh để số vẫn đọc được khi nằm đè lên đường vàng.
+  text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 2px #fff;
+}
+// Điểm sát mép phải thì lật nhãn sang trái, nếu không sẽ bị cắt.
+.top-gain__point.is-flipped em { left: auto; right: 8px; }
 
 .top-gain__footer { margin: 0 1rem; padding: 0.85rem 0 1rem; border-top: 1px solid #e5e9ef; color: var(--tg-muted); font-size: 0.78rem; }
 .top-gain__footer small { font-size: 0.7rem; }

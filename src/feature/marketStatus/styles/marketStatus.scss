@@ -5,7 +5,10 @@
   max-width: 720px;
   margin: 0 auto;
   box-sizing: border-box;
-  padding: clamp(1rem, 2.5vw, 2rem);
+  // Padding hẹp lại: bán kính hình tròn bị chặn bởi CẠNH NHỎ HƠN của vùng vẽ,
+  // mà trong panel của marketCharts cạnh nhỏ là BỀ NGANG — nới padding ăn trực
+  // tiếp vào đường kính.
+  padding: clamp(0.6rem, 1.4vw, 1.1rem);
   border: 1px solid #e2e6ee;
   border-radius: 1.05rem;
   background: #fff;
@@ -29,7 +32,7 @@
 .market-status__state--error { color: #b3261e; }
 .market-status__state button { margin-left: 0.6rem; padding: 0.3rem 0.8rem; border: 1px solid #d8c8e7; border-radius: 0.5rem; background: #fbf9fe; color: #7814a9; cursor: pointer; }
 
-.market-status__chart { width: 100%; height: clamp(220px, 32vw, 300px); }
+.market-status__chart { width: 100%; height: clamp(380px, 54vw, 520px); }
 
 .market-status__legend {
   display: flex;

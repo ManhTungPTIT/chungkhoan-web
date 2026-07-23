@@ -19,6 +19,8 @@ import { useLogoutOnAreaSwitch } from './useLogoutOnAreaSwitch';
 // không nằm trong bundle khởi động.
 const HeatmapPage = lazy(() => import('../feature/heatmap'));
 const PowerPage = lazy(() => import('../feature/power'));
+const MoneyFlowPage = lazy(() => import('../feature/moneyflow'));
+const PutThroughPage = lazy(() => import('../feature/putThrough'));
 const TplusWavePage = lazy(() => import('../feature/tplusWave'));
 const PotentialFlowPage = lazy(() => import('../feature/potentialFlow'));
 const MarketChartsPage = lazy(() => import('../feature/marketCharts'));
@@ -68,6 +70,26 @@ function AppRoute() {
                 fallback={<div style={{ padding: "2rem" }}>Đang tải bản đồ nhiệt…</div>}
               >
                 <HeatmapPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/money-flow"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải dòng tiền theo ngành…</div>}
+              >
+                <MoneyFlowPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/put-through"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải giao dịch thỏa thuận…</div>}
+              >
+                <PutThroughPage />
               </Suspense>
             }
           />
