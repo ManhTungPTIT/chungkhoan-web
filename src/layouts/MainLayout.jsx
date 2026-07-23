@@ -414,6 +414,39 @@ function MainLayout() {
                     <span>Giá trị nước ngoài bán ròng cao nhất</span>
                   </a>
                 </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#top-value");
+                  }}
+                >
+                  <a>
+                    <span>Giá trị tiền khớp lệnh cao nhất (Tỷ)</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#top-volume-view");
+                  }}
+                >
+                  <a>
+                    <span>Khối lượng khớp lệnh cao nhất</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#top-decline");
+                  }}
+                >
+                  <a>
+                    <span>Top giảm cao nhất</span>
+                  </a>
+                </li>
               </ul>
             </li>
             {/* <li className="navbar-item">

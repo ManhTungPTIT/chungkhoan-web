@@ -19,6 +19,9 @@ import SectorBreadthChart from "../sectorBreadth/layouts/SectorBreadthChart";
 import SectorChangeChart from "../sectorChange/layouts/SectorChangeChart";
 import MoneyFlowPage from "../moneyflow";
 import PutThroughPage from "../putThrough";
+import TopValueChart from "../topValue/layouts/TopValueChart";
+import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
+import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -59,6 +62,9 @@ export default function MarketChartsPage() {
   const sectorFlowShareRef = useRef(null);
   const sectorBreadthRef = useRef(null);
   const sectorChangeRef = useRef(null);
+  const topValueRef = useRef(null);
+  const topVolumeRef = useRef(null);
+  const topDeclineRef = useRef(null);
 
   useEffect(() => {
     const targetRef = {
@@ -80,6 +86,9 @@ export default function MarketChartsPage() {
       "#sector-flow-share": sectorFlowShareRef,
       "#sector-breadth": sectorBreadthRef,
       "#sector-change": sectorChangeRef,
+      "#top-value": topValueRef,
+      "#top-volume-view": topVolumeRef,
+      "#top-decline": topDeclineRef,
     }[location.hash] ?? null;
 
     if (!targetRef?.current) return undefined;
@@ -250,6 +259,32 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ tổng hợp tăng giảm theo ngành"
       >
         <SectorChangeChart />
+      </section>
+      <section
+        ref={topValueRef}
+        id="top-value"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ giá trị tiền khớp lệnh cao nhất"
+      >
+        <TopValueChart />
+      </section>
+
+      <section
+        ref={topVolumeRef}
+        id="top-volume-view"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ khối lượng khớp lệnh cao nhất"
+      >
+        <TopVolumeChart />
+      </section>
+
+      <section
+        ref={topDeclineRef}
+        id="top-decline"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ top giảm cao nhất"
+      >
+        <TopDeclineChart />
       </section>
     </main>
   );
