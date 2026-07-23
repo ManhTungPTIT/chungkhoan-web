@@ -20,7 +20,7 @@
 .top-volume-view__card {
   max-width: 1100px;
   margin: auto;
-  padding: clamp(.8rem, 2vw, 1.5rem);
+  padding: 0 1rem 1.2rem;
   overflow: hidden;
   background: #fff;
   border: 1px solid #e7eaf0;
@@ -28,13 +28,24 @@
   box-shadow: 0 12px 34px rgba(19, 28, 50, .08);
 }
 
-.top-volume-view__heading { display: flex; justify-content: center; text-align: center; }
+.top-volume-view__heading {
+  display: flex;
+  min-height: 6rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0 -1rem 0.6rem;
+  padding: 1rem;
+  color: #fff;
+  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+}
 .top-volume-view__heading h1 {
-  margin: .22rem 0 0;
-  font-size: clamp(1rem, 1.35vw, 1.35rem);
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
   font-weight: 800;
   letter-spacing: -.02em;
   line-height: 1.25;
+  text-align: left;
 }
 
 .top-volume-view__legend {

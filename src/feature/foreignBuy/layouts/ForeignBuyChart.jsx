@@ -42,8 +42,8 @@ function ForeignBuyChart() {
                 <div className="foreign-buy__legend" aria-label="Chú giải biểu đồ">
                     <span className="foreign-buy__legend-item"><i className="foreign-buy__legend-swatch foreign-buy__legend-swatch--purple" />Giá trị mua ròng (Tỷ)</span>
                     <span className="foreign-buy__legend-item"><i className="foreign-buy__legend-swatch foreign-buy__legend-swatch--gold" />Đường giá hiện tại (Nghìn)</span>
-                    <span className="foreign-buy__legend-item"><i className="foreign-buy__legend-swatch foreign-buy__legend-swatch--green" />Mã tăng giá (%)</span>
                     <span className="foreign-buy__legend-item"><i className="foreign-buy__legend-swatch foreign-buy__legend-swatch--red" />Mã giảm giá (%)</span>
+                    <span className="foreign-buy__legend-item"><i className="foreign-buy__legend-swatch foreign-buy__legend-swatch--green" />Mã tăng giá (%)</span>
                 </div>
 
                 {isLoading && <div className="foreign-buy__state">Đang tải dữ liệu…</div>}
@@ -55,14 +55,14 @@ function ForeignBuyChart() {
                         <div className="foreign-buy__panel-titles" aria-hidden="true">
                             <span>GIÁ TRỊ MUA RÒNG (TỶ)</span>
                             <span>ĐƯỜNG GIÁ HIỆN TẠI (NGHÌN)</span>
-                            <span>MÃ TĂNG GIÁ (%)</span>
                             <span>MÃ GIẢM GIÁ (%)</span>
+                            <span>MÃ TĂNG GIÁ (%)</span>
                         </div>
                         <div className="foreign-buy__axis-row" aria-hidden="true">
                             <div className="foreign-buy__axis foreign-buy__axis--value" style={{ "--axis-count": valueTicks.length }}>{valueTicks.map((tick, index) => <span key={index}>{fmt(tick)}</span>)}</div>
                             <div className="foreign-buy__axis foreign-buy__axis--price" style={{ "--axis-count": priceTicks.length }}>{priceTicks.map((tick, index) => <span key={index}>{fmt(tick)}</span>)}</div>
-                            <div className="foreign-buy__axis foreign-buy__axis--up" style={{ "--axis-count": pctTicks.length }}>{pctTicks.map((tick, index) => <span key={index}>{fmt(tick)}%</span>)}</div>
                             <div className="foreign-buy__axis foreign-buy__axis--down" style={{ "--axis-count": pctTicks.length }}>{pctTicks.slice().reverse().map((tick, index) => <span key={index}>-{fmt(tick)}%</span>)}</div>
+                            <div className="foreign-buy__axis foreign-buy__axis--up" style={{ "--axis-count": pctTicks.length }}>{pctTicks.map((tick, index) => <span key={index}>{fmt(tick)}%</span>)}</div>
                         </div>
 
                         <div className="foreign-buy__plot">
@@ -92,18 +92,18 @@ function ForeignBuyChart() {
                                 })}
                             </div>
 
-                            <div className="foreign-buy__column foreign-buy__up-bars">
-                                {rows.map((row) => <div className="foreign-buy__bar-row" key={row.symbol}><div className="foreign-buy__bar-track"><span style={{ width: `${row.pctUpBarPct}%` }} /></div>{row.pctTang > 0 && <em>{fmt(row.pctTang, 2)}%</em>}</div>)}
-                            </div>
                             <div className="foreign-buy__column foreign-buy__down-bars">
                                 {rows.map((row) => <div className="foreign-buy__bar-row" key={row.symbol}>{row.pctTang < 0 && <em>{fmt(row.pctTang, 2)}%</em>}<div className="foreign-buy__bar-track"><span style={{ width: `${row.pctDownBarPct}%` }} /></div></div>)}
+                            </div>
+                            <div className="foreign-buy__column foreign-buy__up-bars">
+                                {rows.map((row) => <div className="foreign-buy__bar-row" key={row.symbol}><div className="foreign-buy__bar-track"><span style={{ width: `${row.pctUpBarPct}%` }} /></div>{row.pctTang > 0 && <em>{fmt(row.pctTang, 2)}%</em>}</div>)}
                             </div>
                         </div>
                     </div>
                 )}
                 <footer className="foreign-buy__footer"><small>* Đơn vị: Giá trị mua ròng (Tỷ) · Giá hiện tại (Nghìn) · Cập nhật: {data?.generated_at ?? "—"}</small></footer>
             </section>
-        </main>
+        </main >
     );
 }
 
