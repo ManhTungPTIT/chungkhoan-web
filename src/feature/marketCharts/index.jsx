@@ -11,6 +11,9 @@ import IndexOverviewChart from "../indexOverview/layouts/IndexOverviewChart";
 import MarketStatusChart from "../marketStatus/layouts/MarketStatusChart";
 import ForeignBuyChart from "../foreignBuy/layouts/ForeignBuyChart";
 import ForeignSellChart from "../foreignSell/layouts/ForeignSellChart";
+import TopValueChart from "../topValue/layouts/TopValueChart";
+import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
+import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -43,6 +46,9 @@ export default function MarketChartsPage() {
   const marketStatusRef = useRef(null);
   const foreignBuyRef = useRef(null);
   const foreignSellRef = useRef(null);
+  const topValueRef = useRef(null);
+  const topVolumeRef = useRef(null);
+  const topDeclineRef = useRef(null);
 
   useEffect(() => {
     const targetRef = {
@@ -56,6 +62,9 @@ export default function MarketChartsPage() {
       "#market-status": marketStatusRef,
       "#foreign-buy": foreignBuyRef,
       "#foreign-sell": foreignSellRef,
+      "#top-value": topValueRef,
+      "#top-volume-view": topVolumeRef,
+      "#top-decline": topDeclineRef,
     }[location.hash] ?? null;
 
     if (!targetRef?.current) return undefined;
@@ -162,6 +171,33 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ giá trị nước ngoài bán ròng cao nhất"
       >
         <ForeignSellChart />
+      </section>
+
+      <section
+        ref={topValueRef}
+        id="top-value"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ giá trị tiền khớp lệnh cao nhất"
+      >
+        <TopValueChart />
+      </section>
+
+      <section
+        ref={topVolumeRef}
+        id="top-volume-view"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ khối lượng khớp lệnh cao nhất"
+      >
+        <TopVolumeChart />
+      </section>
+
+      <section
+        ref={topDeclineRef}
+        id="top-decline"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ top giảm cao nhất"
+      >
+        <TopDeclineChart />
       </section>
     </main>
   );
