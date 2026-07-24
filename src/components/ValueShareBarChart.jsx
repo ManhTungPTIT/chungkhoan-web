@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import { fmtTy } from "../untils/valueBarFormat";
+import ChartHeader from "./ChartHeader";
 import "./valueShareBar.scss";
 
 // Biểu đồ cột dùng chung cho dạng "một cột Tổng + các nhóm thành phần", mỗi cột
@@ -19,6 +20,12 @@ export default function ValueShareBarChart({
   isError,
   onRetry,
   emptyText = "Chưa có dữ liệu khớp lệnh phiên này.",
+  headerIcon,
+  headerEyebrow,
+  headerSubtitle,
+  headerVariant = "navy",
+  headerAccent,
+  headerTitle,
 }) {
   const containerRef = useRef(null);
   const hasData = bars.length > 0 && bars[0].value > 0;
@@ -55,7 +62,7 @@ export default function ValueShareBarChart({
       yAxis: {
         type: "value",
         name: "Tỷ đồng",
-        nameTextStyle: { color: "#898781", fontSize: 11, align: "left" },
+        nameTextStyle: { color: "#898781", fontSize: 11, align: "right" },
         axisLabel: { color: "#898781", fontSize: 11, formatter: (v) => fmtTy(v) },
         splitLine: { lineStyle: { color: "#e1e0d9" } },
       },
@@ -101,9 +108,16 @@ export default function ValueShareBarChart({
 
   return (
     <section className="value-bar" aria-labelledby={titleId}>
-      <header className="value-bar__header">
-        <h2 id={titleId}>{title}</h2>
-      </header>
+      <ChartHeader
+        id={titleId}
+        icon={headerIcon}
+        eyebrow={headerEyebrow}
+        title={headerTitle ?? title}
+        subtitle={headerSubtitle}
+        variant={headerVariant}
+        accent={headerAccent}
+        className="value-bar__header"
+      />
 
       {isLoading && <div className="value-bar__state">Đang tải dữ liệu…</div>}
       {isError && (

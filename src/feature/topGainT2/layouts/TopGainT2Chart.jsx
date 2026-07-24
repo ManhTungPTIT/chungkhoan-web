@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { FiActivity, FiInfo } from "react-icons/fi";
+import { BsGraphUpArrow } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useTopGainT2 } from "../hooks/useTopGainT2";
 import { buildTopGainView } from "../untils/topGainLayout";
 import "../styles/topGainT2.scss";
@@ -60,11 +62,13 @@ function TopGainT2Chart({ window = 2 }) {
       </header>
 
       <section className="top-gain__card" aria-labelledby="top-gain-title">
-        <div className="top-gain__titlebar">
-          <div>
-            <h2 id="top-gain-title">TOP TĂNG CAO NHẤT T+{tPlus}</h2>
-          </div>
-        </div>
+        <ChartHeader
+          id="top-gain-title"
+          icon={<BsGraphUpArrow />}
+          title={`NHÓM TĂNG MẠNH NHẤT (NGẮN HẠN: T+${tPlus})`}
+          variant="purple"
+          accent="#e6b52e"
+        />
 
         <div className="top-gain__legend" aria-label="Chú giải biểu đồ">
           <span className="top-gain__legend-item"><i className="top-gain__legend-swatch top-gain__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>

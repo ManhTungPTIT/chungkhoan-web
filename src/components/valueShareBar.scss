@@ -18,25 +18,12 @@
 
 .value-bar * { box-sizing: border-box; }
 
+/* ChartHeader dùng chung — chỉ cần cho nó tràn ra sát mép card (bù padding). */
 .value-bar__header {
-  display: flex;
-  align-items: center;
-  height: 8.5rem;
-  min-height: 8.5rem;
-  box-sizing: border-box;
   margin: calc(-1 * var(--vb-padding)) calc(-1 * var(--vb-padding)) 0.6rem;
-  padding: clamp(1.2rem, 3vw, 2rem) var(--vb-padding) 1.1rem;
-  text-align: left;
-  color: #fff;
-  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
-  border-radius: 0.75rem 0.75rem 0 0;
-}
-.value-bar__header h2 {
-  margin: 0;
-  color: #fff;
-  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
-  font-weight: 850;
-  letter-spacing: 0.01em;
+  padding-left: var(--vb-padding);
+  padding-right: var(--vb-padding);
+  border-radius: 1rem 1rem 0 0;
 }
 
 .value-bar__state { padding: 2.5rem 1rem; text-align: center; color: var(--vb-muted); font-size: 0.9rem; }

@@ -5,9 +5,11 @@
   --sr-ink: #172033;
   --sr-muted: #748099;
   --sr-line: #e6eaf1;
+  --sr-pad: clamp(0.6rem, 1.4vw, 1.1rem);
   width: 100%;
   box-sizing: border-box;
-  padding: clamp(0.6rem, 1.4vw, 1.1rem);
+  padding: var(--sr-pad);
+  overflow: hidden;
   border: 1px solid #e2e6ee;
   border-radius: 1.05rem;
   background: #fff;
@@ -18,12 +20,11 @@
 
 .sector-rows * { box-sizing: border-box; }
 
-.sector-rows__header { text-align: center; margin-bottom: 0.5rem; }
-.sector-rows__header h2 {
-  margin: 0;
-  color: var(--sr-ink);
-  font-size: clamp(1rem, 2.1vw, 1.3rem);
-  font-weight: 850;
+.sector-rows__header {
+  margin: calc(-1 * var(--sr-pad)) calc(-1 * var(--sr-pad)) 0.6rem;
+  padding-left: var(--sr-pad);
+  padding-right: var(--sr-pad);
+  border-radius: 1rem 1rem 0 0;
 }
 
 .sector-rows__state { padding: 2.5rem 1rem; text-align: center; color: var(--sr-muted); font-size: 0.9rem; }

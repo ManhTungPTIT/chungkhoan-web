@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { FiActivity, FiInfo } from "react-icons/fi";
+import { BsGraphUpArrow } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useFlowSurge } from "../hooks/useFlowSurge";
 import { buildTopGainView } from "../untils/topGainLayout";
 import "../styles/flowSurge.scss";
@@ -47,11 +49,13 @@ function FlowSurgeChart() {
       
 
       <section className="flow-surge__card" aria-labelledby="flow-surge-title">
-        <div className="flow-surge__titlebar">
-          <div>
-            <h2 id="flow-surge-title">DÒNG TIỀN TĂNG ĐỘT BIẾN NỔI BẬT HÔM NAY</h2>
-          </div>
-        </div>
+        <ChartHeader
+          id="flow-surge-title"
+          icon={<BsGraphUpArrow />}
+          title={<>TOP BIẾN ĐỘNG TĂNG MẠNH NHẤT <span className="chart-header__hl">HÔM NAY</span></>}
+          variant="navy"
+          accent="#e6b52e"
+        />
 
         <div className="flow-surge__legend" aria-label="Chú giải biểu đồ">
           <span className="flow-surge__legend-item"><i className="flow-surge__legend-swatch flow-surge__legend-swatch--purple" />Giá trị khớp lệnh hôm nay (Tỷ)</span>

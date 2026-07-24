@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { FiActivity, FiInfo } from "react-icons/fi";
+import { BsGraphUpArrow } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useTopGainT3 } from "../hooks/useTopGainT3";
 import { buildTopGainView } from "../untils/topGainLayout";
 import "../styles/topGainT3.scss";
@@ -60,11 +62,13 @@ function TopGainT3Chart({ window = 3 }) {
       </header>
 
       <section className="top-gain-t3__card" aria-labelledby="top-gain-t3-title">
-        <div className="top-gain-t3__titlebar">
-          <div>
-            <h2 id="top-gain-t3-title">TOP TĂNG CAO NHẤT T+{tPlus}</h2>
-          </div>
-        </div>
+        <ChartHeader
+          id="top-gain-t3-title"
+          icon={<BsGraphUpArrow />}
+          title={`NHÓM TĂNG MẠNH NHẤT (NGẮN HẠN: T+${tPlus})`}
+          variant="purple"
+          accent="#e6b52e"
+        />
 
         <div className="top-gain-t3__legend" aria-label="Chú giải biểu đồ">
           <span className="top-gain-t3__legend-item"><i className="top-gain-t3__legend-swatch top-gain-t3__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>
@@ -80,7 +84,7 @@ function TopGainT3Chart({ window = 3 }) {
           </div>
         )}
         {!isLoading && !isError && rows.length === 0 && (
-          <div className="top-gain-t3__state">Hiện chưa có mã HOLD nào ở T+2.</div>
+          <div className="top-gain-t3__state">Hiện chưa có mã HOLD nào ở T+3.</div>
         )}
 
         {!isLoading && !isError && rows.length > 0 && (

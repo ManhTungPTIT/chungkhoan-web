@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as echarts from "echarts";
 import { FiTrendingUp, FiTrendingDown, FiMinus } from "react-icons/fi";
+import { BsPieChartFill } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useMarketStatus } from "../hooks/useMarketStatus";
 import "../styles/marketStatus.scss";
 
@@ -72,9 +74,14 @@ function MarketStatusChart() {
 
   return (
     <section className="market-status" aria-labelledby="market-status-title">
-      <header className="market-status__header">
-        <h2 id="market-status-title">DIỄN BIẾN THỊ TRƯỜNG</h2>
-      </header>
+      <ChartHeader
+        id="market-status-title"
+        icon={<BsPieChartFill />}
+        title="BỨC TRANH THỊ TRƯỜNG"
+        variant="market"
+        accent="#ffffff"
+        className="market-status__header"
+      />
 
       {isLoading && <div className="market-status__state">Đang tải dữ liệu…</div>}
       {isError && (

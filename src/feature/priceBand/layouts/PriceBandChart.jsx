@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { BsStack } from "react-icons/bs";
 import ValueShareBarChart from "../../../components/ValueShareBarChart";
 import { usePriceBands } from "../hooks/usePriceBands";
 import { buildPriceBands } from "../untils/priceBandData";
@@ -11,6 +12,10 @@ function PriceBandChart() {
     <ValueShareBarChart
       id="price-band"
       title="DÒNG TIỀN THEO NHÓM GIÁ CỔ PHIẾU"
+      headerIcon={<BsStack />}
+      headerTitle="DÒNG TIỀN THEO NHÓM GIÁ CỔ PHIẾU"
+      headerVariant="navy"
+      headerAccent="#7fd0ff"
       note="Toàn thị trường 3 sàn · giá trị khớp lệnh · đơn vị: tỷ đồng"
       bars={bars}
       isLoading={isLoading}

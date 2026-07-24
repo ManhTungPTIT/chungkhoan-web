@@ -12,8 +12,7 @@
 }
 .foreign-sell * { box-sizing: border-box; }
 .foreign-sell__card { max-width: 1100px; margin: auto; padding: clamp(.8rem, 2vw, 1.5rem); overflow: hidden; background: #fff; border: 1px solid #e7eaf0; border-radius: 1rem; box-shadow: 0 12px 34px rgba(19, 28, 50, .08); }
-.foreign-sell__heading { display: flex; justify-content: center; text-align: center; }
-.foreign-sell__heading h1 { margin: .22rem 0 0; font-size: clamp(1rem, 1.35vw, 1.35rem); font-weight: 800; letter-spacing: -.02em; line-height: 1.25; }
+.foreign-sell__heading { --_pad: clamp(.8rem, 2vw, 1.5rem); margin: calc(-1 * var(--_pad)) calc(-1 * var(--_pad)) .4rem; padding-left: var(--_pad); padding-right: var(--_pad); border-radius: 1rem 1rem 0 0; }
 .foreign-sell__legend { display: flex; justify-content: center; flex-wrap: wrap; gap: .7rem 2.2rem; padding: 1rem 0; color: #414c5d; font-size: .74rem; }
 .foreign-sell__legend-item { display: inline-flex; align-items: center; gap: .45rem; }
 .foreign-sell__legend-swatch { width: 1.35rem; height: .42rem; border-radius: 1rem; background: currentColor; }
@@ -23,7 +22,7 @@
 .foreign-sell__chart { overflow-x: auto; padding: .1rem 0 .35rem; }
 .foreign-sell__panel-titles, .foreign-sell__axis-row, .foreign-sell__plot { display: grid; grid-template-columns: minmax(8.5rem, 1.3fr) minmax(6.5rem, 1fr) minmax(4.5rem, .7fr) minmax(4.5rem, .7fr); column-gap: .4rem; }
 .foreign-sell__panel-titles { margin-top: .2rem; }.foreign-sell__panel-titles span { justify-self: stretch; text-align: center; padding: .25rem .15rem; border-radius: .2rem; color: #fff; font-size: .48rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }.foreign-sell__panel-titles span:nth-child(1) { background: var(--fb-purple); }.foreign-sell__panel-titles span:nth-child(2) { background: var(--fb-gold); }.foreign-sell__panel-titles span:nth-child(3) { background: var(--fb-red); }.foreign-sell__panel-titles span:nth-child(4) { background: var(--fb-green); }
-.foreign-sell__axis-row { min-height: 2.2rem; align-items: end; }.foreign-sell__axis { display: grid; grid-template-columns: repeat(var(--axis-count), minmax(0, 1fr)); padding: 0 .05rem .4rem; color: #687387; font-size: .68rem; font-weight: 700; }
+.foreign-sell__axis-row { min-height: 2.2rem; align-items: end; }.foreign-sell__axis { display: grid; grid-template-columns: repeat(var(--axis-count), minmax(0, 1fr)); padding: 0 .05rem .4rem; color: #687387; font-size: .6rem; font-weight: 700; }
 .foreign-sell__axis span { min-width: 0; text-align: center; white-space: nowrap; }.foreign-sell__axis--value { padding-left: 2.55rem; color: #682382; }.foreign-sell__axis--price { color: #b67b00; }.foreign-sell__axis--up { color: #087a41; }.foreign-sell__axis--down { color: #da1837; }
 .foreign-sell__plot { position: relative; }.foreign-sell__column { position: relative; min-width: 0; }.foreign-sell__column::before { position: absolute; top: 0; bottom: 0; left: 2.55rem; border-left: 1px solid rgba(215, 221, 229, .75); content: ""; }.foreign-sell__center-line::before, .foreign-sell__up-bars::before, .foreign-sell__down-bars::before { left: 0; }
 .foreign-sell__bar-row { display: flex; align-items: center; height: var(--fb-row-h); gap: .42rem; border-top: 1px dashed #eef0f4; }.foreign-sell__bar-track { position: relative; flex: 1; height: .43rem; overflow: hidden; border-radius: 999px; background: #f2edf5; }.foreign-sell__bar-track span { display: block; height: 100%; min-width: 2px; border-radius: inherit; }

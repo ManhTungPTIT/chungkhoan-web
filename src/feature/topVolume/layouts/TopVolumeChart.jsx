@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { FiActivity } from "react-icons/fi";
+import { BsBarChartFill } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useTopVolume } from "../hooks/useTopVolume";
 import { buildTopVolumeView } from "../untils/topVolumeLayout";
 import "../styles/topVolume.scss";
@@ -35,9 +37,14 @@ function TopVolumeChart() {
     return (
         <main className="top-volume-view">
             <section className="top-volume-view__card" aria-labelledby="top-volume-view-title">
-                <header className="top-volume-view__heading">
-                    <h1 id="top-volume-view-title">KHỐI LƯỢNG KHỚP LỆNH CAO NHẤT (TRIỆU CỔ)</h1>
-                </header>
+                <ChartHeader
+                    id="top-volume-view-title"
+                    icon={<BsBarChartFill />}
+                    title="TOP 20 MÃ DẪN ĐẦU VỀ KHỐI LƯỢNG GIAO DỊCH"
+                    variant="navy"
+                    accent="#b98be0"
+                    className="top-volume-view__heading"
+                />
 
                 <div className="top-volume-view__legend" aria-label="Chú giải biểu đồ">
                     <span className="top-volume-view__legend-item"><i className="top-volume-view__legend-swatch top-volume-view__legend-swatch--purple" />Khối lượng khớp lệnh (Triệu cổ)</span>

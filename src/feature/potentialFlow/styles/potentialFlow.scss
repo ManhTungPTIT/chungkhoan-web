@@ -6,7 +6,7 @@
   --pf-purple-soft: #f2eafa;
   --pf-gold: #d3a719;
   --pf-green: #1d9a45;
-  --pf-row-h: 1.9rem;
+  --pf-row-h: 2.2rem;
   min-height: 100%;
   box-sizing: border-box;
   padding: clamp(1rem, 2.5vw, 2.4rem);
@@ -30,7 +30,7 @@
 .potential-flow__titlebar-kicker { color: rgba(255, 255, 255, 0.65); font-size: 0.6rem; }
 .potential-flow__selector { display: grid; gap: 0.25rem; min-width: 8.5rem; color: rgba(255, 255, 255, 0.72); font-size: 0.68rem; }
 .potential-flow__selector > div { position: relative; }
-.potential-flow__selector select { width: 100%; padding: 0.42rem 1.7rem 0.42rem 0.6rem; border: 1px solid rgba(255,255,255,0.25); border-radius: 0.45rem; color: #fff; background: rgba(255,255,255,0.12); appearance: none; font: inherit; cursor: pointer; }
+.potential-flow__selector select { width: 100%; padding: 0.3rem 1.7rem 0.3rem 0.6rem; border: 1px solid rgba(255,255,255,0.25); border-radius: 0.45rem; color: #fff; background: rgba(255,255,255,0.12); appearance: none; font: inherit; cursor: pointer; }
 .potential-flow__selector option { color: var(--pf-ink); }
 .potential-flow__selector svg { position: absolute; top: 50%; right: 0.5rem; pointer-events: none; transform: translateY(-50%); }
 
@@ -59,7 +59,7 @@
 .potential-flow__symbol-row { position: relative; display: flex; align-items: center; height: var(--pf-row-h); padding: 0 0.5rem; border: 0; border-bottom: 1px solid #f0f2f5; background: transparent; cursor: pointer; text-align: left; }
 .potential-flow__symbol-row::before { content: ""; position: absolute; inset: 0.16rem 0; border-radius: 0.5rem; opacity: 0; background: var(--pf-purple-soft); transition: opacity 0.18s; }
 .potential-flow__symbol-row:hover::before, .potential-flow__symbol-row.is-selected::before { opacity: 1; }
-.potential-flow__badge { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 0.35rem; color: #3e4657; font-size: 0.88rem; }
+.potential-flow__badge { position: relative; z-index: 1; display: inline-flex; align-items: center; gap: 0.4rem; color: #3e4657; font-size: 0.92rem; letter-spacing: 0.01em; }
 .potential-flow__badge svg { width: 1.25rem; height: 1.25rem; padding: 0.24rem; border-radius: 50%; color: #fff; background: #5522a4; }
 .potential-flow__badge strong { font-weight: 800; }
 .potential-flow__badge.is-selected { color: var(--pf-purple); }
@@ -74,7 +74,7 @@
 .potential-flow__left-bars .potential-flow__bar-track span { background: linear-gradient(90deg, #b279d4, var(--pf-purple)); }
 .potential-flow__right-bars .potential-flow__bar-track { background: #edf7ef; }
 .potential-flow__right-bars .potential-flow__bar-track span { background: linear-gradient(90deg, #65c77f, var(--pf-green)); }
-.potential-flow__bar-row em { flex: 0 0 2.85rem; color: #5b6373; font-size: 0.74rem; font-style: normal; font-weight: 850; text-align: left; }
+.potential-flow__bar-row em { flex: 0 0 3.1rem; color: #5b6373; font-size: 0.79rem; font-style: normal; font-weight: 850; text-align: left; }
 .potential-flow__left-bars .potential-flow__bar-row em { order: -1; text-align: right; }
 .potential-flow__right-bars .potential-flow__bar-row em { color: #126f35; }
 .potential-flow__summary-bar { display: flex; align-items: center; justify-content: flex-end; height: var(--pf-row-h); border-top: 1px solid #dfe4eb; color: #596477; font-size: 0.68rem; font-weight: 800; }
@@ -102,7 +102,7 @@
   top: 50%;
   transform: translateY(-50%);
   color: #ad8610;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-style: normal;
   font-weight: 850;
   white-space: nowrap;

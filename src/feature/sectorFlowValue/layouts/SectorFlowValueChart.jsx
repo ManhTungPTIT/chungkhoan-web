@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { BsCashCoin } from "react-icons/bs";
 import StackedSessionBarChart from "../../../components/StackedSessionBarChart";
 import { useSectorFlow } from "../../../untils/useSectorFlow";
 import {
@@ -25,6 +26,10 @@ function SectorFlowValueChart({ sessions = 5 }) {
     <StackedSessionBarChart
       id="sector-flow-value"
       title={`GIÁ TRỊ TIỀN KHỚP LỆNH ${sessions} PHIÊN GẦN NHẤT (ĐV: TỶ)`}
+      headerIcon={<BsCashCoin />}
+      headerTitle={`TỔNG GIÁ TRỊ LỆNH KHỚP ${sessions} PHIÊN GẦN ĐÂY`}
+      headerVariant="navy"
+      headerAccent="#e6b52e"
       note="Toàn thị trường 3 sàn · giá trị ≈ khối lượng × giá đóng cửa · ngành ICB cấp 3"
       labels={series.labels}
       industries={series.industries}

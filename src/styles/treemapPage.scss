@@ -17,10 +17,8 @@
 }
 
 .tm-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  margin: -0.5rem -0.5rem 0.5rem;
+  border-radius: 0.75rem 0.75rem 0 0;
   flex-wrap: wrap;
 }
 
@@ -162,4 +160,44 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+.tm-head--moneyflow .chart-header__badge,
+.tm-head--put-through .chart-header__badge {
+  color: #63d68a;
+}
+
+.tm-head--moneyflow .chart-header__badge svg,
+.tm-head--put-through .chart-header__badge svg {
+  width: 2.35rem;
+  height: 2.35rem;
+}
+
+.tm-toggle button svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex: 0 0 auto;
+}
+.tm-head--moneyflow,
+.tm-head--put-through {
+  flex-wrap: nowrap;
+}
+
+.tm-head--moneyflow .chart-header__text,
+.tm-head--put-through .chart-header__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tm-head--moneyflow .chart-header__title,
+.tm-head--put-through .chart-header__title,
+.tm-head--moneyflow .chart-header__title-line,
+.tm-head--put-through .chart-header__title-line {
+  white-space: nowrap;
+}
+
+.tm-head--moneyflow .tm-toggle,
+.tm-head--put-through .tm-toggle {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }

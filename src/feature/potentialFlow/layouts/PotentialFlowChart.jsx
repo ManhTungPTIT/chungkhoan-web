@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { FiActivity, FiChevronDown, FiInfo } from "react-icons/fi";
+import { BsLightningChargeFill } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { usePotentialFlow } from "../hooks/usePotentialFlow";
 import { buildPotentialView } from "../untils/potentialData";
 import "../styles/potentialFlow.scss";
@@ -84,21 +86,24 @@ function PotentialFlowChart() {
       </header>
 
       <section className="potential-flow__card" aria-labelledby="potential-flow-title">
-        <div className="potential-flow__titlebar">
-          <div>
-            <h2 id="potential-flow-title">CÁC MÃ CỔ PHIẾU TIỀM NĂNG LƯỚT SÓNG</h2>
-          </div>
-          <div className="potential-flow__selector">
-            <label htmlFor="potential-flow-mode">Hiển thị</label>
-            <div>
-              <select id="potential-flow-mode" value={mode} onChange={(event) => setMode(event.target.value)}>
-                <option>Top 20 mã</option>
-                <option>Top tăng giá</option>
-              </select>
-              <FiChevronDown aria-hidden="true" />
+        <ChartHeader
+          id="potential-flow-title"
+          icon={<BsLightningChargeFill />}
+          title="TOP CỔ PHIẾU DẪN ĐẦU VỀ SỨC MẠNH TĂNG GIÁ"
+          variant="navy"
+          accent="#b98be0"
+          control={
+            <div className="potential-flow__selector">
+              <div>
+                <select id="potential-flow-mode" value={mode} onChange={(event) => setMode(event.target.value)}>
+                  <option>Top 20 mã</option>
+                  <option>Top tăng giá</option>
+                </select>
+                <FiChevronDown aria-hidden="true" />
+              </div>
             </div>
-          </div>
-        </div>
+          }
+        />
 
         <div className="potential-flow__legend" aria-label="Chú giải biểu đồ">
           <LegendItem tone="purple">Giá trị khớp lệnh (tỷ đồng)</LegendItem>

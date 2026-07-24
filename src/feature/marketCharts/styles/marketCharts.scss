@@ -41,6 +41,8 @@
 }
 
 .market-chart-pair__panel--tplus {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid #d9d9d9;
   border-radius: 0.75rem;
@@ -48,10 +50,12 @@
   box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
 }
 
+/* Radar chiếm hết phần còn lại của panel (sau header) → cao bằng panel trái.
+   min-height thấp để BẢNG bên trái quyết định chiều cao hàng, radar co theo. */
 .market-chart-pair__tplus-chart {
   width: 100%;
-  height: 100%;
-  min-height: 34rem;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .market-chart-pair__tplus-chart > .tplus-wave-state,
@@ -150,7 +154,7 @@
 .market-chart-pair__panel--top-gain .top-gain-t3__axis-row,
 .market-chart-pair__panel--top-gain .top-gain-t3__plot {
   grid-template-columns:
-    minmax(3rem, 0.55fr)
+    minmax(2.5rem, 0.55fr)
     minmax(4rem, 1fr)
     minmax(0, 1.35fr)
     minmax(4rem, 1fr);
@@ -158,12 +162,12 @@
 }
 
 .market-chart-pair__panel--potential .potential-flow__column {
-  grid-template-rows: repeat(12, minmax(2.25rem, 1fr)) 2.25rem;
+  grid-template-rows: repeat(12, minmax(1.55rem, 1fr)) 1.55rem;
 }
 
 .market-chart-pair__panel--top-gain .top-gain,
 .market-chart-pair__panel--top-gain .top-gain-t3 {
-  --tg-row-h: 1.45rem;
+  --tg-row-h: 1.05rem;
 }
 .market-chart-pair__panel--top-gain > .top-gain-week,
 .market-chart-pair__panel--top-gain > .flow-surge {
@@ -175,7 +179,7 @@
 
 .market-chart-pair__panel--top-gain .top-gain-week,
 .market-chart-pair__panel--top-gain .flow-surge {
-  --tg-row-h: 1.45rem;
+  --tg-row-h: 1.05rem;
 }
 
 .market-chart-pair__panel--top-gain .top-gain-week__card,
@@ -205,8 +209,8 @@
 }
 .market-chart-pair__panel--top-gain .top-gain-week__titlebar,
 .market-chart-pair__panel--top-gain .flow-surge__titlebar {
-  height: 6rem;
-  min-height: 6rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
   align-items: center;
 }
 
@@ -233,7 +237,7 @@
 .market-chart-pair__panel--top-gain .flow-surge__axis-row,
 .market-chart-pair__panel--top-gain .flow-surge__plot {
   grid-template-columns:
-    minmax(3rem, 0.55fr)
+    minmax(2.5rem, 0.55fr)
     minmax(4rem, 1fr)
     minmax(0, 1.35fr)
     minmax(4rem, 1fr);
@@ -245,7 +249,7 @@
 .market-chart-pair__panel--top-gain .flow-surge__plot {
   min-width: 0;
   grid-template-columns:
-    minmax(3rem, 0.55fr)
+    minmax(2.5rem, 0.55fr)
     minmax(4rem, 1fr)
     minmax(0, 1.35fr)
     minmax(4rem, 1fr);
@@ -276,9 +280,16 @@
   font-size: 1rem;
 }
 
+/* Treemap phải có CHIỀU CAO XÁC ĐỊNH thì canvas ECharts (height:100%) mới nở ra.
+   min-height trên flex container không tạo chiều cao xác định cho con → treemap
+   bị co về ~150px, để lại khoảng trắng. Cho hẳn height cố định. */
 .market-chart-pair__panel--moneyflow .tm-chart,
+.market-chart-pair__panel--treemap .tm-chart {
+  flex: none;
+  height: 30rem;
+  min-height: 30rem;
+}
 .market-chart-pair__panel--moneyflow .tm-table-wrap,
-.market-chart-pair__panel--treemap .tm-chart,
 .market-chart-pair__panel--treemap .tm-table-wrap {
   min-height: 25rem;
 }
@@ -379,8 +390,8 @@
 .market-chart-pair__panel--top-gain .top-gain-week__titlebar,
 .market-chart-pair__panel--top-gain .flow-surge__titlebar,
 .market-chart-pair__panel--potential .potential-flow__titlebar {
-  min-height: 6rem;
-  padding: 1.2rem 1rem 1rem;
+  min-height: 2.5rem;
+  padding: 0.15rem 1rem 0.15rem;
   align-items: flex-end;
 }
 
@@ -389,7 +400,7 @@
 .market-chart-pair__panel--top-gain .top-gain-week__titlebar h2,
 .market-chart-pair__panel--top-gain .flow-surge__titlebar h2,
 .market-chart-pair__panel--potential .potential-flow__titlebar h2 {
-  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  font-size: clamp(0.76rem, 1.3vw, 0.92rem);
 }
 
 .market-chart-pair__panel--top-gain > .index-overview .index-overview__card,
@@ -406,13 +417,12 @@
 .market-chart-pair__panel#sector-flow-value .stacked-session__header,
 .market-chart-pair__panel#sector-flow-share .stacked-session__header {
   display: flex;
-  min-height: 6rem;
-  align-items: flex-end;
+  min-height: 3.6rem;
+  align-items: center;
   justify-content: flex-start;
   margin: 0 -1rem 0.6rem;
-  padding: 1.2rem 1rem 1rem;
+  padding: 0.5rem 1rem;
   color: #fff;
-  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
   text-align: left;
 }
 
@@ -424,7 +434,7 @@
 .market-chart-pair__panel#sector-flow-share .stacked-session__header h2 {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  font-size: clamp(0.76rem, 1.3vw, 0.92rem);
   text-align: left;
 }
 
@@ -437,18 +447,17 @@
 
 .market-chart-pair__panel--moneyflow .tm-head,
 .market-chart-pair__panel--treemap .tm-head {
-  min-height: 6rem;
-  align-items: flex-end;
+  min-height: 3.6rem;
+  align-items: center;
   margin: 0 0 0.6rem;
-  padding: 1.2rem 1rem 1rem;
+  padding: 0.5rem 1rem;
   color: #fff;
-  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
 }
 
 .market-chart-pair__panel--moneyflow .tm-title,
 .market-chart-pair__panel--treemap .tm-title {
   color: #fff;
-  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  font-size: clamp(0.76rem, 1.3vw, 0.92rem);
 }
 
 .market-chart-pair__panel--moneyflow .tm-toggle button,
@@ -460,9 +469,9 @@
 
 .market-chart-pair .market-chart-pair__panel--tplus .tplus-wave-controls {
   position: relative;
-  min-height: 6rem;
+  min-height: 2.5rem;
   align-content: flex-end;
-  padding: 1.2rem 1rem 1rem;
+  padding: 0.15rem 1rem 0.15rem;
   border: 0;
   border-radius: 0;
   background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
@@ -472,7 +481,7 @@
   flex: 0 0 100%;
   margin-bottom: 0.6rem;
   color: #fff;
-  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  font-size: clamp(0.76rem, 1.3vw, 0.92rem);
   font-weight: 850;
   letter-spacing: 0.02em;
 }
@@ -523,8 +532,8 @@
 
 /* Giữ mọi header gradient trong MarketCharts cùng chiều cao và bo góc. */
 .market-chart-pair__header-unified {
-  height: 8.5rem;
-  min-height: 8.5rem;
+  height: 2.5rem;
+  min-height: 2.5rem;
   box-sizing: border-box;
   align-items: center;
   border-radius: 0.75rem 0.75rem 0 0;
@@ -545,12 +554,12 @@
 .market-chart-pair__panel--treemap .tm-head,
 .market-chart-pair__panel#sector-flow-value .stacked-session__header,
 .market-chart-pair__panel#sector-flow-share .stacked-session__header {
-  height: 8.5rem;
-  min-height: 8.5rem;
+  height: auto;
+  min-height: 3.6rem;
   box-sizing: border-box;
   align-items: center;
   border-radius: 0.75rem 0.75rem 0 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .market-chart-pair__panel#bull-bear > .value-bar,
@@ -586,16 +595,15 @@
 .market-chart-pair__panel--top-gain > .index-overview .index-overview__title {
   display: flex;
   width: 100%;
-  height: 8.5rem;
-  min-height: 8.5rem;
+  height: auto;
+  min-height: 3.6rem;
   align-items: center;
   justify-content: flex-start;
   box-sizing: border-box;
   margin: 0 0 0.6rem;
-  padding: 1.2rem 1rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.75rem 0.75rem 0 0;
   color: #fff;
-  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
   text-align: left;
 }
 
@@ -630,13 +638,13 @@
 .market-chart-pair__panel#sector-change .sector-rows__header {
   display: flex;
   width: calc(100% + 2rem);
-  height: 8.5rem;
-  min-height: 8.5rem;
+  height: auto;
+  min-height: 3.6rem;
   align-items: center;
   justify-content: flex-start;
   box-sizing: border-box;
   margin: 0 -1rem 0.6rem;
-  padding: 1.2rem 1rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.75rem 0.75rem 0 0;
   color: #fff;
   background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
@@ -647,7 +655,7 @@
 .market-chart-pair__panel#sector-change .sector-rows__header h2 {
   margin: 0;
   color: #fff;
-  font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+  font-size: clamp(0.76rem, 1.3vw, 0.92rem);
   font-weight: 850;
   text-align: left;
 }
@@ -655,4 +663,453 @@
 .market-chart-pair__panel#sector-breadth .sector-rows__chart,
 .market-chart-pair__panel#sector-change .sector-rows__chart {
   width: 100%;
+}
+
+.market-chart-pair__panel#vn30-basket > .sector-rows,
+.market-chart-pair__panel#flow-surge-month > .flow-surge-month {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+.market-chart-pair__panel#flow-surge-month > .flow-surge-month {
+  padding: 0;
+  background: transparent;
+}
+
+.market-chart-pair__panel#flow-surge-month .flow-surge-month__card {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+
+/* Nén sâu nhóm chart DANH SÁCH nhiều dòng để vừa 1 màn: dòng mỏng nên phải thu
+   nhỏ icon badge (1.15rem sẽ tràn khỏi dòng ~0.9rem) + gọn legend/axis. */
+.market-chart-pair__panel--top-gain .top-gain__badge svg,
+.market-chart-pair__panel--top-gain .top-gain-t3__badge svg,
+.market-chart-pair__panel--top-gain .top-gain-week__badge svg,
+.market-chart-pair__panel--top-gain .flow-surge__badge svg,
+.market-chart-pair__panel#flow-surge-month .flow-surge-month__badge svg {
+  width: 0.92rem;
+  height: 0.92rem;
+  padding: 0.1rem;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__legend,
+.market-chart-pair__panel--top-gain .top-gain-t3__legend,
+.market-chart-pair__panel--top-gain .top-gain-week__legend,
+.market-chart-pair__panel--top-gain .flow-surge__legend,
+.market-chart-pair__panel#flow-surge-month .flow-surge-month__legend {
+  gap: 0.3rem 1.4rem;
+  padding: 0.3rem 1rem 0.25rem;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__axis-row,
+.market-chart-pair__panel--top-gain .top-gain-t3__axis-row,
+.market-chart-pair__panel--top-gain .top-gain-week__axis-row,
+.market-chart-pair__panel--top-gain .flow-surge__axis-row,
+.market-chart-pair__panel#flow-surge-month .flow-surge-month__axis-row {
+  min-height: 1.5rem;
+}
+
+/* Đồng bộ độ mỏng dòng cho flow-surge-month với nhóm còn lại. */
+.market-chart-pair__panel#flow-surge-month .flow-surge-month {
+  --tg-row-h: 1.18rem;
+}
+
+/* Nén khoảng cách dòng cho các chart danh sách dùng BIẾN row-h RIÊNG (không phải
+   --tg-row-h): foreign-buy/sell, top-value/volume/decline. Mặc định 1.75rem →
+   1.05rem cho vừa 1 màn, đồng bộ với nhóm top-gain/flow-surge. */
+.market-chart-pair__panel--top-gain .foreign-buy,
+.market-chart-pair__panel--top-gain .foreign-sell {
+  --fb-row-h: 1.05rem;
+}
+.market-chart-pair__panel--top-gain .top-value {
+  --tv-row-h: 1.05rem;
+}
+.market-chart-pair__panel--top-gain .top-volume-view {
+  --tvol-row-h: 1.05rem;
+}
+.market-chart-pair__panel--top-gain .top-decline {
+  --td-row-h: 1.05rem;
+}
+
+/* Axis-row các chart này cao 2.2rem → gọn lại. */
+.market-chart-pair__panel--top-gain .foreign-buy__axis-row,
+.market-chart-pair__panel--top-gain .foreign-sell__axis-row,
+.market-chart-pair__panel--top-gain .top-value__axis-row,
+.market-chart-pair__panel--top-gain .top-volume-view__axis-row,
+.market-chart-pair__panel--top-gain .top-decline__axis-row {
+  min-height: 1.5rem;
+}
+
+/* Nén CHROME (legend/card/footer/heading) cho foreign-buy/sell, top-value/volume/
+   decline — chúng còn cao vì legend wrap ~100px + card padding lớn + footer. */
+.market-chart-pair__panel--top-gain .foreign-buy__legend,
+.market-chart-pair__panel--top-gain .foreign-sell__legend,
+.market-chart-pair__panel--top-gain .top-value__legend,
+.market-chart-pair__panel--top-gain .top-volume-view__legend,
+.market-chart-pair__panel--top-gain .top-decline__legend {
+  gap: 0.22rem 1rem;
+  padding: 0.28rem 0;
+  font-size: 0.62rem;
+}
+.market-chart-pair__panel--top-gain .foreign-buy__card,
+.market-chart-pair__panel--top-gain .foreign-sell__card,
+.market-chart-pair__panel--top-gain .top-value__card,
+.market-chart-pair__panel--top-gain .top-volume-view__card,
+.market-chart-pair__panel--top-gain .top-decline__card {
+  padding: 0.35rem 0.6rem;
+}
+.market-chart-pair__panel--top-gain .foreign-buy__footer,
+.market-chart-pair__panel--top-gain .foreign-sell__footer,
+.market-chart-pair__panel--top-gain .top-value__footer,
+.market-chart-pair__panel--top-gain .top-volume-view__footer,
+.market-chart-pair__panel--top-gain .top-decline__footer {
+  margin-top: 0.3rem;
+  padding-top: 0.35rem;
+  font-size: 0.6rem;
+}
+.market-chart-pair__panel--top-gain .foreign-buy__chart,
+.market-chart-pair__panel--top-gain .foreign-sell__chart,
+.market-chart-pair__panel--top-gain .top-value__chart,
+.market-chart-pair__panel--top-gain .top-volume-view__chart,
+.market-chart-pair__panel--top-gain .top-decline__chart {
+  padding: 0;
+}
+
+/* Heading top-value/volume/decline chưa nằm trong block header thống nhất → nén ở đây. */
+.market-chart-pair__panel--top-gain .top-value__heading,
+.market-chart-pair__panel--top-gain .top-volume-view__heading,
+.market-chart-pair__panel--top-gain .top-decline__heading {
+  min-height: 2.5rem;
+  padding: 0.2rem 1rem;
+}
+.market-chart-pair__panel--top-gain .top-value__heading h1,
+.market-chart-pair__panel--top-gain .top-volume-view__heading h1,
+.market-chart-pair__panel--top-gain .top-decline__heading h1 {
+  font-size: clamp(0.76rem, 1.3vw, 0.92rem);
+  line-height: 1.15;
+}
+
+.market-chart-pair__panel#market-status .market-status__chart {
+  height: clamp(320px, 38vw, 420px);
+}
+
+/* Unified header sizing for top-value, top-volume, and top-decline charts. */
+.market-chart-pair__panel--top-gain .top-value__heading,
+.market-chart-pair__panel--top-gain .top-volume-view__heading,
+.market-chart-pair__panel--top-gain .top-decline__heading {
+  height: 3.5rem;
+  min-height: 3.5rem;
+  align-items: center;
+  padding: 0.6rem 1rem;
+}
+
+.market-chart-pair__panel--top-gain .top-value__heading h1,
+.market-chart-pair__panel--top-gain .top-volume-view__heading h1,
+.market-chart-pair__panel--top-gain .top-decline__heading h1 {
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.1;
+}
+
+.market-chart-pair__panel--top-gain .top-value__card,
+.market-chart-pair__panel--top-gain .top-volume-view__card,
+.market-chart-pair__panel--top-gain .top-decline__card {
+  padding-top: 0;
+}
+
+.market-chart-pair__panel--top-gain .top-value__heading,
+.market-chart-pair__panel--top-gain .top-volume-view__heading,
+.market-chart-pair__panel--top-gain .top-decline__heading {
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.market-chart-pair__panel--top-gain .top-value__chart,
+.market-chart-pair__panel--top-gain .top-volume-view__chart,
+.market-chart-pair__panel--top-gain .top-decline__chart {
+  overflow-y: hidden;
+}
+
+/* Compact PotentialFlowChart for the two-column MarketCharts layout. */
+.market-chart-pair__panel--potential .potential-flow {
+  --pf-row-h: 1.45rem;
+}
+
+.market-chart-pair__panel--potential .potential-flow__chart {
+  padding: 0 0.5rem 0.35rem;
+}
+
+.market-chart-pair__panel--potential .potential-flow__legend {
+  gap: 0.3rem 1rem;
+  padding: 0.3rem 0.5rem 0.25rem;
+  font-size: 0.62rem;
+}
+
+.market-chart-pair__panel--potential .potential-flow__axis-row {
+  min-height: 1.6rem;
+}
+
+.market-chart-pair__panel--potential .potential-flow__plot {
+  min-height: 22rem;
+}
+
+.market-chart-pair__panel--potential .potential-flow__column {
+  grid-template-rows: repeat(12, minmax(1.15rem, 1fr)) 1.15rem;
+}
+
+/* Match ValueShareBarChart headers with the compact MarketCharts headers. */
+.market-chart-pair__panel#bull-bear > .value-bar,
+.market-chart-pair__panel#price-band > .value-bar {
+  padding-top: 0;
+}
+
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__header,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__header {
+  margin-top: 0;
+  height: 3.5rem;
+  min-height: 3.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__header h2,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__header h2 {
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.1;
+}
+
+.market-chart-pair__panel--top-gain .top-value__heading h1,
+.market-chart-pair__panel--top-gain .top-volume-view__heading h1,
+.market-chart-pair__panel--top-gain .top-decline__heading h1,
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__header h2,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__header h2 {
+  font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+  line-height: 1.05;
+}
+
+/* Panel radar chỉ giữ sàn tối thiểu; để BẢNG bên trái quyết định chiều cao,
+   radar (flex) co theo cho bằng — không tự đẩy cao 30rem nữa. */
+.market-chart-pair__panel#tplus-wave {
+  min-height: 24rem;
+}
+.market-chart-pair__panel#tplus-wave .market-chart-pair__tplus-chart {
+  min-height: 0;
+}
+
+
+/* Prevent vertical scrolling inside foreign buy/sell charts. */
+.market-chart-pair__panel#foreign-buy .foreign-buy__chart,
+.market-chart-pair__panel#foreign-sell .foreign-sell__chart {
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+
+/* Compact index overview table rows. */
+.market-chart-pair__panel#index-overview .index-overview__table {
+  margin-top: 0.55rem;
+  font-size: 0.72rem;
+  line-height: 1.22;
+}
+
+.market-chart-pair__panel#index-overview .index-overview__table th,
+.market-chart-pair__panel#index-overview .index-overview__table td {
+  padding: 0.42rem 0.45rem;
+  line-height: 1.22;
+}
+
+.market-chart-pair__panel#index-overview .index-overview__table th {
+  font-size: 0.66rem;
+  line-height: 1.2;
+}
+
+
+/* Reduce MarketStatus legend and statistic text. */
+.market-chart-pair__panel#market-status .market-status__legend {
+  font-size: 0.68rem;
+}
+
+.market-chart-pair__panel#market-status .market-status__stat-label {
+  font-size: 0.6rem;
+}
+
+.market-chart-pair__panel#market-status .market-status__stat-value {
+  font-size: 0.92rem;
+}
+/* Let interactive panels shrink back after switching view/data modes. */
+.market-chart-pair__panel--moneyflow,
+.market-chart-pair__panel--treemap {
+  align-self: start;
+  height: auto;
+}
+
+/* Cặp đầu tiên (bảng dẫn đầu + radar) căng bằng chiều cao nhau trong 1 hàng. */
+.market-chart-pair__panel--potential,
+.market-chart-pair__panel--tplus {
+  align-self: stretch;
+}
+
+.market-chart-pair__panel--potential > .potential-flow,
+.market-chart-pair__panel--potential .potential-flow__card,
+.market-chart-pair__panel--moneyflow > .tm-page,
+.market-chart-pair__panel--treemap > .tm-page {
+  height: auto;
+  min-height: 34rem;
+}
+
+.market-chart-pair__panel--tplus .market-chart-pair__tplus-chart,
+.market-chart-pair__panel--tplus .tplus-wave-page,
+.market-chart-pair__panel--tplus .tplus-wave-chart {
+  height: auto;
+}
+
+/* ── ChartHeader (badge + tên) đồng nhất trong MarketCharts ─────────────────
+   Các panel top-gain/potential/flow-surge/tplus không còn class titlebar cũ,
+   nên chỉ có class .chart-header — chuẩn hoá chiều cao & cỡ badge/tên tại đây
+   để mọi header trong composite cao bằng nhau và không cắt mất icon/nút. */
+.market-chart-pair .chart-header {
+  min-height: 3.6rem;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  overflow: visible;
+}
+.market-chart-pair .chart-header__badge {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+.market-chart-pair .chart-header__badge svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+.market-chart-pair .chart-header__title {
+  font-size: clamp(0.82rem, 1.35vw, 1.02rem);
+}
+/* Giữ nút/dropdown trên header hiển thị rõ (Chi tiết/Bảng, Top 20 mã…). */
+.market-chart-pair .chart-header__control {
+  margin-left: auto;
+}
+.market-chart-pair .chart-header__control button,
+.market-chart-pair .chart-header__control select {
+  color: #fff;
+}
+
+
+/* Tighten ValueShareBar table rows in the paired MarketCharts panels. */
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__table,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__table {
+  font-size: 0.78rem;
+  line-height: 1.22;
+}
+
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__table th,
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__table td,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__table th,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__table td {
+  padding: 0.28rem 0.45rem;
+  line-height: 1.22;
+}
+
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__table th[scope="row"] i,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__table th[scope="row"] i {
+  width: 8px;
+  height: 8px;
+  margin-right: 0.4rem;
+}
+
+/* Reduce vertical whitespace around the ValueShareBar charts in paired panels. */
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__chart,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__chart {
+  height: clamp(240px, 29vw, 330px);
+}
+
+.market-chart-pair__panel#bull-bear > .value-bar .value-bar__note,
+.market-chart-pair__panel#price-band > .value-bar .value-bar__note {
+  margin: 0.05rem 0 0.35rem;
+  font-size: 0.74rem;
+}
+
+/* Size the T+ strength radar compactly inside the MarketCharts card. */
+.market-chart-pair__panel#tplus-wave {
+  min-height: 30rem;
+}
+
+.market-chart-pair__panel#tplus-wave .market-chart-pair__tplus-chart {
+  height: clamp(30rem, 42vw, 36rem);
+  min-height: 30rem;
+}
+
+.market-chart-pair__panel#tplus-wave .market-chart-pair__tplus-chart > div {
+  height: 100%;
+  min-height: 30rem;
+}
+
+/* Equalize the paired money-flow and put-through treemap panels. */
+.market-chart-pair__panel#money-flow,
+.market-chart-pair__panel#put-through {
+  min-height: 34rem;
+  height: 34rem;
+  align-self: stretch;
+}
+
+.market-chart-pair__panel#money-flow > .tm-page,
+.market-chart-pair__panel#put-through > .tm-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+.market-chart-pair__panel#money-flow .tm-chart,
+.market-chart-pair__panel#put-through .tm-chart {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+/* Equal height for the leading strength table and T+ radar pair. */
+.market-chart-pair__panel#potential-flow,
+.market-chart-pair__panel#tplus-wave {
+  height: 38rem;
+  min-height: 38rem;
+  align-self: stretch;
+  overflow: hidden;
+}
+
+.market-chart-pair__panel#potential-flow > .potential-flow,
+.market-chart-pair__panel#potential-flow .potential-flow__card,
+.market-chart-pair__panel#tplus-wave .tplus-wave-page,
+.market-chart-pair__panel#tplus-wave .tplus-wave-chart,
+.market-chart-pair__panel#tplus-wave .market-chart-pair__tplus-chart > div {
+  height: 100%;
+  min-height: 0;
+}
+
+.market-chart-pair__panel#tplus-wave .market-chart-pair__tplus-chart {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+/* Keep foreign buy/sell symbols clear of the value bars. */
+.market-chart-pair__panel--top-gain .foreign-buy__symbol,
+.market-chart-pair__panel--top-gain .foreign-sell__symbol {
+  width: 3.75rem;
+  flex-basis: 3.75rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.market-chart-pair__panel--top-gain .foreign-buy__axis--value,
+.market-chart-pair__panel--top-gain .foreign-sell__axis--value {
+  padding-left: 4.15rem;
+}
+
+.market-chart-pair__panel--top-gain .foreign-buy__value-bars::before,
+.market-chart-pair__panel--top-gain .foreign-sell__value-bars::before {
+  left: 4.15rem;
 }

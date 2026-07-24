@@ -36,8 +36,8 @@ const metaOf = (payload) => metaForWindows(windowsFromPayload(payload));
 
 // Tâm + bán kính radar. Dùng CHUNG cho cả radar và lưới vuông overlay để trùng khít.
 export const CENTER_X_RATIO = 0.5;
-export const CENTER_Y_RATIO = 0.56;
-export const RADAR_RADIUS_RATIO = 0.78;
+export const CENTER_Y_RATIO = 0.5;
+export const RADAR_RADIUS_RATIO = 0.75;
 export const GRID_SPLIT_NUMBER = 8; // số hình vuông đồng tâm
 
 const fmtPct = (v) => `${v >= 0 ? "+" : ""}${Number(v).toFixed(2)}%`;
@@ -111,12 +111,12 @@ export function buildRadarOption(payload) {
     title: {
       text: "CÁC MÃ ĐANG CÓ SÓNG TĂNG T+",
       left: "center",
-      top: 8,
-      textStyle: { fontSize: 20, color: "#222", fontWeight: "bold" },
+      top: 2,
+      textStyle: { fontSize: 15, color: "#222", fontWeight: "bold" },
     },
     legend: {
       data: meta.map((m) => m.name),
-      top: 42,
+      top: 30,
       itemWidth: 28,
       itemHeight: 10,
       itemGap: 18,
@@ -144,7 +144,7 @@ export function buildRadarOption(payload) {
         min: axisMin,
         ...(axisColors[i] ? { color: axisColors[i] } : {}),
       })),
-      axisName: { fontSize: 10, color: "#666" },
+      axisName: { fontSize: 12, color: "#555", fontWeight: 600 },
       axisLine: { show: true, lineStyle: { color: "#b0b0b0", width: 1 } }, // nan hoa
       splitLine: { show: false },
       splitArea: { show: false },
@@ -197,7 +197,7 @@ export function buildSquareGridGraphic(width, height, bounds, splitNumber = GRID
       style: {
         text: `${Math.round(value)}`,
         fill: "#444",
-        fontSize: 10,
+        fontSize: 11,
         align: "center",
         verticalAlign: "bottom",
       },
@@ -245,3 +245,4 @@ export function buildSeriesRayGraphic(width, height, bounds, payload) {
   }
   return els;
 }
+

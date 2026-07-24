@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import { stackOrder } from "../untils/sectorFlowSeries";
+import ChartHeader from "./ChartHeader";
 import "./stackedSessionBar.scss";
 
 // Cột chồng theo phiên, mỗi khúc là một ngành. Dùng bởi hai chart "5 phiên gần
@@ -26,6 +27,12 @@ export default function StackedSessionBarChart({
   isError,
   onRetry,
   emptyText = "Chưa có dữ liệu 5 phiên gần nhất.",
+  headerIcon,
+  headerEyebrow,
+  headerSubtitle,
+  headerVariant = "navy",
+  headerAccent,
+  headerTitle,
 }) {
   const containerRef = useRef(null);
   const hasData = labels.length > 0 && industries.length > 0;
@@ -104,9 +111,16 @@ export default function StackedSessionBarChart({
 
   return (
     <section className="stacked-session" aria-labelledby={titleId}>
-      <header className="stacked-session__header">
-        <h2 id={titleId}>{title}</h2>
-      </header>
+      <ChartHeader
+        id={titleId}
+        icon={headerIcon}
+        eyebrow={headerEyebrow}
+        title={headerTitle ?? title}
+        subtitle={headerSubtitle}
+        variant={headerVariant}
+        accent={headerAccent}
+        className="stacked-session__header"
+      />
 
       {isLoading && <div className="stacked-session__state">Đang tải dữ liệu…</div>}
       {isError && (

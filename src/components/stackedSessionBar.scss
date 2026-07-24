@@ -16,12 +16,13 @@
 
 .stacked-session * { box-sizing: border-box; }
 
-.stacked-session__header { text-align: center; margin-bottom: 0.6rem; }
-.stacked-session__header h2 {
-  margin: 0;
-  color: var(--ss-ink);
-  font-size: clamp(1rem, 2.2vw, 1.35rem);
-  font-weight: 850;
+/* ChartHeader dùng chung — cho tràn ra sát mép card (bù padding). */
+.stacked-session__header {
+  --_pad: clamp(1rem, 2.5vw, 2rem);
+  margin: calc(-1 * var(--_pad)) calc(-1 * var(--_pad)) 0.6rem;
+  padding-left: var(--_pad);
+  padding-right: var(--_pad);
+  border-radius: 1rem 1rem 0 0;
 }
 
 .stacked-session__state { padding: 2.5rem 1rem; text-align: center; color: var(--ss-muted); font-size: 0.9rem; }

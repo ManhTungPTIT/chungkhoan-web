@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as echarts from "echarts";
+import { BsGraphUpArrow } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useSectorBreadth } from "../../../untils/useSectorBreadth";
 import {
   buildSectorBreadth,
@@ -200,9 +202,14 @@ function SectorChangeChart() {
 
   return (
     <section className="sector-rows" aria-labelledby="sector-change-title">
-      <header className="sector-rows__header">
-        <h2 id="sector-change-title">TỔNG HỢP TĂNG GIẢM THEO NGÀNH</h2>
-      </header>
+      <ChartHeader
+        id="sector-change-title"
+        icon={<BsGraphUpArrow />}
+        title="BỨC TRANH BIẾN ĐỘNG DÒNG TIỀN"
+        variant="navy"
+        accent="#e061b8"
+        className="sector-rows__header"
+      />
 
       {isLoading && <div className="sector-rows__state">Đang tải dữ liệu…</div>}
       {isError && (

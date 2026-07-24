@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { FiActivity, FiInfo } from "react-icons/fi";
+import { BsGraphUpArrow } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useTopGainWeek } from "../hooks/useTopGainWeek";
 import { buildTopGainView } from "../untils/topGainLayout";
 import "../styles/topGainWeek.scss";
@@ -47,11 +49,13 @@ function TopGainWeekChart() {
     <main className="top-gain-week">
 
       <section className="top-gain-week__card" aria-labelledby="top-gain-week-title">
-        <div className="top-gain-week__titlebar">
-          <div>
-            <h2 id="top-gain-week-title">TOP TĂNG CAO NHẤT TUẦN</h2>
-          </div>
-        </div>
+        <ChartHeader
+          id="top-gain-week-title"
+          icon={<BsGraphUpArrow />}
+          title={<>TOP TĂNG MẠNH NHẤT <span className="chart-header__hl">TUẦN</span></>}
+          variant="navy"
+          accent="#e6b52e"
+        />
 
         <div className="top-gain-week__legend" aria-label="Chú giải biểu đồ">
           <span className="top-gain-week__legend-item"><i className="top-gain-week__legend-swatch top-gain-week__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>

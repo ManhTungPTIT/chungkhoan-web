@@ -5,9 +5,11 @@
   --td-purple: #7b0c9d;
   --td-gold: #f2ae10;
   --td-red: #f20d32;
-  --td-row-h: 1.75rem;
+  /* Cao mỗi dòng co theo chiều cao màn hình để 20 dòng + header/chú thích/trục/
+     footer luôn gói gọn trong MỘT màn hình (không phải cuộn). Trần 1.75rem. */
+  --td-row-h: clamp(0.9rem, calc((100dvh - 21rem) / 20), 1.75rem);
   min-height: auto;
-  padding: clamp(1rem, 2.8vw, 2.5rem);
+  padding: clamp(0.5rem, 1.2vh, 1.5rem);
   color: var(--td-ink);
   background: #f7f8fb;
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
@@ -27,16 +29,10 @@
 }
 
 .top-decline__heading {
-  display: flex;
-  min-height: 6rem;
-  align-items: center;
-  justify-content: flex-start;
   margin: 0 -1rem 0.6rem;
-  padding: 1rem;
-  color: #fff;
-  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+  border-radius: 1rem 1rem 0 0;
 }
-.top-decline__heading h1 {
+.top-decline__heading--unused h1 {
   margin: 0;
   color: #fff;
   font-size: clamp(1.1rem, 2.2vw, 1.55rem);

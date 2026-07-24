@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { FiActivity } from "react-icons/fi";
+import { BsTrophyFill } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useTopDecline } from "../hooks/useTopDecline";
 import { buildTopDeclineView } from "../untils/topDeclineLayout";
 import "../styles/topDecline.scss";
@@ -35,9 +37,14 @@ function TopDeclineChart() {
     return (
         <main className="top-decline">
             <section className="top-decline__card" aria-labelledby="top-decline-title">
-                <header className="top-decline__heading">
-                    <h1 id="top-decline-title">TOP GIẢM CAO NHẤT</h1>
-                </header>
+                <ChartHeader
+                    id="top-decline-title"
+                    icon={<BsTrophyFill />}
+                    title="TOP 20 MÃ GIẢM MẠNH NHẤT (THEO % GIẢM)"
+                    variant="navy"
+                    accent="#e6b52e"
+                    className="top-decline__heading"
+                />
 
                 <div className="top-decline__legend" aria-label="Chú giải biểu đồ">
                     <span className="top-decline__legend-item"><i className="top-decline__legend-swatch top-decline__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>

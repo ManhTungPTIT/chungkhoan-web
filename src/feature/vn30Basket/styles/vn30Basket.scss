@@ -1,0 +1,45 @@
+// Chart "MÃ RỔ VN30" dùng chung khung thẻ .sector-rows (components/sectorRows.scss).
+// Panel này rộng ngang (4 cột), nên cho phép CUỘN NGANG trên màn hình hẹp thay vì
+// bóp méo tỷ lệ các cột. Scope min-width dưới wrapper để không rò sang chart khác
+// đang dùng chung .sector-rows__chart.
+.vn30-basket-scroll {
+  width: 100%;
+  overflow: hidden;
+
+  > .sector-rows__chart {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
+
+/* VN30 card header. */
+.market-chart-pair__panel#vn30-basket > .sector-rows {
+  padding: 0 1rem 1.2rem;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.market-chart-pair__panel#vn30-basket .sector-rows__header {
+  display: flex;
+  width: calc(100% + 2rem);
+  height: 2.5rem;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0 -1rem 0.6rem;
+  padding: 0 1rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  color: #fff;
+  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+  text-align: left;
+}
+
+.market-chart-pair__panel#vn30-basket .sector-rows__header h2 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(0.76rem, 1.3vw, 0.92rem);
+  font-weight: 850;
+  text-align: left;
+}

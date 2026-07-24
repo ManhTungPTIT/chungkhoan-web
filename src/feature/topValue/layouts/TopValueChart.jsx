@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { FiActivity } from "react-icons/fi";
+import { BsCoin } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useTopValue } from "../hooks/useTopValue";
 import { buildTopValueView } from "../untils/topValueLayout";
 import "../styles/topValue.scss";
@@ -35,9 +37,14 @@ function TopValueChart() {
     return (
         <main className="top-value">
             <section className="top-value__card" aria-labelledby="top-value-title">
-                <header className="top-value__heading">
-                    <h1 id="top-value-title">GIÁ TRỊ TIỀN KHỚP LỆNH CAO NHẤT (TỶ)</h1>
-                </header>
+                <ChartHeader
+                    id="top-value-title"
+                    icon={<BsCoin />}
+                    title="TOP 20 MÃ DẪN ĐẦU VỀ GIÁ TRỊ GIAO DỊCH"
+                    variant="navy"
+                    accent="#e6b52e"
+                    className="top-value__heading"
+                />
 
                 <div className="top-value__legend" aria-label="Chú giải biểu đồ">
                     <span className="top-value__legend-item"><i className="top-value__legend-swatch top-value__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>

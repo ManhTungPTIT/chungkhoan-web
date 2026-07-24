@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { BsPieChartFill } from "react-icons/bs";
 import StackedSessionBarChart from "../../../components/StackedSessionBarChart";
 import { useSectorFlow } from "../../../untils/useSectorFlow";
 import {
@@ -18,6 +19,10 @@ function SectorFlowShareChart({ sessions = 5 }) {
     <StackedSessionBarChart
       id="sector-flow-share"
       title={`TỶ TRỌNG GIÁ TRỊ TIỀN KHỚP LỆNH ${sessions} PHIÊN GẦN NHẤT`}
+      headerIcon={<BsPieChartFill />}
+      headerTitle={`CƠ CẤU TỶ TRỌNG GIÁ TRỊ LỆNH KHỚP ${sessions} PHIÊN GẦN ĐÂY`}
+      headerVariant="navy"
+      headerAccent="#5aa9ff"
       note="Tự chuẩn hóa nên mỗi cột luôn đủ 100% · ngành ICB cấp 3"
       labels={series.labels}
       industries={series.industries}

@@ -29,16 +29,10 @@
 }
 
 .top-value__heading {
-  display: flex;
-  min-height: 6rem;
-  align-items: center;
-  justify-content: flex-start;
   margin: 0 -1rem 0.6rem;
-  padding: 1rem;
-  color: #fff;
-  background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+  border-radius: 1rem 1rem 0 0;
 }
-.top-value__heading h1 {
+.top-value__heading--unused h1 {
   margin: 0;
   color: #fff;
   font-size: clamp(1.1rem, 2.2vw, 1.55rem);

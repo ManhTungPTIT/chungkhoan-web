@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { FiActivity } from "react-icons/fi";
+import { BsBarChartFill } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useForeignBuy } from "../hooks/useForeignBuy";
 import { buildForeignBuyView } from "../untils/foreignBuyLayout";
 import "../styles/foreignBuy.scss";
@@ -35,9 +37,14 @@ function ForeignBuyChart() {
     return (
         <main className="foreign-buy">
             <section className="foreign-buy__card" aria-labelledby="foreign-buy-title">
-                <header className="foreign-buy__heading">
-                    <h1 id="foreign-buy-title">GIÁ TRỊ NƯỚC NGOÀI MUA RÒNG CAO NHẤT</h1>
-                </header>
+                <ChartHeader
+                    id="foreign-buy-title"
+                    icon={<BsBarChartFill />}
+                    title="TOP MUA RÒNG KHỐI NGOẠI"
+                    variant="purple"
+                    accent="#35c66b"
+                    className="foreign-buy__heading"
+                />
 
                 <div className="foreign-buy__legend" aria-label="Chú giải biểu đồ">
                     <span className="foreign-buy__legend-item"><i className="foreign-buy__legend-swatch foreign-buy__legend-swatch--purple" />Giá trị mua ròng (Tỷ)</span>
@@ -59,7 +66,7 @@ function ForeignBuyChart() {
                             <span>MÃ TĂNG GIÁ (%)</span>
                         </div>
                         <div className="foreign-buy__axis-row" aria-hidden="true">
-                            <div className="foreign-buy__axis foreign-buy__axis--value" style={{ "--axis-count": valueTicks.length }}>{valueTicks.map((tick, index) => <span key={index}>{fmt(tick)}</span>)}</div>
+                            <div className="foreign-buy__axis foreign-buy__axis--value" style={{ "--axis-count": valueTicks.length }}>{valueTicks.map((tick, index) => <span key={index}>{fmt(tick, 0)}</span>)}</div>
                             <div className="foreign-buy__axis foreign-buy__axis--price" style={{ "--axis-count": priceTicks.length }}>{priceTicks.map((tick, index) => <span key={index}>{fmt(tick)}</span>)}</div>
                             <div className="foreign-buy__axis foreign-buy__axis--down" style={{ "--axis-count": pctTicks.length }}>{pctTicks.slice().reverse().map((tick, index) => <span key={index}>-{fmt(tick)}%</span>)}</div>
                             <div className="foreign-buy__axis foreign-buy__axis--up" style={{ "--axis-count": pctTicks.length }}>{pctTicks.map((tick, index) => <span key={index}>{fmt(tick)}%</span>)}</div>

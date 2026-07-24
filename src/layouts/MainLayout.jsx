@@ -295,6 +295,17 @@ function MainLayout() {
                   className="navbar-subitem"
                   onClick={(e) => {
                     e.stopPropagation();
+                    navigate("/chart/market#flow-surge-month");
+                  }}
+                >
+                  <a>
+                    <span>Dòng tiền tăng đột biến so với bình quân 1 tháng</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     navigate("/chart/market#money-flow");
                   }}
                 >
@@ -388,6 +399,17 @@ function MainLayout() {
                 >
                   <a>
                     <span>Chỉ số chung 3 sàn</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#vn30-basket");
+                  }}
+                >
+                  <a>
+                    <span>Mã rổ VN30</span>
                   </a>
                 </li>
 

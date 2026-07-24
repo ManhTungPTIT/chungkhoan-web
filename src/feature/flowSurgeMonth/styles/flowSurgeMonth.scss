@@ -1,0 +1,136 @@
+.flow-surge-month {
+  --tg-ink: #172033;
+  --tg-muted: #748099;
+  --tg-line: #e6eaf1;
+  --tg-purple: #7814a9;
+  --tg-gold: #d3a719;
+  --tg-green: #1d9a45;
+  --tg-row-h: 1.35rem;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: clamp(1rem, 2.5vw, 2.4rem);
+  color: var(--tg-ink);
+  background: radial-gradient(circle at 12% 8%, rgba(125, 54, 194, 0.08), transparent 22rem), #f5f7fb;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+
+.flow-surge-month * { box-sizing: border-box; }
+.flow-surge-month__page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; max-width: 1180px; margin: 0 auto 1.4rem; }
+.flow-surge-month__eyebrow, .flow-surge-month__titlebar-kicker { color: #8a5eb5; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; }
+.flow-surge-month__page-header h1 { margin: 0.28rem 0 0.34rem; color: var(--tg-ink); font-size: clamp(1.55rem, 3vw, 2.35rem); font-weight: 850; letter-spacing: -0.04em; }
+.flow-surge-month__page-header p { margin: 0; color: var(--tg-muted); font-size: 0.92rem; }
+.flow-surge-month__header-meta { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 0.8rem; color: var(--tg-muted); font-size: 0.75rem; text-align: right; white-space: nowrap; }
+.flow-surge-month__header-meta strong { grid-column: 1; color: var(--tg-ink); font-size: 0.82rem; }
+.flow-surge-month__header-meta button { grid-column: 2; grid-row: 1 / 3; display: grid; place-items: center; width: 2.3rem; height: 2.3rem; border: 1px solid #d8c8e7; border-radius: 0.65rem; color: var(--tg-purple); background: #fbf9fe; cursor: pointer; }
+
+.flow-surge-month__card { max-width: 1180px; margin: 0 auto; overflow: hidden; border: 1px solid #e2e6ee; border-radius: 1.05rem; background: #fff; box-shadow: 0 22px 50px rgba(48, 36, 84, 0.1); }
+.flow-surge-month__titlebar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 2.5rem; padding: 0.25rem 1.1rem 0.22rem; color: #fff; background: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e); }
+.flow-surge-month__titlebar h2 { margin: 0; color: #fff; font-size: clamp(0.76rem, 1.3vw, 0.92rem); font-weight: 850; letter-spacing: 0.02em; line-height: 1.15; }
+.flow-surge-month__titlebar-kicker { color: rgba(255, 255, 255, 0.65); font-size: 0.6rem; }
+
+.flow-surge-month__legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem 2.2rem; padding: 0.45rem 1rem 0.35rem; color: #5c667a; font-size: 0.72rem; }
+.flow-surge-month__legend-item { display: inline-flex; align-items: center; gap: 0.42rem; }
+.flow-surge-month__legend-swatch { width: 1.1rem; height: 0.36rem; border-radius: 1rem; }
+.flow-surge-month__legend-swatch--purple { background: var(--tg-purple); }
+.flow-surge-month__legend-swatch--gold { width: 0.6rem; height: 0.6rem; background: var(--tg-gold); border-radius: 50%; }
+.flow-surge-month__legend-swatch--green { background: var(--tg-green); }
+
+.flow-surge-month__state { padding: 2.5rem 1rem; text-align: center; color: var(--tg-muted); font-size: 0.9rem; }
+.flow-surge-month__state--error { color: #b3261e; }
+.flow-surge-month__state button { margin-left: 0.6rem; padding: 0.3rem 0.8rem; border: 1px solid #d8c8e7; border-radius: 0.5rem; background: #fbf9fe; color: var(--tg-purple); cursor: pointer; }
+
+.flow-surge-month__chart { padding: 0 1rem 0.4rem; }
+.flow-surge-month__axis-row, .flow-surge-month__plot { display: grid; grid-template-columns: minmax(3rem, 0.55fr) minmax(4rem, 1fr) minmax(0, 1.35fr) minmax(4rem, 1fr); column-gap: 0.3rem; }
+.flow-surge-month__axis-row { align-items: end; min-height: 1.9rem; border-bottom: 1px solid var(--tg-line); color: #6b7486; font-size: 0.72rem; font-weight: 700; }
+.flow-surge-month__axis-caption { padding: 0 0 0.55rem 0.5rem; color: #4b5568; font-size: 0.74rem; font-weight: 850; }
+.flow-surge-month__axis { display: grid; grid-template-columns: repeat(var(--axis-count), minmax(0, 1fr)); align-items: flex-end; padding-bottom: 0.55rem; }
+.flow-surge-month__axis span { min-width: 0; text-align: center; white-space: nowrap; font-size: 0.62rem; }
+.flow-surge-month__axis--left { color: #8a57a8; }
+.flow-surge-month__axis--right { color: #3b9660; }
+.flow-surge-month__axis--center { color: #aa8c23; }
+
+.flow-surge-month__column { position: relative; display: flex; flex-direction: column; min-width: 0; }
+.flow-surge-month__symbols { border-right: 1px solid var(--tg-line); }
+.flow-surge-month__symbol-row { display: flex; align-items: center; height: var(--tg-row-h); padding: 0 0.5rem; border-bottom: 1px solid #f0f2f5; }
+.flow-surge-month__badge { display: inline-flex; align-items: center; gap: 0.35rem; color: #3e4657; font-size: .88rem; }
+.flow-surge-month__badge svg { width: 1.15rem; height: 1.15rem; padding: 0.22rem; border-radius: 50%; color: #fff; background: #5522a4; }
+.flow-surge-month__badge strong { font-weight: 800; }
+.flow-surge-month__summary-label { display: flex; align-items: center; height: var(--tg-row-h); padding-left: 0.5rem; border-top: 1px solid #dfe4eb; color: #525d70; font-size: 0.7rem; font-weight: 800; }
+
+.flow-surge-month__bar-row { display: flex; align-items: center; justify-content: flex-end; gap: 0.45rem; height: var(--tg-row-h); padding: 0 0.25rem; border-bottom: 1px solid #f0f2f5; }
+.flow-surge-month__bar-track { position: relative; width: 100%; height: 0.38rem; border-radius: 1rem; background: #f3eff7; }
+.flow-surge-month__left-bars .flow-surge-month__bar-track { display: flex; justify-content: flex-end; }
+.flow-surge-month__bar-track span { display: block; height: 100%; min-width: 0.12rem; border-radius: inherit; }
+.flow-surge-month__left-bars .flow-surge-month__bar-track span { background: linear-gradient(90deg, #b279d4, var(--tg-purple)); }
+.flow-surge-month__right-bars .flow-surge-month__bar-track { background: #edf7ef; }
+.flow-surge-month__right-bars .flow-surge-month__bar-track span { background: linear-gradient(90deg, #65c77f, var(--tg-green)); }
+.flow-surge-month__bar-row em { flex: 0 0 2.85rem; color: #5b6373; font-size: .74rem; font-style: normal; text-align: left; }
+.flow-surge-month__left-bars .flow-surge-month__bar-row em { order: -1; text-align: right; }
+.flow-surge-month__right-bars .flow-surge-month__bar-row em { color: #126f35; }
+.flow-surge-month__summary-bar { display: flex; align-items: center; justify-content: flex-end; height: var(--tg-row-h); border-top: 1px solid #dfe4eb; color: #596477; font-size: 0.68rem; font-weight: 800; }
+
+.flow-surge-month__center-line { overflow: visible; }
+.flow-surge-month__zero-line { position: absolute; top: 0; bottom: var(--tg-row-h); left: 0; width: 1px; background: rgba(183, 150, 33, 0.45); }
+.flow-surge-month__line-svg { position: absolute; inset: 0 0 var(--tg-row-h); width: 100%; height: calc(100% - var(--tg-row-h)); overflow: visible; }
+.flow-surge-month__line-svg path { fill: none; stroke: var(--tg-gold); stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+// Lớp chấm + nhãn giá: HTML thuần, KHÔNG nằm trong svg (xem chú thích ở JSX).
+// Mỗi nhãn nằm gọn trong dải dòng của chính nó nên không bao giờ đè nhãn dòng
+// khác — khác hẳn cách cũ đặt chữ phía trên chấm.
+.flow-surge-month__points { position: absolute; inset: 0 0 var(--tg-row-h); pointer-events: none; }
+.flow-surge-month__point {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--tg-gold);
+}
+.flow-surge-month__point em {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ad8610;
+  font-size: 0.6rem;
+  font-style: normal;
+  font-weight: 700;
+  white-space: nowrap;
+  // Viền trắng mảnh để số vẫn đọc được khi nằm đè lên đường vàng.
+  text-shadow: 0 0 2px #fff, 0 0 2px #fff, 0 0 2px #fff;
+}
+// Điểm sát mép phải thì lật nhãn sang trái, nếu không sẽ bị cắt.
+.flow-surge-month__point.is-flipped em { left: auto; right: 8px; }
+
+.flow-surge-month__footer { margin: 0 1rem; padding: 0.85rem 0 1rem; border-top: 1px solid #e5e9ef; color: var(--tg-muted); font-size: 0.78rem; }
+.flow-surge-month__footer small { font-size: 0.7rem; }
+
+@media (max-width: 760px) {
+  .flow-surge-month { padding: 0.85rem; }
+  .flow-surge-month__page-header { align-items: flex-start; flex-direction: column; gap: 0.8rem; }
+  .flow-surge-month__header-meta { text-align: left; }
+  .flow-surge-month__chart { overflow-x: hidden; padding-inline: 0.4rem; }
+  .flow-surge-month__axis-row,
+  .flow-surge-month__plot {
+    min-width: 0;
+    grid-template-columns:
+      minmax(3rem, 0.55fr)
+      minmax(4rem, 1fr)
+      minmax(0, 1.35fr)
+      minmax(4rem, 1fr);
+    column-gap: 0.3rem;
+  }
+  .flow-surge-month__bar-row { gap: 0.25rem; padding-inline: 0.1rem; }
+  .flow-surge-month__bar-row em { flex-basis: 2.35rem; font-size: 0.58rem; }
+}
+
+// 3 thanh header màu trên mỗi panel (khớp mockup "so với bình quân 1 tháng").
+.flow-surge-month__panel-heads { display: grid; grid-template-columns: minmax(3rem, 0.55fr) minmax(4rem, 1fr) minmax(0, 1.35fr) minmax(4rem, 1fr); column-gap: 0.3rem; margin-bottom: 0.45rem; }
+.flow-surge-month__panel-head { display: flex; align-items: center; justify-content: center; padding: 0.42rem 0.4rem; border-radius: 0.42rem; color: #fff; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.02em; line-height: 1.15; text-align: center; text-transform: uppercase; }
+.flow-surge-month__panel-head--purple { background: var(--tg-purple); }
+.flow-surge-month__panel-head--navy { background: #1f2a4a; }
+.flow-surge-month__panel-head--green { background: var(--tg-green); }
+
+@media (max-width: 760px) {
+  .flow-surge-month__panel-heads { grid-template-columns: minmax(3rem, 0.55fr) minmax(4rem, 1fr) minmax(0, 1.35fr) minmax(4rem, 1fr); column-gap: 0.3rem; }
+  .flow-surge-month__panel-head { padding: 0.35rem 0.2rem; font-size: 0.54rem; }
+}

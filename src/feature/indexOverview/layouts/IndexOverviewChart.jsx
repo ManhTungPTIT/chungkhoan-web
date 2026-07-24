@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts";
+import { BsBarChartLineFill } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useIndexOverview } from "../hooks/useIndexOverview";
 import {
   buildBarSeries,
@@ -76,8 +78,15 @@ function IndexOverviewChart() {
 
   return (
     <main className="index-overview">
-      <section className="index-overview__card">
-        <h2 className="index-overview__title">CHỈ SỐ CHUNG 3 SÀN</h2>
+      <section className="index-overview__card" aria-labelledby="index-overview-title">
+        <ChartHeader
+          id="index-overview-title"
+          icon={<BsBarChartLineFill />}
+          title="TOÀN CẢNH CHỈ SỐ"
+          variant="blue"
+          accent="#5aa9ff"
+          className="index-overview__title"
+        />
 
         {isLoading && <div className="index-overview__state">Đang tải dữ liệu…</div>}
         {isError && (

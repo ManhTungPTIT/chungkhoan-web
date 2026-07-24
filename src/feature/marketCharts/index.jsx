@@ -1,5 +1,7 @@
 ﻿import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { BsGraphUpArrow } from "react-icons/bs";
+import ChartHeader from "../../components/ChartHeader";
 import { useTplusWave } from "../tplusWave/hooks/useTplusWave";
 import TplusWaveRadar from "../tplusWave/layouts/TplusWaveRadar";
 import PotentialFlowChart from "../potentialFlow/layouts/PotentialFlowChart";
@@ -7,6 +9,7 @@ import TopGainT2Chart from "../topGainT2/layouts/TopGainT2Chart";
 import TopGainT3Chart from "../topGainT3/layouts/TopGainT3Chart";
 import TopGainWeekChart from "../topGainWeek/layouts/TopGainWeekChart";
 import FlowSurgeChart from "../flowSurge/layouts/FlowSurgeChart";
+import FlowSurgeMonthChart from "../flowSurgeMonth/layouts/FlowSurgeMonthChart";
 import IndexOverviewChart from "../indexOverview/layouts/IndexOverviewChart";
 import MarketStatusChart from "../marketStatus/layouts/MarketStatusChart";
 import ForeignBuyChart from "../foreignBuy/layouts/ForeignBuyChart";
@@ -17,6 +20,7 @@ import SectorFlowValueChart from "../sectorFlowValue/layouts/SectorFlowValueChar
 import SectorFlowShareChart from "../sectorFlowShare/layouts/SectorFlowShareChart";
 import SectorBreadthChart from "../sectorBreadth/layouts/SectorBreadthChart";
 import SectorChangeChart from "../sectorChange/layouts/SectorChangeChart";
+import Vn30BasketChart from "../vn30Basket/layouts/Vn30BasketChart";
 import MoneyFlowPage from "../moneyflow";
 import PutThroughPage from "../putThrough";
 import TopValueChart from "../topValue/layouts/TopValueChart";
@@ -50,6 +54,7 @@ export default function MarketChartsPage() {
   const topGainT3Ref = useRef(null);
   const topGainWeekRef = useRef(null);
   const flowSurgeRef = useRef(null);
+  const flowSurgeMonthRef = useRef(null);
   const indexOverviewRef = useRef(null);
   const marketStatusRef = useRef(null);
   const foreignBuyRef = useRef(null);
@@ -62,6 +67,7 @@ export default function MarketChartsPage() {
   const sectorFlowShareRef = useRef(null);
   const sectorBreadthRef = useRef(null);
   const sectorChangeRef = useRef(null);
+  const vn30BasketRef = useRef(null);
   const topValueRef = useRef(null);
   const topVolumeRef = useRef(null);
   const topDeclineRef = useRef(null);
@@ -74,6 +80,7 @@ export default function MarketChartsPage() {
       "#top-gain-t3": topGainT3Ref,
       "#top-gain-week": topGainWeekRef,
       "#flow-surge": flowSurgeRef,
+      "#flow-surge-month": flowSurgeMonthRef,
       "#index-overview": indexOverviewRef,
       "#market-status": marketStatusRef,
       "#foreign-buy": foreignBuyRef,
@@ -86,6 +93,7 @@ export default function MarketChartsPage() {
       "#sector-flow-share": sectorFlowShareRef,
       "#sector-breadth": sectorBreadthRef,
       "#sector-change": sectorChangeRef,
+      "#vn30-basket": vn30BasketRef,
       "#top-value": topValueRef,
       "#top-volume-view": topVolumeRef,
       "#top-decline": topDeclineRef,
@@ -121,6 +129,14 @@ export default function MarketChartsPage() {
         className="market-chart-pair__panel market-chart-pair__panel--tplus"
         aria-label="Biểu đồ radar sóng tăng T+"
       >
+        <ChartHeader
+          id="tplus-wave-title"
+          icon={<BsGraphUpArrow />}
+          title="BẢN ĐỒ SỨC MẠNH TĂNG GIÁ CỔ PHIẾU"
+          variant="navy"
+          accent="#35c66b"
+          className="market-chart-pair__tplus-header"
+        />
         <div className="market-chart-pair__tplus-chart">
           <TplusChartPanel />
         </div>
@@ -259,6 +275,22 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ tổng hợp tăng giảm theo ngành"
       >
         <SectorChangeChart />
+      </section>
+      <section
+        ref={vn30BasketRef}
+        id="vn30-basket"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ mã rổ VN30"
+      >
+        <Vn30BasketChart />
+      </section>
+       <section
+        ref={flowSurgeMonthRef}
+        id="flow-surge-month"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ dòng tiền tăng đột biến so với bình quân 1 tháng"
+      >
+        <FlowSurgeMonthChart />
       </section>
       <section
         ref={topValueRef}

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as echarts from "echarts";
+import { BsBullseye } from "react-icons/bs";
+import ChartHeader from "../../../components/ChartHeader";
 import { useSectorBreadth } from "../../../untils/useSectorBreadth";
 import {
   buildSectorBreadth,
@@ -87,9 +89,14 @@ function SectorBreadthChart() {
 
   return (
     <section className="sector-rows" aria-labelledby="sector-breadth-title">
-      <header className="sector-rows__header">
-        <h2 id="sector-breadth-title">XU HƯỚNG DÒNG TIỀN — TÍCH CỰC TIÊU CỰC NGÀNH</h2>
-      </header>
+      <ChartHeader
+        id="sector-breadth-title"
+        icon={<BsBullseye />}
+        title="BẢN ĐỒ DÒNG TIỀN"
+        variant="navy"
+        accent="#35c66b"
+        className="sector-rows__header"
+      />
 
       {isLoading && <div className="sector-rows__state">Đang tải dữ liệu…</div>}
       {isError && (
