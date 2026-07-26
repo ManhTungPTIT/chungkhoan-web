@@ -97,20 +97,16 @@
 .market-chart-pair__panel--top-gain > .top-gain-t3,
 .market-chart-pair__panel--top-gain > .foreign-buy,
 .market-chart-pair__panel--top-gain > .foreign-sell,
-.market-chart-pair__panel--top-gain > .top-decline {
+.market-chart-pair__panel--top-gain > .top-decline,
+.market-chart-pair__panel--top-gain > .sector-flow-surge,
+.market-chart-pair__panel--top-gain > .top-value,
+.market-chart-pair__panel--top-gain > .top-volume-view {
   height: 100%;
   min-height: 100%;
   padding: 0;
   background: transparent;
 }
 
-.market-chart-pair__panel--top-gain > .top-value,
-.market-chart-pair__panel--top-gain > .top-volume-view {
-  height: auto;
-  min-height: auto;
-  padding: 0;
-  background: transparent;
-}
 
 .market-chart-pair__panel--top-gain .top-gain__page-header,
 .market-chart-pair__panel--top-gain .top-gain-t3__page-header,
@@ -118,7 +114,8 @@
 .market-chart-pair__panel--top-gain .foreign-sell__page-header,
 .market-chart-pair__panel--top-gain .top-value__page-header,
 .market-chart-pair__panel--top-gain .top-volume-view__page-header,
-.market-chart-pair__panel--top-gain .top-decline__page-header {
+.market-chart-pair__panel--top-gain .top-decline__page-header,
+.market-chart-pair__panel--top-gain .sector-flow-surge__page-header {
   display: none;
 }
 
@@ -126,7 +123,10 @@
 .market-chart-pair__panel--top-gain .top-gain-t3__card,
 .market-chart-pair__panel--top-gain .foreign-buy__card,
 .market-chart-pair__panel--top-gain .foreign-sell__card,
-.market-chart-pair__panel--top-gain .top-decline__card {
+.market-chart-pair__panel--top-gain .top-decline__card,
+.market-chart-pair__panel--top-gain .sector-flow-surge__card,
+.market-chart-pair__panel--top-gain .top-value__card,
+.market-chart-pair__panel--top-gain .top-volume-view__card {
   max-width: none;
   height: 100%;
   margin: 0;
@@ -134,14 +134,6 @@
   box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
 }
 
-.market-chart-pair__panel--top-gain .top-value__card,
-.market-chart-pair__panel--top-gain .top-volume-view__card {
-  max-width: none;
-  height: auto;
-  margin: 0;
-  border-radius: 0.75rem;
-  box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
-}
 
 .market-chart-pair__panel--top-gain .top-gain__plot,
 .market-chart-pair__panel--top-gain .top-gain-t3__plot {
