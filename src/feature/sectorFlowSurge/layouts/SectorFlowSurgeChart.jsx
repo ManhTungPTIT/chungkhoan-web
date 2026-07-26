@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { FiBarChart2 } from "react-icons/fi";
+import { FiActivity, FiBarChart2 } from "react-icons/fi";
+import ChartHeader from "../../../components/ChartHeader";
 import { useSectorFlowSurge } from "../hooks/useSectorFlowSurge";
 import { buildSectorFlowSurgeView } from "../untils/sectorFlowSurgeLayout";
 import "../styles/sectorFlowSurge.scss";
@@ -29,15 +30,22 @@ function SectorFlowSurgeChart({ avgWindow = 20 }) {
     return (
         <main className="sector-flow-surge">
             <section className="sector-flow-surge__card" aria-labelledby="sector-flow-surge-title">
-                <header className="sector-flow-surge__heading">
-                    <h1 id="sector-flow-surge-title">NGÀNH CÓ DÒNG TIỀN TĂNG ĐỘT BIẾN</h1>
-                </header>
+                <ChartHeader
+                    id="sector-flow-surge-title"
+                    icon={<FiBarChart2 />}
+                    title="NGÀNH CÓ DÒNG TIỀN TĂNG ĐỘT BIẾN"
+                    variant="navy"
+                    accent="#e6b52e"
+                    className="sector-flow-surge__heading"
+                />
+
                 <div className="sector-flow-surge__legend" aria-label="Chú giải biểu đồ">
                     <span className="sector-flow-surge__legend-item"><i className="sector-flow-surge__legend-swatch sector-flow-surge__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>
                     <span className="sector-flow-surge__legend-item"><i className="sector-flow-surge__legend-swatch sector-flow-surge__legend-swatch--gold" />Đường giá trung bình (Nghìn)</span>
                     <span className="sector-flow-surge__legend-item"><i className="sector-flow-surge__legend-swatch sector-flow-surge__legend-swatch--green" />Mã Tăng Giá</span>
                     <span className="sector-flow-surge__legend-item"><i className="sector-flow-surge__legend-swatch sector-flow-surge__legend-swatch--red" />Mã Giảm Giá</span>
                 </div>
+
                 {isLoading && <div className="sector-flow-surge__state">Đang tải dữ liệu…</div>}
                 {isError && (
                     <div className="sector-flow-surge__state sector-flow-surge__state--error">
@@ -49,13 +57,6 @@ function SectorFlowSurgeChart({ avgWindow = 20 }) {
                 )}
                 {!isLoading && !isError && rows.length > 0 && (
                     <div className="sector-flow-surge__chart">
-                        <div className="sector-flow-surge__panel-titles" aria-hidden="true">
-                            <span>GIÁ TRỊ KHỚP LỆNH (TỶ)</span>
-                            <span>ĐƯỜNG GIÁ TRUNG BÌNH (NGHÌN)</span>
-                            <span className="sector-flow-surge__panel-titles-pct">
-                                <b>MÃ GIẢM GIÁ</b><b>MÃ TĂNG GIÁ</b>
-                            </span>
-                        </div>
                         <div className="sector-flow-surge__axis-row" aria-hidden="true">
                             <div className="sector-flow-surge__axis sector-flow-surge__axis--value">
                                 {valueTicks.map((tick, index) => <span key={index}>{fmt(tick, 0)}</span>)}
@@ -71,10 +72,7 @@ function SectorFlowSurgeChart({ avgWindow = 20 }) {
                             <div className="sector-flow-surge__column sector-flow-surge__value-bars">
                                 {rows.map((row) => (
                                     <div className="sector-flow-surge__bar-row" key={row.icbCode}>
-                                        <strong className="sector-flow-surge__symbol" title={row.group}>
-                                            <FiBarChart2 aria-hidden="true" />
-                                            <span>{row.group}</span>
-                                        </strong>
+                                        <strong className="sector-flow-surge__symbol" title={row.group}><FiActivity aria-hidden="true" /><span>{row.group}</span></strong>
                                         <div className="sector-flow-surge__bar-track"><span style={{ width: `${row.valueBarPct}%` }} /></div>
                                         <em>{fmt(row.valueTy, row.valueTy < 10 ? 2 : 0)}</em>
                                     </div>
