@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { FiBarChart2 } from "react-icons/fi";
 import { useSectorFlowSurge } from "../hooks/useSectorFlowSurge";
 import { buildSectorFlowSurgeView } from "../untils/sectorFlowSurgeLayout";
-import "../styles/sectorflowsurge.scss";
+import "../styles/sectorFlowSurge.scss";
 
 const fmt = (value, digits = 1) => new Intl.NumberFormat("vi-VN", { maximumFractionDigits: digits }).format(value);
 const fmtAvg = (value) => String(Math.round(value * 100) / 100);
