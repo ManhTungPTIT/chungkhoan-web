@@ -440,6 +440,17 @@ function MainLayout() {
                   className="navbar-subitem"
                   onClick={(e) => {
                     e.stopPropagation();
+                    navigate("/chart/market#sector-flow-surge");
+                  }}
+                >
+                  <a>
+                    <span>Ngành có dòng tiền tăng đột biến</span>
+                  </a>
+                </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
                     navigate("/chart/market#top-decline");
                   }}
                 >

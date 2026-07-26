@@ -22,6 +22,7 @@ import PutThroughPage from "../putThrough";
 import TopValueChart from "../topValue/layouts/TopValueChart";
 import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
+import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -65,6 +66,7 @@ export default function MarketChartsPage() {
   const topValueRef = useRef(null);
   const topVolumeRef = useRef(null);
   const topDeclineRef = useRef(null);
+  const sectorFlowSurgeRef = useRef(null);
 
   useEffect(() => {
     const targetRef = {
@@ -89,6 +91,7 @@ export default function MarketChartsPage() {
       "#top-value": topValueRef,
       "#top-volume-view": topVolumeRef,
       "#top-decline": topDeclineRef,
+      "#sector-flow-surge": sectorFlowSurgeRef,
     }[location.hash] ?? null;
 
     if (!targetRef?.current) return undefined;
@@ -276,6 +279,15 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ khối lượng khớp lệnh cao nhất"
       >
         <TopVolumeChart />
+      </section>
+
+      <section
+        ref={sectorFlowSurgeRef}
+        id="sector-flow-surge"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Ngành có dòng tiền tăng đột biến"
+      >
+        <SectorFlowSurgeChart />
       </section>
 
       <section
