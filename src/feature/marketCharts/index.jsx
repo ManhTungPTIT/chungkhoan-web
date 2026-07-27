@@ -29,6 +29,7 @@ import TopValueChart from "../topValue/layouts/TopValueChart";
 import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
+import ForeignTradingHistoryChart from "../foreignTrading/layouts/ForeignTradingChart";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -219,7 +220,7 @@ export default function MarketChartsPage() {
       >
         <Vn30BasketChart />
       </section>
-       <section
+      <section
         id="flow-surge-month"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ dòng tiền tăng đột biến so với bình quân 1 tháng"
@@ -256,6 +257,14 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ top giảm cao nhất"
       >
         <TopDeclineChart />
+      </section>
+
+      <section
+        id="foreign-trading-history"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ lịch sử giao dịch nước ngoài"
+      >
+        <ForeignTradingHistoryChart />
       </section>
     </main>
   );

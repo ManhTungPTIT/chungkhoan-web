@@ -104,7 +104,8 @@
 .market-chart-pair__panel--top-gain > .top-decline,
 .market-chart-pair__panel--top-gain > .sector-flow-surge,
 .market-chart-pair__panel--top-gain > .top-value,
-.market-chart-pair__panel--top-gain > .top-volume-view {
+.market-chart-pair__panel--top-gain > .top-volume-view,
+.market-chart-pair__panel--top-gain > .foreign-trading {
   height: 100%;
   min-height: 100%;
   padding: 0;
@@ -118,6 +119,7 @@
 .market-chart-pair__panel--top-gain .foreign-sell__page-header,
 .market-chart-pair__panel--top-gain .top-value__page-header,
 .market-chart-pair__panel--top-gain .top-volume-view__page-header,
+.market-chart-pair__panel--top-gain .foreign-trading__page-header,
 .market-chart-pair__panel--top-gain .top-decline__page-header,
 .market-chart-pair__panel--top-gain .sector-flow-surge__page-header {
   display: none;
@@ -130,7 +132,8 @@
 .market-chart-pair__panel--top-gain .top-decline__card,
 .market-chart-pair__panel--top-gain .sector-flow-surge__card,
 .market-chart-pair__panel--top-gain .top-value__card,
-.market-chart-pair__panel--top-gain .top-volume-view__card {
+.market-chart-pair__panel--top-gain .top-volume-view__card,
+.market-chart-pair__panel--top-gain .foreign-trading__card {
   max-width: none;
   height: 100%;
   margin: 0;

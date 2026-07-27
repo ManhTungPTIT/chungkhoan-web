@@ -30,6 +30,7 @@ export const MARKET_CHARTS = [
   { id: "top-value", label: "Giá trị tiền khớp lệnh cao nhất (Tỷ)" },
   { id: "top-volume-view", label: "Khối lượng khớp lệnh cao nhất" },
   { id: "top-decline", label: "Top giảm cao nhất" },
+  { id: "foreign-trading-history", label: "Lịch sử giao dịch nước ngoài" },
 ];
 
 /** Cuộn tới một biểu đồ theo id. Trả true nếu tìm thấy section (để caller biết
