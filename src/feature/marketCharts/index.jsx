@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { BsGraphUpArrow } from "react-icons/bs";
 import ChartHeader from "../../components/ChartHeader";
@@ -29,12 +29,16 @@ import TopValueChart from "../topValue/layouts/TopValueChart";
 import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
+<<<<<<< HEAD
 // Ba "bản đồ thị trường" trước đây là trang riêng trong submenu cùng tên; đã
 // gộp vào đây để tất cả nằm chung một mục "Biểu đồ thị trường". Route cũ
 // (/chart/heatmap, /chart/power, /home) vẫn giữ để không gãy link đã lưu.
 import HeatmapPage from "../heatmap";
 import PowerPage from "../power";
 import HomePage from "../homepage/layouts/HomePage";
+=======
+import ForeignTradingHistoryChart from "../foreignTrading/layouts/ForeignTradingChart";
+>>>>>>> 6922a00f775b4101615ff0cdf3296abe62d32fc2
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -225,7 +229,7 @@ export default function MarketChartsPage() {
       >
         <Vn30BasketChart />
       </section>
-       <section
+      <section
         id="flow-surge-month"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ dòng tiền tăng đột biến so với bình quân 1 tháng"

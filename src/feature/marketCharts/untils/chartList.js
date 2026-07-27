@@ -34,6 +34,7 @@ export const MARKET_CHARTS = [
   { id: "heatmap", label: "Bản đồ nhiệt thị trường" },
   { id: "power-map", label: "Bản đồ sức mạnh dòng tiền" },
   { id: "market-overview", label: "Bản đồ toàn cảnh thị trường" },
+  { id: "foreign-trading-history", label: "Lịch sử giao dịch nước ngoài" },
 ];
 
 /** Cuộn tới một biểu đồ theo id. Trả true nếu tìm thấy section (để caller biết

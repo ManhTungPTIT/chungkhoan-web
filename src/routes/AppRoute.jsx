@@ -35,6 +35,7 @@ const TopValuePage = lazy(() => import('../feature/topValue'));
 const TopVolumePage = lazy(() => import('../feature/topVolume'));
 const TopDeclinePage = lazy(() => import('../feature/topDecline'));
 const SectorFlowSurgePage = lazy(() => import('../feature/sectorFlowSurge'));
+const ForeignTradingHistoryPage = lazy(() => import('../feature/foreignTrading'));
 
 function AppRoute() {
   // Đổi vùng admin ↔ user thì tự logout (xem hook).
@@ -244,6 +245,16 @@ function AppRoute() {
                 fallback={<div style={{ padding: "2rem" }}>Đang tải Top giảm cao nhất…</div>}
               >
                 <TopDeclinePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/foreign-trading-history"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Giá trị mua bán ròng 30 phiên gần nhất…</div>}
+              >
+                <ForeignTradingHistoryPage />
               </Suspense>
             }
           />
