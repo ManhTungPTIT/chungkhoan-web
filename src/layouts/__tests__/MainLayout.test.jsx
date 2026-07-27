@@ -72,18 +72,16 @@ describe("MainLayout — mở cặp biểu đồ đầu tiên", () => {
   });
 });
 describe("MainLayout — menu biểu đồ thị trường", () => {
-  it("trượt ra danh sách hai biểu đồ khi bấm vào mục biểu đồ thị trường", () => {
+  it("KHÔNG còn liệt kê tên từng biểu đồ trong sidebar", () => {
     renderLayout();
 
     fireEvent.click(screen.getByText("Biểu đồ thị trường"));
 
-    expect(screen.getByText("Radar sóng tăng T+")).toBeTruthy();
-    expect(screen.getByText("Mã cổ phiếu tiềm năng")).toBeTruthy();
-    expect(screen.getByText("Top tăng cao nhất T+2")).toBeTruthy();
-    expect(screen.getByText("Top tăng cao nhất T+3")).toBeTruthy();
-    expect(screen.getByText("Top tăng cao nhất tuần")).toBeTruthy();
-    expect(screen.getByText("Dòng tiền tăng đột biến hôm nay")).toBeTruthy();
-    expect(screen.getByText("Chỉ số chung 3 sàn")).toBeTruthy();
+    // Danh sách tên biểu đồ đã chuyển sang nút nổi trên trang /chart/market.
+    expect(screen.queryByText("Mã cổ phiếu tiềm năng")).toBeNull();
+    expect(screen.queryByText("Nhóm tăng mạnh nhất T+2")).toBeNull();
+    expect(screen.queryByText("Dòng tiền tăng đột biến hôm nay")).toBeNull();
+    expect(screen.queryByText("Chỉ số chung 3 sàn")).toBeNull();
   });
 });
 

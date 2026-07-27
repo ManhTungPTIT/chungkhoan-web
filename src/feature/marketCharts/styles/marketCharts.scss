@@ -5,6 +5,9 @@
   gap: 0.75rem;
   min-height: calc(100vh - 60px);
   padding: 0.75rem;
+  // Dải trống cho nút nổi "Danh sách các biểu đồ" (position: fixed, góc trên
+  // phải) — không có nó thì nút đè lên tiêu đề card đầu tiên.
+  padding-top: 3.75rem;
   overflow-x: hidden;
   overflow-y: auto;
   background: #f5f7fb;
@@ -14,7 +17,8 @@
 .market-chart-pair__panel {
   min-width: 0;
   min-height: 34rem;
-  scroll-margin-top: 0.75rem;
+  // Nhảy tới biểu đồ thì dừng DƯỚI nút nổi, không để nút che mất tiêu đề.
+  scroll-margin-top: 3.75rem;
 }
 
 .market-chart-pair__panel--potential > .potential-flow {
@@ -145,7 +149,7 @@
 
 .market-chart-pair__panel--top-gain .top-gain__plot,
 .market-chart-pair__panel--top-gain .top-gain-t3__plot {
-  min-height: 25rem;
+  min-height: 0;
 }
 .market-chart-pair__panel--potential .potential-flow__axis-row,
 .market-chart-pair__panel--potential .potential-flow__plot,
@@ -154,11 +158,11 @@
 .market-chart-pair__panel--top-gain .top-gain-t3__axis-row,
 .market-chart-pair__panel--top-gain .top-gain-t3__plot {
   grid-template-columns:
-    minmax(2.5rem, 0.55fr)
+    minmax(3.75rem, 0.72fr)
     minmax(4rem, 1fr)
-    minmax(0, 1.35fr)
+    minmax(0, 1.22fr)
     minmax(4rem, 1fr);
-  column-gap: 0.4rem;
+  column-gap: 0.25rem;
 }
 
 .market-chart-pair__panel--potential .potential-flow__column {
@@ -167,7 +171,7 @@
 
 .market-chart-pair__panel--top-gain .top-gain,
 .market-chart-pair__panel--top-gain .top-gain-t3 {
-  --tg-row-h: 1.05rem;
+  --tg-row-h: 1.32rem;
 }
 .market-chart-pair__panel--top-gain > .top-gain-week,
 .market-chart-pair__panel--top-gain > .flow-surge {
@@ -705,7 +709,7 @@
 .market-chart-pair__panel--top-gain .flow-surge__legend,
 .market-chart-pair__panel#flow-surge-month .flow-surge-month__legend {
   gap: 0.3rem 1.4rem;
-  padding: 0.3rem 1rem 0.25rem;
+  padding: 0.28rem 0.8rem 0.22rem;
 }
 
 .market-chart-pair__panel--top-gain .top-gain__axis-row,
@@ -713,7 +717,19 @@
 .market-chart-pair__panel--top-gain .top-gain-week__axis-row,
 .market-chart-pair__panel--top-gain .flow-surge__axis-row,
 .market-chart-pair__panel#flow-surge-month .flow-surge-month__axis-row {
-  min-height: 1.5rem;
+  min-height: 1.55rem;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__chart,
+.market-chart-pair__panel--top-gain .top-gain-t3__chart {
+  padding: 0 0.65rem 0.2rem;
+}
+
+.market-chart-pair__panel--top-gain .top-gain__footer,
+.market-chart-pair__panel--top-gain .top-gain-t3__footer {
+  margin: 0 0.65rem;
+  padding: 0.42rem 0 0.5rem;
+  line-height: 1.35;
 }
 
 /* Đồng bộ độ mỏng dòng cho flow-surge-month với nhóm còn lại. */

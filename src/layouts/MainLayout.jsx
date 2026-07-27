@@ -46,17 +46,16 @@ function MainLayout() {
   const [showSidebar, setShowSidebar] = useState(
     typeof window !== "undefined" && window.innerWidth <= 768,
   );
-  // Dropdown gộp các bản đồ thị trường; các biểu đồ thị trường nằm trong menu riêng
+  // Dropdown gộp các bản đồ thị trường. Danh sách TÊN các biểu đồ thị trường
+  // KHÔNG còn ở đây — trang /chart/market có hơn 20 biểu đồ nên chúng chuyển
+  // sang nút nổi "Danh sách các biểu đồ" ngay trên trang đó
+  // (feature/marketCharts/layouts/ChartListButton.jsx).
   const [mapMenuOpen, setMapMenuOpen] = useState(false);
-  const [marketChartMenuOpen, setMarketChartMenuOpen] = useState(false);
-  // Rời khỏi khu vực của một submenu thì mới thu nó lại. Đừng đóng cả hai theo
-  // một điều kiện chung: mọi mục của "Biểu đồ thị trường" đều ở lại
-  // /chart/market nên nó không sao, còn mỗi mục của "Bản đồ thị trường" lại đi
-  // MỘT path khác nhau — điều kiện chung khiến bấm mục nào cũng thu menu ngay
-  // lập tức, không nhìn được các mục còn lại.
+  // Rời khỏi khu vực của submenu thì mới thu nó lại: mỗi mục của "Bản đồ thị
+  // trường" đi MỘT path khác nhau, đóng theo điều kiện chung sẽ khiến bấm mục
+  // nào cũng thu menu ngay, không nhìn được các mục còn lại.
   useEffect(() => {
     if (!MAP_MENU_PATHS.includes(location.pathname)) setMapMenuOpen(false);
-    if (location.pathname !== MARKET_CHART_PATH) setMarketChartMenuOpen(false);
   }, [location.pathname, location.search, location.hash]);
 
   const data = readStoredAuth();
@@ -75,6 +74,15 @@ function MainLayout() {
   const handleLogout = () => {
     navigate('/login')
     logout();
+  };
+
+  // Đổi BOT nhưng GIỮ mã đang xem: chỉ set lại `bot`, bảo toàn `symbol` hiện có
+  // trên URL. Điều hướng tới "/?bot=..." cứng sẽ xoá `symbol` → index.jsx tự reset
+  // về VNINDEX, khiến biểu đồ "giật" khỏi mã đang chọn.
+  const goToBot = (botValue) => {
+    const params = new URLSearchParams(location.search);
+    params.set("bot", botValue);
+    navigate(`/?${params.toString()}`);
   };
 
   return (
@@ -122,19 +130,19 @@ function MainLayout() {
             <li className="navbar-item">
               <span>Chứng khoán cơ sở</span>
             </li>
-            <li className="navbar-item text-redirect" onClick={() => navigate("/?bot=trend")}>
+            <li className="navbar-item text-redirect" onClick={() => goToBot("trend")}>
               <a>
                 <LuArrowUpNarrowWide />
                 <span>BOT Trend</span>
               </a>
             </li>
-            <li className="navbar-item text-redirect" onClick={() => navigate("/?bot=t")}>
+            <li className="navbar-item text-redirect" onClick={() => goToBot("t")}>
               <a>
                 <LuArrowUpNarrowWide />
                 <span>BOT T+</span>
               </a>
             </li>
-            <li className="navbar-item text-redirect" onClick={() => navigate("/?bot=long")}>
+            <li className="navbar-item text-redirect" onClick={() => goToBot("long")}>
               <a>
                 <LuArrowUpNarrowWide />
                 <span>BOT Dài hạn</span>
@@ -152,10 +160,7 @@ function MainLayout() {
             <li
               className={`navbar-item text-redirect power-parent${mapMenuOpen ? " is-open" : ""
                 }`}
-              onClick={() => {
-                setMapMenuOpen((v) => !v);
-                setMarketChartMenuOpen(false);
-              }}
+              onClick={() => setMapMenuOpen((v) => !v)}
             >
               <a className="break-word">
                 <MdGridView />
@@ -201,275 +206,16 @@ function MainLayout() {
               </ul>
             </li>
             <li
-              className={`navbar-item text-redirect power-parent${marketChartMenuOpen ? " is-open" : ""
-                }`}
+              className="navbar-item text-redirect"
               onClick={() => {
-                setMarketChartMenuOpen((v) => !v);
                 setMapMenuOpen(false);
-                navigate("/chart/market#potential-flow");
+                navigate(`${MARKET_CHART_PATH}#potential-flow`);
               }}
             >
-              <a
-                className="break-word"
-                aria-expanded={marketChartMenuOpen}
-                aria-controls="market-chart-submenu"
-              >
+              <a className="break-word">
                 <MdStackedLineChart />
                 <span>Biểu đồ thị trường</span>
-                <MdExpandMore className="navbar-caret" />
               </a>
-            </li>
-            <li
-              id="market-chart-submenu"
-              className={`navbar-submenu${marketChartMenuOpen ? " is-open" : ""
-                }`}
-            >
-              <ul>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#tplus-wave");
-                  }}
-                >
-                  <a>
-                    <span>Radar sóng tăng T+</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#potential-flow");
-                  }}
-                >
-                  <a>
-                    <span>Mã cổ phiếu tiềm năng</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#top-gain-t2");
-                  }}
-                >
-                  <a>
-                    <span>Top tăng cao nhất T+2</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#top-gain-t3");
-                  }}
-                >
-                  <a>
-                    <span>Top tăng cao nhất T+3</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#top-gain-week");
-                  }}
-                >
-                  <a>
-                    <span>Top tăng cao nhất tuần</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#flow-surge");
-                  }}
-                >
-                  <a>
-                    <span>Dòng tiền tăng đột biến hôm nay</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#flow-surge-month");
-                  }}
-                >
-                  <a>
-                    <span>Dòng tiền tăng đột biến so với bình quân 1 tháng</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#money-flow");
-                  }}
-                >
-                  <a>
-                    <span>Tỷ trọng dòng tiền theo ngành</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#put-through");
-                  }}
-                >
-                  <a>
-                    <span>Dòng tiền giao dịch thỏa thuận</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#bull-bear");
-                  }}
-                >
-                  <a>
-                    <span>Dòng tiền phe bò và phe gấu</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#price-band");
-                  }}
-                >
-                  <a>
-                    <span>Dòng tiền theo nhóm giá cổ phiếu</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#sector-flow-value");
-                  }}
-                >
-                  <a>
-                    <span>Giá trị khớp lệnh 5 phiên theo ngành</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#sector-flow-share");
-                  }}
-                >
-                  <a>
-                    <span>Tỷ trọng khớp lệnh 5 phiên theo ngành</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#sector-breadth");
-                  }}
-                >
-                  <a>
-                    <span>Xu hướng tích cực tiêu cực ngành</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#sector-change");
-                  }}
-                >
-                  <a>
-                    <span>Tổng hợp tăng giảm theo ngành</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#index-overview");
-                  }}
-                >
-                  <a>
-                    <span>Chỉ số chung 3 sàn</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#vn30-basket");
-                  }}
-                >
-                  <a>
-                    <span>Mã rổ VN30</span>
-                  </a>
-                </li>
-
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#foreign-buy");
-                  }}
-                >
-                  <a>
-                    <span>Giá trị nước ngoài mua ròng cao nhất</span>
-                  </a>
-                </li>
-
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#foreign-sell");
-                  }}
-                >
-                  <a>
-                    <span>Giá trị nước ngoài bán ròng cao nhất</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#top-value");
-                  }}
-                >
-                  <a>
-                    <span>Giá trị tiền khớp lệnh cao nhất (Tỷ)</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#top-volume-view");
-                  }}
-                >
-                  <a>
-                    <span>Khối lượng khớp lệnh cao nhất</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/market#top-decline");
-                  }}
-                >
-                  <a>
-                    <span>Top giảm cao nhất</span>
-                  </a>
-                </li>
-              </ul>
             </li>
             {/* <li className="navbar-item">
               <span>Thông tin</span>

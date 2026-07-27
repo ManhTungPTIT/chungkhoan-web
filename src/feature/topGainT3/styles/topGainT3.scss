@@ -5,7 +5,7 @@
   --tg-purple: #7814a9;
   --tg-gold: #d3a719;
   --tg-green: #1d9a45;
-  --tg-row-h: 1.75rem;
+  --tg-row-h: 1.82rem;
   min-height: 100%;
   box-sizing: border-box;
   padding: clamp(1rem, 2.5vw, 2.4rem);
@@ -39,10 +39,10 @@
 .top-gain-t3__state--error { color: #b3261e; }
 .top-gain-t3__state button { margin-left: 0.6rem; padding: 0.3rem 0.8rem; border: 1px solid #d8c8e7; border-radius: 0.5rem; background: #fbf9fe; color: var(--tg-purple); cursor: pointer; }
 
-.top-gain-t3__chart { padding: 0 1rem 0.7rem; }
-.top-gain-t3__axis-row, .top-gain-t3__plot { display: grid; grid-template-columns: minmax(3rem, 0.55fr) minmax(4rem, 1fr) minmax(0, 1.35fr) minmax(4rem, 1fr); column-gap: 0.3rem; }
+.top-gain-t3__chart { padding: 0 0.85rem 0.35rem; }
+.top-gain-t3__axis-row, .top-gain-t3__plot { display: grid; grid-template-columns: minmax(3.8rem, 0.68fr) minmax(4rem, 1fr) minmax(0, 1.28fr) minmax(4rem, 1fr); column-gap: 0.25rem; }
 .top-gain-t3__axis-row { align-items: end; min-height: 2.6rem; border-bottom: 1px solid var(--tg-line); color: #6b7486; font-size: 0.72rem; font-weight: 700; }
-.top-gain-t3__axis-caption { padding: 0 0 0.55rem 0.5rem; color: #4b5568; font-size: 0.74rem; font-weight: 850; }
+.top-gain-t3__axis-caption { padding: 0 0 0.55rem 0.65rem; color: #4b5568; font-size: 0.74rem; font-weight: 850; }
 .top-gain-t3__axis { display: grid; grid-template-columns: repeat(var(--axis-count), minmax(0, 1fr)); align-items: flex-end; padding-bottom: 0.55rem; }
 .top-gain-t3__axis span { min-width: 0; text-align: center; white-space: nowrap; }
 .top-gain-t3__axis--left { color: #8a57a8; }
@@ -51,11 +51,11 @@
 
 .top-gain-t3__column { position: relative; display: flex; flex-direction: column; min-width: 0; }
 .top-gain-t3__symbols { border-right: 1px solid var(--tg-line); }
-.top-gain-t3__symbol-row { display: flex; align-items: center; height: var(--tg-row-h); padding: 0 0.5rem; border-bottom: 1px solid #f0f2f5; }
-.top-gain-t3__badge { display: inline-flex; align-items: center; gap: 0.35rem; color: #3e4657; font-size: .88rem; }
+.top-gain-t3__symbol-row { display: flex; align-items: center; height: var(--tg-row-h); padding: 0 0.65rem; border-bottom: 1px solid #f0f2f5; }
+.top-gain-t3__badge { display: inline-flex; align-items: center; gap: 0.42rem; color: #3e4657; font-size: .9rem; }
 .top-gain-t3__badge svg { width: 1.15rem; height: 1.15rem; padding: 0.22rem; border-radius: 50%; color: #fff; background: #5522a4; }
 .top-gain-t3__badge strong { font-weight: 800; }
-.top-gain-t3__summary-label { display: flex; align-items: center; height: var(--tg-row-h); padding-left: 0.5rem; border-top: 1px solid #dfe4eb; color: #525d70; font-size: 0.7rem; font-weight: 800; }
+.top-gain-t3__summary-label { display: flex; align-items: center; height: var(--tg-row-h); padding-left: 0.65rem; border-top: 1px solid #dfe4eb; color: #525d70; font-size: 0.7rem; font-weight: 800; }
 
 .top-gain-t3__bar-row { display: flex; align-items: center; justify-content: flex-end; gap: 0.45rem; height: var(--tg-row-h); padding: 0 0.25rem; border-bottom: 1px solid #f0f2f5; }
 .top-gain-t3__bar-track { position: relative; width: 100%; height: 0.38rem; border-radius: 1rem; background: #f3eff7; }
@@ -101,7 +101,7 @@
 // Điểm sát mép phải thì lật nhãn sang trái, nếu không sẽ bị cắt.
 .top-gain-t3__point.is-flipped em { left: auto; right: 8px; }
 
-.top-gain-t3__footer { margin: 0 1rem; padding: 0.85rem 0 1rem; border-top: 1px solid #e5e9ef; color: var(--tg-muted); font-size: 0.78rem; }
+.top-gain-t3__footer { margin: 0 0.85rem; padding: 0.65rem 0 0.75rem; border-top: 1px solid #e5e9ef; color: var(--tg-muted); font-size: 0.78rem; }
 .top-gain-t3__footer small { font-size: 0.7rem; }
 
 @media (max-width: 760px) {

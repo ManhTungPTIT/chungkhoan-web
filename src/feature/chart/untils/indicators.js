@@ -184,42 +184,83 @@ export function generateSignals(candles) {
   return signals;
 }
 
+/**
+ * Tín hiệu mua/bán theo cấu trúc price-action + Histogram MACD.
+ *
+ * Máy trạng thái flat/long giữ tín hiệu xen kẽ buy → sell → buy.
+ *
+ * Điểm MUA — nến hiện tại (i) phải đồng thời:
+ *   - Đỉnh cao hơn đỉnh nến trước:          high[i]  > high[i-1]
+ *   - Đáy cao hơn đáy nến trước:            low[i]   > low[i-1]
+ *   - Là nến tăng (xanh):                   close[i] > open[i]
+ *   - Đóng cửa vượt đỉnh nến trước:         close[i] > high[i-1]
+ *   - Đóng cửa vượt đỉnh cả hai nến trước:  close[i] > high[i-2]
+ *   - Histogram hiện tại > Histogram nến trước: hist[i] > hist[i-1]
+ *
+ * Điểm BÁN — nến hiện tại (i) phải:
+ *   - Đỉnh thấp hơn đỉnh nến trước:         high[i]  < high[i-1]
+ *   - Đáy thấp hơn đáy nến trước:           low[i]   < low[i-1]
+ *   - Là nến giảm (đỏ):                     close[i] < open[i]
+ *   - Đóng cửa thủng đáy cả hai nến trước:  close[i] < low[i-1] VÀ close[i] < low[i-2]
+ *   - Histogram hiện tại < Histogram nến trước: hist[i] < hist[i-1]
+ *
+ * Ánh xạ index của histogram (như calcMACD sản xuất):
+ *   histogram[k-33].value = Histogram tại nến k  (k >= 33)
+ * Vòng lặp bắt đầu tại i = 34 để có sẵn nến i-2 và histogram i-1.
+ */
 export function generateSignalsT(candles) {
-  const ma10 = calcSMA(candles, 10);
-  const { macdLine, signal } = calcMACD(candles);
+  const { histogram } = calcMACD(candles);
   const signals = [];
 
   let inLong = false;
 
   for (let i = 34; i < candles.length; i++) {
-    const closePrice = candles[i].close;
-    const ma = ma10[i - 9].value;
+    const cur = candles[i];
+    const prev = candles[i - 1];
+    const prev2 = candles[i - 2];
 
-    const macd = macdLine[i - 25].value;
-    const sig = signal[i - 33].value;
+    const hist = histogram[i - 33].value;
+    const histPrev = histogram[i - 34].value;
 
     if (!inLong) {
-      // Vào lệnh: giá trên MA10 VÀ MACD > Signal
+      // Điểm MUA: cấu trúc bứt phá đỉnh + histogram tăng
+      const isBuy =
+        cur.high > prev.high &&
+        cur.low > prev.low &&
+        cur.close > cur.open &&
+        cur.close > prev.high &&
+        cur.close > prev2.high &&
+        hist > histPrev;
 
-      if (closePrice > ma && macd > sig) {
+      if (isBuy) {
         signals.push({
-          time: candles[i].time,
-          date: toDateString(candles[i].time),
+          time: cur.time,
+          date: toDateString(cur.time),
           type: "buy",
-          priceTarget: closePrice,
-          price: candles[i].low, // hiển thị: neo marker ở giá thấp nhất của nến
+          priceTarget: cur.close,
+          price: cur.low, // hiển thị: neo marker ở giá thấp nhất của nến
         });
         inLong = true;
       }
-    } else if (closePrice < ma && macd < sig) {
-      // Ra lệnh: giá thủng MA10
-      signals.push({
-        time: candles[i].time,
-        date: toDateString(candles[i].time),
-        type: "sell",
-        price: candles[i].high, // hiển thị: neo marker ở giá cao nhất của nến
-      });
-      inLong = false;
+    } else {
+      // Điểm BÁN: cấu trúc thủng đáy + histogram giảm
+      const isSell =
+        cur.high < prev.high &&
+        cur.low < prev.low &&
+        cur.close < cur.open &&
+        cur.close < prev.low &&
+        cur.close < prev2.low &&
+        hist < histPrev;
+
+      if (isSell) {
+        signals.push({
+          time: cur.time,
+          date: toDateString(cur.time),
+          type: "sell",
+          price: cur.high, // hiển thị: neo marker ở giá cao nhất của nến
+        });
+        inLong = false;
+      }
     }
   }
 

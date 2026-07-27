@@ -1,0 +1,88 @@
+// Nút nổi "Danh sách các biểu đồ" + menu xổ xuống. `position: fixed` để nút
+// luôn nằm trên nội dung dù trang cuộn tới đâu (trang /chart/market rất dài).
+.chart-list {
+  // Nút nổi thì kiểu gì cũng đè lên nội dung; đặt ở dải trống bên phải thanh
+  // tiêu đề của card đầu tiên (tiêu đề căn giữa nên mép phải luôn rỗng) để
+  // không che legend/nhãn trục của biểu đồ.
+  position: fixed;
+  top: 1.35rem;
+  right: 1.25rem;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    border: none;
+    border-radius: 0.4rem;
+    background: #f0851f;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 25%);
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    &:hover {
+      background: #d9741a;
+    }
+  }
+
+  &__menu {
+    // Danh sách hơn 20 mục — giới hạn chiều cao và cho cuộn trong menu, không
+    // để nó tràn khỏi màn hình.
+    max-height: min(70vh, 32rem);
+    width: min(22rem, calc(100vw - 2.5rem));
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.35rem;
+    list-style: none;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 22%);
+  }
+
+  &__item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    border: none;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: #243044;
+    font-size: 0.82rem;
+    text-align: left;
+    line-height: 1.35;
+    cursor: pointer;
+
+    &:hover {
+      background: #f2f5f9;
+    }
+
+    &.is-active {
+      background: #fdf0e2;
+      color: #b5590c;
+      font-weight: 600;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-list {
+    top: 3.5rem;
+    right: 0.75rem;
+
+    &__trigger span {
+      display: none; // màn hẹp: chỉ còn icon cho đỡ che biểu đồ
+    }
+  }
+}

@@ -1,7 +1,9 @@
-﻿import { useEffect, useRef } from "react";
+﻿import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { BsGraphUpArrow } from "react-icons/bs";
 import ChartHeader from "../../components/ChartHeader";
+import ChartListButton from "./layouts/ChartListButton";
+import { scrollToChart } from "./untils/chartList";
 import { useTplusWave } from "../tplusWave/hooks/useTplusWave";
 import TplusWaveRadar from "../tplusWave/layouts/TplusWaveRadar";
 import PotentialFlowChart from "../potentialFlow/layouts/PotentialFlowChart";
@@ -48,74 +50,22 @@ function TplusChartPanel() {
 
 export default function MarketChartsPage() {
   const location = useLocation();
-  const potentialRef = useRef(null);
-  const tplusRef = useRef(null);
-  const topGainT2Ref = useRef(null);
-  const topGainT3Ref = useRef(null);
-  const topGainWeekRef = useRef(null);
-  const flowSurgeRef = useRef(null);
-  const flowSurgeMonthRef = useRef(null);
-  const indexOverviewRef = useRef(null);
-  const marketStatusRef = useRef(null);
-  const foreignBuyRef = useRef(null);
-  const foreignSellRef = useRef(null);
-  const moneyFlowRef = useRef(null);
-  const putThroughRef = useRef(null);
-  const bullBearRef = useRef(null);
-  const priceBandRef = useRef(null);
-  const sectorFlowValueRef = useRef(null);
-  const sectorFlowShareRef = useRef(null);
-  const sectorBreadthRef = useRef(null);
-  const sectorChangeRef = useRef(null);
-  const vn30BasketRef = useRef(null);
-  const topValueRef = useRef(null);
-  const topVolumeRef = useRef(null);
-  const topDeclineRef = useRef(null);
 
+  // Mọi <section> đều có id trùng hash nên tra thẳng bằng getElementById —
+  // không cần 23 ref song song với danh sách (dễ lệch khi thêm biểu đồ mới).
+  // setTimeout 0 để chờ section vừa mount xong mới cuộn.
   useEffect(() => {
-    const targetRef = {
-      "#potential-flow": potentialRef,
-      "#tplus-wave": tplusRef,
-      "#top-gain-t2": topGainT2Ref,
-      "#top-gain-t3": topGainT3Ref,
-      "#top-gain-week": topGainWeekRef,
-      "#flow-surge": flowSurgeRef,
-      "#flow-surge-month": flowSurgeMonthRef,
-      "#index-overview": indexOverviewRef,
-      "#market-status": marketStatusRef,
-      "#foreign-buy": foreignBuyRef,
-      "#foreign-sell": foreignSellRef,
-      "#money-flow": moneyFlowRef,
-      "#put-through": putThroughRef,
-      "#bull-bear": bullBearRef,
-      "#price-band": priceBandRef,
-      "#sector-flow-value": sectorFlowValueRef,
-      "#sector-flow-share": sectorFlowShareRef,
-      "#sector-breadth": sectorBreadthRef,
-      "#sector-change": sectorChangeRef,
-      "#vn30-basket": vn30BasketRef,
-      "#top-value": topValueRef,
-      "#top-volume-view": topVolumeRef,
-      "#top-decline": topDeclineRef,
-    }[location.hash] ?? null;
+    const id = location.hash.replace(/^#/, "");
+    if (!id) return undefined;
 
-    if (!targetRef?.current) return undefined;
-
-    const timer = window.setTimeout(() => {
-      targetRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-        inline: "nearest",
-      });
-    }, 0);
-
+    const timer = window.setTimeout(() => scrollToChart(id), 0);
     return () => window.clearTimeout(timer);
   }, [location.hash]);
 
   return (
     <main className="market-chart-pair">
+      <ChartListButton />
       <section
-        ref={potentialRef}
         id="potential-flow"
         className="market-chart-pair__panel market-chart-pair__panel--potential"
         aria-label="Biểu đồ mã cổ phiếu tiềm năng"
@@ -124,7 +74,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={tplusRef}
         id="tplus-wave"
         className="market-chart-pair__panel market-chart-pair__panel--tplus"
         aria-label="Biểu đồ radar sóng tăng T+"
@@ -142,7 +91,6 @@ export default function MarketChartsPage() {
         </div>
       </section>
       <section
-        ref={topGainT2Ref}
         id="top-gain-t2"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ top tăng cao nhất T+2"
@@ -151,7 +99,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={topGainT3Ref}
         id="top-gain-t3"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ top tăng cao nhất T+3"
@@ -160,7 +107,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={topGainWeekRef}
         id="top-gain-week"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ top tăng cao nhất tuần"
@@ -169,7 +115,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={flowSurgeRef}
         id="flow-surge"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ dòng tiền tăng đột biến hôm nay"
@@ -178,7 +123,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={indexOverviewRef}
         id="index-overview"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ chỉ số chung 3 sàn"
@@ -187,7 +131,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={marketStatusRef}
         id="market-status"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ diễn biến thị trường"
@@ -196,7 +139,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={foreignBuyRef}
         id="foreign-buy"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ giá trị nước ngoài mua ròng cao nhất"
@@ -205,7 +147,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={foreignSellRef}
         id="foreign-sell"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ giá trị nước ngoài bán ròng cao nhất"
@@ -213,7 +154,6 @@ export default function MarketChartsPage() {
         <ForeignSellChart />
       </section>
       <section
-        ref={moneyFlowRef}
         id="money-flow"
         className="market-chart-pair__panel market-chart-pair__panel--moneyflow"
         aria-label="Money flow theo nganh"
@@ -221,7 +161,6 @@ export default function MarketChartsPage() {
         <MoneyFlowPage />
       </section>
       <section
-        ref={putThroughRef}
         id="put-through"
         className="market-chart-pair__panel market-chart-pair__panel--treemap"
         aria-label="Dòng tiền giao dịch thỏa thuận theo mã"
@@ -229,7 +168,6 @@ export default function MarketChartsPage() {
         <PutThroughPage />
       </section>
       <section
-        ref={bullBearRef}
         id="bull-bear"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ dòng tiền phe bò và phe gấu"
@@ -237,7 +175,6 @@ export default function MarketChartsPage() {
         <BullBearChart />
       </section>
       <section
-        ref={priceBandRef}
         id="price-band"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ dòng tiền theo nhóm giá cổ phiếu"
@@ -245,7 +182,6 @@ export default function MarketChartsPage() {
         <PriceBandChart />
       </section>
       <section
-        ref={sectorFlowValueRef}
         id="sector-flow-value"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
@@ -253,7 +189,6 @@ export default function MarketChartsPage() {
         <SectorFlowValueChart />
       </section>
       <section
-        ref={sectorFlowShareRef}
         id="sector-flow-share"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ tỷ trọng giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
@@ -261,7 +196,6 @@ export default function MarketChartsPage() {
         <SectorFlowShareChart />
       </section>
       <section
-        ref={sectorBreadthRef}
         id="sector-breadth"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ xu hướng dòng tiền tích cực tiêu cực theo ngành"
@@ -269,7 +203,6 @@ export default function MarketChartsPage() {
         <SectorBreadthChart />
       </section>
       <section
-        ref={sectorChangeRef}
         id="sector-change"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ tổng hợp tăng giảm theo ngành"
@@ -277,7 +210,6 @@ export default function MarketChartsPage() {
         <SectorChangeChart />
       </section>
       <section
-        ref={vn30BasketRef}
         id="vn30-basket"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ mã rổ VN30"
@@ -285,7 +217,6 @@ export default function MarketChartsPage() {
         <Vn30BasketChart />
       </section>
        <section
-        ref={flowSurgeMonthRef}
         id="flow-surge-month"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ dòng tiền tăng đột biến so với bình quân 1 tháng"
@@ -293,7 +224,6 @@ export default function MarketChartsPage() {
         <FlowSurgeMonthChart />
       </section>
       <section
-        ref={topValueRef}
         id="top-value"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ giá trị tiền khớp lệnh cao nhất"
@@ -302,7 +232,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={topVolumeRef}
         id="top-volume-view"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ khối lượng khớp lệnh cao nhất"
@@ -311,7 +240,6 @@ export default function MarketChartsPage() {
       </section>
 
       <section
-        ref={topDeclineRef}
         id="top-decline"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ top giảm cao nhất"

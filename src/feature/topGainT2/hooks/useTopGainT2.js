@@ -2,7 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 // API trả: { generated_at, window, rows:[{symbol, gia_tri_khop_lenh, gia_hien_tai, pct_tang}] }
-// rows = mã đang HOLD đúng T+2, xếp theo % tăng giảm dần.
+// rows = rổ vn100 (value > 1 tỷ), % tăng so nến đã đóng lùi (window + 1) phiên,
+// xếp giảm dần, top 20 (mặc định của endpoint).
 const fetchTopGainT2 = async (window) => {
   const { data } = await axios.get(
     `${import.meta.env.VITE_PYTHON_API_URL}/top-gain-tplus`,

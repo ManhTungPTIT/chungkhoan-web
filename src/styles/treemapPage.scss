@@ -189,11 +189,20 @@
   min-width: 0;
 }
 
+/* Tiêu đề hai header này TRƯỚC ĐÂY để white-space: nowrap — chữ vừa không xuống
+   dòng vừa không co được nên tràn ra ngoài ô và đè lên cụm nút Chi tiết/Bảng.
+   Nay: cỡ chữ nhỏ hơn mặc định của .chart-header__title (đủ nằm gọn 1 dòng ở bề
+   ngang thường), và CHO PHÉP xuống dòng khi thanh quá hẹp — thà header cao thêm
+   một dòng còn hơn giấu mất chữ. Không cắt ellipsis: tiêu đề phải hiện đủ. */
 .tm-head--moneyflow .chart-header__title,
-.tm-head--put-through .chart-header__title,
+.tm-head--put-through .chart-header__title {
+  font-size: clamp(0.82rem, 1.25vw, 1.05rem);
+}
+
 .tm-head--moneyflow .chart-header__title-line,
 .tm-head--put-through .chart-header__title-line {
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .tm-head--moneyflow .tm-toggle,

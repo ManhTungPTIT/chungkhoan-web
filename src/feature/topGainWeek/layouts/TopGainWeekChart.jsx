@@ -58,7 +58,7 @@ function TopGainWeekChart() {
         />
 
         <div className="top-gain-week__legend" aria-label="Chú giải biểu đồ">
-          <span className="top-gain-week__legend-item"><i className="top-gain-week__legend-swatch top-gain-week__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>
+          <span className="top-gain-week__legend-item"><i className="top-gain-week__legend-swatch top-gain-week__legend-swatch--purple" />Giá trị khớp lệnh 5 phiên (Tỷ)</span>
           <span className="top-gain-week__legend-item"><i className="top-gain-week__legend-swatch top-gain-week__legend-swatch--gold" />Đường giá hiện tại (Nghìn)</span>
           <span className="top-gain-week__legend-item"><i className="top-gain-week__legend-swatch top-gain-week__legend-swatch--green" />Mã tăng giá (%)</span>
         </div>

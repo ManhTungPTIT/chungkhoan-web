@@ -52,7 +52,7 @@ function TopGainT3Chart({ window = 3 }) {
         <div>
           <span className="top-gain-t3__eyebrow">LEOSTOCK · MARKET RADAR</span>
           <h1>Top tăng cao nhất T+{tPlus}</h1>
-          <p>Các mã đang HOLD ở phiên T+{tPlus} — dòng tiền khớp lệnh, giá hiện tại và mức tăng.</p>
+          <p>Mã thanh khoản trên 1 tỷ tăng mạnh nhất so với {tPlus + 1} phiên trước — dòng tiền khớp lệnh, giá hiện tại và mức tăng.</p>
         </div>
         <div className="top-gain-t3__header-meta">
           <span>Cập nhật lần cuối</span>
@@ -71,7 +71,7 @@ function TopGainT3Chart({ window = 3 }) {
         />
 
         <div className="top-gain-t3__legend" aria-label="Chú giải biểu đồ">
-          <span className="top-gain-t3__legend-item"><i className="top-gain-t3__legend-swatch top-gain-t3__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>
+          <span className="top-gain-t3__legend-item"><i className="top-gain-t3__legend-swatch top-gain-t3__legend-swatch--purple" />Giá trị khớp lệnh hôm nay (Tỷ)</span>
           <span className="top-gain-t3__legend-item"><i className="top-gain-t3__legend-swatch top-gain-t3__legend-swatch--gold" />Đường giá hiện tại (Nghìn)</span>
           <span className="top-gain-t3__legend-item"><i className="top-gain-t3__legend-swatch top-gain-t3__legend-swatch--green" />Mã tăng giá (%)</span>
         </div>
@@ -84,7 +84,7 @@ function TopGainT3Chart({ window = 3 }) {
           </div>
         )}
         {!isLoading && !isError && rows.length === 0 && (
-          <div className="top-gain-t3__state">Hiện chưa có mã HOLD nào ở T+3.</div>
+          <div className="top-gain-t3__state">Chưa có mã nào đủ dữ liệu.</div>
         )}
 
         {!isLoading && !isError && rows.length > 0 && (
@@ -176,7 +176,7 @@ function TopGainT3Chart({ window = 3 }) {
         )}
 
         <footer className="top-gain-t3__footer">
-          <small>Nguồn: tín hiệu HOLD T+3 . Sắp xếp theo % tăng giảm dần . % tính so giá đóng cửa ngày báo (T0)</small>
+          <small>Nguồn: rổ mã giá trị khớp lệnh trên 1 tỷ . Sắp xếp theo % tăng giảm dần . % tính so giá đóng cửa {tPlus + 1} phiên trước</small>
         </footer>
       </section>
     </main>
