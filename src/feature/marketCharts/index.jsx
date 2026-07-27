@@ -265,6 +265,14 @@ export default function MarketChartsPage() {
         <TopDeclineChart />
       </section>
 
+      <section
+        id="foreign-trading-history"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ lịch sử giao dịch nước ngoài"
+      >
+        <ForeignTradingHistoryChart />
+      </section>
+
       {/* Ba bản đồ chiếm CẢ hai cột: chúng vốn là trang riêng chiếm trọn bề
           ngang, nhét vào nửa cột thì treemap/vòng tròn bị bóp không đọc nổi. */}
       <section
