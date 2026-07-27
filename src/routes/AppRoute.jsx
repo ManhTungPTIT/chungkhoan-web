@@ -34,6 +34,7 @@ const ForeignSellPage = lazy(() => import('../feature/foreignSell'));
 const TopValuePage = lazy(() => import('../feature/topValue'));
 const TopVolumePage = lazy(() => import('../feature/topVolume'));
 const TopDeclinePage = lazy(() => import('../feature/topDecline'));
+const SectorFlowSurgePage = lazy(() => import('../feature/sectorFlowSurge'));
 
 function AppRoute() {
   // Đổi vùng admin ↔ user thì tự logout (xem hook).
@@ -223,6 +224,16 @@ function AppRoute() {
                 fallback={<div style={{ padding: "2rem" }}>Đang tải Khối lượng khớp lệnh cao nhất…</div>}
               >
                 <TopVolumePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/top-volume-view"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Ngành có dòng tiền tăng đột biến…</div>}
+              >
+                <SectorFlowSurgePage />
               </Suspense>
             }
           />

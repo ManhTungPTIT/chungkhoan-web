@@ -28,6 +28,7 @@ import PutThroughPage from "../putThrough";
 import TopValueChart from "../topValue/layouts/TopValueChart";
 import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
+import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -50,13 +51,71 @@ function TplusChartPanel() {
 
 export default function MarketChartsPage() {
   const location = useLocation();
+  const potentialRef = useRef(null);
+  const tplusRef = useRef(null);
+  const topGainT2Ref = useRef(null);
+  const topGainT3Ref = useRef(null);
+  const topGainWeekRef = useRef(null);
+  const flowSurgeRef = useRef(null);
+  const flowSurgeMonthRef = useRef(null);
+  const indexOverviewRef = useRef(null);
+  const marketStatusRef = useRef(null);
+  const foreignBuyRef = useRef(null);
+  const foreignSellRef = useRef(null);
+  const moneyFlowRef = useRef(null);
+  const putThroughRef = useRef(null);
+  const bullBearRef = useRef(null);
+  const priceBandRef = useRef(null);
+  const sectorFlowValueRef = useRef(null);
+  const sectorFlowShareRef = useRef(null);
+  const sectorBreadthRef = useRef(null);
+  const sectorChangeRef = useRef(null);
+  const vn30BasketRef = useRef(null);
+  const topValueRef = useRef(null);
+  const topVolumeRef = useRef(null);
+  const topDeclineRef = useRef(null);
+  const sectorFlowSurgeRef = useRef(null);
 
   // Mọi <section> đều có id trùng hash nên tra thẳng bằng getElementById —
   // không cần 23 ref song song với danh sách (dễ lệch khi thêm biểu đồ mới).
   // setTimeout 0 để chờ section vừa mount xong mới cuộn.
   useEffect(() => {
-    const id = location.hash.replace(/^#/, "");
-    if (!id) return undefined;
+    const targetRef = {
+      "#potential-flow": potentialRef,
+      "#tplus-wave": tplusRef,
+      "#top-gain-t2": topGainT2Ref,
+      "#top-gain-t3": topGainT3Ref,
+      "#top-gain-week": topGainWeekRef,
+      "#flow-surge": flowSurgeRef,
+      "#flow-surge-month": flowSurgeMonthRef,
+      "#index-overview": indexOverviewRef,
+      "#market-status": marketStatusRef,
+      "#foreign-buy": foreignBuyRef,
+      "#foreign-sell": foreignSellRef,
+      "#money-flow": moneyFlowRef,
+      "#put-through": putThroughRef,
+      "#bull-bear": bullBearRef,
+      "#price-band": priceBandRef,
+      "#sector-flow-value": sectorFlowValueRef,
+      "#sector-flow-share": sectorFlowShareRef,
+      "#sector-breadth": sectorBreadthRef,
+      "#sector-change": sectorChangeRef,
+      "#vn30-basket": vn30BasketRef,
+      "#top-value": topValueRef,
+      "#top-volume-view": topVolumeRef,
+      "#top-decline": topDeclineRef,
+      "#sector-flow-surge": sectorFlowSurgeRef,
+    }[location.hash] ?? null;
+
+    if (!targetRef?.current) return undefined;
+
+    const timer = window.setTimeout(() => {
+      targetRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+        inline: "nearest",
+      });
+    }, 0);
 
     const timer = window.setTimeout(() => scrollToChart(id), 0);
     return () => window.clearTimeout(timer);
@@ -240,6 +299,16 @@ export default function MarketChartsPage() {
       </section>
 
       <section
+        ref={sectorFlowSurgeRef}
+        id="sector-flow-surge"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Ngành có dòng tiền tăng đột biến"
+      >
+        <SectorFlowSurgeChart />
+      </section>
+
+      <section
+        ref={topDeclineRef}
         id="top-decline"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
         aria-label="Biểu đồ top giảm cao nhất"
