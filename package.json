@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "build:app": "vite build --mode app --outDir dist-app"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.10",

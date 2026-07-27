@@ -29,6 +29,12 @@ import TopValueChart from "../topValue/layouts/TopValueChart";
 import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
+// Ba "bản đồ thị trường" trước đây là trang riêng trong submenu cùng tên; đã
+// gộp vào đây để tất cả nằm chung một mục "Biểu đồ thị trường". Route cũ
+// (/chart/heatmap, /chart/power, /home) vẫn giữ để không gãy link đã lưu.
+import HeatmapPage from "../heatmap";
+import PowerPage from "../power";
+import HomePage from "../homepage/layouts/HomePage";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -256,6 +262,32 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ top giảm cao nhất"
       >
         <TopDeclineChart />
+      </section>
+
+      {/* Ba bản đồ chiếm CẢ hai cột: chúng vốn là trang riêng chiếm trọn bề
+          ngang, nhét vào nửa cột thì treemap/vòng tròn bị bóp không đọc nổi. */}
+      <section
+        id="heatmap"
+        className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--heatmap"
+        aria-label="Bản đồ nhiệt thị trường"
+      >
+        <HeatmapPage />
+      </section>
+
+      <section
+        id="power-map"
+        className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--power"
+        aria-label="Bản đồ sức mạnh dòng tiền"
+      >
+        <PowerPage />
+      </section>
+
+      <section
+        id="market-overview"
+        className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--overview"
+        aria-label="Bản đồ toàn cảnh thị trường"
+      >
+        <HomePage />
       </section>
     </main>
   );

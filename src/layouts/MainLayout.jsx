@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { MdStackedLineChart } from "react-icons/md";
 import { GiHamburgerMenu } from "react-icons/gi";
@@ -6,8 +6,6 @@ import { FaUserCircle } from "react-icons/fa";
 import { TiHomeOutline } from "react-icons/ti";
 import { LuArrowUpNarrowWide } from "react-icons/lu";
 import { BsFunnel } from "react-icons/bs";
-import { MdGridView } from "react-icons/md";
-import { MdExpandMore } from "react-icons/md";
 import { FaRegStar } from "react-icons/fa";
 import { FaArrowRight } from "react-icons/fa6";
 import { FaArrowUp } from "react-icons/fa";
@@ -24,9 +22,6 @@ import { GiLion } from "react-icons/gi";
 import "../feature/chart/index.scss";
 import logo from "../assets/logo-auth.png"
 
-// Path đích của từng submenu — dùng để biết đang đứng trong khu vực nào mà giữ
-// menu mở. Thêm mục con mới thì nhớ thêm path vào đây.
-const MAP_MENU_PATHS = ["/chart/heatmap", "/chart/power", "/home"];
 const MARKET_CHART_PATH = "/chart/market";
 
 function readStoredAuth() {
@@ -46,17 +41,10 @@ function MainLayout() {
   const [showSidebar, setShowSidebar] = useState(
     typeof window !== "undefined" && window.innerWidth <= 768,
   );
-  // Dropdown gộp các bản đồ thị trường. Danh sách TÊN các biểu đồ thị trường
-  // KHÔNG còn ở đây — trang /chart/market có hơn 20 biểu đồ nên chúng chuyển
-  // sang nút nổi "Danh sách các biểu đồ" ngay trên trang đó
+  // Sidebar KHÔNG còn submenu nào: cả "Bản đồ thị trường" lẫn danh sách tên
+  // biểu đồ đã gộp về một mục "Biểu đồ thị trường" duy nhất — mọi biểu đồ nay
+  // là section trong /chart/market, chọn qua nút nổi "Danh sách các biểu đồ"
   // (feature/marketCharts/layouts/ChartListButton.jsx).
-  const [mapMenuOpen, setMapMenuOpen] = useState(false);
-  // Rời khỏi khu vực của submenu thì mới thu nó lại: mỗi mục của "Bản đồ thị
-  // trường" đi MỘT path khác nhau, đóng theo điều kiện chung sẽ khiến bấm mục
-  // nào cũng thu menu ngay, không nhìn được các mục còn lại.
-  useEffect(() => {
-    if (!MAP_MENU_PATHS.includes(location.pathname)) setMapMenuOpen(false);
-  }, [location.pathname, location.search, location.hash]);
 
   const data = readStoredAuth();
   // Hồ sơ lấy từ API (/user/me) — nguồn chuẩn; localStorage chỉ là fallback hiển
@@ -158,59 +146,8 @@ function MainLayout() {
               </a>
             </li>
             <li
-              className={`navbar-item text-redirect power-parent${mapMenuOpen ? " is-open" : ""
-                }`}
-              onClick={() => setMapMenuOpen((v) => !v)}
-            >
-              <a className="break-word">
-                <MdGridView />
-                <span>Bản đồ thị trường</span>
-                <MdExpandMore className="navbar-caret" />
-              </a>
-            </li>
-            <li className={`navbar-submenu${mapMenuOpen ? " is-open" : ""}`}>
-              <ul>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/heatmap");
-                  }}
-                >
-                  <a>
-                    <span>Bản đồ nhiệt</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/chart/power");
-                  }}
-                >
-                  <a>
-                    <span>Bản đồ sức mạnh dòng tiền</span>
-                  </a>
-                </li>
-                <li
-                  className="navbar-subitem"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate("/home");
-                  }}
-                >
-                  <a>
-                    <span>Bản đồ toàn cảnh thị trường</span>
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li
               className="navbar-item text-redirect"
-              onClick={() => {
-                setMapMenuOpen(false);
-                navigate(`${MARKET_CHART_PATH}#potential-flow`);
-              }}
+              onClick={() => navigate(`${MARKET_CHART_PATH}#potential-flow`)}
             >
               <a className="break-word">
                 <MdStackedLineChart />

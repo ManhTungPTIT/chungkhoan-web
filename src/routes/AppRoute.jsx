@@ -228,7 +228,7 @@ function AppRoute() {
             }
           />
           <Route
-            path="/chart/top-volume-view"
+            path="/chart/sector-flow-surge"
             element={
               <Suspense
                 fallback={<div style={{ padding: "2rem" }}>Đang tải Ngành có dòng tiền tăng đột biến…</div>}

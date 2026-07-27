@@ -71,7 +71,7 @@ describe("MainLayout — mở cặp biểu đồ đầu tiên", () => {
     expect(screen.getByText("BIỂU ĐỒ GHÉP")).toBeTruthy();
   });
 });
-describe("MainLayout — menu biểu đồ thị trường", () => {
+describe("MainLayout — sidebar chỉ còn một mục biểu đồ", () => {
   it("KHÔNG còn liệt kê tên từng biểu đồ trong sidebar", () => {
     renderLayout();
 
@@ -83,18 +83,16 @@ describe("MainLayout — menu biểu đồ thị trường", () => {
     expect(screen.queryByText("Dòng tiền tăng đột biến hôm nay")).toBeNull();
     expect(screen.queryByText("Chỉ số chung 3 sàn")).toBeNull();
   });
-});
 
-describe("MainLayout — đóng menu khi chuyển tab", () => {
-  it("đóng các menu bản đồ và biểu đồ khi chuyển sang tab khác", () => {
+  it('KHÔNG còn mục "Bản đồ thị trường" riêng — đã gộp vào "Biểu đồ thị trường"', () => {
     renderLayout();
 
-    fireEvent.click(screen.getByText("Bản đồ thị trường"));
-    expect(document.querySelector(".navbar-submenu.is-open")).toBeTruthy();
-
-    fireEvent.click(screen.getByText("Trang chủ"));
-
-    expect(document.querySelector(".navbar-submenu.is-open")).toBeNull();
+    expect(screen.queryByText("Bản đồ thị trường")).toBeNull();
+    expect(screen.queryByText("Bản đồ nhiệt")).toBeNull();
+    expect(screen.queryByText("Bản đồ sức mạnh dòng tiền")).toBeNull();
+    expect(screen.queryByText("Bản đồ toàn cảnh thị trường")).toBeNull();
+    // Không còn submenu nào trong sidebar.
+    expect(document.querySelector(".navbar-submenu")).toBeNull();
   });
 });
 

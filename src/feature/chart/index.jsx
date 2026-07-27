@@ -35,6 +35,11 @@ import { color } from "echarts";
 const COLOR_CODE_BUY = { action: "Xanh", color: "#2563eb" };
 const COLOR_CODE_SELL = { action: "Đỏ", color: "#e11d48" };
 
+const signalTypeFromBackend = (signal) => {
+  if (signal === "buy" || signal === "sell") return signal;
+  return null;
+};
+
 // Nhận Date hoặc chuỗi ngày ("2026-02-23 07:00"); giá trị không parse được
 // (vd "--" khi chưa có signal) trả về nguyên văn thay vì crash render
 const convertDay = (value) => {
@@ -162,6 +167,17 @@ function TradingView() {
   const isLoadingSymbol =
     isFetching && (isPlaceholderData || candles.length === 0);
   const { data: dataPanel = [] } = useVn100();
+  const selectedPanelRow = useMemo(
+    () =>
+      Array.isArray(dataPanel)
+        ? dataPanel.find(
+            (item) =>
+              String(item?.symbol ?? "").toUpperCase() ===
+              String(chanelCode ?? "").toUpperCase(),
+          )
+        : null,
+    [dataPanel, chanelCode],
+  );
 
   // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend.
   // useMemo giữ reference 'signals' ổn định: nếu tính inline mỗi render sẽ tạo
@@ -243,18 +259,29 @@ function TradingView() {
 
   //Lay gia va ngay tai diem signal cuoi cung (co the chua co khi data dang tai)
   const lastSignal = signals.length > 0 ? signals[signals.length - 1] : null;
-  const priceChange = lastSignal ? lastSignal.price : "--";
+  const backendSignalType = signalTypeFromBackend(selectedPanelRow?.signal);
+  const signalType = backendSignalType ?? lastSignal?.type;
+  const priceChange =
+    backendSignalType && selectedPanelRow?.signal_price != null
+      ? selectedPanelRow.signal_price
+      : lastSignal
+        ? lastSignal.price
+        : "--";
   const priceTarget = lastSignal ? lastSignal.priceTarget : "--";
-  const dayChange = lastSignal ? lastSignal.date : "--";
+  const dayChange =
+    backendSignalType && selectedPanelRow?.signal_date
+      ? selectedPanelRow.signal_date
+      : lastSignal
+        ? lastSignal.date
+        : "--";
   const dayChangeConvert = convertDay(dayChange);
-  const COLORCODE =
-    lastSignal && lastSignal.type === "buy" ? COLOR_CODE_BUY : COLOR_CODE_SELL;
+  const COLORCODE = signalType === "buy" ? COLOR_CODE_BUY : COLOR_CODE_SELL;
   const isBuySignal = COLORCODE.action === "Xanh";
 
   const priceCurrent =
     candles.length > 0 ? candles[candles.length - 1].close : "--";
   const hasNumericSignalPrice =
-    lastSignal && Number.isFinite(Number(priceChange)) && Number(priceChange) !== 0;
+    Number.isFinite(Number(priceChange)) && Number(priceChange) !== 0;
   const hasNumericCurrentPrice = Number.isFinite(Number(priceCurrent));
 
   //Goi y nam giu
@@ -262,7 +289,10 @@ function TradingView() {
     hasNumericSignalPrice && hasNumericCurrentPrice
       ? (((Number(priceCurrent) - Number(priceChange)) / Number(priceChange)) * 100).toFixed(2) + "%"
       : "--";
-  const dayCount = countTradingSessions(dayChange, today);
+  const dayCount =
+    backendSignalType && selectedPanelRow?.signal_sessions != null
+      ? selectedPanelRow.signal_sessions
+      : countTradingSessions(dayChange, today);
   // Mua: muc tieu tang; Ban: vung day du kien
   const target1 = hasNumericSignalPrice
     ? (isBuySignal ? Number(priceChange) * 1.2 : Number(priceChange) / 1.2).toFixed(2)

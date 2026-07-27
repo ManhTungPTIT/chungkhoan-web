@@ -29,7 +29,11 @@ export const MARKET_CHARTS = [
   { id: "flow-surge-month", label: "Dòng tiền tăng đột biến so với bình quân 1 tháng" },
   { id: "top-value", label: "Giá trị tiền khớp lệnh cao nhất (Tỷ)" },
   { id: "top-volume-view", label: "Khối lượng khớp lệnh cao nhất" },
+  { id: "sector-flow-surge", label: "Ngành có dòng tiền tăng đột biến" },
   { id: "top-decline", label: "Top giảm cao nhất" },
+  { id: "heatmap", label: "Bản đồ nhiệt thị trường" },
+  { id: "power-map", label: "Bản đồ sức mạnh dòng tiền" },
+  { id: "market-overview", label: "Bản đồ toàn cảnh thị trường" },
 ];
 
 /** Cuộn tới một biểu đồ theo id. Trả true nếu tìm thấy section (để caller biết
