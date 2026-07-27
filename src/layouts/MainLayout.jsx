@@ -480,6 +480,17 @@ function MainLayout() {
                     <span>Top giảm cao nhất</span>
                   </a>
                 </li>
+                <li
+                  className="navbar-subitem"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate("/chart/market#foreign-trading-history");
+                  }}
+                >
+                  <a>
+                    <span>Giá trị mua bán ròng 30 phiên gần nhất</span>
+                  </a>
+                </li>
               </ul>
             </li>
             {/* <li className="navbar-item">

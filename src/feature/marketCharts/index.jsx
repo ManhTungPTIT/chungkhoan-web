@@ -27,6 +27,7 @@ import TopValueChart from "../topValue/layouts/TopValueChart";
 import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
+import ForeignTradingHistoryChart from "../foreignTrading/layouts/ForeignTradingChart";
 import "./styles/marketCharts.scss";
 
 function TplusChartPanel() {
@@ -73,6 +74,7 @@ export default function MarketChartsPage() {
   const topVolumeRef = useRef(null);
   const topDeclineRef = useRef(null);
   const sectorFlowSurgeRef = useRef(null);
+  const foreignTradingHistoryRef = useRef(null);
 
   useEffect(() => {
     const targetRef = {
@@ -100,6 +102,7 @@ export default function MarketChartsPage() {
       "#top-volume-view": topVolumeRef,
       "#top-decline": topDeclineRef,
       "#sector-flow-surge": sectorFlowSurgeRef,
+      "#foreign-trading-history": foreignTradingHistoryRef,
     }[location.hash] ?? null;
 
     if (!targetRef?.current) return undefined;
@@ -287,7 +290,7 @@ export default function MarketChartsPage() {
       >
         <Vn30BasketChart />
       </section>
-       <section
+      <section
         ref={flowSurgeMonthRef}
         id="flow-surge-month"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
@@ -329,6 +332,15 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ top giảm cao nhất"
       >
         <TopDeclineChart />
+      </section>
+
+      <section
+        ref={foreignTradingHistoryRef}
+        id="foreign-trading-history"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ lịch sử giao dịch nước ngoài"
+      >
+        <ForeignTradingHistoryChart />
       </section>
     </main>
   );
