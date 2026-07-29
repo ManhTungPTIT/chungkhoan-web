@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   buildSectorBreadth,
-  sortByChange,
   fmtTy,
   fmtPct,
   STATE_META,
@@ -99,16 +98,13 @@ describe("buildSectorBreadth", () => {
   });
 });
 
-describe("sortByChange", () => {
-  it("xếp % giảm dần: dương trên, âm dưới", () => {
-    const rows = sortByChange(buildSectorBreadth(payload));
-    expect(rows.map((r) => r.changePct)).toEqual([1.1, -3.04]);
-  });
-
-  it("không sửa mảng gốc", () => {
+describe("thứ tự ngành", () => {
+  it("giữ NGUYÊN thứ tự BE trả, không sắp lại theo % thay đổi", () => {
+    // Payload đã ở thứ tự tiền giảm dần (5.532 tỷ → 3.294 tỷ) dù % thay đổi thì
+    // ngược lại — hai chart phải xếp hàng y hệt nhau nên FE không được đụng vào.
     const rows = buildSectorBreadth(payload);
-    sortByChange(rows);
-    expect(rows[0].icb_code).toBe("8355");
+    expect(rows.map((r) => r.icb_code)).toEqual(["8355", "8630"]);
+    expect(rows.map((r) => r.valueTy)).toEqual([5532, 3294]);
   });
 });
 

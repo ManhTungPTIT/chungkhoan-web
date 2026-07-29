@@ -5,7 +5,6 @@ import ChartHeader from "../../../components/ChartHeader";
 import { useSectorBreadth } from "../../../untils/useSectorBreadth";
 import {
   buildSectorBreadth,
-  sortByChange,
   fmtTy,
   fmtPct,
   UP_COLOR,
@@ -37,7 +36,9 @@ function valueAxisMax(rows) {
 
 function SectorChangeChart() {
   const { data, isLoading, isError, refetch } = useSectorBreadth();
-  const rows = useMemo(() => sortByChange(buildSectorBreadth(data)), [data]);
+  // Giữ NGUYÊN thứ tự BE trả (tổng GT khớp lệnh giảm dần) — chart này và "bản đồ
+  // dòng tiền" phải xếp hàng y hệt nhau thì mới đối chiếu ngang được.
+  const rows = useMemo(() => buildSectorBreadth(data), [data]);
   const containerRef = useRef(null);
 
   useEffect(() => {

@@ -1125,6 +1125,62 @@
   left: 4.15rem;
 }
 
+/* Equalize this paired row: sector flow surge + top advance. */
+.market-chart-pair__panel#sector-flow-surge,
+.market-chart-pair__panel#top-advance {
+  height: auto;
+  min-height: 34rem;
+  align-self: stretch;
+  overflow: visible;
+}
+
+.market-chart-pair__panel#sector-flow-surge > .sector-flow-surge,
+.market-chart-pair__panel#top-advance > .top-advance {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  padding: 0;
+  background: transparent;
+}
+
+.market-chart-pair__panel#sector-flow-surge > .sector-flow-surge {
+  --sfs-row-h: clamp(0.82rem, calc((34rem - 12.5rem) / 20), 1.12rem);
+}
+
+.market-chart-pair__panel#top-advance > .top-advance {
+  --ta-row-h: clamp(0.82rem, calc((34rem - 12.5rem) / 20), 1.12rem);
+}
+
+.market-chart-pair__panel#sector-flow-surge .sector-flow-surge__card,
+.market-chart-pair__panel#top-advance .top-advance__card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 100%;
+  margin: 0 !important;
+  padding: 0 1rem 1.2rem !important;
+  overflow: visible;
+  border-radius: 0.75rem;
+}
+
+
+.market-chart-pair__panel#top-advance > .top-advance {
+  height: 100%;
+  min-height: 100%;
+}
+.market-chart-pair__panel#top-advance .top-advance__card {
+  height: 100% !important;
+}
+.market-chart-pair__panel#sector-flow-surge .sector-flow-surge__chart,
+.market-chart-pair__panel#top-advance .top-advance__chart {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
 /* ── Ba "bản đồ thị trường" gộp vào trang này ────────────────────────────────
    Chúng vốn là TRANG RIÊNG: root đặt `height: 100dvh` + `overflow: hidden` để
    chiếm trọn màn. Nhúng vào lưới panel thì phải gỡ hai thứ đó, nếu không mỗi

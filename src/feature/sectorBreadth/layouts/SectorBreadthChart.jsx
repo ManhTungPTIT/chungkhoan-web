@@ -47,7 +47,7 @@ function SectorBreadthChart() {
       },
       yAxis: {
         type: "category",
-        // inverse: ngành khỏe nhất (BE đã xếp đầu) phải nằm TRÊN CÙNG; trục
+        // inverse: ngành hút tiền nhất (BE đã xếp đầu) phải nằm TRÊN CÙNG; trục
         // category của ECharts mặc định vẽ ngược từ dưới lên.
         inverse: true,
         data: rows.map((r) => r.shortLabel),

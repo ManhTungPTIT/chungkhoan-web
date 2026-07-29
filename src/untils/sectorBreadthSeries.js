@@ -62,11 +62,10 @@ export function buildSectorBreadth(payload) {
     }));
 }
 
-// Chart "tổng hợp tăng giảm" xếp theo % thay đổi giảm dần: dương nằm trên, âm
-// nằm dưới, mốc 0% chia biểu đồ thành hai nửa rõ ràng.
-export function sortByChange(rows) {
-  return [...rows].sort((a, b) => b.changePct - a.changePct);
-}
+// Không có hàm sắp xếp ở đây: thứ tự ngành do BE quyết (tổng GT khớp lệnh giảm
+// dần) và cả hai chart dùng NGUYÊN thứ tự đó. Sắp lại ở FE là hai chart lệch
+// hàng nhau, mà `valueTy` ở đây đã làm tròn về tỷ nên sort lại còn đảo cả các
+// ngành sát nhau.
 
 export function fmtTy(ty) {
   return ty.toLocaleString("vi-VN");
