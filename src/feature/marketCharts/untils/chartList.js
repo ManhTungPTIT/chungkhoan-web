@@ -30,11 +30,12 @@ export const MARKET_CHARTS = [
   { id: "top-value", label: "Giá trị tiền khớp lệnh cao nhất (Tỷ)" },
   { id: "top-volume-view", label: "Khối lượng khớp lệnh cao nhất" },
   { id: "sector-flow-surge", label: "Ngành có dòng tiền tăng đột biến" },
+  { id: "top-advance", label: "Top tăng cao nhất" },
   { id: "top-decline", label: "Top giảm cao nhất" },
+  { id: "foreign-trading-history", label: "Lịch sử giao dịch nước ngoài" },
   { id: "heatmap", label: "Bản đồ nhiệt thị trường" },
   { id: "power-map", label: "Bản đồ sức mạnh dòng tiền" },
   { id: "market-overview", label: "Bản đồ toàn cảnh thị trường" },
-  { id: "foreign-trading-history", label: "Lịch sử giao dịch nước ngoài" },
 ];
 
 /** Cuộn tới một biểu đồ theo id. Trả true nếu tìm thấy section (để caller biết

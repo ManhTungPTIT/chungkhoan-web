@@ -27,4 +27,4 @@ dist-ssr
 *.sw?
 
 *.md
-!docs/superpowers/**/*.md
+docs/superpowers

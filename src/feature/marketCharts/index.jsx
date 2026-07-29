@@ -27,6 +27,7 @@ import MoneyFlowPage from "../moneyflow";
 import PutThroughPage from "../putThrough";
 import TopValueChart from "../topValue/layouts/TopValueChart";
 import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
+import TopAdvanceChart from "../topAdvance/layouts/TopAdvanceChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
 // Ba "bản đồ thị trường" trước đây là trang riêng trong submenu cùng tên; đã
@@ -255,6 +256,14 @@ export default function MarketChartsPage() {
         aria-label="Ngành có dòng tiền tăng đột biến"
       >
         <SectorFlowSurgeChart />
+      </section>
+
+      <section
+        id="top-advance"
+        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+        aria-label="Biểu đồ top tăng cao nhất"
+      >
+        <TopAdvanceChart />
       </section>
 
       <section

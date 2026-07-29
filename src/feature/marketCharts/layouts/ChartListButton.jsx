@@ -56,6 +56,7 @@ function ChartListButton() {
         aria-controls="chart-list-menu"
       >
         <MdFormatListBulleted aria-hidden="true" />
+        <span>Danh sách các biểu đồ</span>
 
       </button>
 
