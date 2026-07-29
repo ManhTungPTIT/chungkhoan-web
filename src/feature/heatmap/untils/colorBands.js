@@ -6,17 +6,17 @@ export const REF_EPS = 0.05; // |pct| < REF_EPS coi như tham chiếu
 
 const CEILING_COLOR = "#C026D3"; // tím
 const FLOOR_COLOR = "#22A7F0"; // xanh dương
-const REF_COLOR = "#F4D03F"; // vàng
+const REF_COLOR = "#f6bd51"; // vàng
 
 // xanh lá đậm dần theo biên độ tăng
-const UP_SMALL = "#26a69a";
-const UP_MID = "#1c8a78";
-const UP_STRONG = "#0b6e4f";
+const UP_SMALL = "#00d31f";
+const UP_MID = "#00d31f";
+const UP_STRONG = "#00d31f";
 
 // đỏ đậm dần theo biên độ giảm
-const DOWN_SMALL = "#ef5350";
-const DOWN_MID = "#c62828";
-const DOWN_STRONG = "#a01818";
+const DOWN_SMALL = "#ef2f2e";
+const DOWN_MID = "#ef2f2e";
+const DOWN_STRONG = "#ef2f2e";
 
 // pct: số phần trăm (vd 6.15 = +6.15%). Trả về mã màu hex.
 export function colorForChange(pct) {

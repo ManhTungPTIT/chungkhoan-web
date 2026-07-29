@@ -69,13 +69,13 @@
 .potential-flow__bar-row { display: flex; align-items: center; justify-content: flex-end; gap: 0.45rem; height: var(--pf-row-h); padding: 0 0.25rem; border-bottom: 1px solid #f0f2f5; }
 .potential-flow__bar-row.is-selected { background: linear-gradient(90deg, transparent, rgba(120, 20, 169, 0.07)); }
 .potential-flow__bar-track { position: relative; width: 100%; height: 0.38rem; border-radius: 1rem; background: #f3eff7; }
-.potential-flow__left-bars .potential-flow__bar-track { display: flex; justify-content: flex-end; }
+// Thanh neo TRÁI, mọc sang phải — cùng chiều với trục 0 → max phía trên.
+.potential-flow__left-bars .potential-flow__bar-track { display: flex; }
 .potential-flow__bar-track span { display: block; height: 100%; min-width: 0.12rem; border-radius: inherit; }
 .potential-flow__left-bars .potential-flow__bar-track span { background: linear-gradient(90deg, #b279d4, var(--pf-purple)); }
 .potential-flow__right-bars .potential-flow__bar-track { background: #edf7ef; }
 .potential-flow__right-bars .potential-flow__bar-track span { background: linear-gradient(90deg, #65c77f, var(--pf-green)); }
 .potential-flow__bar-row em { flex: 0 0 3.1rem; color: #5b6373; font-size: 0.79rem; font-style: normal; font-weight: 850; text-align: left; }
-.potential-flow__left-bars .potential-flow__bar-row em { order: -1; text-align: right; }
 .potential-flow__right-bars .potential-flow__bar-row em { color: #126f35; }
 .potential-flow__summary-bar { display: flex; align-items: center; justify-content: flex-end; height: var(--pf-row-h); border-top: 1px solid #dfe4eb; color: #596477; font-size: 0.68rem; font-weight: 800; }
 

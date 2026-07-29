@@ -320,6 +320,13 @@ $radius: 10px;
     }
   }
 
+  // Đăng xuất — chỉ render ở bản app, nơi không có sidebar để chứa nút này.
+  .iu-logout {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+  }
+
   // "Quên mật khẩu? Click vào đây" ngay dưới ô mật khẩu hiện tại.
   .iu-forgot {
     margin-top: 0.45rem;

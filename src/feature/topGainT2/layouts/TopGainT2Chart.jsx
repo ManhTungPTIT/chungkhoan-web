@@ -3,14 +3,13 @@ import { FiActivity, FiInfo } from "react-icons/fi";
 import { BsGraphUpArrow } from "react-icons/bs";
 import ChartHeader from "../../../components/ChartHeader";
 import { useTopGainT2 } from "../hooks/useTopGainT2";
-import { buildTopGainView } from "../untils/topGainLayout";
+import { buildTopGainView, leftTicks } from "../untils/topGainLayout";
 import "../styles/topGainT2.scss";
 
 const fmt = (value, digits = 2) =>
   new Intl.NumberFormat("vi-VN", { maximumFractionDigits: digits }).format(value);
 
 // Trục trái cố định (decorative, khớp mockup). Trục % và trục giá tính động.
-const LEFT_TICKS = [-15, -10, -5, 0];
 
 // Nhãn trục % (0..axisMax, bước 5) — khớp bar được scale theo pctAxisMax.
 function rightTicks(pctAxisMax) {
@@ -45,6 +44,7 @@ function TopGainT2Chart({ window = 2 }) {
     return [0, 1, 2, 3, 4].map((i) => Math.round(step * i));
   }, [view.priceMax]);
   const rightAxisTicks = useMemo(() => rightTicks(view.pctAxisMax), [view.pctAxisMax]);
+  const leftAxisTicks = useMemo(() => leftTicks(view.leftMax), [view.leftMax]);
 
   return (
     <main className="top-gain">
@@ -91,8 +91,8 @@ function TopGainT2Chart({ window = 2 }) {
           <div className="top-gain__chart">
             <div className="top-gain__axis-row" aria-hidden="true">
               <span className="top-gain__axis-caption">MÃ</span>
-              <div className="top-gain__axis top-gain__axis--left" style={{ "--axis-count": LEFT_TICKS.length }}>
-                {LEFT_TICKS.map((tick) => <span key={tick}>{tick}%</span>)}
+              <div className="top-gain__axis top-gain__axis--left" style={{ "--axis-count": leftAxisTicks.length }}>
+                {leftAxisTicks.map((tick, i) => <span key={i}>{fmt(tick)}</span>)}
               </div>
               <div className="top-gain__axis top-gain__axis--center" style={{ "--axis-count": centerTicks.length }}>
                 {centerTicks.map((tick, i) => <span key={i}>{tick}</span>)}
@@ -118,8 +118,8 @@ function TopGainT2Chart({ window = 2 }) {
               <div className="top-gain__column top-gain__left-bars">
                 {rows.map((row) => (
                   <div className="top-gain__bar-row" key={row.symbol}>
-                    <em>{fmt(row.valueTy)}</em>
                     <div className="top-gain__bar-track"><span style={{ width: `${row.valueBarPct}%` }} /></div>
+                    <em>{fmt(row.valueTy)}</em>
                   </div>
                 ))}
                 <div className="top-gain__summary-bar">{fmt(totalValue)}</div>

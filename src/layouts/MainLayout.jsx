@@ -19,6 +19,7 @@ import { LoginUserService } from "../feature/auth/user/services/loginUserService
 import { useMe } from "../feature/auth/user/hooks/useMe";
 import { activePackageTitle } from "../feature/auth/user/untils/packageDisplay";
 import { GiLion } from "react-icons/gi";
+import { botTargetPath } from "./untils/navigation";
 import "../feature/chart/index.scss";
 import logo from "../assets/logo-auth.png"
 
@@ -64,13 +65,10 @@ function MainLayout() {
     logout();
   };
 
-  // Đổi BOT nhưng GIỮ mã đang xem: chỉ set lại `bot`, bảo toàn `symbol` hiện có
-  // trên URL. Điều hướng tới "/?bot=..." cứng sẽ xoá `symbol` → index.jsx tự reset
-  // về VNINDEX, khiến biểu đồ "giật" khỏi mã đang chọn.
+  // Đổi BOT nhưng GIỮ mã đang xem. Logic ở untils/navigation.js vì bottom sheet
+  // của bản app (components/BotSheet.jsx) cần đúng hành vi này.
   const goToBot = (botValue) => {
-    const params = new URLSearchParams(location.search);
-    params.set("bot", botValue);
-    navigate(`/?${params.toString()}`);
+    navigate(botTargetPath(location.search, botValue));
   };
 
   return (

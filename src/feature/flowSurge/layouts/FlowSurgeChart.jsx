@@ -3,14 +3,13 @@ import { FiActivity, FiInfo } from "react-icons/fi";
 import { BsGraphUpArrow } from "react-icons/bs";
 import ChartHeader from "../../../components/ChartHeader";
 import { useFlowSurge } from "../hooks/useFlowSurge";
-import { buildTopGainView } from "../untils/topGainLayout";
+import { buildTopGainView, leftTicks } from "../untils/topGainLayout";
 import "../styles/flowSurge.scss";
 
 const fmt = (value, digits = 2) =>
   new Intl.NumberFormat("vi-VN", { maximumFractionDigits: digits }).format(value);
 
 // Trục trái cố định (decorative, khớp mockup). Trục % và trục giá tính động.
-const LEFT_TICKS = [-15, -10, -5, 0];
 
 // % dòng tiền có thể rất lớn (tới ~9,250%) → chia trục thành 5 mốc đều theo
 // pctAxisMax (đã làm tròn "đẹp" trong buildTopGainView), khớp bề rộng bar.
@@ -43,6 +42,7 @@ function FlowSurgeChart() {
     return [0, 1, 2, 3, 4].map((i) => Math.round(step * i));
   }, [view.priceMax]);
   const rightAxisTicks = useMemo(() => rightTicks(view.pctAxisMax), [view.pctAxisMax]);
+  const leftAxisTicks = useMemo(() => leftTicks(view.leftMax), [view.leftMax]);
 
   return (
     <main className="flow-surge">
@@ -78,8 +78,8 @@ function FlowSurgeChart() {
           <div className="flow-surge__chart">
             <div className="flow-surge__axis-row" aria-hidden="true">
               <span className="flow-surge__axis-caption">MÃ</span>
-              <div className="flow-surge__axis flow-surge__axis--left" style={{ "--axis-count": LEFT_TICKS.length }}>
-                {LEFT_TICKS.map((tick) => <span key={tick}>{tick}%</span>)}
+              <div className="flow-surge__axis flow-surge__axis--left" style={{ "--axis-count": leftAxisTicks.length }}>
+                {leftAxisTicks.map((tick, i) => <span key={i}>{fmt(tick)}</span>)}
               </div>
               <div className="flow-surge__axis flow-surge__axis--center" style={{ "--axis-count": centerTicks.length }}>
                 {centerTicks.map((tick, i) => <span key={i}>{tick}</span>)}
@@ -105,8 +105,8 @@ function FlowSurgeChart() {
               <div className="flow-surge__column flow-surge__left-bars">
                 {rows.map((row) => (
                   <div className="flow-surge__bar-row" key={row.symbol}>
-                    <em>{fmt(row.valueTy)}</em>
                     <div className="flow-surge__bar-track"><span style={{ width: `${row.valueBarPct}%` }} /></div>
+                    <em>{fmt(row.valueTy)}</em>
                   </div>
                 ))}
                 <div className="flow-surge__summary-bar">{fmt(totalValue)}</div>

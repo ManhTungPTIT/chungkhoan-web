@@ -3,13 +3,7 @@ import * as echarts from "echarts";
 import { BsBarChartLineFill } from "react-icons/bs";
 import ChartHeader from "../../../components/ChartHeader";
 import { useIndexOverview } from "../hooks/useIndexOverview";
-import {
-  buildBarSeries,
-  VALUE_COLOR,
-  DIEM_POS_COLOR,
-  PCT_POS_COLOR,
-  NEG_COLOR,
-} from "../untils/indexOverviewOption";
+import { buildChartOption, BASELINE_PCT } from "../untils/indexOverviewOption";
 import "../styles/indexOverview.scss";
 
 const fmt = (v, digits = 2) =>
@@ -19,47 +13,16 @@ const fmt = (v, digits = 2) =>
 
 const signClass = (v) => (v === null || v === undefined ? "" : v >= 0 ? "is-up" : "is-down");
 
-function IndexChart({ indices }) {
+// Thanh khoản so với nền: ≥100% là chợ sôi động hơn thường lệ.
+const liquidityClass = (v) => (v === null || v === undefined ? "" : v >= BASELINE_PCT ? "is-up" : "is-down");
+
+function IndexChart({ indices, soPhienTb }) {
   const ref = useRef(null);
 
   useEffect(() => {
     if (!ref.current) return undefined;
     const chart = echarts.init(ref.current);
-    const s = buildBarSeries(indices);
-
-    chart.setOption({
-      // 3 series khác đơn vị nhưng cùng nằm khoảng nhỏ (-10..20) → chung 1 trục,
-      // gắn nhãn số trực tiếp trên cột (không so giá trị thật giữa các cột).
-      tooltip: { trigger: "axis", axisPointer: { type: "shadow" } },
-      legend: {
-        top: 6,
-        data: ["Giá trị khớp lệnh (nghìn tỷ)", "Điểm tăng giảm", "% Tăng giảm"],
-      },
-      grid: { left: 8, right: 16, top: 48, bottom: 8, containLabel: true },
-      xAxis: { type: "category", data: s.categories, axisTick: { alignWithLabel: true } },
-      yAxis: { type: "value", axisLine: { show: false }, splitLine: { lineStyle: { color: "#eee" } } },
-      series: [
-        {
-          name: "Giá trị khớp lệnh (nghìn tỷ)",
-          type: "bar",
-          data: s.valueData,
-          label: { show: true, position: "top", fontSize: 10, formatter: (p) => fmt(p.value) },
-          itemStyle: { color: VALUE_COLOR },
-        },
-        {
-          name: "Điểm tăng giảm",
-          type: "bar",
-          data: s.diemData,
-          label: { show: true, position: "top", fontSize: 10, formatter: (p) => fmt(p.value) },
-        },
-        {
-          name: "% Tăng giảm",
-          type: "bar",
-          data: s.pctData,
-          label: { show: true, position: "top", fontSize: 10, formatter: (p) => (p.value == null ? "" : `${fmt(p.value)}%`) },
-        },
-      ],
-    });
+    chart.setOption(buildChartOption(indices, soPhienTb, fmt));
 
     const onResize = () => chart.resize();
     window.addEventListener("resize", onResize);
@@ -67,7 +30,7 @@ function IndexChart({ indices }) {
       window.removeEventListener("resize", onResize);
       chart.dispose();
     };
-  }, [indices]);
+  }, [indices, soPhienTb]);
 
   return <div ref={ref} className="index-overview__chart" />;
 }
@@ -75,6 +38,7 @@ function IndexChart({ indices }) {
 function IndexOverviewChart() {
   const { data, isLoading, isError, refetch } = useIndexOverview();
   const indices = data?.indices ?? [];
+  const soPhienTb = data?.so_phien_tb ?? 0;
 
   return (
     <main className="index-overview">
@@ -98,13 +62,22 @@ function IndexOverviewChart() {
 
         {!isLoading && !isError && indices.length > 0 && (
           <>
-            <IndexChart indices={indices} />
+            <IndexChart indices={indices} soPhienTb={soPhienTb} />
+            {soPhienTb === 0 && (
+              <div className="index-overview__note">
+                Chưa có nền lịch sử để tính thanh khoản — dữ liệu phiên cũ đang được nạp.
+              </div>
+            )}
             <table className="index-overview__table">
               <thead>
                 <tr>
                   <th>Sàn</th>
                   <th>Tổng điểm thị trường</th>
-                  <th>Giá trị khớp lệnh<br />(nghìn tỷ)</th>
+                  <th>
+                    Thanh khoản
+                    <br />
+                    {soPhienTb > 0 ? `(% TB ${soPhienTb} phiên)` : "(% TB)"}
+                  </th>
                   <th>Điểm tăng giảm</th>
                   <th>% Tăng giảm</th>
                 </tr>
@@ -114,7 +87,12 @@ function IndexOverviewChart() {
                   <tr key={r.ten_san}>
                     <td className="index-overview__san">{r.ten_san}</td>
                     <td>{fmt(r.diem_hien_tai)}</td>
-                    <td className="index-overview__purple">{fmt(r.gia_tri_khop_lenh)}</td>
+                    <td
+                      className={liquidityClass(r.thanh_khoan_pct)}
+                      title={`Giá trị khớp lệnh: ${fmt(r.gia_tri_khop_lenh)} nghìn tỷ`}
+                    >
+                      {r.thanh_khoan_pct == null ? "—" : `${fmt(r.thanh_khoan_pct, 0)}%`}
+                    </td>
                     <td className={signClass(r.diem_tang_giam)}>{fmt(r.diem_tang_giam)}</td>
                     <td className={signClass(r.pct)}>{r.pct == null ? "—" : `${fmt(r.pct)}%`}</td>
                   </tr>

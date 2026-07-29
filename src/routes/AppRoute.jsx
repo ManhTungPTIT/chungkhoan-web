@@ -12,8 +12,14 @@ import AdminPrivateRoute from './AdminPrivateRoute';
 import FilterStock from '../feature/stock/layouts/filterStock'
 import InfoUser from '../feature/auth/user/layouts/InfoUser';
 import MainLayout from '../layouts/MainLayout';
+import AppLayout from '../layouts/AppLayout';
 import HomePage from '../feature/homepage/layouts/HomePage'
 import { useLogoutOnAreaSwitch } from './useLogoutOnAreaSwitch';
+import { IS_APP } from '../feature/auth/untils/appClient';
+
+// Bản app dùng bottom tab, bản web dùng sidebar. Chọn ở tầng route để MainLayout
+// không phải mang thêm nhánh nào — xem layouts/AppLayout.jsx.
+const ProtectedLayout = IS_APP ? AppLayout : MainLayout;
 
 // Lazy-load: echarts + các trang dùng echarts chỉ tải khi mở route,
 // không nằm trong bundle khởi động.
@@ -34,6 +40,7 @@ const ForeignSellPage = lazy(() => import('../feature/foreignSell'));
 const TopValuePage = lazy(() => import('../feature/topValue'));
 const TopVolumePage = lazy(() => import('../feature/topVolume'));
 const TopDeclinePage = lazy(() => import('../feature/topDecline'));
+const TopAdvancePage = lazy(() => import('../feature/topAdvance'));
 const SectorFlowSurgePage = lazy(() => import('../feature/sectorFlowSurge'));
 const ForeignTradingHistoryPage = lazy(() => import('../feature/foreignTrading'));
 
@@ -63,7 +70,7 @@ function AppRoute() {
 
       {/* Protected routes — only these sit behind PrivateRoute. */}
       <Route element={<PrivateRoute />}>
-        <Route element={<MainLayout />}>
+        <Route element={<ProtectedLayout />}>
           <Route path="/" element={<TradingView />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/chart/filter" element={<FilterStock />} />
@@ -245,6 +252,16 @@ function AppRoute() {
                 fallback={<div style={{ padding: "2rem" }}>Đang tải Top giảm cao nhất…</div>}
               >
                 <TopDeclinePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/top-advance"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Top tăng cao nhất…</div>}
+              >
+                <TopAdvancePage />
               </Suspense>
             }
           />

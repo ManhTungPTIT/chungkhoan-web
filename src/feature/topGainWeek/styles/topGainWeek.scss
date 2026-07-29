@@ -59,13 +59,13 @@
 
 .top-gain-week__bar-row { display: flex; align-items: center; justify-content: flex-end; gap: 0.45rem; height: var(--tg-row-h); padding: 0 0.25rem; border-bottom: 1px solid #f0f2f5; }
 .top-gain-week__bar-track { position: relative; width: 100%; height: 0.38rem; border-radius: 1rem; background: #f3eff7; }
-.top-gain-week__left-bars .top-gain-week__bar-track { display: flex; justify-content: flex-end; }
+// Thanh neo TRÁI, mọc sang phải — cùng chiều với trục 0 → max phía trên.
+.top-gain-week__left-bars .top-gain-week__bar-track { display: flex; }
 .top-gain-week__bar-track span { display: block; height: 100%; min-width: 0.12rem; border-radius: inherit; }
 .top-gain-week__left-bars .top-gain-week__bar-track span { background: linear-gradient(90deg, #b279d4, var(--tg-purple)); }
 .top-gain-week__right-bars .top-gain-week__bar-track { background: #edf7ef; }
 .top-gain-week__right-bars .top-gain-week__bar-track span { background: linear-gradient(90deg, #65c77f, var(--tg-green)); }
 .top-gain-week__bar-row em { flex: 0 0 2.85rem; color: #5b6373; font-size: .74rem; font-style: normal; text-align: left; }
-.top-gain-week__left-bars .top-gain-week__bar-row em { order: -1; text-align: right; }
 .top-gain-week__right-bars .top-gain-week__bar-row em { color: #126f35; }
 .top-gain-week__summary-bar { display: flex; align-items: center; justify-content: flex-end; height: var(--tg-row-h); border-top: 1px solid #dfe4eb; color: #596477; font-size: 0.68rem; font-weight: 800; }
 

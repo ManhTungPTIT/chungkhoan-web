@@ -38,7 +38,17 @@
 .index-overview__legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
 .index-overview__swatch { width: 0.85rem; height: 0.85rem; border-radius: 0.2rem; }
 
-.index-overview__chart { width: 100%; height: 320px; }
+// Hai khung vẽ chồng dọc với grid.top/height cố định bằng px (xem
+// IndexOverviewChart.jsx) → chiều cao container cũng phải cố định, không co theo
+// viewport, nếu không khung dưới bị cắt mất nhãn trục.
+.index-overview__chart { width: 100%; height: 360px; }
+
+.index-overview__note {
+  margin-top: 0.5rem;
+  color: #8a7398;
+  font-size: 0.74rem;
+  text-align: center;
+}
 
 .index-overview__state { padding: 2.5rem 1rem; text-align: center; color: #748099; font-size: 0.9rem; }
 .index-overview__state--error { color: #b3261e; }
@@ -65,12 +75,10 @@
 .index-overview__table th:first-child,
 .index-overview__table td:first-child { text-align: left; }
 .index-overview__san { font-weight: 800; color: #2a3350; }
-.index-overview__purple { color: var(--io-purple); font-weight: 700; }
 .index-overview__table .is-up { color: var(--io-up); font-weight: 700; }
 .index-overview__table .is-down { color: var(--io-down); font-weight: 700; }
 
 @media (max-width: 620px) {
   .index-overview { padding: 0.8rem; }
   .index-overview__table { font-size: 0.74rem; }
-  .index-overview__chart { height: 260px; }
 }

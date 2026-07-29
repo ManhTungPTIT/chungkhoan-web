@@ -23,6 +23,21 @@ export function mapBoardRow(row) {
   };
 }
 
+// Mốc trục cột tím (giá trị khớp lệnh, Tỷ): 5 mốc đều từ 0 tới giá trị lớn nhất.
+//
+// Trước đây trục này là dãy cứng [-15, -10, -5, 0] kèm dấu % chép từ mockup — không
+// mô tả dữ liệu nào cả, vì cột tím là số tiền chứ không phải phần trăm.
+//
+// 5 mốc để khớp trục giá và trục % trong cùng biểu đồ.
+export function leftTicks(leftMax) {
+  const max = leftMax > 0 ? leftMax : 1;
+  // Chỉ giữ số lẻ khi thang nhỏ: max = 2 mà làm tròn nguyên thì 5 mốc thành
+  // 0, 1, 1, 2, 2 — trục có mốc trùng nhau, đọc ra vô nghĩa.
+  const digits = max >= 20 ? 0 : max >= 4 ? 1 : 2;
+  const factor = 10 ** digits;
+  return [0, 1, 2, 3, 4].map((i) => Math.round((max * i * factor) / 4) / factor);
+}
+
 export function buildPotentialView(boardRows, topN = 20) {
   const mapped = (Array.isArray(boardRows) ? boardRows : [])
     .map(mapBoardRow)

@@ -3,13 +3,11 @@ import { FiActivity, FiChevronDown, FiInfo } from "react-icons/fi";
 import { BsLightningChargeFill } from "react-icons/bs";
 import ChartHeader from "../../../components/ChartHeader";
 import { usePotentialFlow } from "../hooks/usePotentialFlow";
-import { buildPotentialView } from "../untils/potentialData";
+import { buildPotentialView, leftTicks } from "../untils/potentialData";
 import "../styles/potentialFlow.scss";
 
 const formatNumber = (value) =>
   new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(value);
-
-const LEFT_TICKS = [-15, -10, -5, 0];
 
 function rightTicks(pctAxisMax) {
   const max = pctAxisMax > 0 ? pctAxisMax : 15;
@@ -69,6 +67,7 @@ function PotentialFlowChart() {
     return [0, 1, 2, 3, 4].map((i) => Math.round(view.priceMin + step * i));
   }, [view.priceMin, view.priceMax]);
   const rightAxisTicks = useMemo(() => rightTicks(view.pctAxisMax), [view.pctAxisMax]);
+  const leftAxisTicks = useMemo(() => leftTicks(view.leftMax), [view.leftMax]);
 
   return (
     <main className="potential-flow">
@@ -126,8 +125,8 @@ function PotentialFlowChart() {
           <div className="potential-flow__chart">
             <div className="potential-flow__axis-row" aria-hidden="true">
               <span className="potential-flow__axis-caption">MÃ</span>
-              <div className="potential-flow__axis potential-flow__axis--left" style={{ "--axis-count": LEFT_TICKS.length }}>
-                {LEFT_TICKS.map((tick) => <span key={tick}>{tick}%</span>)}
+              <div className="potential-flow__axis potential-flow__axis--left" style={{ "--axis-count": leftAxisTicks.length }}>
+                {leftAxisTicks.map((tick, i) => <span key={i}>{formatNumber(tick)}</span>)}
               </div>
               <div className="potential-flow__axis potential-flow__axis--center" style={{ "--axis-count": centerTicks.length }}>
                 {centerTicks.map((tick, i) => <span key={i}>{tick}</span>)}

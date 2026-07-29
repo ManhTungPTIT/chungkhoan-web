@@ -21,6 +21,21 @@ function niceCeil(v) {
   return m * pow;
 }
 
+// Mốc trục cột tím (giá trị khớp lệnh, Tỷ): 5 mốc đều từ 0 tới giá trị lớn nhất.
+//
+// Trước đây trục này là dãy cứng [-15, -10, -5, 0] kèm dấu % chép từ mockup — không
+// mô tả dữ liệu nào cả, vì cột tím là số tiền chứ không phải phần trăm.
+//
+// 5 mốc để khớp trục giá và trục % trong cùng biểu đồ.
+export function leftTicks(leftMax) {
+  const max = leftMax > 0 ? leftMax : 1;
+  // Chỉ giữ số lẻ khi thang nhỏ: max = 2 mà làm tròn nguyên thì 5 mốc thành
+  // 0, 1, 1, 2, 2 — trục có mốc trùng nhau, đọc ra vô nghĩa.
+  const digits = max >= 20 ? 0 : max >= 4 ? 1 : 2;
+  const factor = 10 ** digits;
+  return [0, 1, 2, 3, 4].map((i) => Math.round((max * i * factor) / 4) / factor);
+}
+
 export function buildTopGainView(rows) {
   const safe = Array.isArray(rows) ? rows.filter((row) => { if (!row || typeof row.symbol !== "string" || !row.symbol.trim()) return false; const value = Number(row.gia_tri_khop_lenh); const price = Number(row.gia_hien_tai); const pct = Number(row.pct_tang); return value > 0 && price > 0 && Number.isFinite(pct); }) : [];
   const values = safe.map((r) => num(r.gia_tri_khop_lenh));

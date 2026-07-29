@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {  data, useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiPhone, FiSave, FiKey, FiPackage } from "react-icons/fi";
+import { IoLogOutOutline } from "react-icons/io5";
 import { detectAccountType } from "../untils/accountType";
 import { useMe, useRequestPackage } from "../hooks/useMe";
 import { useChangePassword } from "../hooks/useChangePassword";
+import { LoginUserService } from "../services/loginUserService";
+import { IS_APP } from "../../untils/appClient";
 import "../styles/infoUser.scss";
 
 // Danh sách nơi cư trú rút gọn — thêm/bớt tuỳ nhu cầu.
@@ -156,6 +159,16 @@ export default function InfoUser() {
 
   // ---------- Đổi mật khẩu ----------
   const navigate = useNavigate();
+
+  // Đăng xuất — chỉ hiện ở bản app (xem chỗ render cuối file). Cùng hành vi với
+  // nút trong sidebar bản web: chuyển về /login trước rồi thu hồi token, vì
+  // service tự xoá token và chuyển trang kể cả khi API lỗi.
+  const { logout } = LoginUserService();
+  const handleLogout = () => {
+    navigate("/login");
+    logout();
+  };
+
   const changePassword = useChangePassword();
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
   const [pwError, setPwError] = useState("");
@@ -538,6 +551,17 @@ export default function InfoUser() {
             </button>
           </div>
         </form>
+      )}
+
+      {/* Chỉ bản app: sidebar bản web đã có nút đăng xuất, thêm ở đây nữa là thừa.
+          Bản app bỏ sidebar nên nếu không có nút này thì KHÔNG còn cách nào đăng
+          xuất ngoài gỡ cài đặt. */}
+      {IS_APP && (
+        <div className="iu-logout">
+          <button type="button" className="iu-btn" onClick={handleLogout}>
+            <IoLogOutOutline /> Đăng xuất
+          </button>
+        </div>
       )}
     </div>
   );

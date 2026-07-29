@@ -3,14 +3,13 @@ import { FiActivity, FiInfo } from "react-icons/fi";
 import { BsGraphUpArrow } from "react-icons/bs";
 import ChartHeader from "../../../components/ChartHeader";
 import { useTopGainWeek } from "../hooks/useTopGainWeek";
-import { buildTopGainView } from "../untils/topGainLayout";
+import { buildTopGainView, leftTicks } from "../untils/topGainLayout";
 import "../styles/topGainWeek.scss";
 
 const fmt = (value, digits = 2) =>
   new Intl.NumberFormat("vi-VN", { maximumFractionDigits: digits }).format(value);
 
 // Trục trái cố định (decorative, khớp mockup). Trục % và trục giá tính động.
-const LEFT_TICKS = [-15, -10, -5, 0];
 
 // Nhãn trục % (0..axisMax, bước 5) — khớp bar được scale theo pctAxisMax.
 function rightTicks(pctAxisMax) {
@@ -44,6 +43,7 @@ function TopGainWeekChart() {
     return [0, 1, 2, 3, 4].map((i) => Math.round(step * i));
   }, [view.priceMax]);
   const rightAxisTicks = useMemo(() => rightTicks(view.pctAxisMax), [view.pctAxisMax]);
+  const leftAxisTicks = useMemo(() => leftTicks(view.leftMax), [view.leftMax]);
 
   return (
     <main className="top-gain-week">
@@ -78,8 +78,8 @@ function TopGainWeekChart() {
           <div className="top-gain-week__chart">
             <div className="top-gain-week__axis-row" aria-hidden="true">
               <span className="top-gain-week__axis-caption">MÃ</span>
-              <div className="top-gain-week__axis top-gain-week__axis--left" style={{ "--axis-count": LEFT_TICKS.length }}>
-                {LEFT_TICKS.map((tick) => <span key={tick}>{tick}%</span>)}
+              <div className="top-gain-week__axis top-gain-week__axis--left" style={{ "--axis-count": leftAxisTicks.length }}>
+                {leftAxisTicks.map((tick, i) => <span key={i}>{fmt(tick)}</span>)}
               </div>
               <div className="top-gain-week__axis top-gain-week__axis--center" style={{ "--axis-count": centerTicks.length }}>
                 {centerTicks.map((tick, i) => <span key={i}>{tick}</span>)}
@@ -105,8 +105,8 @@ function TopGainWeekChart() {
               <div className="top-gain-week__column top-gain-week__left-bars">
                 {rows.map((row) => (
                   <div className="top-gain-week__bar-row" key={row.symbol}>
-                    <em>{fmt(row.valueTy)}</em>
                     <div className="top-gain-week__bar-track"><span style={{ width: `${row.valueBarPct}%` }} /></div>
+                    <em>{fmt(row.valueTy)}</em>
                   </div>
                 ))}
                 <div className="top-gain-week__summary-bar">{fmt(totalValue)}</div>
