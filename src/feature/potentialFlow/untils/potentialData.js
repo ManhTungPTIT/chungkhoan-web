@@ -2,9 +2,25 @@
 // lướt sóng" và tính vị trí hiển thị. Hàm thuần, không phụ thuộc React.
 //   - gia_tri_khop_lenh (Tỷ)   = value (VND) / 1e9
 //   - gia_hien_tai (Nghìn)     = price (VND) / 1000
-//   - pct_tang_gia (%)         = change_pct
+//   - pct_tang_gia             = ĐIỂM SỨC MẠNH, xem dưới
 // Đường giá dùng MIN-MAX scale (biên độ giá giữa các mã chênh rất lớn), bar
 // tím/xanh scale theo max của cột.
+//
+// `pct_tang_gia` KHÔNG còn là phần trăm thuần (giữ tên cũ để không phải sửa
+// khắp component/test). Công thức hiện hành:
+//
+//     điểm = (giá hiện tại − giá tham chiếu) / giá tham chiếu × 100
+//            + √(thanh khoản tại thời điểm đó, đơn vị TỶ ĐỒNG)
+//
+// Số hạng đầu chính là `change_pct` do BE trả (data_source: (match_price −
+// ref_price)/ref_price × 100, mã chưa khớp được gán 0 thay vì −100% ảo) — dùng
+// lại thay vì tự tính từ `ref` để thừa hưởng luôn guard đó.
+//
+// Số hạng √thanh khoản tính bằng TỶ, không phải VND: √(10 tỷ VND) ≈ 100.000 sẽ
+// nhấn chìm phần % (0–15), chart thành xếp hạng thanh khoản thuần. Tính bằng tỷ
+// thì √300 ≈ 17.3, cùng cỡ với phần % → hai thành phần cộng được với nhau. Căn
+// bậc 2 làm phẳng chênh lệch thanh khoản (300 tỷ chỉ hơn 30 tỷ 1.8 lần điểm,
+// không phải 10 lần) nên mã thanh khoản khủng không một mình chiếm hết top.
 
 const num = (value) => {
   const n = Number(value);
@@ -15,11 +31,15 @@ const VND_TO_TY = 1_000_000_000;
 const VND_TO_NGHIN = 1000;
 
 export function mapBoardRow(row) {
+  const giaTriKhopLenh = num(row?.value) / VND_TO_TY;
+  // max(0, …): value âm không hợp lệ nhưng nếu vendor trả rác thì √(số âm) = NaN
+  // sẽ làm sort và mọi phép scale phía sau vỡ im lặng.
+  const thanhKhoanBonus = Math.sqrt(Math.max(giaTriKhopLenh, 0));
   return {
     ma_ck: row?.symbol,
-    gia_tri_khop_lenh: num(row?.value) / VND_TO_TY,
+    gia_tri_khop_lenh: giaTriKhopLenh,
     gia_hien_tai: num(row?.price) / VND_TO_NGHIN,
-    pct_tang_gia: num(row?.change_pct),
+    pct_tang_gia: num(row?.change_pct) + thanhKhoanBonus,
   };
 }
 

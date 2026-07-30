@@ -30,6 +30,7 @@ import TopVolumeChart from "../topVolume/layouts/TopVolumeChart";
 import TopAdvanceChart from "../topAdvance/layouts/TopAdvanceChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
+import SectorFlowConsistencyChart from "../sectorFlowConsistency/layouts/SectorFlowConsistencyChart";
 // Ba "bản đồ thị trường" trước đây là trang riêng trong submenu cùng tên; đã
 // gộp vào đây để tất cả nằm chung một mục "Biểu đồ thị trường". Route cũ
 // (/chart/heatmap, /chart/power, /home) vẫn giữ để không gãy link đã lưu.
@@ -258,6 +259,11 @@ export default function MarketChartsPage() {
         <SectorFlowSurgeChart />
       </section>
 
+      {/* --wide: lưới 30-60 cột + 2 cột chỉ số không vừa nửa hàng; panel hẹp đẩy
+          TB/ĐLC và "phiên +" ra ngoài vùng cuộn ngang, tức mất đúng con số xếp
+          hạng mà chart này tồn tại để hiển thị. */}
+      
+
       <section
         id="top-advance"
         className="market-chart-pair__panel market-chart-pair__panel--top-gain"
@@ -280,6 +286,13 @@ export default function MarketChartsPage() {
         aria-label="Biểu đồ lịch sử giao dịch nước ngoài"
       >
         <ForeignTradingHistoryChart />
+      </section>
+      <section
+        id="sector-flow-consistency"
+        className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--consistency"
+        aria-label="Ngành hút tiền đều đặn nhất 30 phiên"
+      >
+        <SectorFlowConsistencyChart />
       </section>
 
       {/* Ba bản đồ chiếm CẢ hai cột: chúng vốn là trang riêng chiếm trọn bề

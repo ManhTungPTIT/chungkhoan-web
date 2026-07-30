@@ -16,13 +16,13 @@ const signClass = (v) => (v === null || v === undefined ? "" : v >= 0 ? "is-up" 
 // Thanh khoản so với nền: ≥100% là chợ sôi động hơn thường lệ.
 const liquidityClass = (v) => (v === null || v === undefined ? "" : v >= BASELINE_PCT ? "is-up" : "is-down");
 
-function IndexChart({ indices, soPhienTb }) {
+function IndexChart({ indices }) {
   const ref = useRef(null);
 
   useEffect(() => {
     if (!ref.current) return undefined;
     const chart = echarts.init(ref.current);
-    chart.setOption(buildChartOption(indices, soPhienTb, fmt));
+    chart.setOption(buildChartOption(indices, fmt));
 
     const onResize = () => chart.resize();
     window.addEventListener("resize", onResize);
@@ -30,7 +30,7 @@ function IndexChart({ indices, soPhienTb }) {
       window.removeEventListener("resize", onResize);
       chart.dispose();
     };
-  }, [indices, soPhienTb]);
+  }, [indices]);
 
   return <div ref={ref} className="index-overview__chart" />;
 }
@@ -39,6 +39,11 @@ function IndexOverviewChart() {
   const { data, isLoading, isError, refetch } = useIndexOverview();
   const indices = data?.indices ?? [];
   const soPhienTb = data?.so_phien_tb ?? 0;
+  // React Query GIỮ `data` khi một lượt refetch nền thất bại nhưng vẫn bật
+  // isError. Gác chart bằng `!isError` (bản cũ) là mất trắng cả chart lẫn bảng
+  // chỉ vì 1 nhịp poll lỗi — hay xảy ra đúng lúc đóng phiên/sáng hôm sau khi
+  // vendor chậm. Có dữ liệu thì luôn vẽ, lỗi chỉ hạ thành banner "số liệu cũ".
+  const hasData = indices.length > 0;
 
   return (
     <main className="index-overview">
@@ -52,17 +57,23 @@ function IndexOverviewChart() {
           className="index-overview__title"
         />
 
-        {isLoading && <div className="index-overview__state">Đang tải dữ liệu…</div>}
-        {isError && (
+        {isLoading && !hasData && <div className="index-overview__state">Đang tải dữ liệu…</div>}
+        {isError && !hasData && (
           <div className="index-overview__state index-overview__state--error">
             Không tải được dữ liệu.
             <button type="button" onClick={() => refetch()}>Thử lại</button>
           </div>
         )}
+        {isError && hasData && (
+          <div className="index-overview__stale">
+            Không cập nhật được số liệu mới — đang hiển thị bản gần nhất.
+            <button type="button" onClick={() => refetch()}>Thử lại</button>
+          </div>
+        )}
 
-        {!isLoading && !isError && indices.length > 0 && (
+        {hasData && (
           <>
-            <IndexChart indices={indices} soPhienTb={soPhienTb} />
+            <IndexChart indices={indices} />
             {soPhienTb === 0 && (
               <div className="index-overview__note">
                 Chưa có nền lịch sử để tính thanh khoản — dữ liệu phiên cũ đang được nạp.

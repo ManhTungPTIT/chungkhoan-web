@@ -30,6 +30,7 @@ export const MARKET_CHARTS = [
   { id: "top-value", label: "Giá trị tiền khớp lệnh cao nhất (Tỷ)" },
   { id: "top-volume-view", label: "Khối lượng khớp lệnh cao nhất" },
   { id: "sector-flow-surge", label: "Ngành có dòng tiền tăng đột biến" },
+  { id: "sector-flow-consistency", label: "Ngành hút tiền đều đặn nhất" },
   { id: "top-advance", label: "Top tăng cao nhất" },
   { id: "top-decline", label: "Top giảm cao nhất" },
   { id: "foreign-trading-history", label: "Lịch sử giao dịch nước ngoài" },

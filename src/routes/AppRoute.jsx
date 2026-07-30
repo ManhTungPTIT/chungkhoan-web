@@ -42,6 +42,7 @@ const TopVolumePage = lazy(() => import('../feature/topVolume'));
 const TopDeclinePage = lazy(() => import('../feature/topDecline'));
 const TopAdvancePage = lazy(() => import('../feature/topAdvance'));
 const SectorFlowSurgePage = lazy(() => import('../feature/sectorFlowSurge'));
+const SectorFlowConsistencyPage = lazy(() => import('../feature/sectorFlowConsistency'));
 const ForeignTradingHistoryPage = lazy(() => import('../feature/foreignTrading'));
 
 function AppRoute() {
@@ -262,6 +263,16 @@ function AppRoute() {
                 fallback={<div style={{ padding: "2rem" }}>Đang tải Top tăng cao nhất…</div>}
               >
                 <TopAdvancePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/chart/sector-flow-consistency"
+            element={
+              <Suspense
+                fallback={<div style={{ padding: "2rem" }}>Đang tải Ngành hút tiền đều đặn nhất…</div>}
+              >
+                <SectorFlowConsistencyPage />
               </Suspense>
             }
           />

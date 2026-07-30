@@ -7,7 +7,7 @@
 export const STATE_META = [
   { key: "limit_up", label: "Mã trần", color: "#8e24aa" },
   { key: "up", label: "Mã tăng", color: "#1d9a45" },
-  { key: "flat", label: "Mã đứng giá", color: "#d3a719" },
+  { key: "flat", label: "Mã đứng giá", color: "#F6BD51" },
   { key: "down", label: "Mã giảm giá", color: "#e53935" },
   { key: "limit_down", label: "Mã sàn", color: "#1565c0" },
 ];

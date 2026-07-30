@@ -15,7 +15,7 @@ describe("buildPalette", () => {
       const p = buildPalette(dark);
       expect(p).toHaveLength(24);
       expect(new Set(p).size).toBe(24);
-      for (const hex of p) expect(hex).toMatch(/^#[0-9a-f]{6}$/);
+      for (const hex of p) expect(hex).toMatch(/^#[0-9a-f]{6}$/i);
     }
   });
 
@@ -24,7 +24,7 @@ describe("buildPalette", () => {
       "#2a78d6",
       "#eb6834",
       "#1baf7a",
-      "#eda100",
+      "#F6BD51",
       "#e87ba4",
       "#008300",
       "#4a3aa7",
@@ -95,7 +95,7 @@ describe("assignSectorColors", () => {
 
 describe("labelInk", () => {
   it("nền vàng/nhạt → chữ đen, nền tím đậm → chữ trắng", () => {
-    expect(labelInk("#eda100")).toBe("#0b0b0b");
+    expect(labelInk("#F6BD51")).toBe("#0b0b0b");
     expect(labelInk("#4a3aa7")).toBe("#ffffff");
   });
 

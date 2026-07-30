@@ -4,7 +4,9 @@
   --ta-line: #e7ebf0;
   --ta-purple: #7b0c9d;
   --ta-gold: #f2ae10;
-  --ta-red: #f20d32;
+  /* Cột "% tăng" dùng xanh (cùng token #1d9a45 với các chart tăng giá khác) —
+     đỏ chỉ dành cho chart giảm giá. */
+  --ta-green: #1d9a45;
   /* Cao mỗi dòng co theo chiều cao màn hình để 30 dòng + header/chú thích/trục/
      footer luôn gói gọn trong MỘT màn hình (không phải cuộn). Trần 1.75rem. */
   --ta-row-h: clamp(0.9rem, calc((100dvh - 21rem) / 30), 1.75rem);
@@ -45,7 +47,7 @@
 .top-advance__legend-item { display: inline-flex; align-items: center; gap: .45rem; }
 .top-advance__legend-swatch { width: 1.35rem; height: .42rem; border-radius: 1rem; background: currentColor; }
 .top-advance__legend-swatch--purple { background: var(--ta-purple); }
-.top-advance__legend-swatch--red { background: var(--ta-red); }
+.top-advance__legend-swatch--green { background: var(--ta-green); }
 .top-advance__legend-swatch--gold {
   position: relative;
   width: 1.5rem;
@@ -93,7 +95,7 @@
 }
 .top-advance__panel-titles span:nth-child(1) { background: var(--ta-purple); }
 .top-advance__panel-titles span:nth-child(2) { background: var(--ta-gold); }
-.top-advance__panel-titles span:nth-child(3) { background: var(--ta-red); }
+.top-advance__panel-titles span:nth-child(3) { background: var(--ta-green); }
 
 .top-advance__axis-row { min-height: 2.2rem; align-items: end; }
 .top-advance__axis {
@@ -107,7 +109,7 @@
 }
 .top-advance__axis--value { padding-left: 2.55rem; color: #682382; }
 .top-advance__axis--price { color: #b67b00; }
-.top-advance__axis--pct { color: #da1837; }
+.top-advance__axis--pct { color: #12813a; }
 
 .top-advance__plot { position: relative; }
 .top-advance__column { position: relative; min-width: 0; }
@@ -139,10 +141,10 @@
 }
 .top-advance__bar-track span { display: block; height: 100%; min-width: 2px; border-radius: inherit; }
 .top-advance__value-bars .top-advance__bar-track span { background: var(--ta-purple); }
-.top-advance__pct-bars .top-advance__bar-track { background: #fce9ed; }
+.top-advance__pct-bars .top-advance__bar-track { background: #e7f5ec; }
 /* Trục % đọc "0% (trái) -> +max (phải)": neo thanh về BÊN TRÁI (mốc 0%), giãn
    dần sang phải theo độ tăng — gương đúng của chart top giảm. */
-.top-advance__pct-bars .top-advance__bar-track span { margin-right: auto; background: var(--ta-red); }
+.top-advance__pct-bars .top-advance__bar-track span { margin-right: auto; background: var(--ta-green); }
 
 .top-advance__symbol {
   display: inline-flex;
@@ -169,7 +171,7 @@
 }
 .top-advance__pct-bars .top-advance__bar-row em {
   min-width: 2.2rem;
-  color: #a72723;
+  color: #126f35;
   font-size: .56rem;
   font-style: normal;
   font-weight: 700;

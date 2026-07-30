@@ -1,12 +1,18 @@
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import { useNavigate } from "react-router-dom";
+import { withLabelFontSize } from "../untils/treemapData";
 
 // Định dạng % có dấu để hiển thị
 const fmtPct = (pct) => `${pct >= 0 ? "+" : ""}${pct}%`;
 
 // Lá treemap = node có _pct (node ngành không có).
 const isLeaf = (node) => node && node._pct !== undefined && node.name;
+
+// Cỡ chữ chỉ đổi đáng kể khi diện tích khung đổi nhiều; vẽ lại mỗi lần
+// ResizeObserver kêu (kéo cửa sổ = hàng chục lần/giây, ~1500 node/lần) là quá
+// đắt mà mắt không thấy khác. Chỉ setOption lại khi diện tích lệch ≥ 10%.
+const AREA_RERENDER_RATIO = 0.1;
 
 export default function Heatmap({ data }) {
   const containerRef = useRef(null);
@@ -17,10 +23,14 @@ export default function Heatmap({ data }) {
       typeof window !== "undefined" &&
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches;
-    // Gap giữa các nhóm tô bằng màu nền trang để các nhóm "tách rời";
-    // header (dải tên nhóm) dùng nền tối + chữ trắng để nổi bật trên cả 2 theme.
+    // Gap giữa các nhóm VÀ giữa các mã đều tô bằng màu nền trang: nhóm tách
+    // rời nhau, các ô trong nhóm cách nhau bằng đường kẻ trắng mảnh.
+    //
+    // Dải tên ngành trước đây là thanh nền tối chữ trắng canh trái; nay để trong
+    // suốt (= nền trang) với chữ đậm màu tối canh giữa, đúng kiểu bảng giá: tên
+    // ngành trông như nhãn nằm TRÊN nhóm chứ không phải một thanh header.
     const pageBg = dark ? "#16171d" : "#ffffff";
-    const headerBg = dark ? "#3a3d49" : "#3a3f4b";
+    const headerText = dark ? "#dfe3ec" : "#2c3140";
 
     const chart = echarts.init(containerRef.current);
 
@@ -54,7 +64,9 @@ export default function Heatmap({ data }) {
           label: {
             show: true,
             color: "#fff",
-            fontSize: 11,
+            fontWeight: "bold",
+            // fontSize KHÔNG đặt ở đây: mỗi lá tự mang cỡ chữ theo diện tích ô
+            // (withLabelFontSize). Đặt ở series sẽ đè lên và mọi ô lại bằng nhau.
             overflow: "truncate",
             formatter: (p) => {
               const d = p.data || {};
@@ -62,37 +74,59 @@ export default function Heatmap({ data }) {
               return `${p.name}\n${fmtPct(d._pct)}`;
             },
           },
-          // dải header ghi tên nhóm — nền tối, chữ trắng đậm, canh trái
+          // nhãn tên ngành — chữ đậm màu tối, canh giữa, nền trong suốt.
+          //
+          // `align: "center"` MỘT MÌNH là sai: nó chỉ đổi neo chữ chứ không đổi
+          // toạ độ vẽ (vẫn là mép trái dải), nên chữ bị neo giữa TẠI mép trái và
+          // tràn hẳn ra ngoài nhóm — "Ngân hàng" hiện thành "hàng". Phải đặt
+          // `position` về giữa dải rồi mới canh neo theo.
           upperLabel: {
             show: true,
-            height: 26,
-            color: "#fff",
+            height: 22,
+            color: headerText,
             fontWeight: "bold",
-            fontSize: 13,
-            align: "left",
-            padding: [0, 8],
+            fontSize: 12,
+            position: ["50%", "50%"],
+            align: "center",
+            verticalAlign: "middle",
+            padding: [0, 4],
             overflow: "truncate",
           },
           levels: [
             {
-              // ngành: nền dải header tối; gap nhỏ giữa các mã con (grout)
+              // ngành: nền = nền trang (dải tên ngành trông "trong suốt");
+              // gap nhỏ giữa các mã con tạo đường kẻ trắng mảnh
               upperLabel: { show: true },
               itemStyle: {
-                color: headerBg,
-                borderColor: headerBg,
+                color: pageBg,
+                borderColor: pageBg,
                 borderWidth: 0,
                 gapWidth: 2,
               },
             },
             {
               // mã: màu lá đã gắn sẵn trong data; gap mảnh
-              itemStyle: { borderColor: headerBg, borderWidth: 0, gapWidth: 2 },
+              itemStyle: { borderColor: pageBg, borderWidth: 0, gapWidth: 2 },
             },
           ],
-          data,
+          data: [],
         },
       ],
     });
+
+    // Cỡ chữ phụ thuộc diện tích khung → phải biết container đã layout xong,
+    // không tính được lúc dựng option. `lastArea` chặn vẽ lại khi resize nhỏ.
+    let lastArea = 0;
+    const renderLabels = () => {
+      const el = containerRef.current;
+      if (!el) return;
+      const area = el.clientWidth * el.clientHeight;
+      if (!area) return;
+      if (lastArea && Math.abs(area - lastArea) / lastArea < AREA_RERENDER_RATIO) return;
+      lastArea = area;
+      chart.setOption({ series: [{ data: withLabelFontSize(data, area) }] });
+    };
+    renderLabels();
 
     const onClick = (params) => {
       const d = params?.data;
@@ -100,7 +134,10 @@ export default function Heatmap({ data }) {
     };
     chart.on("click", onClick);
 
-    const ro = new ResizeObserver(() => chart.resize());
+    const ro = new ResizeObserver(() => {
+      chart.resize();
+      renderLabels();
+    });
     ro.observe(containerRef.current);
 
     return () => {

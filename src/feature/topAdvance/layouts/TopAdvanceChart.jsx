@@ -50,7 +50,7 @@ function TopAdvanceChart() {
                 <div className="top-advance__legend" aria-label="Chú giải biểu đồ">
                     <span className="top-advance__legend-item"><i className="top-advance__legend-swatch top-advance__legend-swatch--purple" />Giá trị khớp lệnh (Tỷ)</span>
                     <span className="top-advance__legend-item"><i className="top-advance__legend-swatch top-advance__legend-swatch--gold" />Giá hiện tại (Nghìn)</span>
-                    <span className="top-advance__legend-item"><i className="top-advance__legend-swatch top-advance__legend-swatch--red" />Mã Tăng giá (%)</span>
+                    <span className="top-advance__legend-item"><i className="top-advance__legend-swatch top-advance__legend-swatch--green" />Mã Tăng giá (%)</span>
                 </div>
 
                 {isLoading && <div className="top-advance__state">Đang tải dữ liệu…</div>}

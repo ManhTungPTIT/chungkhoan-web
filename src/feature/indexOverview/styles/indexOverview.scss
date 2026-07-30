@@ -38,10 +38,32 @@
 .index-overview__legend span { display: inline-flex; align-items: center; gap: 0.4rem; }
 .index-overview__swatch { width: 0.85rem; height: 0.85rem; border-radius: 0.2rem; }
 
-// Hai khung vẽ chồng dọc với grid.top/height cố định bằng px (xem
-// IndexOverviewChart.jsx) → chiều cao container cũng phải cố định, không co theo
-// viewport, nếu không khung dưới bị cắt mất nhãn trục.
-.index-overview__chart { width: 100%; height: 360px; }
+// Khung vẽ dùng grid.top/left/right/bottom cố định bằng px (xem GRID trong
+// indexOverviewOption.js) → chiều cao container cũng phải cố định, không co theo
+// viewport, nếu không nhãn trục X bị cắt. Khớp với CHART_HEIGHT.
+.index-overview__chart { width: 100%; height: 300px; }
+
+// Banner "số liệu cũ": poll lỗi nhưng vẫn còn dữ liệu → cảnh báo nhẹ, KHÔNG ẩn
+// chart (xem IndexOverviewChart.jsx).
+.index-overview__stale {
+  margin-bottom: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid #f0dcc0;
+  border-radius: 0.5rem;
+  background: #fff8ec;
+  color: #8a6420;
+  font-size: 0.74rem;
+  text-align: center;
+}
+.index-overview__stale button {
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid #e2c795;
+  border-radius: 0.4rem;
+  background: #fffdf8;
+  color: #8a6420;
+  cursor: pointer;
+}
 
 .index-overview__note {
   margin-top: 0.5rem;

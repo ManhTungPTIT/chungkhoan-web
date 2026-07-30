@@ -12,7 +12,7 @@ const BASE_LIGHT = [
   "#2a78d6", // blue
   "#eb6834", // orange
   "#1baf7a", // aqua
-  "#f4cf43", // yellow
+  "#F6BD51", // yellow
   "#e87ba4", // magenta
   "#008300", // green
   "#4a3aa7", // violet
@@ -23,7 +23,7 @@ const BASE_DARK = [
   "#3987e5",
   "#d95926",
   "#199e70",
-  "#c98500",
+  "#F6BD51",
   "#d55181",
   "#008300",
   "#9085e9",

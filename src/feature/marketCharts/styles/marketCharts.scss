@@ -1212,6 +1212,15 @@
   border-radius: 0.75rem;
 }
 
+/* Cùng lý do như ba bản đồ trên: chart "dòng tiền theo ngành" là trang riêng có
+   `height: 100dvh` để lưới gói trong một màn hình. Trong lưới panel thì chiều
+   cao phải theo nội dung, nếu không nó nuốt trọn một màn và các dòng cuối bị
+   cắt. `--fc-row-h` vẫn tính theo 100dvh nên mật độ dòng không đổi. */
+.market-chart-pair__panel--consistency > .flow-consistency {
+  height: auto;
+  overflow: visible;
+}
+
 /* Tiêu đề trang riêng của bản đồ nhiệt — trong lưới panel nó đứng lệch so với
    thanh tiêu đề (ChartHeader) của các biểu đồ khác, canh lại cho đồng bộ. */
 .market-chart-pair__panel--heatmap .heatmap-title {

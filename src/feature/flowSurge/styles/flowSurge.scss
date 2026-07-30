@@ -3,7 +3,7 @@
   --tg-muted: #748099;
   --tg-line: #e6eaf1;
   --tg-purple: #7814a9;
-  --tg-gold: #d3a719;
+  --tg-gold: #F6BD51;
   --tg-green: #1d9a45;
   --tg-row-h: 1.75rem;
   min-height: 100%;
@@ -47,7 +47,7 @@
 .flow-surge__axis span { min-width: 0; text-align: center; white-space: nowrap; }
 .flow-surge__axis--left { color: #8a57a8; }
 .flow-surge__axis--right { color: #3b9660; }
-.flow-surge__axis--center { color: #aa8c23; }
+.flow-surge__axis--center { color: #B87516; }
 
 .flow-surge__column { position: relative; display: flex; flex-direction: column; min-width: 0; }
 .flow-surge__symbols { border-right: 1px solid var(--tg-line); }
@@ -90,7 +90,7 @@
   left: 8px;
   top: 50%;
   transform: translateY(-50%);
-  color: #ad8610;
+  color: #B87516;
   font-size: 0.6rem;
   font-style: normal;
   font-weight: 700;

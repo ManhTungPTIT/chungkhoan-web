@@ -94,7 +94,7 @@ function SectorBreadthChart() {
         icon={<BsBullseye />}
         title="BẢN ĐỒ DÒNG TIỀN"
         variant="navy"
-        accent="#35c66b"
+        accent="#F6BD51"
         className="sector-rows__header"
       />
 

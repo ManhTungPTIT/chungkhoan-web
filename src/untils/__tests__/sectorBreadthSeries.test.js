@@ -123,7 +123,7 @@ describe("màu trạng thái", () => {
     const byKey = Object.fromEntries(STATE_META.map((s) => [s.key, s.color]));
     expect(byKey.limit_up).toBe("#8e24aa");
     expect(byKey.up).toBe("#1d9a45");
-    expect(byKey.flat).toBe("#d3a719");
+    expect(byKey.flat).toBe("#F6BD51");
     expect(byKey.down).toBe("#e53935");
     expect(byKey.limit_down).toBe("#1565c0");
   });

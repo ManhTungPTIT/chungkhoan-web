@@ -2,7 +2,7 @@
 // combo "TOP TĂNG MẠNH NHẤT" — bản đối xứng của topDeclineLayout:
 //   - cột tím  (giá trị khớp lệnh Tỷ): bar width theo max toàn cột
 //   - đường vàng (giá hiện tại Nghìn): MIN-MAX scale về [0..100]
-//   - cột đỏ   (% tăng giá, đơn hướng): bar width theo pct / axisMax
+//   - cột xanh (% tăng giá, đơn hướng): bar width theo pct / axisMax
 // Hàm thuần, không phụ thuộc React — dễ test.
 
 const num = (value) => {

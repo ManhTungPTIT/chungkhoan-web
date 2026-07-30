@@ -24,3 +24,34 @@
   padding: 2rem;
   color: var(--text);
 }
+
+/* Chú giải 5 mức bảng giá kèm số mã — flex-shrink: 0 để nó không bị
+   `.heatmap-chart { flex: 1 }` bóp mất khi khung thấp. */
+.heatmap-legend {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 1.4rem;
+  padding: 0.45rem 0.25rem 0.15rem;
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.heatmap-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.heatmap-legend__swatch {
+  width: 1.1rem;
+  height: 0.7rem;
+  flex-shrink: 0;
+  border-radius: 0.15rem;
+}
+
+.heatmap-legend strong {
+  font-weight: 700;
+}

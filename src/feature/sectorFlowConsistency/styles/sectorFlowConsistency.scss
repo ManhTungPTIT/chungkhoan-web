@@ -1,0 +1,277 @@
+/* Lưới nhiệt "ngành × phiên". Dựng bằng CSS grid chứ không ECharts: đây là lưới
+   TĨNH cỡ 15-37 hàng × 30-60 ô, grid nhẹ hơn hẳn và tránh mấy bẫy nhãn/label
+   của ECharts treemap-heatmap. Mỗi hàng là một grid con để tên ngành và 2 cột
+   chỉ số luôn thẳng cột giữa các hàng. */
+.flow-consistency {
+  --fc-ink: #172033;
+  --fc-muted: #6b7488;
+  --fc-line: #e6eaf1;
+  --fc-in-strong: #0e8a3a;
+  --fc-in: #7fd39b;
+  --fc-neutral: #e3e7ee;
+  --fc-out: #f09a97;
+  --fc-out-strong: #c62828;
+  --fc-empty: #f4f6fa;
+  /* Cao mỗi dòng chia theo SỐ NGÀNH ĐANG HIỆN (`--rows` do component đặt) trên
+     phần chiều cao còn lại sau header/chú giải/hàng nhãn ngày/footer (~13.5rem),
+     để 15 hay 26 ngành đều gói trong MỘT màn hình — không cuộn dọc, cũng không
+     bị cắt mất mấy dòng cuối. `2.2vh` cố định trước đây không biết có bao nhiêu
+     dòng: chọn "Tất cả ngành" ở màn 640px là 8 ngành cuối bị cắt LẶNG LẼ (tổ
+     tiên overflow:hidden nên không có cả thanh cuộn để phát hiện). */
+  --fc-row-h: clamp(0.42rem, calc((100dvh - 13.5rem) / var(--rows, 15)), 1.5rem);
+
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  height: 100dvh;
+  padding: clamp(0.5rem, 1.2vh, 1.25rem);
+  box-sizing: border-box;
+  overflow: hidden;
+  color: var(--fc-ink);
+  background: #f7f8fb;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+
+.flow-consistency * { box-sizing: border-box; }
+
+/* Card là flex column + min-height:0 để vùng lưới co lại được thay vì đẩy card
+   dài quá khung. Không có min-height:0 thì flex item mặc định không co dưới
+   kích thước nội dung và cả khối lại tràn ra ngoài như cũ. */
+.flow-consistency__card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0 1rem 1rem;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e7eaf0;
+  border-radius: 1rem;
+  box-shadow: 0 12px 34px rgba(19, 28, 50, 0.08);
+}
+
+.flow-consistency .chart-header { margin: 0 -1rem 0.6rem; border-radius: 1rem 1rem 0 0; }
+
+.flow-consistency__controls { display: flex; gap: 0.5rem; }
+.flow-consistency__select {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.flow-consistency__select select {
+  appearance: none;
+  padding: 0.3rem 1.6rem 0.3rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.flow-consistency__select select option { color: #172033; }
+.flow-consistency__select svg {
+  position: absolute;
+  right: 0.45rem;
+  color: #fff;
+  pointer-events: none;
+}
+
+/* Chú giải + footer KHÔNG co (flex: 0 0 auto): chúng phải giữ nguyên chiều cao
+   để phần chừa cho lưới (13.5rem trong công thức --fc-row-h) luôn đúng. */
+.flow-consistency__legend {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 1.5rem;
+  padding: 0.5rem 0 0.7rem;
+  color: #414c5d;
+  font-size: 0.72rem;
+}
+.flow-consistency__legend-item { display: inline-flex; align-items: center; gap: 0.4rem; }
+.flow-consistency__swatch { width: 1rem; height: 0.7rem; border-radius: 0.15rem; }
+.flow-consistency__swatch--in-strong { background: var(--fc-in-strong); }
+.flow-consistency__swatch--in { background: var(--fc-in); }
+.flow-consistency__swatch--neutral { background: var(--fc-neutral); }
+.flow-consistency__swatch--out { background: var(--fc-out); }
+.flow-consistency__swatch--out-strong { background: var(--fc-out-strong); }
+
+.flow-consistency__state { padding: 2.5rem 1rem; text-align: center; color: var(--fc-muted); }
+.flow-consistency__state--error { color: #b3261e; }
+.flow-consistency__state button {
+  margin-left: 0.5rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* Lưới hẹp thì cuộn NGANG trong khung riêng, không đẩy cả trang trượt ngang.
+   Dọc thì KHÔNG cuộn: `--fc-row-h` đã chia vừa số dòng, `overflow-y: hidden`
+   chỉ là chốt an toàn cho trường hợp lẻ (dòng nào cũng đã có chiều cao cứng). */
+.flow-consistency__grid-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.flow-consistency__grid { min-width: 46rem; }
+
+.flow-consistency__row {
+  display: grid;
+  /* # | ngành | điểm MA + bar | so N phiên | lưới ô | TB/ĐLC | phiên+ */
+  grid-template-columns:
+    1.4rem minmax(7rem, 1.1fr) minmax(7.5rem, 1.6fr) 3.6rem
+    minmax(10rem, 4fr) 3.4rem 3rem;
+  align-items: center;
+  gap: 0.4rem;
+  height: var(--fc-row-h);
+  /* Chiều cao dòng là CỨNG; không có overflow:hidden thì line-height mặc định
+     của tên ngành/số liệu (cao hơn dòng khi lưới bị nén) tràn xuống dòng dưới. */
+  overflow: hidden;
+}
+.flow-consistency__row:not(:last-child) { border-bottom: 1px solid #f1f3f7; }
+.flow-consistency__row--head {
+  height: auto;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--fc-line);
+  color: var(--fc-muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Cỡ chữ trần 0.68rem nhưng không bao giờ cao hơn dòng: lưới nén xuống 0.5rem
+   mà chữ giữ 11px thì tên ngành bị cắt ngang thân chữ. */
+.flow-consistency__name {
+  overflow: hidden;
+  font-size: min(0.68rem, calc(var(--fc-row-h) * 0.82));
+  font-weight: 600;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-consistency__rank {
+  color: var(--fc-muted);
+  text-align: right;
+  font-size: min(0.6rem, calc(var(--fc-row-h) * 0.75));
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Điểm MA + thanh bar nằm CÙNG một ô lưới: số canh phải cố định bề rộng
+   (tabular-nums) rồi thanh chiếm phần còn lại, nên mọi thanh khởi đầu từ cùng
+   một mốc x — thiếu điều đó thì độ dài thanh không còn so sánh được bằng mắt. */
+.flow-consistency__score {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.flow-consistency__score-value {
+  flex: 0 0 2.6rem;
+  text-align: right;
+  font-size: min(0.64rem, calc(var(--fc-row-h) * 0.78));
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.flow-consistency__score-value--up { color: #0e6b34; }
+.flow-consistency__score-value--down { color: #b3261e; }
+.flow-consistency__score-track {
+  flex: 1;
+  min-width: 0;
+  height: max(0.18rem, calc(var(--fc-row-h) - 0.5rem));
+  border-radius: 0.12rem;
+  background: #f1f3f7;
+}
+.flow-consistency__score-bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+.flow-consistency__score-bar--up { background: var(--fc-in-strong); }
+.flow-consistency__score-bar--down { background: var(--fc-out-strong); }
+
+.flow-consistency__score-head {
+  padding-left: 3rem; /* thẳng với thanh bar, không thẳng với cột số */
+}
+
+/* Vạch ngăn nhóm điểm dương với nhóm điểm âm (xếp hạng theo ratio nên dấu của
+   ratio trùng dấu điểm MA → dương luôn nằm trên, vạch là duy nhất). */
+.flow-consistency__row--divider { border-bottom: 1px dashed #b9c0cd !important; }
+
+/* Cột ô và hàng nhãn ngày dùng CÙNG `--cols` để nhãn rơi đúng trên ô của nó. */
+.flow-consistency__cells,
+.flow-consistency__ticks {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 1px;
+}
+.flow-consistency__ticks {
+  gap: 0;
+  color: var(--fc-muted);
+  font-size: 0.55rem;
+  font-style: normal;
+  font-weight: 600;
+}
+.flow-consistency__ticks em { font-style: normal; white-space: nowrap; }
+
+/* max(): trừ thẳng 0.35rem thì dòng nén dưới 0.35rem cho ra chiều cao ÂM và ô
+   biến mất hẳn. Giữ tối thiểu 0.18rem để vệt màu luôn nhìn được. */
+.flow-consistency__cell {
+  height: max(0.18rem, calc(var(--fc-row-h) - 0.35rem));
+  border-radius: 0.1rem;
+  background: var(--fc-empty);
+}
+.flow-consistency__cell--in-strong { background: var(--fc-in-strong); }
+.flow-consistency__cell--in { background: var(--fc-in); }
+.flow-consistency__cell--neutral { background: var(--fc-neutral); }
+.flow-consistency__cell--out { background: var(--fc-out); }
+.flow-consistency__cell--out-strong { background: var(--fc-out-strong); }
+/* Ô rỗng (ngành không có mã nào giao dịch phiên đó) — gạch chéo mờ để phân biệt
+   với "trung tính", hai thứ này khác nhau về ý nghĩa. */
+.flow-consistency__cell--empty {
+  background: repeating-linear-gradient(
+    45deg, #f4f6fa, #f4f6fa 2px, #e6e9f0 2px, #e6e9f0 4px
+  );
+}
+
+.flow-consistency__metric {
+  text-align: right;
+  font-size: min(0.64rem, calc(var(--fc-row-h) * 0.78));
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.flow-consistency__metric--up { color: #0e6b34; }
+.flow-consistency__metric--down { color: #b3261e; }
+
+.flow-consistency__footer {
+  flex: 0 0 auto;
+  padding-top: 0.6rem;
+  color: var(--fc-muted);
+  font-size: 0.6rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .flow-consistency { padding: 0.6rem; }
+  .flow-consistency__card { padding: 0 0.7rem 0.8rem; }
+  .flow-consistency__row {
+    grid-template-columns:
+      1.2rem minmax(5rem, 1fr) minmax(6rem, 1.4fr) 3rem
+      minmax(8rem, 3fr) 3rem 2.6rem;
+  }
+}
