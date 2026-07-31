@@ -52,7 +52,7 @@ function TopGainT3Chart({ window = 3 }) {
         <div>
           <span className="top-gain-t3__eyebrow">LEOSTOCK · MARKET RADAR</span>
           <h1>Top tăng cao nhất T+{tPlus}</h1>
-          <p>Mã thanh khoản trên 1 tỷ tăng mạnh nhất so với {tPlus + 1} phiên trước — dòng tiền khớp lệnh, giá hiện tại và mức tăng.</p>
+          <p>Mã thanh khoản trên 1 tỷ đang tăng giá, xếp theo điểm sức mạnh so với {tPlus + 1} phiên trước — dòng tiền khớp lệnh, giá hiện tại và mức tăng.</p>
         </div>
         <div className="top-gain-t3__header-meta">
           <span>Cập nhật lần cuối</span>
@@ -176,7 +176,7 @@ function TopGainT3Chart({ window = 3 }) {
         )}
 
         <footer className="top-gain-t3__footer">
-          <small>Nguồn: rổ mã giá trị khớp lệnh trên 1 tỷ . Sắp xếp theo % tăng giảm dần . % tính so giá đóng cửa {tPlus + 1} phiên trước</small>
+          <small>Nguồn: rổ mã giá trị khớp lệnh trên 1 tỷ, chỉ mã tăng giá . % tính so giá đóng cửa {tPlus + 1} phiên trước . Sắp xếp theo điểm = % tăng × log10(thanh khoản + 1)</small>
         </footer>
       </section>
     </main>

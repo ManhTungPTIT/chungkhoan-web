@@ -1,1 +1,0 @@
-import{t as e}from"./IndexOverviewChart-C18ToYvm.js";var t=e;export{t as default};

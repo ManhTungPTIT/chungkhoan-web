@@ -43,7 +43,6 @@ function SectorFlowConsistencyChart() {
           id="flow-consistency-title"
           icon={<BsCalendar3 />}
           title="DÒNG TIỀN THEO NGÀNH"
-          subtitle="Điểm ngành mỗi phiên = trung bình có trọng số vốn hóa của điểm từng mã · Xếp hạng theo TB ÷ ĐLC"
           variant="navy"
           accent="#35c66b"
           control={
@@ -185,14 +184,14 @@ function SectorFlowConsistencyChart() {
           </div>
         )}
 
-        <footer className="flow-consistency__footer">
+        {/* <footer className="flow-consistency__footer">
           <small>
             {rows.length > 0 && `Hiện ${rows.length}/${view.total} ngành · `}
             Điểm mã mỗi phiên: +100 giá tăng &amp; thanh khoản ≥ 1.5× nền 20 phiên · +50 giá tăng ·
             0 đứng giá · −50 giá giảm · −100 giá giảm &amp; thanh khoản ≥ 1.5× nền
             {view.generatedAt ? ` · Cập nhật: ${view.generatedAt}` : ""}
           </small>
-        </footer>
+        </footer> */}
       </section>
     </main>
   );

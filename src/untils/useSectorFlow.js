@@ -23,9 +23,10 @@ export function useSectorFlow(sessions = 5) {
   return useQuery({
     queryKey: ["sector-flow", sessions],
     queryFn: () => fetchSectorFlow(sessions),
-    // Dữ liệu chỉ đổi 1 lần/ngày (job nền quét nến ngày toàn thị trường) nên
-    // không cần nhịp 60s như các chart realtime.
-    refetchInterval: 10 * 60 * 1000,
-    staleTime: 5 * 60 * 1000,
+    // 4 cột phiên đã đóng chỉ đổi 1 lần/ngày, nhưng cột PHIÊN HIỆN TẠI được BE
+    // dựng từ board realtime (~20s/lần) nên vẫn chạy trong phiên → nhịp 60s như
+    // các chart realtime khác. Payload nhỏ (đã gộp về ~40 ngành × 5 phiên).
+    refetchInterval: 60 * 1000,
+    staleTime: 30 * 1000,
   });
 }

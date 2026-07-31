@@ -1,8 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-// Chart TOP TĂNG MẠNH NHẤT TUẦN — cả rổ vn100 sắp theo % tăng của 5 phiên đã
-// đóng gần nhất (KHÔNG tính phiên hôm nay); % so close phiên đầu cửa sổ.
+// Chart TOP TĂNG MẠNH NHẤT TUẦN — rổ vn100 lọc thanh khoản hôm nay > 1 tỷ + chỉ
+// mã tăng giá, xếp theo diem = % tăng × log10(thanh khoản Tỷ + 1). % tính so
+// close phiên ĐẦU cửa sổ (5 phiên đã đóng gần nhất, KHÔNG tính phiên hôm nay);
+// gia_tri_khop_lenh là thanh khoản HÔM NAY (chính hệ số của diem), không phải
+// số cộng dồn 5 phiên như trước 31/07.
 // API: /top-gain-period?period=week → { generated_at, period, start, sessions, rows:[...] }
 const fetchTopGainWeek = async () => {
   const { data } = await axios.get(

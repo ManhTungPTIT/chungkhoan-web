@@ -2,25 +2,33 @@
 // lướt sóng" và tính vị trí hiển thị. Hàm thuần, không phụ thuộc React.
 //   - gia_tri_khop_lenh (Tỷ)   = value (VND) / 1e9
 //   - gia_hien_tai (Nghìn)     = price (VND) / 1000
-//   - pct_tang_gia             = ĐIỂM SỨC MẠNH, xem dưới
+//   - pct_tang_gia             = % tăng giá thật (hiển thị ở cột xanh)
+//   - diem                     = ĐIỂM SỨC MẠNH, chỉ dùng để xếp hạng, xem dưới
 // Đường giá dùng MIN-MAX scale (biên độ giá giữa các mã chênh rất lớn), bar
 // tím/xanh scale theo max của cột.
 //
-// `pct_tang_gia` KHÔNG còn là phần trăm thuần (giữ tên cũ để không phải sửa
-// khắp component/test). Công thức hiện hành:
+// Điều kiện lọc (mã không thoả bị loại khỏi bảng, không phải bị đẩy xuống cuối):
+//   - thanh khoản > 1 tỷ đồng
+//   - giá tăng (pct_tang_gia > 0)
+//
+// Công thức xếp hạng:
 //
 //     điểm = (giá hiện tại − giá tham chiếu) / giá tham chiếu × 100
-//            + √(thanh khoản tại thời điểm đó, đơn vị TỶ ĐỒNG)
+//            × log10(thanh khoản tại thời điểm đó + 1)
 //
-// Số hạng đầu chính là `change_pct` do BE trả (data_source: (match_price −
+// Thừa số đầu chính là `change_pct` do BE trả (data_source: (match_price −
 // ref_price)/ref_price × 100, mã chưa khớp được gán 0 thay vì −100% ảo) — dùng
 // lại thay vì tự tính từ `ref` để thừa hưởng luôn guard đó.
 //
-// Số hạng √thanh khoản tính bằng TỶ, không phải VND: √(10 tỷ VND) ≈ 100.000 sẽ
-// nhấn chìm phần % (0–15), chart thành xếp hạng thanh khoản thuần. Tính bằng tỷ
-// thì √300 ≈ 17.3, cùng cỡ với phần % → hai thành phần cộng được với nhau. Căn
-// bậc 2 làm phẳng chênh lệch thanh khoản (300 tỷ chỉ hơn 30 tỷ 1.8 lần điểm,
-// không phải 10 lần) nên mã thanh khoản khủng không một mình chiếm hết top.
+// log10 tính theo TỶ, không phải VND. Theo VND mọi mã đều rơi vào khoảng
+// log10(1e9…1e12) = 9…12, hệ số gần như bằng nhau → xếp hạng thoái hoá về
+// đúng thứ tự % tăng giá, thanh khoản coi như không tính. Theo tỷ thì hệ số
+// trải 0.3 (1 tỷ) → 3 (1000 tỷ), tức chênh 10 lần, đủ để mã tăng ít nhưng dòng
+// tiền lớn vượt mã tăng nhiều mà thanh khoản mỏng. Bộ lọc >1 tỷ cũng đảm bảo
+// hệ số luôn > 0 nên điểm không bao giờ đổi dấu so với % tăng giá.
+//
+// `+1` giữ nguyên theo công thức gốc: chống log10(0) = −∞ ở các mã sát ngưỡng
+// (và ở mapBoardRow, vốn map được cả mã sẽ bị lọc bỏ sau đó).
 
 const num = (value) => {
   const n = Number(value);
@@ -30,16 +38,21 @@ const num = (value) => {
 const VND_TO_TY = 1_000_000_000;
 const VND_TO_NGHIN = 1000;
 
+// Ngưỡng thanh khoản tối thiểu để vào bảng (Tỷ đồng).
+export const MIN_THANH_KHOAN_TY = 1;
+
 export function mapBoardRow(row) {
   const giaTriKhopLenh = num(row?.value) / VND_TO_TY;
-  // max(0, …): value âm không hợp lệ nhưng nếu vendor trả rác thì √(số âm) = NaN
-  // sẽ làm sort và mọi phép scale phía sau vỡ im lặng.
-  const thanhKhoanBonus = Math.sqrt(Math.max(giaTriKhopLenh, 0));
+  const pctTangGia = num(row?.change_pct);
+  // max(0, …): value âm không hợp lệ nhưng nếu vendor trả rác thì log10(số âm)
+  // = NaN sẽ làm sort và mọi phép scale phía sau vỡ im lặng.
+  const heSoThanhKhoan = Math.log10(Math.max(giaTriKhopLenh, 0) + 1);
   return {
     ma_ck: row?.symbol,
     gia_tri_khop_lenh: giaTriKhopLenh,
     gia_hien_tai: num(row?.price) / VND_TO_NGHIN,
-    pct_tang_gia: num(row?.change_pct) + thanhKhoanBonus,
+    pct_tang_gia: pctTangGia,
+    diem: pctTangGia * heSoThanhKhoan,
   };
 }
 
@@ -61,8 +74,13 @@ export function leftTicks(leftMax) {
 export function buildPotentialView(boardRows, topN = 20) {
   const mapped = (Array.isArray(boardRows) ? boardRows : [])
     .map(mapBoardRow)
-    .filter((r) => r.ma_ck)
-    .sort((a, b) => b.pct_tang_gia - a.pct_tang_gia)
+    .filter(
+      (r) =>
+        r.ma_ck &&
+        r.gia_tri_khop_lenh > MIN_THANH_KHOAN_TY &&
+        r.pct_tang_gia > 0,
+    )
+    .sort((a, b) => b.diem - a.diem)
     .slice(0, topN);
 
   const values = mapped.map((r) => r.gia_tri_khop_lenh);

@@ -2,9 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 // Chart T+3 độc lập — gọi endpoint với window=3.
-// API trả: { generated_at, window, rows:[{symbol, gia_tri_khop_lenh, gia_hien_tai, pct_tang}] }
-// rows = rổ vn100 (value > 1 tỷ), % tăng so nến đã đóng lùi (window + 1) phiên,
-// xếp giảm dần, top 20 (mặc định của endpoint).
+// API trả: { generated_at, window,
+//            rows:[{symbol, gia_tri_khop_lenh, gia_hien_tai, pct_tang, diem}] }
+// rows = rổ vn100 lọc value hôm nay > 1 tỷ + chỉ mã tăng giá; pct_tang so nến đã
+// đóng lùi (window + 1) phiên; xếp giảm dần theo diem = pct_tang ×
+// log10(thanh khoản Tỷ + 1), top 20 (mặc định của endpoint).
 const fetchTopGainT3 = async (window) => {
   const { data } = await axios.get(
     `${import.meta.env.VITE_PYTHON_API_URL}/top-gain-tplus`,

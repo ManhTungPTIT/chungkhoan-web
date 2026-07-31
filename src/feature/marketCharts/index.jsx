@@ -313,13 +313,13 @@ export default function MarketChartsPage() {
         <PowerPage />
       </section>
 
-      <section
+      {/* <section
         id="market-overview"
         className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--overview"
         aria-label="Bản đồ toàn cảnh thị trường"
       >
         <HomePage />
-      </section>
+      </section> */}
     </main>
   );
 }

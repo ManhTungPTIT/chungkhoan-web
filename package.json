@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build:app": "vite build --mode app --outDir dist-app"
+    "build:app": "vite build --mode app --outDir dist-app",
+    "build:app:prod": "vite build --mode app-prod --outDir dist-app"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.100.10",
