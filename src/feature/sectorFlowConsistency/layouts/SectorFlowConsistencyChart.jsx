@@ -7,23 +7,30 @@ import { buildConsistencyView, CELL_BANDS } from "../untils/consistencyView";
 import "../styles/sectorFlowConsistency.scss";
 
 const TOP_MODES = { "Top 15 ngành": 15, "Tất cả ngành": 0 };
-const SESSION_MODES = { "30 phiên": 30, "60 phiên": 60 };
+// Số phiên nhìn lại. BE chấp nhận 5..120; danh sách này là các mốc hay dùng.
+// Giữ dạng MẢNG SỐ chứ không object {label: value}: khoá dạng "5" là số nguyên
+// nên JS sẽ tự sắp lại thứ tự khoá, còn ở đây thứ tự chính là thứ tự dropdown.
+const SESSION_OPTIONS = [5, 10, 15, 20, 24, 30];
+const DEFAULT_SESSIONS = 30;
 
 const fmt = (value, digits = 2) => value.toFixed(digits);
 const signed = (value, digits = 1) => `${value > 0 ? "+" : ""}${value.toFixed(digits)}`;
 
 // Nhãn ngày chỉ in thưa: 30 nhãn "dd/MM" chen trong 30 cột vài chục px thì
 // chồng lên nhau thành vệt đen. Mốc đầu/cuối luôn hiện để đọc được khoảng thời gian.
+// Bước nhảy tính theo số cột (mục tiêu ~7 nhãn) chứ không cứng 5: ở chế độ 5-10
+// phiên thì bước 5 chỉ còn đúng 2 nhãn cho cả trục.
 function tickVisible(index, total) {
   if (index === 0 || index === total - 1) return true;
-  const step = total > 40 ? 10 : 5;
-  return index % step === 0;
+  const step = Math.max(1, Math.ceil(total / 7));
+  if (index % step !== 0) return false;
+  // Nhãn cuối LUÔN hiện, nên nhãn theo bước rơi sát nó sẽ chồng chữ → bỏ.
+  return total - 1 - index > step / 2;
 }
 
 function SectorFlowConsistencyChart() {
   const [topMode, setTopMode] = useState("Top 15 ngành");
-  const [sessionMode, setSessionMode] = useState("30 phiên");
-  const sessions = SESSION_MODES[sessionMode] ?? 30;
+  const [sessions, setSessions] = useState(DEFAULT_SESSIONS);
 
   const { data, isLoading, isError, refetch } = useSectorFlowConsistency(sessions);
   const view = useMemo(
@@ -50,11 +57,11 @@ function SectorFlowConsistencyChart() {
               <div className="flow-consistency__select">
                 <select
                   aria-label="Số phiên nhìn lại"
-                  value={sessionMode}
-                  onChange={(event) => setSessionMode(event.target.value)}
+                  value={sessions}
+                  onChange={(event) => setSessions(Number(event.target.value))}
                 >
-                  {Object.keys(SESSION_MODES).map((label) => (
-                    <option key={label}>{label}</option>
+                  {SESSION_OPTIONS.map((value) => (
+                    <option key={value} value={value}>{`${value} phiên`}</option>
                   ))}
                 </select>
                 <FiChevronDown aria-hidden="true" />

@@ -175,9 +175,6 @@ function TopGainT3Chart({ window = 3 }) {
           </div>
         )}
 
-        <footer className="top-gain-t3__footer">
-          <small>Nguồn: rổ mã giá trị khớp lệnh trên 1 tỷ, chỉ mã tăng giá . % tính so giá đóng cửa {tPlus + 1} phiên trước . Sắp xếp theo điểm = % tăng × log10(thanh khoản + 1)</small>
-        </footer>
       </section>
     </main>
   );

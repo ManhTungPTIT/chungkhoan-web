@@ -212,12 +212,17 @@
    ratio trùng dấu điểm MA → dương luôn nằm trên, vạch là duy nhất). */
 .flow-consistency__row--divider { border-bottom: 1px dashed #b9c0cd !important; }
 
-/* Cột ô và hàng nhãn ngày dùng CÙNG `--cols` để nhãn rơi đúng trên ô của nó. */
+/* Cột ô và hàng nhãn ngày dùng CÙNG `--cols` để nhãn rơi đúng trên ô của nó
+   (kể cả max-width — bỏ nó ở hàng nhãn là nhãn lệch khỏi ô ngay).
+   max-width chặn bề rộng MỘT ô ở ~2rem: chế độ 5 phiên chia 1fr cho cả vùng
+   4fr sẽ cho ô rộng cả trăm px, lưới nhiệt biến thành mấy thanh dài vô nghĩa.
+   Chạm trần thì cả khối dạt trái (grid item stretch + max-width = canh đầu). */
 .flow-consistency__cells,
 .flow-consistency__ticks {
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
   gap: 1px;
+  max-width: calc(var(--cols) * 2rem);
 }
 .flow-consistency__ticks {
   gap: 0;
