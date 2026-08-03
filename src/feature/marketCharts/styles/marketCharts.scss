@@ -7,7 +7,7 @@
   padding: 0.75rem;
   // Dải trống cho nút nổi "Danh sách các biểu đồ" (position: fixed, góc trên
   // phải) — không có nó thì nút đè lên tiêu đề card đầu tiên.
-  padding-top: 3.75rem;
+  padding-top: 0.75rem;
   overflow-x: hidden;
   overflow-y: auto;
   background: #f5f7fb;
@@ -68,6 +68,16 @@
   min-height: 34rem;
   place-items: center;
   padding: 1.5rem;
+  color: #566176;
+  text-align: center;
+}
+
+// Bỏ tích hết biểu đồ: chiếm cả hai cột lưới, không thì nó nép vào nửa trái
+// của một trang trống trơn.
+.market-chart-pair__empty {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 3rem 1.5rem;
   color: #566176;
   text-align: center;
 }

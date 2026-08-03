@@ -3,7 +3,9 @@ import { useLocation } from "react-router-dom";
 import { BsGraphUpArrow } from "react-icons/bs";
 import ChartHeader from "../../components/ChartHeader";
 import ChartListButton from "./layouts/ChartListButton";
-import { scrollToChart } from "./untils/chartList";
+import { ChartSection, ChartVisibilityProvider } from "./layouts/ChartSection";
+import { useChartVisibility } from "./hooks/useChartVisibility";
+import { MARKET_CHARTS, scrollToChart } from "./untils/chartList";
 import { useTplusWave } from "../tplusWave/hooks/useTplusWave";
 import TplusWaveRadar from "../tplusWave/layouts/TplusWaveRadar";
 import PotentialFlowChart from "../potentialFlow/layouts/PotentialFlowChart";
@@ -60,266 +62,287 @@ function TplusChartPanel() {
 
 export default function MarketChartsPage() {
   const location = useLocation();
-  // Mọi <section> đều có id trùng hash nên tra thẳng bằng getElementById —
+  const { visible, toggleChart, showChart, showAll, hideAll } = useChartVisibility();
+  const hasVisibleChart = MARKET_CHARTS.some((chart) => visible[chart.id] !== false);
+
+  // Mọi <ChartSection> đều có id trùng hash nên tra thẳng bằng getElementById —
   // không cần 23 ref song song với danh sách (dễ lệch khi thêm biểu đồ mới).
   // setTimeout 0 để chờ section vừa mount xong mới cuộn.
   useEffect(() => {
     const id = location.hash.slice(1);
     if (!id) return undefined;
 
+    // Link sâu (#id) tới biểu đồ người dùng đã ẩn: bật lại rồi mới cuộn, không
+    // thì mở link xong chẳng thấy gì mà cũng không hiểu vì sao.
+    showChart(id);
+
     const timer = window.setTimeout(() => {
       scrollToChart(id);
     }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [location.hash]);
+  }, [location.hash, showChart]);
 
   return (
-    <main className="market-chart-pair">
-      <ChartListButton />
-      <section
-        id="potential-flow"
-        className="market-chart-pair__panel market-chart-pair__panel--potential"
-        aria-label="Biểu đồ mã cổ phiếu tiềm năng"
-      >
-        <PotentialFlowChart />
-      </section>
-
-      <section
-        id="tplus-wave"
-        className="market-chart-pair__panel market-chart-pair__panel--tplus"
-        aria-label="Biểu đồ radar sóng tăng T+"
-      >
-        <ChartHeader
-          id="tplus-wave-title"
-          icon={<BsGraphUpArrow />}
-          title="BẢN ĐỒ SỨC MẠNH TĂNG GIÁ CỔ PHIẾU"
-          variant="navy"
-          accent="#35c66b"
-          className="market-chart-pair__tplus-header"
+    <ChartVisibilityProvider visible={visible}>
+      <main className="market-chart-pair">
+        <ChartListButton
+          visible={visible}
+          onToggleChart={toggleChart}
+          onShowChart={showChart}
+          onShowAll={showAll}
+          onHideAll={hideAll}
         />
-        <div className="market-chart-pair__tplus-chart">
-          <TplusChartPanel />
-        </div>
-      </section>
-      <section
-        id="top-gain-t2"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ top tăng cao nhất T+2"
-      >
-        <TopGainT2Chart window={2} />
-      </section>
+        {!hasVisibleChart && (
+          <p className="market-chart-pair__empty">
+            Chưa chọn biểu đồ nào — mở danh sách ở góc trên bên phải để bật lại.
+          </p>
+        )}
+        <ChartSection
+          id="power-map"
+          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--power"
+          aria-label="Bản đồ sức mạnh dòng tiền"
+        >
+          <PowerPage />
+        </ChartSection>
+        <ChartSection
+          id="potential-flow"
+          className="market-chart-pair__panel market-chart-pair__panel--potential"
+          aria-label="Biểu đồ mã cổ phiếu tiềm năng"
+        >
+          <PotentialFlowChart />
+        </ChartSection>
 
-      <section
-        id="top-gain-t3"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ top tăng cao nhất T+3"
-      >
-        <TopGainT3Chart window={3} />
-      </section>
+        <ChartSection
+          id="tplus-wave"
+          className="market-chart-pair__panel market-chart-pair__panel--tplus"
+          aria-label="Biểu đồ radar sóng tăng T+"
+        >
+          <ChartHeader
+            id="tplus-wave-title"
+            icon={<BsGraphUpArrow />}
+            title="BẢN ĐỒ SỨC MẠNH TĂNG GIÁ CỔ PHIẾU"
+            variant="navy"
+            accent="#35c66b"
+            className="market-chart-pair__tplus-header"
+          />
+          <div className="market-chart-pair__tplus-chart">
+            <TplusChartPanel />
+          </div>
+        </ChartSection>
+        <ChartSection
+          id="top-gain-t2"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ top tăng cao nhất T+2"
+        >
+          <TopGainT2Chart window={2} />
+        </ChartSection>
 
-      <section
-        id="top-gain-week"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ top tăng cao nhất tuần"
-      >
-        <TopGainWeekChart />
-      </section>
+        <ChartSection
+          id="top-gain-t3"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ top tăng cao nhất T+3"
+        >
+          <TopGainT3Chart window={3} />
+        </ChartSection>
 
-      <section
-        id="flow-surge"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ dòng tiền tăng đột biến hôm nay"
-      >
-        <FlowSurgeChart />
-      </section>
+        <ChartSection
+          id="top-gain-week"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ top tăng cao nhất tuần"
+        >
+          <TopGainWeekChart />
+        </ChartSection>
 
-      <section
-        id="index-overview"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ chỉ số chung 3 sàn"
-      >
-        <IndexOverviewChart />
-      </section>
+        <ChartSection
+          id="flow-surge"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ dòng tiền tăng đột biến hôm nay"
+        >
+          <FlowSurgeChart />
+        </ChartSection>
 
-      <section
-        id="market-status"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ diễn biến thị trường"
-      >
-        <MarketStatusChart />
-      </section>
+        <ChartSection
+          id="index-overview"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ chỉ số chung 3 sàn"
+        >
+          <IndexOverviewChart />
+        </ChartSection>
 
-      <section
-        id="foreign-buy"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ giá trị nước ngoài mua ròng cao nhất"
-      >
-        <ForeignBuyChart />
-      </section>
+        <ChartSection
+          id="market-status"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ diễn biến thị trường"
+        >
+          <MarketStatusChart />
+        </ChartSection>
 
-      <section
-        id="foreign-sell"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ giá trị nước ngoài bán ròng cao nhất"
-      >
-        <ForeignSellChart />
-      </section>
-      <section
-        id="money-flow"
-        className="market-chart-pair__panel market-chart-pair__panel--moneyflow"
-        aria-label="Money flow theo nganh"
-      >
-        <MoneyFlowPage />
-      </section>
-      <section
-        id="put-through"
-        className="market-chart-pair__panel market-chart-pair__panel--treemap"
-        aria-label="Dòng tiền giao dịch thỏa thuận theo mã"
-      >
-        <PutThroughPage />
-      </section>
-      <section
-        id="bull-bear"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ dòng tiền phe bò và phe gấu"
-      >
-        <BullBearChart />
-      </section>
-      <section
-        id="price-band"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ dòng tiền theo nhóm giá cổ phiếu"
-      >
-        <PriceBandChart />
-      </section>
-      <section
-        id="sector-flow-value"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
-      >
-        <SectorFlowValueChart />
-      </section>
-      <section
-        id="sector-flow-share"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ tỷ trọng giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
-      >
-        <SectorFlowShareChart />
-      </section>
-      <section
-        id="sector-breadth"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ xu hướng dòng tiền tích cực tiêu cực theo ngành"
-      >
-        <SectorBreadthChart />
-      </section>
-      <section
-        id="sector-change"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ tổng hợp tăng giảm theo ngành"
-      >
-        <SectorChangeChart />
-      </section>
-      <section
-        id="vn30-basket"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ mã rổ VN30"
-      >
-        <Vn30BasketChart />
-      </section>
-      <section
-        id="flow-surge-month"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ dòng tiền tăng đột biến so với bình quân 1 tháng"
-      >
-        <FlowSurgeMonthChart />
-      </section>
-      <section
-        id="top-value"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ giá trị tiền khớp lệnh cao nhất"
-      >
-        <TopValueChart />
-      </section>
+        <ChartSection
+          id="foreign-buy"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ giá trị nước ngoài mua ròng cao nhất"
+        >
+          <ForeignBuyChart />
+        </ChartSection>
 
-      <section
-        id="top-volume-view"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ khối lượng khớp lệnh cao nhất"
-      >
-        <TopVolumeChart />
-      </section>
+        <ChartSection
+          id="foreign-sell"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ giá trị nước ngoài bán ròng cao nhất"
+        >
+          <ForeignSellChart />
+        </ChartSection>
+        <ChartSection
+          id="money-flow"
+          className="market-chart-pair__panel market-chart-pair__panel--moneyflow"
+          aria-label="Money flow theo nganh"
+        >
+          <MoneyFlowPage />
+        </ChartSection>
+        <ChartSection
+          id="put-through"
+          className="market-chart-pair__panel market-chart-pair__panel--treemap"
+          aria-label="Dòng tiền giao dịch thỏa thuận theo mã"
+        >
+          <PutThroughPage />
+        </ChartSection>
+        <ChartSection
+          id="bull-bear"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ dòng tiền phe bò và phe gấu"
+        >
+          <BullBearChart />
+        </ChartSection>
+        <ChartSection
+          id="price-band"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ dòng tiền theo nhóm giá cổ phiếu"
+        >
+          <PriceBandChart />
+        </ChartSection>
+        <ChartSection
+          id="sector-flow-value"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
+        >
+          <SectorFlowValueChart />
+        </ChartSection>
+        <ChartSection
+          id="sector-flow-share"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ tỷ trọng giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
+        >
+          <SectorFlowShareChart />
+        </ChartSection>
+        <ChartSection
+          id="sector-breadth"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ xu hướng dòng tiền tích cực tiêu cực theo ngành"
+        >
+          <SectorBreadthChart />
+        </ChartSection>
+        <ChartSection
+          id="sector-change"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ tổng hợp tăng giảm theo ngành"
+        >
+          <SectorChangeChart />
+        </ChartSection>
+        <ChartSection
+          id="vn30-basket"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ mã rổ VN30"
+        >
+          <Vn30BasketChart />
+        </ChartSection>
+        <ChartSection
+          id="flow-surge-month"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ dòng tiền tăng đột biến so với bình quân 1 tháng"
+        >
+          <FlowSurgeMonthChart />
+        </ChartSection>
+        <ChartSection
+          id="top-value"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ giá trị tiền khớp lệnh cao nhất"
+        >
+          <TopValueChart />
+        </ChartSection>
 
-      <section
-        id="sector-flow-surge"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Ngành có dòng tiền tăng đột biến"
-      >
-        <SectorFlowSurgeChart />
-      </section>
+        <ChartSection
+          id="top-volume-view"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ khối lượng khớp lệnh cao nhất"
+        >
+          <TopVolumeChart />
+        </ChartSection>
 
-      {/* --wide: lưới 30-60 cột + 2 cột chỉ số không vừa nửa hàng; panel hẹp đẩy
-          TB/ĐLC và "phiên +" ra ngoài vùng cuộn ngang, tức mất đúng con số xếp
-          hạng mà chart này tồn tại để hiển thị. */}
+        <ChartSection
+          id="sector-flow-surge"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Ngành có dòng tiền tăng đột biến"
+        >
+          <SectorFlowSurgeChart />
+        </ChartSection>
+
+        {/* --wide: lưới 30-60 cột + 2 cột chỉ số không vừa nửa hàng; panel hẹp đẩy
+            TB/ĐLC và "phiên +" ra ngoài vùng cuộn ngang, tức mất đúng con số xếp
+            hạng mà chart này tồn tại để hiển thị. */}
       
 
-      <section
-        id="top-advance"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ top tăng cao nhất"
-      >
-        <TopAdvanceChart />
-      </section>
+        <ChartSection
+          id="top-advance"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ top tăng cao nhất"
+        >
+          <TopAdvanceChart />
+        </ChartSection>
 
-      <section
-        id="top-decline"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ top giảm cao nhất"
-      >
-        <TopDeclineChart />
-      </section>
+        <ChartSection
+          id="top-decline"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ top giảm cao nhất"
+        >
+          <TopDeclineChart />
+        </ChartSection>
 
-      <section
-        id="foreign-trading-history"
-        className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-        aria-label="Biểu đồ lịch sử giao dịch nước ngoài"
-      >
-        <ForeignTradingHistoryChart />
-      </section>
-      <section
-        id="sector-flow-consistency"
-        className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--consistency"
-        aria-label="Ngành hút tiền đều đặn nhất 30 phiên"
-      >
-        <SectorFlowConsistencyChart />
-      </section>
+        <ChartSection
+          id="foreign-trading-history"
+          className="market-chart-pair__panel market-chart-pair__panel--top-gain"
+          aria-label="Biểu đồ lịch sử giao dịch nước ngoài"
+        >
+          <ForeignTradingHistoryChart />
+        </ChartSection>
+        <ChartSection
+          id="sector-flow-consistency"
+          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--consistency"
+          aria-label="Ngành hút tiền đều đặn nhất 30 phiên"
+        >
+          <SectorFlowConsistencyChart />
+        </ChartSection>
 
-      {/* Ba bản đồ chiếm CẢ hai cột: chúng vốn là trang riêng chiếm trọn bề
-          ngang, nhét vào nửa cột thì treemap/vòng tròn bị bóp không đọc nổi. */}
-      <section
-        id="heatmap"
-        className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--heatmap"
-        aria-label="Bản đồ nhiệt thị trường"
-      >
-        <HeatmapPage />
-      </section>
+        {/* Ba bản đồ chiếm CẢ hai cột: chúng vốn là trang riêng chiếm trọn bề
+            ngang, nhét vào nửa cột thì treemap/vòng tròn bị bóp không đọc nổi. */}
+        <ChartSection
+          id="heatmap"
+          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--heatmap"
+          aria-label="Bản đồ nhiệt thị trường"
+        >
+          <HeatmapPage />
+        </ChartSection>
 
-      <section
-        id="power-map"
-        className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--power"
-        aria-label="Bản đồ sức mạnh dòng tiền"
-      >
-        <PowerPage />
-      </section>
+      
 
-      {/* <section
-        id="market-overview"
-        className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--overview"
-        aria-label="Bản đồ toàn cảnh thị trường"
-      >
-        <HomePage />
-      </section> */}
-    </main>
+        {/* <ChartSection
+          id="market-overview"
+          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--overview"
+          aria-label="Bản đồ toàn cảnh thị trường"
+        >
+          <HomePage />
+        </ChartSection> */}
+      </main>
+    </ChartVisibilityProvider>
   );
 }

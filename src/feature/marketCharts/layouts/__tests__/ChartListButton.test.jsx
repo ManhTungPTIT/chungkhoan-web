@@ -1,10 +1,12 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { useState } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import ChartListButton from "../ChartListButton";
 import { MARKET_CHARTS } from "../../untils/chartList";
+import { buildDefaultVisibility } from "../../untils/chartVisibility";
 
 afterEach(cleanup);
 
@@ -14,36 +16,56 @@ function HashProbe() {
   return <span data-testid="hash">{location.hash}</span>;
 }
 
-function renderButton(initialEntry = "/chart/market") {
+// Đóng vai MarketChartsPage: giữ state hiện/ẩn và bơm xuống nút danh sách.
+function Host({ initialVisible }) {
+  const [visible, setVisible] = useState(initialVisible ?? buildDefaultVisibility());
+
+  return (
+    <>
+      <ChartListButton
+        visible={visible}
+        onToggleChart={(id) => setVisible((v) => ({ ...v, [id]: !v[id] }))}
+        onShowChart={(id) => setVisible((v) => ({ ...v, [id]: true }))}
+        onShowAll={() => setVisible(buildDefaultVisibility())}
+        onHideAll={() =>
+          setVisible(
+            MARKET_CHARTS.reduce((next, chart) => {
+              next[chart.id] = false;
+              return next;
+            }, {}),
+          )
+        }
+      />
+      <HashProbe />
+    </>
+  );
+}
+
+function renderButton(initialEntry = "/chart/market", initialVisible) {
   return render(
     <MemoryRouter initialEntries={[initialEntry]}>
       <Routes>
-        <Route
-          path="/chart/market"
-          element={
-            <>
-              <ChartListButton />
-              <HashProbe />
-            </>
-          }
-        />
+        <Route path="/chart/market" element={<Host initialVisible={initialVisible} />} />
       </Routes>
     </MemoryRouter>,
   );
 }
 
+const trigger = () => screen.getByRole("button", { name: "Danh sách các biểu đồ" });
+const checkboxFor = (label) => screen.getByRole("checkbox", { name: `Hiện biểu đồ ${label}` });
+
 describe("ChartListButton", () => {
   it("chỉ hiện nút, chưa xổ danh sách trước khi bấm", () => {
     renderButton();
 
-    expect(screen.getByText("Danh sách các biểu đồ")).toBeTruthy();
+    expect(trigger()).toBeTruthy();
     expect(screen.queryByRole("menu")).toBeNull();
   });
 
   it("bấm nút thì xổ đủ tên mọi biểu đồ", () => {
     renderButton();
 
-    fireEvent.click(screen.getByText("Danh sách các biểu đồ"));
+    fireEvent.click(trigger());
 
     expect(screen.getAllByRole("menuitem")).toHaveLength(MARKET_CHARTS.length);
     expect(screen.getByText("Nhóm tăng mạnh nhất T+2")).toBeTruthy();
@@ -53,7 +75,7 @@ describe("ChartListButton", () => {
   it("chọn một biểu đồ thì đặt hash tương ứng và đóng danh sách", () => {
     renderButton();
 
-    fireEvent.click(screen.getByText("Danh sách các biểu đồ"));
+    fireEvent.click(trigger());
     fireEvent.click(screen.getByText("Nhóm tăng mạnh nhất T+3"));
 
     expect(screen.getByTestId("hash").textContent).toBe("#top-gain-t3");
@@ -68,7 +90,7 @@ describe("ChartListButton", () => {
     document.body.appendChild(section);
 
     renderButton("/chart/market#top-gain-t2");
-    fireEvent.click(screen.getByText("Danh sách các biểu đồ"));
+    fireEvent.click(trigger());
     fireEvent.click(screen.getByText("Nhóm tăng mạnh nhất T+2"));
 
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
@@ -78,12 +100,58 @@ describe("ChartListButton", () => {
   it("bấm ra ngoài thì đóng danh sách", () => {
     renderButton();
 
-    fireEvent.click(screen.getByText("Danh sách các biểu đồ"));
+    fireEvent.click(trigger());
     expect(screen.queryByRole("menu")).toBeTruthy();
 
     fireEvent.mouseDown(document.body);
 
     expect(screen.queryByRole("menu")).toBeNull();
+  });
+});
+
+describe("ChartListButton — tích chọn biểu đồ hiện", () => {
+  it("mặc định mọi biểu đồ đều được tích", () => {
+    renderButton();
+
+    fireEvent.click(trigger());
+
+    const boxes = screen.getAllByRole("checkbox");
+    expect(boxes).toHaveLength(MARKET_CHARTS.length);
+    expect(boxes.every((box) => box.checked)).toBe(true);
+  });
+
+  it("bỏ tích một biểu đồ nhưng KHÔNG đóng menu (còn tích tiếp)", () => {
+    renderButton();
+
+    fireEvent.click(trigger());
+    fireEvent.click(checkboxFor("Bản đồ nhiệt thị trường"));
+
+    expect(checkboxFor("Bản đồ nhiệt thị trường").checked).toBe(false);
+    expect(checkboxFor("Mã cổ phiếu tiềm năng").checked).toBe(true);
+    expect(screen.queryByRole("menu")).toBeTruthy();
+  });
+
+  it("bỏ hết rồi chọn tất cả thì quay lại hiện hết", () => {
+    renderButton();
+
+    fireEvent.click(trigger());
+    fireEvent.click(screen.getByText("Bỏ hết"));
+    expect(screen.getAllByRole("checkbox").every((box) => box.checked)).toBe(false);
+
+    fireEvent.click(screen.getByText("Chọn tất cả"));
+    expect(screen.getAllByRole("checkbox").every((box) => box.checked)).toBe(true);
+  });
+
+  it("bấm TÊN của biểu đồ đang ẩn thì bật lại rồi mới nhảy tới", () => {
+    renderButton("/chart/market", { ...buildDefaultVisibility(), heatmap: false });
+
+    fireEvent.click(trigger());
+    fireEvent.click(screen.getByText("Bản đồ nhiệt thị trường"));
+
+    expect(screen.getByTestId("hash").textContent).toBe("#heatmap");
+
+    fireEvent.click(trigger());
+    expect(checkboxFor("Bản đồ nhiệt thị trường").checked).toBe(true);
   });
 });
 
@@ -95,7 +163,7 @@ describe("MARKET_CHARTS", () => {
     expect(MARKET_CHARTS.every((c) => c.label.trim().length > 0)).toBe(true);
   });
 
-  it("mọi id đều trỏ tới một <section> có thật trong trang, đúng thứ tự cuộn", () => {
+  it("mọi id đều trỏ tới một <ChartSection> có thật trong trang, đúng thứ tự cuộn", () => {
     // Đọc thẳng source trang: nút nhảy vô dụng nếu id không khớp section, mà
     // render cả trang trong test thì phải mock hơn 20 chart.
     const page = readFileSync(

@@ -7,6 +7,7 @@
 export const MARKET_CHART_PATH = "/chart/market";
 
 export const MARKET_CHARTS = [
+  { id: "power-map", label: "Bản đồ sức mạnh dòng tiền" },
   { id: "potential-flow", label: "Mã cổ phiếu tiềm năng" },
   { id: "tplus-wave", label: "Bản đồ sức mạnh tăng giá cổ phiếu" },
   { id: "top-gain-t2", label: "Nhóm tăng mạnh nhất T+2" },
@@ -30,13 +31,13 @@ export const MARKET_CHARTS = [
   { id: "top-value", label: "Giá trị tiền khớp lệnh cao nhất (Tỷ)" },
   { id: "top-volume-view", label: "Khối lượng khớp lệnh cao nhất" },
   { id: "sector-flow-surge", label: "Ngành có dòng tiền tăng đột biến" },
-  { id: "sector-flow-consistency", label: "Ngành hút tiền đều đặn nhất" },
   { id: "top-advance", label: "Top tăng cao nhất" },
   { id: "top-decline", label: "Top giảm cao nhất" },
   { id: "foreign-trading-history", label: "Lịch sử giao dịch nước ngoài" },
+  { id: "sector-flow-consistency", label: "Ngành hút tiền đều đặn nhất" },
   { id: "heatmap", label: "Bản đồ nhiệt thị trường" },
-  { id: "power-map", label: "Bản đồ sức mạnh dòng tiền" },
-  { id: "market-overview", label: "Bản đồ toàn cảnh thị trường" },
+  // "market-overview" đã bị gỡ: section tương ứng trong index.jsx đang comment
+  // nên mục này chỉ nhảy tới hư không (và nay còn là ô tích không điều khiển gì).
 ];
 
 /** Cuộn tới một biểu đồ theo id. Trả true nếu tìm thấy section (để caller biết

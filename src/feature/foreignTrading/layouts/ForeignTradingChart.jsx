@@ -34,7 +34,10 @@ function ForeignTradingChart() {
                     <div className="foreign-trading__chart">
                         <div className="foreign-trading__panel-titles" aria-hidden="true">
                             <span />
-                            <span className="foreign-trading__badge foreign-trading__badge--purple">TỔNG MUA BÁN (TỶ)</span>
+                            {/* Cột tím vẽ sell_value (xem foreignTradingLayout: `sellTy`), không
+                                phải buy+sell — nhãn cũ "TỔNG MUA BÁN" đọc ra con số khác hẳn
+                                (phiên 30/07: bán 2.422 tỷ, tổng 5.442 tỷ). */}
+                            <span className="foreign-trading__badge foreign-trading__badge--purple">GIÁ TRỊ BÁN (TỶ)</span>
                             <span className="foreign-trading__panel-titles-net">
                                 <b className="foreign-trading__badge--red">BÁN RÒNG</b>
                                 <b className="foreign-trading__badge--green">MUA RÒNG</b>

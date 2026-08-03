@@ -37,23 +37,66 @@
     }
   }
 
-  &__menu {
-    // Danh sách hơn 20 mục — giới hạn chiều cao và cho cuộn trong menu, không
-    // để nó tràn khỏi màn hình.
-    max-height: min(70vh, 32rem);
+  // Khung bọc: hàng nút "Chọn tất cả / Bỏ hết" đứng yên, chỉ phần danh sách cuộn.
+  &__panel {
     width: min(22rem, calc(100vw - 2.5rem));
-    overflow-y: auto;
-    margin: 0;
-    padding: 0.35rem;
-    list-style: none;
     border-radius: 0.5rem;
     background: #fff;
     box-shadow: 0 6px 20px rgb(0 0 0 / 22%);
   }
 
+  &__bulk {
+    display: flex;
+    gap: 0.35rem;
+    padding: 0.45rem 0.5rem;
+    border-bottom: 1px solid #e6eaf1;
+  }
+
+  &__bulk-btn {
+    flex: 1;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #d8dee8;
+    border-radius: 0.35rem;
+    background: #f7f9fc;
+    color: #33405a;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: #eef2f8;
+    }
+  }
+
+  &__menu {
+    // Danh sách hơn 20 mục — giới hạn chiều cao và cho cuộn trong menu, không
+    // để nó tràn khỏi màn hình.
+    max-height: min(70vh, 32rem);
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.35rem;
+    list-style: none;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  &__check {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin: 0 0.15rem 0 0.35rem;
+    accent-color: #f0851f;
+    cursor: pointer;
+  }
+
   &__item {
     display: block;
-    width: 100%;
+    flex: 1;
+    min-width: 0;
     padding: 0.5rem 0.65rem;
     border: none;
     border-radius: 0.35rem;
@@ -72,6 +115,13 @@
       background: #fdf0e2;
       color: #b5590c;
       font-weight: 600;
+    }
+
+    // Đang bị ẩn: làm mờ cho thấy khác hẳn mục đang hiện. Vẫn bấm được — bấm
+    // thì biểu đồ tự bật lại rồi cuộn tới.
+    &.is-hidden-chart {
+      color: #8a94a6;
+      text-decoration: line-through;
     }
   }
 }
