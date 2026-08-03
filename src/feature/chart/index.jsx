@@ -8,22 +8,14 @@ import DataStatusBanner from "../chart/layouts/DataStatusBanner";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
 import TimelineStock from "../chart/layouts/TimelineStock";
 import {
-  generateSignals,
-  generateSignalsT,
-  generateSignalsLong,
-} from "./untils/indicators";
+  signalGeneratorForBot,
+  usesBackendPanelSignal,
+} from "./untils/botSignals";
 import {
   loadIndicatorState,
   normalizeIndicatorConfigs,
   saveIndicatorState,
 } from "./untils/indicatorSettings";
-
-// Chọn hàm sinh tín hiệu theo BOT trên sidebar (qua /?bot=...)
-const SIGNAL_GENERATORS = {
-  trend: generateSignals, // BOT Trend (mặc định)
-  t: generateSignalsT, // BOT T+
-  long: generateSignalsLong, // BOT Dài hạn
-};
 import Panel from "../chart/layouts/panel";
 import { useIntraday } from "./hooks/useIntraday";
 import { useQuoteStream } from "./hooks/useQuoteStream";
@@ -184,10 +176,7 @@ function TradingView() {
   // mảng mới → useEffect khởi tạo chart (deps có signals) chạy lại → dispose()+
   // init() xoá sạch overlay đang vẽ. Chỉ đổi khi candles hoặc bot thay đổi.
   const bot = searchParams.get("bot");
-  const signals = useMemo(() => {
-    const generateSignalsFor = SIGNAL_GENERATORS[bot] ?? generateSignals;
-    return generateSignalsFor(candles);
-  }, [candles, bot]);
+  const signals = useMemo(() => signalGeneratorForBot(bot)(candles), [candles, bot]);
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
 
@@ -259,7 +248,12 @@ function TradingView() {
 
   //Lay gia va ngay tai diem signal cuoi cung (co the chua co khi data dang tai)
   const lastSignal = signals.length > 0 ? signals[signals.length - 1] : null;
-  const backendSignalType = signalTypeFromBackend(selectedPanelRow?.signal);
+  // Panel /vn100 chỉ có tín hiệu của BOT Trend (xem usesBackendPanelSignal).
+  // BOT T+/Dài hạn phải đọc `lastSignal` do FE tự tính, không thì đổi bot mà
+  // giá/ngày/số phiên trên thẻ đứng yên ở số của BOT Trend.
+  const backendSignalType = usesBackendPanelSignal(bot)
+    ? signalTypeFromBackend(selectedPanelRow?.signal)
+    : null;
   const signalType = backendSignalType ?? lastSignal?.type;
   const priceChange =
     backendSignalType && selectedPanelRow?.signal_price != null
