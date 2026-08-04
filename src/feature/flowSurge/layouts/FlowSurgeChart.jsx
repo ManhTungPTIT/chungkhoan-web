@@ -52,7 +52,7 @@ function FlowSurgeChart() {
         <ChartHeader
           id="flow-surge-title"
           icon={<BsGraphUpArrow />}
-          title={<>TOP BIẾN ĐỘNG TĂNG MẠNH NHẤT <span className="chart-header__hl">HÔM NAY</span></>}
+          title={<>CÁC MÃ ĐỘT BIẾN DÒNG TIỀN MẠNH NHẤT<span className="chart-header__hl">HÔM NAY</span></>}
           variant="navy"
           accent="#e6b52e"
         />

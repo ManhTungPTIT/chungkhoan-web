@@ -58,7 +58,7 @@ export default function MoneyFlowPage() {
       <ChartHeader
         id="money-flow-title"
         icon={<SectorHeaderIcon />}
-        title="PHÂN BỔ DÒNG VỐN THEO LĨNH VỰC"
+        title="PHÂN BỔ DÒNG VỐN THEO NGÀNH"
         variant="teal"
         accent="#62d98b"
         className="tm-head tm-head--moneyflow"

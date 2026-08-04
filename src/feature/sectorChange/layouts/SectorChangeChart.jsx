@@ -206,7 +206,7 @@ function SectorChangeChart() {
       <ChartHeader
         id="sector-change-title"
         icon={<BsGraphUpArrow />}
-        title="BỨC TRANH BIẾN ĐỘNG DÒNG TIỀN"
+        title=" DIỄN GIẢI CHI TIẾT DÒNG TIỀN TÍCH CỰC - TIÊU CỰC NGÀNH"
         variant="navy"
         accent="#e061b8"
         className="sector-rows__header"

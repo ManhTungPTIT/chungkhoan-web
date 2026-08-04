@@ -19,25 +19,26 @@ export default function PowerCircle({ data }) {
     const maxMag = Math.max(1, ...data.map((d) => d.magnitude));
 
     chart.setOption({
-      title: {
-        text: "BẢN ĐỒ SỨC MẠNH DÒNG TIỀN ",
-        left: "center",
-        top: 4,
-        textStyle: {
-          fontSize: 15,
-          color: "#333",
-          fontFamily: "Times New Roman", // tên font, vd: "Roboto", "Arial"
-          fontWeight: "bold", // "normal" | "bold" | "bolder" | 100–900
-          fontStyle: "normal", // "normal" | "italic" | "oblique"
-        },
-      },
+      // Không có `title` ở đây: tiêu đề là <ChartHeader> ngoài canvas (xem
+      // feature/power/index.jsx) để đồng bộ với mọi biểu đồ khác.
       tooltip: {
         formatter: (p) => {
           const d = data[p.dataIndex] || {};
-          return `${d.symbol}<br/>${fmtPct(d.pct)}<br/>GT: ${(d.value || 0).toLocaleString("vi-VN")}`;
+          const lines = [
+            d.symbol,
+            fmtPct(d.pct),
+            `GT: ${(d.value || 0).toLocaleString("vi-VN")}`,
+          ];
+          // Lý do mã được tô tím / xếp đầu cung nằm ở đây — không có dòng này
+          // thì thứ hạng trông như ngẫu nhiên. Vắng mặt khi chưa chấm được
+          // (thiếu nền TB20), không hiện 0% để khỏi đọc nhầm là "hụt tiền".
+          if (d.surge != null) lines.push(`Đột biến: ${d.surge}%`);
+          return lines.join("<br/>");
         },
       },
-      polar: { radius: ["4%", "72%"], center: ["50%", "54%"] },
+      // center dọc 50%: mốc 54% trước đây là để né chỗ cho title vẽ trong canvas;
+      // title đã chuyển ra ngoài nên giữ 54% là vòng tròn lệch xuống dưới.
+      polar: { radius: ["4%", "72%"], center: ["50%", "50%"] },
       angleAxis: {
         type: "category",
         data: symbols,

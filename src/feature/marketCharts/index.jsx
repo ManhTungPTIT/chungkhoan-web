@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { BsGraphUpArrow } from "react-icons/bs";
 import ChartHeader from "../../components/ChartHeader";
@@ -33,6 +33,7 @@ import TopAdvanceChart from "../topAdvance/layouts/TopAdvanceChart";
 import TopDeclineChart from "../topDecline/layouts/TopDeclineChart";
 import SectorFlowSurgeChart from "../sectorFlowSurge/layouts/SectorFlowSurgeChart";
 import SectorFlowConsistencyChart from "../sectorFlowConsistency/layouts/SectorFlowConsistencyChart";
+import BaseBreakoutChart from "../baseBreakout/layouts/BaseBreakoutChart";
 // Ba "bản đồ thị trường" trước đây là trang riêng trong submenu cùng tên; đã
 // gộp vào đây để tất cả nằm chung một mục "Biểu đồ thị trường". Route cũ
 // (/chart/heatmap, /chart/power, /home) vẫn giữ để không gãy link đã lưu.
@@ -41,6 +42,8 @@ import PowerPage from "../power";
 import HomePage from "../homepage/layouts/HomePage";
 import ForeignTradingHistoryChart from "../foreignTrading/layouts/ForeignTradingChart";
 import "./styles/marketCharts.scss";
+
+const MARKET_CHART_LABELS = Object.fromEntries(MARKET_CHARTS.map(({ id, label }) => [id, label]));
 
 function TplusChartPanel() {
   const { data, isLoading, isError } = useTplusWave();
@@ -98,25 +101,20 @@ export default function MarketChartsPage() {
             Chưa chọn biểu đồ nào — mở danh sách ở góc trên bên phải để bật lại.
           </p>
         )}
+        {/* Hai "bản đồ sức mạnh" ghép thành CẶP mở đầu trang: cùng nửa hàng,
+            cùng header navy, cùng chiều cao (khoá trong marketCharts.scss). */}
         <ChartSection
           id="power-map"
-          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--power"
-          aria-label="Bản đồ sức mạnh dòng tiền"
+          className="market-chart-pair__panel market-chart-pair__panel--power"
+          aria-label={MARKET_CHART_LABELS["power-map"]}
         >
           <PowerPage />
-        </ChartSection>
-        <ChartSection
-          id="potential-flow"
-          className="market-chart-pair__panel market-chart-pair__panel--potential"
-          aria-label="Biểu đồ mã cổ phiếu tiềm năng"
-        >
-          <PotentialFlowChart />
         </ChartSection>
 
         <ChartSection
           id="tplus-wave"
           className="market-chart-pair__panel market-chart-pair__panel--tplus"
-          aria-label="Biểu đồ radar sóng tăng T+"
+          aria-label={MARKET_CHART_LABELS["tplus-wave"]}
         >
           <ChartHeader
             id="tplus-wave-title"
@@ -130,10 +128,22 @@ export default function MarketChartsPage() {
             <TplusChartPanel />
           </div>
         </ChartSection>
+
+        {/* --wide: cặp trên lấy mất ô mà power-map từng chiếm cả hàng. Cho
+            potential-flow trải cả hàng để SỐ Ô lưới trước top-gain-t2 vẫn chẵn —
+            không thì mọi cặp phía dưới (money-flow + put-through, bull-bear +
+            price-band…) lệch nhau một cột. */}
+        <ChartSection
+          id="potential-flow"
+          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--potential"
+          aria-label={MARKET_CHART_LABELS["potential-flow"]}
+        >
+          <PotentialFlowChart />
+        </ChartSection>
         <ChartSection
           id="top-gain-t2"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ top tăng cao nhất T+2"
+          aria-label={MARKET_CHART_LABELS["top-gain-t2"]}
         >
           <TopGainT2Chart window={2} />
         </ChartSection>
@@ -141,7 +151,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="top-gain-t3"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ top tăng cao nhất T+3"
+          aria-label={MARKET_CHART_LABELS["top-gain-t3"]}
         >
           <TopGainT3Chart window={3} />
         </ChartSection>
@@ -149,7 +159,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="top-gain-week"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ top tăng cao nhất tuần"
+          aria-label={MARKET_CHART_LABELS["top-gain-week"]}
         >
           <TopGainWeekChart />
         </ChartSection>
@@ -157,7 +167,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="flow-surge"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ dòng tiền tăng đột biến hôm nay"
+          aria-label={MARKET_CHART_LABELS["flow-surge"]}
         >
           <FlowSurgeChart />
         </ChartSection>
@@ -165,7 +175,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="index-overview"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ chỉ số chung 3 sàn"
+          aria-label={MARKET_CHART_LABELS["index-overview"]}
         >
           <IndexOverviewChart />
         </ChartSection>
@@ -173,7 +183,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="market-status"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ diễn biến thị trường"
+          aria-label={MARKET_CHART_LABELS["market-status"]}
         >
           <MarketStatusChart />
         </ChartSection>
@@ -181,7 +191,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="foreign-buy"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ giá trị nước ngoài mua ròng cao nhất"
+          aria-label={MARKET_CHART_LABELS["foreign-buy"]}
         >
           <ForeignBuyChart />
         </ChartSection>
@@ -189,84 +199,84 @@ export default function MarketChartsPage() {
         <ChartSection
           id="foreign-sell"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ giá trị nước ngoài bán ròng cao nhất"
+          aria-label={MARKET_CHART_LABELS["foreign-sell"]}
         >
           <ForeignSellChart />
         </ChartSection>
         <ChartSection
           id="money-flow"
           className="market-chart-pair__panel market-chart-pair__panel--moneyflow"
-          aria-label="Money flow theo nganh"
+          aria-label={MARKET_CHART_LABELS["money-flow"]}
         >
           <MoneyFlowPage />
         </ChartSection>
         <ChartSection
           id="put-through"
           className="market-chart-pair__panel market-chart-pair__panel--treemap"
-          aria-label="Dòng tiền giao dịch thỏa thuận theo mã"
+          aria-label={MARKET_CHART_LABELS["put-through"]}
         >
           <PutThroughPage />
         </ChartSection>
         <ChartSection
           id="bull-bear"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ dòng tiền phe bò và phe gấu"
+          aria-label={MARKET_CHART_LABELS["bull-bear"]}
         >
           <BullBearChart />
         </ChartSection>
         <ChartSection
           id="price-band"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ dòng tiền theo nhóm giá cổ phiếu"
+          aria-label={MARKET_CHART_LABELS["price-band"]}
         >
           <PriceBandChart />
         </ChartSection>
         <ChartSection
           id="sector-flow-value"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
+          aria-label={MARKET_CHART_LABELS["sector-flow-value"]}
         >
           <SectorFlowValueChart />
         </ChartSection>
         <ChartSection
           id="sector-flow-share"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ tỷ trọng giá trị tiền khớp lệnh 5 phiên gần nhất theo ngành"
+          aria-label={MARKET_CHART_LABELS["sector-flow-share"]}
         >
           <SectorFlowShareChart />
         </ChartSection>
         <ChartSection
           id="sector-breadth"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ xu hướng dòng tiền tích cực tiêu cực theo ngành"
+          aria-label={MARKET_CHART_LABELS["sector-breadth"]}
         >
           <SectorBreadthChart />
         </ChartSection>
         <ChartSection
           id="sector-change"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ tổng hợp tăng giảm theo ngành"
+          aria-label={MARKET_CHART_LABELS["sector-change"]}
         >
           <SectorChangeChart />
         </ChartSection>
         <ChartSection
           id="vn30-basket"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ mã rổ VN30"
+          aria-label={MARKET_CHART_LABELS["vn30-basket"]}
         >
           <Vn30BasketChart />
         </ChartSection>
         <ChartSection
           id="flow-surge-month"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ dòng tiền tăng đột biến so với bình quân 1 tháng"
+          aria-label={MARKET_CHART_LABELS["flow-surge-month"]}
         >
           <FlowSurgeMonthChart />
         </ChartSection>
         <ChartSection
           id="top-value"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ giá trị tiền khớp lệnh cao nhất"
+          aria-label={MARKET_CHART_LABELS["top-value"]}
         >
           <TopValueChart />
         </ChartSection>
@@ -274,7 +284,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="top-volume-view"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ khối lượng khớp lệnh cao nhất"
+          aria-label={MARKET_CHART_LABELS["top-volume-view"]}
         >
           <TopVolumeChart />
         </ChartSection>
@@ -282,7 +292,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="sector-flow-surge"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Ngành có dòng tiền tăng đột biến"
+          aria-label={MARKET_CHART_LABELS["sector-flow-surge"]}
         >
           <SectorFlowSurgeChart />
         </ChartSection>
@@ -295,7 +305,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="top-advance"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ top tăng cao nhất"
+          aria-label={MARKET_CHART_LABELS["top-advance"]}
         >
           <TopAdvanceChart />
         </ChartSection>
@@ -303,7 +313,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="top-decline"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ top giảm cao nhất"
+          aria-label={MARKET_CHART_LABELS["top-decline"]}
         >
           <TopDeclineChart />
         </ChartSection>
@@ -311,16 +321,27 @@ export default function MarketChartsPage() {
         <ChartSection
           id="foreign-trading-history"
           className="market-chart-pair__panel market-chart-pair__panel--top-gain"
-          aria-label="Biểu đồ lịch sử giao dịch nước ngoài"
+          aria-label={MARKET_CHART_LABELS["foreign-trading-history"]}
         >
           <ForeignTradingHistoryChart />
         </ChartSection>
         <ChartSection
           id="sector-flow-consistency"
           className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--consistency"
-          aria-label="Ngành hút tiền đều đặn nhất 30 phiên"
+          aria-label={MARKET_CHART_LABELS["sector-flow-consistency"]}
         >
           <SectorFlowConsistencyChart />
+        </ChartSection>
+
+        {/* --wide bắt buộc: nội dung là một ảnh nền 1920×1080 với 15 bong bóng
+            vẽ sẵn, nhét vào nửa cột thì chữ trong bong bóng nhỏ tới mức không
+            đọc được. */}
+        <ChartSection
+          id="base-breakout"
+          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--base-breakout"
+          aria-label={MARKET_CHART_LABELS["base-breakout"]}
+        >
+          <BaseBreakoutChart />
         </ChartSection>
 
         {/* Ba bản đồ chiếm CẢ hai cột: chúng vốn là trang riêng chiếm trọn bề
@@ -328,7 +349,7 @@ export default function MarketChartsPage() {
         <ChartSection
           id="heatmap"
           className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--heatmap"
-          aria-label="Bản đồ nhiệt thị trường"
+          aria-label={MARKET_CHART_LABELS["heatmap"]}
         >
           <HeatmapPage />
         </ChartSection>

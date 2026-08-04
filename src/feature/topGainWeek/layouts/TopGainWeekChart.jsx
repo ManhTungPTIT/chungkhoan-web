@@ -52,7 +52,7 @@ function TopGainWeekChart() {
         <ChartHeader
           id="top-gain-week-title"
           icon={<BsGraphUpArrow />}
-          title={<>TOP TĂNG MẠNH NHẤT <span className="chart-header__hl">TUẦN</span></>}
+          title={<>BỘ LỌC MÃ TĂNG MẠNH NHẤT <span className="chart-header__hl">TUẦN</span></>}
           variant="navy"
           accent="#e6b52e"
         />

@@ -32,6 +32,28 @@ describe("buildBarSeries", () => {
     expect(s.thanhKhoanData[0]).toEqual({ value: 15.18, itemStyle: { color: LIQUIDITY_COLOR } });
   });
 
+  // Board vendor chỉ có khớp lệnh nên cột cũ hụt ~10-14% so với tổng giao dịch
+  // thật của sàn; BE nay trả thêm `gia_tri_giao_dich` (đã cộng thỏa thuận).
+  it("ưu tiên gia_tri_giao_dich (đã gồm thỏa thuận) thay vì chỉ khớp lệnh", () => {
+    const s = buildBarSeries([
+      {
+        ten_san: "VN INDEX",
+        gia_tri_khop_lenh: 7.11,
+        gia_tri_thoa_thuan: 1.02,
+        gia_tri_giao_dich: 8.13,
+        thanh_khoan_pct: 48.53,
+      },
+    ]);
+
+    expect(s.thanhKhoanData[0].value).toBe(8.13);
+  });
+
+  it("BE chưa có trường mới thì lùi về khớp lệnh, không mất cột", () => {
+    const s = buildBarSeries([{ ten_san: "VN INDEX", gia_tri_khop_lenh: 7.11 }]);
+
+    expect(s.thanhKhoanData[0].value).toBe(7.11);
+  });
+
   it("map màu điểm/% theo dấu, giữ thứ tự nhóm", () => {
     const indices = [
       { ten_san: "VN INDEX", gia_tri_khop_lenh: 15.18, diem_tang_giam: 5.04, pct: 0.3 },

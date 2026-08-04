@@ -1,0 +1,177 @@
+/* Chart "TOP MÃ VƯỢT NỀN TÍCH LŨY 30 PHIÊN".
+
+   Toàn bộ khung nhìn là một ẢNH NỀN (tiêu đề, thẻ thống kê, thang band, mặt
+   nước và các quả bong bóng đều vẽ chết trong đó). Lớp React chỉ phủ CHỮ lên,
+   định vị bằng % nên phải khoá đúng tỉ lệ khung hình — lệch tỉ lệ là mọi nhãn
+   trượt khỏi bong bóng.
+
+   HAI ảnh nền: ngang 1672×941 (15 bong bóng) và dọc 1080×1920 (9 bong bóng).
+   `aspect-ratio` và cỡ chữ đặt INLINE từ layout đang chọn (xem
+   baseBreakoutSlots.js) vì chúng khác nhau giữa hai bản. */
+
+.base-breakout {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Bản ngang: cỡ chữ trong bong bóng tỉ lệ với bề ngang canvas nên dưới ~1000px
+   quả nhỏ nhất rơi xuống dưới 9px — không đọc nổi. Thà cuộn ngang còn hơn thu
+   nhỏ. Bản dọc KHÔNG có hai dòng này: nó sinh ra để khỏi phải cuộn. */
+.base-breakout--desktop {
+  overflow-x: auto;
+}
+
+.base-breakout--desktop .base-breakout__canvas {
+  min-width: 1000px;
+}
+
+.base-breakout__canvas {
+  position: relative;
+  width: 100%;
+  /* aspect-ratio (đặt inline) + background-size 100% 100%: ảnh luôn phủ kín và
+     KHÔNG bị cắt, nên hệ toạ độ % của lớp chữ trùng khít hệ toạ độ của ảnh.
+     Dùng `cover` thì ảnh bị crop ở tỉ lệ khác và chữ lệch. Tỉ lệ phải là kích
+     thước THẬT của file (bản ngang là 1672/941, không phải 16/9 tròn) — lấy
+     tròn là mọi nhãn trượt dần theo chiều dọc. */
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  /* Mốc cho đơn vị cqw của chữ bên trong — cỡ chữ co theo BỀ NGANG canvas, giữ
+     đúng tỉ lệ với ảnh ở mọi kích thước panel. */
+  container-type: inline-size;
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+}
+
+/* ── Con số trong 5 thẻ thống kê ────────────────────────────────────────────
+   Nhãn ("MÃ VƯỢT NỀN"…) đã có sẵn trong ảnh; đây chỉ là con số bên dưới. */
+.base-breakout__tile {
+  position: absolute;
+  display: flex;
+  /* Số và đơn vị NẰM CÙNG MỘT DÒNG (không xuống dòng): thẻ cao 99px mà nhãn đã
+     bake chiếm tới y=161, chỉ còn ~60px; tách hai dòng thì cụm số bị đẩy chạm
+     đáy thẻ. Canh theo baseline để đáy chữ số lớn và đáy chữ đơn vị nhỏ thẳng
+     nhau. */
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.45cqw;
+  transform: translate(-50%, -50%);
+  line-height: 1.05;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.base-breakout__tile-value {
+  color: #2f1d6b;
+  font-size: var(--bb-tile-value);
+  font-weight: 850;
+  letter-spacing: -0.01em;
+}
+
+.base-breakout__tile-unit {
+  color: #6b7486;
+  font-size: var(--bb-tile-unit);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* ── Badge ngày/giờ trong ô tím góc trên phải ─────────────────────────────── */
+/* Lưới 2 cột (icon | chữ) × 2 hàng: cột icon tự rộng bằng icon to hơn, nên chữ
+   ngày và chữ giờ luôn bắt đầu ở CÙNG một mốc x — canh bằng flex thì lệch ngay
+   khi hai icon khác bề rộng. justify-content: center để cả cụm nằm giữa ô tím. */
+.base-breakout__badge {
+  position: absolute;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4cqw 0.45cqw;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  /* Bản ngang dùng 0.95cqw chứ không 1.05: ở 1.05 dòng "04/08/2026" + icon rộng
+     140/146px của ô tím, chỉ chừa 3px mỗi bên — nhìn như chữ dính mép. */
+  font-size: var(--bb-badge);
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+  span{
+    text-align: left;
+  }
+}
+
+.base-breakout__badge svg {
+  width: var(--bb-badge);
+  height: var(--bb-badge);
+  /* Icon nằm ở cột riêng nên justify-self giữ nó canh giữa cột, không bị kéo
+     giãn theo ô lưới. */
+  justify-self: center;
+}
+
+/* ── Chữ trong bong bóng ───────────────────────────────────────────────────
+   font-size đặt inline theo bề rộng từng quả (xem BaseBreakoutChart.jsx); ở đây
+   chỉ dùng em để ba dòng luôn giữ tỉ lệ với nhau. */
+.base-breakout__bubble {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  color: #fff;
+  line-height: 1.12;
+  white-space: nowrap;
+  cursor: pointer;
+  /* Nền bong bóng đậm nhưng có vùng cao sáng (highlight) — viền chữ mảnh giữ
+     chữ đọc được khi rơi trúng vệt sáng đó. */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.base-breakout__bubble strong {
+  font-size: 1em;
+  font-weight: 850;
+  letter-spacing: 0.01em;
+}
+
+.base-breakout__bubble span {
+  font-size: 0.78em;
+  font-weight: 800;
+}
+
+.base-breakout__bubble:hover strong,
+.base-breakout__bubble:focus-visible strong {
+  text-decoration: underline;
+}
+
+/* ── Trạng thái tải / lỗi ──────────────────────────────────────────────────
+   Phủ lên giữa canvas thay vì thay thế nó: ảnh nền vẫn là phần lớn nội dung,
+   bỏ hẳn đi thì panel sập chiều cao và cả hàng lưới giật. */
+.base-breakout__state {
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.7rem 1.2rem;
+  transform: translate(-50%, -50%);
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 20px rgba(48, 36, 84, 0.18);
+  color: #3d4756;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.base-breakout__state button {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid #d8c8e7;
+  border-radius: 0.5rem;
+  background: #fbf9fe;
+  color: #5522a4;
+  font: inherit;
+  cursor: pointer;
+}

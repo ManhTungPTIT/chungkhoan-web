@@ -1,12 +1,18 @@
+// KHÔNG padding ở root: header gradient phải chạm mép card, có padding thì nó
+// thụt vào và hở một viền trắng quanh thanh màu. Padding chuyển xuống hai khối
+// nội dung bên dưới.
 .power-page {
   display: flex;
   flex-direction: column;
   height: 100dvh;
   flex: 1;
   min-width: 0;
-  padding: 0.5rem;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.power-page__header {
+  flex: 0 0 auto;
 }
 
 .power-legend {
@@ -16,6 +22,7 @@
   justify-content: center;
   font-size: 0.8rem;
   color: var(--text);
+  padding: 0.5rem 0.5rem 0;
   margin-bottom: 0.25rem;
 
   .power-legend-item {
@@ -35,6 +42,7 @@
 .power-chart {
   flex: 1;
   min-height: 0;
+  padding: 0 0.5rem 0.5rem;
 }
 
 .power-state {

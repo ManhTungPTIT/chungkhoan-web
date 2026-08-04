@@ -88,7 +88,7 @@ function PotentialFlowChart() {
         <ChartHeader
           id="potential-flow-title"
           icon={<BsLightningChargeFill />}
-          title="TOP CỔ PHIẾU DẪN ĐẦU VỀ SỨC MẠNH TĂNG GIÁ"
+          title="BỘ LỌC MÃ TIỀM NĂNG LƯỚT T+"
           variant="navy"
           accent="#b98be0"
           control={

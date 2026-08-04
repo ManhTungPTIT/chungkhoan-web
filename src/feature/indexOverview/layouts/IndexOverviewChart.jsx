@@ -100,7 +100,16 @@ function IndexOverviewChart() {
                     <td>{fmt(r.diem_hien_tai)}</td>
                     <td
                       className={liquidityClass(r.thanh_khoan_pct)}
-                      title={`Giá trị khớp lệnh: ${fmt(r.gia_tri_khop_lenh)} nghìn tỷ`}
+                      // Ghi rõ tách bạch: cột % này so KHỚP LỆNH với nền lịch sử
+                      // (nền không có thỏa thuận), còn cột tím của chart là TỔNG.
+                      title={
+                        `Khớp lệnh: ${fmt(r.gia_tri_khop_lenh)} nghìn tỷ` +
+                        (r.gia_tri_thoa_thuan == null
+                          ? ""
+                          : ` · Thỏa thuận: ${fmt(r.gia_tri_thoa_thuan)} nghìn tỷ` +
+                            ` · Tổng: ${fmt(r.gia_tri_giao_dich)} nghìn tỷ`) +
+                        `\n% so với TB ${soPhienTb || "N"} phiên tính trên khớp lệnh`
+                      }
                     >
                       {r.thanh_khoan_pct == null ? "—" : `${fmt(r.thanh_khoan_pct, 0)}%`}
                     </td>

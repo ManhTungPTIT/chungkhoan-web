@@ -156,8 +156,8 @@
 .market-chart-pair__panel--top-gain .top-gain-t3__plot {
   min-height: 0;
 }
-.market-chart-pair__panel--potential .potential-flow__axis-row,
-.market-chart-pair__panel--potential .potential-flow__plot,
+/* Bóp cột cho vừa NỬA hàng — chỉ còn nhóm top-gain; potential-flow đã chuyển
+   sang chiếm cả hàng nên giữ tỷ lệ cột gốc (cột đường giá rộng hơn). */
 .market-chart-pair__panel--top-gain .top-gain__axis-row,
 .market-chart-pair__panel--top-gain .top-gain__plot,
 .market-chart-pair__panel--top-gain .top-gain-t3__axis-row,
@@ -168,10 +168,6 @@
     minmax(0, 1.22fr)
     minmax(4rem, 1fr);
   column-gap: 0.25rem;
-}
-
-.market-chart-pair__panel--potential .potential-flow__column {
-  grid-template-rows: repeat(12, minmax(1.55rem, 1fr)) 1.55rem;
 }
 
 .market-chart-pair__panel--top-gain .top-gain,
@@ -856,32 +852,9 @@
   overflow-y: hidden;
 }
 
-/* Compact PotentialFlowChart for the two-column MarketCharts layout. */
-.market-chart-pair__panel--potential .potential-flow {
-  --pf-row-h: 1.45rem;
-}
-
-.market-chart-pair__panel--potential .potential-flow__chart {
-  padding: 0 0.5rem 0.35rem;
-}
-
-.market-chart-pair__panel--potential .potential-flow__legend {
-  gap: 0.3rem 1rem;
-  padding: 0.3rem 0.5rem 0.25rem;
-  font-size: 0.62rem;
-}
-
-.market-chart-pair__panel--potential .potential-flow__axis-row {
-  min-height: 1.6rem;
-}
-
-.market-chart-pair__panel--potential .potential-flow__plot {
-  min-height: 22rem;
-}
-
-.market-chart-pair__panel--potential .potential-flow__column {
-  grid-template-rows: repeat(12, minmax(1.15rem, 1fr)) 1.15rem;
-}
+/* Không còn khối nén cho PotentialFlowChart: chart này nay chiếm CẢ hàng
+   (--wide) nên dùng thẳng mật độ gốc của nó (--pf-row-h: 2.2rem, legend
+   0.72rem…). Nén theo nửa cột thì ở bề ngang gấp đôi dòng mỏng dính vào nhau. */
 
 /* Match ValueShareBarChart headers with the compact MarketCharts headers. */
 .market-chart-pair__panel#bull-bear > .value-bar,
@@ -970,8 +943,9 @@
   height: auto;
 }
 
-/* Cặp đầu tiên (bảng dẫn đầu + radar) căng bằng chiều cao nhau trong 1 hàng. */
-.market-chart-pair__panel--potential,
+/* Cặp đầu tiên (bản đồ sức mạnh dòng tiền + radar sóng tăng T+) căng bằng chiều
+   cao nhau trong 1 hàng. */
+.market-chart-pair__panel--power,
 .market-chart-pair__panel--tplus {
   align-self: stretch;
 }
@@ -1093,8 +1067,10 @@
   height: auto;
   min-height: 0;
 }
-/* Equal height for the leading strength table and T+ radar pair. */
-.market-chart-pair__panel#potential-flow,
+/* Cặp mở đầu trang — hai "bản đồ sức mạnh" phải CAO BẰNG NHAU: cả hai đều là
+   biểu đồ tròn, lệch chiều cao là hai vòng tròn khác đường kính, đọc như hai
+   thang đo khác nhau. */
+.market-chart-pair__panel#power-map,
 .market-chart-pair__panel#tplus-wave {
   height: 38rem;
   min-height: 38rem;
@@ -1102,8 +1078,7 @@
   overflow: hidden;
 }
 
-.market-chart-pair__panel#potential-flow > .potential-flow,
-.market-chart-pair__panel#potential-flow .potential-flow__card,
+.market-chart-pair__panel#power-map > .power-page,
 .market-chart-pair__panel#tplus-wave .tplus-wave-page,
 .market-chart-pair__panel#tplus-wave .tplus-wave-chart,
 .market-chart-pair__panel#tplus-wave .market-chart-pair__tplus-chart > div {
@@ -1209,11 +1184,19 @@
   box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
 }
 
-.market-chart-pair__panel--heatmap > .heatmap-page,
-.market-chart-pair__panel--power > .power-page {
+.market-chart-pair__panel--heatmap > .heatmap-page {
   height: 100%;
   min-height: 40rem;
   overflow: visible;
+}
+
+/* power-page vốn là TRANG RIÊNG (`height: 100dvh`) → phải theo panel. min-height
+   để 0: panel đã bị khoá 38rem cho khớp radar bên cạnh, đặt sàn 40rem là nó
+   tràn ra khỏi card. */
+.market-chart-pair__panel--power > .power-page {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .market-chart-pair__panel--overview > .home-market {
@@ -1229,6 +1212,22 @@
 .market-chart-pair__panel--consistency > .flow-consistency {
   height: auto;
   overflow: visible;
+}
+
+/* Chart "vượt nền 30 phiên" là một ảnh nền khoá tỉ lệ 16:9 — chiều cao do BỀ
+   NGANG quyết định, nên phải gỡ sàn 34rem của panel (ở bề ngang hẹp, sàn đó tạo
+   dải trống dưới ảnh) và không thêm padding (padding làm ảnh co lại nhưng lớp
+   chữ vẫn tính theo % của khung ngoài → chữ lệch khỏi bong bóng). */
+.market-chart-pair__panel--base-breakout {
+  min-height: 0;
+  height: auto;
+  align-self: start;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #d9d9d9;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(48, 36, 84, 0.1);
 }
 
 /* Tiêu đề trang riêng của bản đồ nhiệt — trong lưới panel nó đứng lệch so với

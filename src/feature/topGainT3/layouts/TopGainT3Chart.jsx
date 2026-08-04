@@ -65,7 +65,7 @@ function TopGainT3Chart({ window = 3 }) {
         <ChartHeader
           id="top-gain-t3-title"
           icon={<BsGraphUpArrow />}
-          title={`NHÓM TĂNG MẠNH NHẤT (NGẮN HẠN: T+${tPlus})`}
+          title={`BỘ LỌC MÃ TĂNG MẠNH NHẤT (NGẮN HẠN: T+${tPlus})`}
           variant="purple"
           accent="#e6b52e"
         />

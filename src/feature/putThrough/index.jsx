@@ -62,7 +62,7 @@ export default function PutThroughPage() {
       <ChartHeader
         id="put-through-title"
         icon={<CashStackHeaderIcon />}
-        title="DÒNG TIỀN THỰC HIỆN THEO MÃ"
+        title="CÁC MÃ GIAO DỊCH THỎA THUẬN (TỶ)"
         variant="blue"
         accent="#62d98b"
         className="tm-head tm-head--put-through"

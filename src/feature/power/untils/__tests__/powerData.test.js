@@ -136,3 +136,111 @@ describe("buildPowerData", () => {
     expect(buildPowerData(undefined)).toEqual([]);
   });
 });
+
+// ─── Tiêu chí "đột biến dòng tiền so với TB20" (surgeData.js) ───────────────
+// Mọi test dưới đây chốt thời điểm 14:30 giờ VN → tỉ lệ kỳ vọng 100%, để nền so
+// sánh đúng bằng avg_value_20 và số học đọc thẳng ra được.
+describe("buildPowerData + đột biến dòng tiền", () => {
+  const NOW = new Date(Date.UTC(2026, 7, 4, 14 - 7, 30)); // 14:30 giờ VN
+
+  it("tím chọn theo ĐIỂM đột biến, không theo value thô", () => {
+    const board = [
+      // value lớn nhất nhưng chỉ chạy nửa nhịp thường ngày
+      { symbol: "BIG", change_pct: 2, value: 100e9, avg_value_20: 200e9 },
+      // value nhỏ hơn nhưng gấp 3 lần nhịp thường ngày
+      { symbol: "SURGE", change_pct: 2, value: 30e9, avg_value_20: 10e9 },
+    ];
+    const out = buildPowerData(board, { purpleN: 1, now: NOW });
+    const bySym = Object.fromEntries(out.map((d) => [d.symbol, d]));
+    expect(bySym.SURGE.category).toBe("purple");
+    expect(bySym.BIG.category).toBe("green"); // công thức cũ sẽ cho BIG tím
+  });
+
+  it("gắn % đột biến vào từng dòng cho tooltip", () => {
+    const board = [
+      { symbol: "A", change_pct: 1, value: 30e9, avg_value_20: 10e9 },
+    ];
+    expect(buildPowerData(board, { purpleN: 0, now: NOW })[0].surge).toBe(300);
+  });
+
+  it("xếp trong cung theo điểm đột biến, không theo |pct|", () => {
+    const board = [
+      { symbol: "A", change_pct: 5, value: 50e9, avg_value_20: 25e9 }, // ratio 2
+      { symbol: "B", change_pct: 9, value: 10e9, avg_value_20: 20e9 }, // ratio 0.5
+    ];
+    const out = buildPowerData(board, { purpleN: 0, now: NOW });
+    // B biên độ lớn hơn nhưng dòng tiền hụt → xếp sau
+    expect(out.map((d) => d.symbol)).toEqual(["A", "B"]);
+  });
+
+  it("áp đồng nhất cả cung ĐỎ: mã giảm kèm tiền đột biến xếp trước mã giảm sâu", () => {
+    const board = [
+      { symbol: "R1", change_pct: -2, value: 60e9, avg_value_20: 20e9 }, // ratio 3
+      { symbol: "R2", change_pct: -8, value: 5e9, avg_value_20: 5e9 }, // ratio 1
+    ];
+    const out = buildPowerData(board, { purpleN: 0, now: NOW });
+    expect(out.map((d) => d.category)).toEqual(["red", "red"]);
+    expect(out.map((d) => d.symbol)).toEqual(["R1", "R2"]);
+  });
+
+  it("mã thiếu avg_value_20 xếp cuối cung dù |pct| lớn hơn", () => {
+    const board = [
+      { symbol: "OK", change_pct: 1, value: 50e9, avg_value_20: 25e9 },
+      { symbol: "NOAVG", change_pct: 9, value: 90e9 }, // |pct| và value đều lớn hơn
+    ];
+    // purpleN 0 để cả hai cùng cung xanh — đo đúng thứ tự TRONG cung, không bị
+    // thứ tự cung (xanh trước tím) lấn át.
+    const out = buildPowerData(board, { purpleN: 0, now: NOW });
+    expect(out.map((d) => d.symbol)).toEqual(["OK", "NOAVG"]);
+    expect(out[1].surge).toBe(null);
+  });
+
+  it("mã thiếu avg_value_20 không vào tím", () => {
+    const board = [
+      { symbol: "OK", change_pct: 1, value: 50e9, avg_value_20: 25e9 },
+      { symbol: "NOAVG", change_pct: 9, value: 90e9 },
+    ];
+    const bySym = Object.fromEntries(
+      buildPowerData(board, { purpleN: 1, now: NOW }).map((d) => [d.symbol, d]),
+    );
+    expect(bySym.OK.category).toBe("purple");
+    expect(bySym.NOAVG.category).toBe("green");
+  });
+
+  it("nền dưới sàn 1 tỷ bị bỏ qua — penny không cướp suất tím", () => {
+    const board = [
+      { symbol: "THIN", change_pct: 1, value: 5e9, avg_value_20: 5e8 }, // ratio 10 nhưng nền 0,5 tỷ
+      { symbol: "REAL", change_pct: 1, value: 20e9, avg_value_20: 10e9 },
+    ];
+    const out = buildPowerData(board, { purpleN: 1, now: NOW });
+    const bySym = Object.fromEntries(out.map((d) => [d.symbol, d]));
+    expect(bySym.REAL.category).toBe("purple");
+    expect(bySym.THIN.surge).toBe(null);
+  });
+
+  // Hai test degrade dưới đây là lý do tiêu chí mới an toàn để bật mặc định.
+  it("không mã nào có avg (BE chưa warm nến) → trùng khít công thức cũ", () => {
+    const board = [
+      { symbol: "A", change_pct: 2, value: 10e9 },
+      { symbol: "B", change_pct: 5, value: 90e9 },
+      { symbol: "C", change_pct: -3, value: 50e9 },
+    ];
+    expect(buildPowerData(board, { purpleN: 1, now: NOW })).toEqual(
+      buildPowerData(board, { purpleN: 1, now: NOW, useSurge: false }),
+    );
+  });
+
+  it("useSurge: false → bỏ qua avg, quay về xếp theo |pct| và value", () => {
+    const board = [
+      { symbol: "A", change_pct: 5, value: 50e9, avg_value_20: 25e9 },
+      { symbol: "B", change_pct: 9, value: 10e9, avg_value_20: 20e9 },
+    ];
+    const out = buildPowerData(board, {
+      purpleN: 0,
+      now: NOW,
+      useSurge: false,
+    });
+    expect(out.map((d) => d.symbol)).toEqual(["B", "A"]); // |pct| giảm dần
+    expect(out[0].surge).toBe(null);
+  });
+});

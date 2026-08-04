@@ -68,15 +68,15 @@ describe("ChartListButton", () => {
     fireEvent.click(trigger());
 
     expect(screen.getAllByRole("menuitem")).toHaveLength(MARKET_CHARTS.length);
-    expect(screen.getByText("Nhóm tăng mạnh nhất T+2")).toBeTruthy();
-    expect(screen.getByText("Top tăng mạnh nhất tuần")).toBeTruthy();
+    expect(screen.getByText("BỘ LỌC MÃ TĂNG MẠNH NHẤT (NGẮN HẠN: T+2)")).toBeTruthy();
+    expect(screen.getByText("BỘ LỌC MÃ TĂNG MẠNH NHẤT TUẦN")).toBeTruthy();
   });
 
   it("chọn một biểu đồ thì đặt hash tương ứng và đóng danh sách", () => {
     renderButton();
 
     fireEvent.click(trigger());
-    fireEvent.click(screen.getByText("Nhóm tăng mạnh nhất T+3"));
+    fireEvent.click(screen.getByText("BỘ LỌC MÃ TĂNG MẠNH NHẤT (NGẮN HẠN: T+3)"));
 
     expect(screen.getByTestId("hash").textContent).toBe("#top-gain-t3");
     expect(screen.queryByRole("menu")).toBeNull();
@@ -91,7 +91,7 @@ describe("ChartListButton", () => {
 
     renderButton("/chart/market#top-gain-t2");
     fireEvent.click(trigger());
-    fireEvent.click(screen.getByText("Nhóm tăng mạnh nhất T+2"));
+    fireEvent.click(screen.getByText("BỘ LỌC MÃ TĂNG MẠNH NHẤT (NGẮN HẠN: T+2)"));
 
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
     section.remove();
@@ -124,10 +124,10 @@ describe("ChartListButton — tích chọn biểu đồ hiện", () => {
     renderButton();
 
     fireEvent.click(trigger());
-    fireEvent.click(checkboxFor("Bản đồ nhiệt thị trường"));
+    fireEvent.click(checkboxFor("BẢN ĐỒ NHIỆT THỊ TRƯỜNG"));
 
-    expect(checkboxFor("Bản đồ nhiệt thị trường").checked).toBe(false);
-    expect(checkboxFor("Mã cổ phiếu tiềm năng").checked).toBe(true);
+    expect(checkboxFor("BẢN ĐỒ NHIỆT THỊ TRƯỜNG").checked).toBe(false);
+    expect(checkboxFor("BỘ LỌC MÃ TIỀM NĂNG LƯỚT T+").checked).toBe(true);
     expect(screen.queryByRole("menu")).toBeTruthy();
   });
 
@@ -146,12 +146,12 @@ describe("ChartListButton — tích chọn biểu đồ hiện", () => {
     renderButton("/chart/market", { ...buildDefaultVisibility(), heatmap: false });
 
     fireEvent.click(trigger());
-    fireEvent.click(screen.getByText("Bản đồ nhiệt thị trường"));
+    fireEvent.click(screen.getByText("BẢN ĐỒ NHIỆT THỊ TRƯỜNG"));
 
     expect(screen.getByTestId("hash").textContent).toBe("#heatmap");
 
     fireEvent.click(trigger());
-    expect(checkboxFor("Bản đồ nhiệt thị trường").checked).toBe(true);
+    expect(checkboxFor("BẢN ĐỒ NHIỆT THỊ TRƯỜNG").checked).toBe(true);
   });
 });
 

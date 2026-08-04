@@ -92,7 +92,7 @@ function SectorBreadthChart() {
       <ChartHeader
         id="sector-breadth-title"
         icon={<BsBullseye />}
-        title="BẢN ĐỒ DÒNG TIỀN"
+        title="BẢN ĐỒ DÒNG TIỀN TÍCH CỰC- TIÊU CỰC THEO NGÀNH"
         variant="navy"
         accent="#FFFF00"
         className="sector-rows__header"

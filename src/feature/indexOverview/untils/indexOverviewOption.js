@@ -1,7 +1,7 @@
 // Chuẩn hoá payload /index-overview thành dữ liệu series cho echarts cột nhóm.
 // Màu ĐIỀU KIỆN: cột điểm/% xanh khi ≥0, đỏ khi <0 (thanh khoản luôn tím).
 
-export const LIQUIDITY_COLOR = "#6b1f9c"; // tím — giá trị khớp lệnh
+export const LIQUIDITY_COLOR = "#6b1f9c"; // tím — tổng giá trị giao dịch
 export const DIEM_POS_COLOR = "#4caf50"; // xanh nhạt — điểm tăng
 export const PCT_POS_COLOR = "#1b7a3a";  // xanh đậm — % tăng
 export const NEG_COLOR = "#e23b3b";      // đỏ — giảm
@@ -38,16 +38,25 @@ const bar = (value, color) =>
         ...(value < 0 ? { label: { position: "bottom" } } : {}),
       };
 
-// indices: [{ten_san, diem_hien_tai, diem_dong_cua_phien_truoc, gia_tri_khop_lenh,
-//            thanh_khoan_pct, diem_tang_giam, pct}]
+// indices: [{ten_san, diem_hien_tai, diem_dong_cua_phien_truoc, gia_tri_giao_dich,
+//            gia_tri_khop_lenh, gia_tri_thoa_thuan, thanh_khoan_pct,
+//            diem_tang_giam, pct}]
 //
-// Cột thanh khoản vẽ `gia_tri_khop_lenh` (NGHÌN TỶ, số tuyệt đối) chứ không phải
-// `thanh_khoan_pct` — bảng bên dưới vẫn giữ cột % TB N phiên.
+// Cột thanh khoản vẽ `gia_tri_giao_dich` = khớp lệnh + THỎA THUẬN (NGHÌN TỶ, số
+// tuyệt đối) chứ không phải `thanh_khoan_pct` — bảng bên dưới vẫn giữ cột % TB N
+// phiên. Board của vendor chỉ có khớp lệnh nên cột cũ hụt ~10-14% so với tổng
+// giao dịch thật của sàn (xem index_overview_service.put_through_values).
+//
+// Lùi về `gia_tri_khop_lenh` khi BE chưa có trường mới: lệch deploy FE/BE thì
+// cột hụt một chút vẫn hơn là mất hẳn cột.
+export const liquidityValue = (row) =>
+  row?.gia_tri_giao_dich ?? row?.gia_tri_khop_lenh;
+
 export function buildBarSeries(indices) {
   const rows = Array.isArray(indices) ? indices : [];
   return {
     categories: rows.map((r) => r.ten_san),
-    thanhKhoanData: rows.map((r) => bar(r.gia_tri_khop_lenh, LIQUIDITY_COLOR)),
+    thanhKhoanData: rows.map((r) => bar(liquidityValue(r), LIQUIDITY_COLOR)),
     diemData: rows.map((r) => bar(r.diem_tang_giam, signColor(r.diem_tang_giam, DIEM_POS_COLOR))),
     pctData: rows.map((r) => bar(r.pct, signColor(r.pct, PCT_POS_COLOR))),
   };
