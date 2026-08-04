@@ -14,4 +14,9 @@ export function isHolding(item) {
   return item?.signal === "buy" && Boolean(item?.signal_hold);
 }
 
+// Backend còn trả cờ `signal_stale` (tín hiệu tính từ nến nền cũ hơn thị trường,
+// đang được xếp hàng vá — xem signal_service._base_behind_market). CỐ Ý KHÔNG
+// hiển thị: theo yêu cầu sản phẩm, người dùng không cần biết có mã đang chờ vá.
+// Cờ giữ lại trong payload để giám sát phía server.
+
 

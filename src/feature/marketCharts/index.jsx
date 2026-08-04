@@ -101,11 +101,10 @@ export default function MarketChartsPage() {
             Chưa chọn biểu đồ nào — mở danh sách ở góc trên bên phải để bật lại.
           </p>
         )}
-        {/* Hai "bản đồ sức mạnh" ghép thành CẶP mở đầu trang: cùng nửa hàng,
-            cùng header navy, cùng chiều cao (khoá trong marketCharts.scss). */}
+        {/* Bản đồ sức mạnh dòng tiền đứng riêng ở đầu trang và chiếm gần trọn viewport. */}
         <ChartSection
           id="power-map"
-          className="market-chart-pair__panel market-chart-pair__panel--power"
+          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--power"
           aria-label={MARKET_CHART_LABELS["power-map"]}
         >
           <PowerPage />
@@ -128,14 +127,10 @@ export default function MarketChartsPage() {
             <TplusChartPanel />
           </div>
         </ChartSection>
-
-        {/* --wide: cặp trên lấy mất ô mà power-map từng chiếm cả hàng. Cho
-            potential-flow trải cả hàng để SỐ Ô lưới trước top-gain-t2 vẫn chẵn —
-            không thì mọi cặp phía dưới (money-flow + put-through, bull-bear +
-            price-band…) lệch nhau một cột. */}
+        {/* Radar sức mạnh tăng giá cổ phiếu ghép cặp với bộ lọc mã tiềm năng lướt T+. */}
         <ChartSection
           id="potential-flow"
-          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--potential"
+          className="market-chart-pair__panel market-chart-pair__panel--potential"
           aria-label={MARKET_CHART_LABELS["potential-flow"]}
         >
           <PotentialFlowChart />

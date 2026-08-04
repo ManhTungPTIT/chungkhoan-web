@@ -1237,3 +1237,48 @@
   text-align: center;
   font-weight: 700;
 }
+
+/* Current MarketCharts layout: money-flow strength map owns the first viewport,
+   then the T+ strength radar pairs with the potential T+ filter. */
+.market-chart-pair__panel#power-map {
+  grid-column: 1 / -1;
+  height: clamp(42rem, calc(100dvh - 5.25rem), 58rem);
+  min-height: clamp(42rem, calc(100dvh - 5.25rem), 58rem);
+  align-self: stretch;
+}
+
+.market-chart-pair__panel#power-map > .power-page {
+  height: 100%;
+  min-height: 0;
+}
+
+.market-chart-pair__panel#tplus-wave,
+.market-chart-pair__panel#potential-flow {
+  height: 38rem;
+  min-height: 38rem;
+  align-self: stretch;
+  overflow: hidden;
+}
+
+.market-chart-pair__panel#potential-flow > .potential-flow,
+.market-chart-pair__panel#potential-flow .potential-flow__card {
+  height: 100%;
+  min-height: 0;
+}
+
+.market-chart-pair__panel#potential-flow .potential-flow__plot {
+  min-height: 0;
+}
+
+@media (max-width: 1050px) {
+  .market-chart-pair__panel#power-map {
+    height: clamp(38rem, calc(100dvh - 4.5rem), 52rem);
+    min-height: clamp(38rem, calc(100dvh - 4.5rem), 52rem);
+  }
+
+  .market-chart-pair__panel#tplus-wave,
+  .market-chart-pair__panel#potential-flow {
+    height: auto;
+    min-height: 34rem;
+  }
+}

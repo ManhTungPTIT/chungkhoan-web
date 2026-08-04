@@ -7,12 +7,11 @@ import "../styles/flowSurgeMonth.scss";
 const fmt = (value, digits = 2) =>
   new Intl.NumberFormat("vi-VN", { maximumFractionDigits: digits }).format(value);
 
-// % dòng tiền có thể rất lớn → chia trục thành 5 mốc đều theo pctAxisMax (đã làm
-// tròn "đẹp" trong buildTopGainView), khớp bề rộng bar. Dùng 5 mốc (không phải 6)
-// để nhãn không chen nhau trong cột phải hẹp của panel marketCharts.
+// % dòng tiền có thể rất lớn, nên trục phải chỉ giữ 3 mốc chính để nhãn không
+// chen nhau trong cột hẹp của panel marketCharts.
 function rightTicks(pctAxisMax) {
   const max = pctAxisMax > 0 ? pctAxisMax : 100;
-  return [0, 1, 2, 3, 4].map((i) => Math.round((max * i) / 4));
+  return [0, Math.round(max / 2), max];
 }
 
 function buildLinePath(rows) {

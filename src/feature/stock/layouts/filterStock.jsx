@@ -242,6 +242,9 @@ function FilterStock() {
               return (
                 <tr key={s.symbol}>
                   <td className="col-code">{s.symbol}</td>
+                  {/* KHÔNG hiển thị cờ `signal_stale` của backend: theo yêu cầu
+                      sản phẩm, người dùng không cần biết có mã đang chờ vá. Cờ
+                      vẫn nằm trong payload để giám sát phía server. */}
                   <td className="col-signal">
                     <span className={`badge badge--${isHolding(s) ? sig.className : "buy"}`}>
                       {isHolding(s) ? "Nắm giữ" : sig.label}
