@@ -145,7 +145,7 @@ function MainLayout() {
             </li>
             <li
               className="navbar-item text-redirect"
-              onClick={() => navigate(`${MARKET_CHART_PATH}#potential-flow`)}
+              onClick={() => navigate(`${MARKET_CHART_PATH}#power-map`)}
             >
               <a className="break-word">
                 <MdStackedLineChart />
