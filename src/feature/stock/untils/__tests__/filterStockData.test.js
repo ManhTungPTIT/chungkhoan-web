@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   PHASE,
+  PHASE_BADGE,
   convertDay,
   convertTime,
   countPhases,
@@ -50,6 +51,35 @@ describe("sessionPhase — bốn pha loại trừ nhau", () => {
 
   it("chưa có tín hiệu → không thuộc pha nào", () => {
     expect(sessionPhase({ signal: null }, TODAY)).toBeNull();
+  });
+});
+
+describe("PHASE_BADGE — badge mang PHA, tiếng Việt", () => {
+  it("bốn pha ra bốn nhãn tiếng Việt, không còn BUY/SELL", () => {
+    expect(PHASE_BADGE).toEqual({
+      [PHASE.BUY]: "MUA",
+      [PHASE.HOLD]: "Nắm giữ",
+      [PHASE.SELL]: "BÁN",
+      [PHASE.OUT]: "Đứng ngoài",
+    });
+  });
+
+  // Đây là thứ người dùng báo: mã đã qua ngày báo mà badge vẫn ghi BUY thì
+  // tưởng đang có tín hiệu mua mới.
+  it("mã buy đã qua ngày báo hiện 'Nắm giữ' chứ không phải 'MUA'", () => {
+    const phase = sessionPhase(
+      { signal: "buy", signal_hold: true, signal_sessions: 17 },
+      "2026-08-05",
+    );
+    expect(PHASE_BADGE[phase]).toBe("Nắm giữ");
+  });
+
+  it("mã sell đã qua ngày báo hiện 'Đứng ngoài' chứ không phải 'BÁN'", () => {
+    const phase = sessionPhase(
+      { signal: "sell", signal_date: "2026-07-17", signal_sessions: 13 },
+      "2026-08-05",
+    );
+    expect(PHASE_BADGE[phase]).toBe("Đứng ngoài");
   });
 });
 

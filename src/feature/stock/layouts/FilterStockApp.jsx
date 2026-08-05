@@ -18,10 +18,9 @@ import useSector from "../hooks/useSector";
 import useSectorSymbol from "../hooks/useSectorSymbol";
 import { useAutoPageSize } from "../hooks/useAutoPageSize";
 import { useVn100 } from "../../chart/hooks/useVn100";
-import { signalDisplay } from "../../chart/untils/signalDisplay";
 import {
   PHASE,
-  PHASE_LABEL,
+  PHASE_BADGE,
   convertDay,
   convertTime,
   countPhases,
@@ -41,12 +40,16 @@ import {
 // PHIÊN" hẹp tới mức "Đang nắm giữ" vỡ thành ba dòng, đội chiều cao mỗi dòng lên
 // gấp đôi và chỉ còn 3 mã lọt một trang.
 const COLUMNS = [
-  { key: "symbol", label: ["MÃ"], width: "13%", sortable: true, align: "left" },
-  { key: "signal", label: ["TÍN HIỆU"], width: "15%" },
-  { key: "date", label: ["NGÀY BÁO", "MUA / BÁN"], width: "19%", sortable: true },
-  { key: "phase", label: ["TRẠNG THÁI", "PHIÊN"], width: "20%", sortable: true },
-  { key: "pnl", label: ["% LÃI / LỖ", "HIỆN TẠI"], width: "16%", sortable: true },
-  { key: "price", label: ["GIÁ HIỆN TẠI", "GIÁ BÁO"], width: "17%", sortable: true },
+  { key: "symbol", label: ["MÃ"], width: "11%", sortable: true, align: "left" },
+  // Badge nay mang cả "Đứng ngoài" (11 ký tự) nên cột này rộng nhất trong nhóm
+  // trái. Cột kế bên đổi tiêu đề thành "SỐ PHIÊN": tên pha đã chuyển hẳn vào
+  // badge, để nguyên "TRẠNG THÁI PHIÊN" thì tiêu đề rộng hơn nội dung nó chứa
+  // và tràn sang cột bên.
+  { key: "signal", label: ["TÍN HIỆU"], width: "21%" },
+  { key: "date", label: ["NGÀY BÁO", "MUA / BÁN"], width: "17%", sortable: true },
+  { key: "phase", label: ["SỐ PHIÊN"], width: "15%", sortable: true },
+  { key: "pnl", label: ["% LÃI / LỖ", "HIỆN TẠI"], width: "17%", sortable: true },
+  { key: "price", label: ["GIÁ HIỆN TẠI", "GIÁ BÁO"], width: "19%", sortable: true },
 ];
 
 // Bốn thẻ thống kê — bốn pha LOẠI TRỪ NHAU, xem untils/filterStockData.js.
@@ -237,7 +240,6 @@ function FilterStockApp() {
           </thead>
           <tbody>
             {pagedRows.map((s) => {
-              const sig = signalDisplay(s.signal);
               const phase = sessionPhase(s, today);
               const pnl = pnlPct(s);
               return (
@@ -248,19 +250,19 @@ function FilterStockApp() {
                   <td className="col-code">{s.symbol}</td>
                   {/* KHÔNG hiển thị cờ `signal_stale` của backend: theo yêu cầu
                       sản phẩm, người dùng không cần biết có mã đang chờ vá. */}
+                  {/* Badge mang PHA (MUA / BÁN / Nắm giữ / Đứng ngoài) chứ không
+                      mang loại lệnh: mã đã qua ngày báo mà vẫn ghi BUY thì người
+                      dùng tưởng đang có tín hiệu mua mới. */}
                   <td className="col-signal">
-                    <span className={`badge badge--${sig.className}`}>{sig.label}</span>
+                    <span className={`badge badge--${phase ?? "none"}`}>
+                      {phase ? PHASE_BADGE[phase] : "--"}
+                    </span>
                   </td>
                   <td className="col-date">
                     {s.signal_date ? convertDay(s.signal_date) : "--"}
                   </td>
                   <td className="col-phase">
-                    <span className={`phase phase--${phase ?? "none"}`}>
-                      {phase ? PHASE_LABEL[phase] : "--"}
-                    </span>
-                    <small>
-                      {s.signal_sessions != null ? `${s.signal_sessions} phiên` : "--"}
-                    </small>
+                    {s.signal_sessions != null ? `${s.signal_sessions} phiên` : "--"}
                   </td>
                   <td
                     className={`col-pnl ${pnl == null ? "" : pnl >= 0 ? "col-pnl--up" : "col-pnl--down"}`}

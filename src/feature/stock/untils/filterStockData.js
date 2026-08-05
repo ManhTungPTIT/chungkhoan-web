@@ -78,6 +78,20 @@ export const PHASE_LABEL = {
 };
 
 /**
+ * Nhãn NGẮN cho badge trong bảng — tiếng Việt, không còn BUY/SELL.
+ *
+ * Badge mang PHA chứ không mang loại lệnh: mã đã qua ngày báo hiện "Nắm giữ" /
+ * "Đứng ngoài" thay vì vẫn nói MUA/BÁN. Không mất thông tin — "Nắm giữ" chỉ đến
+ * từ lệnh mua, "Đứng ngoài" chỉ đến từ lệnh bán.
+ */
+export const PHASE_BADGE = {
+  [PHASE.BUY]: "MUA",
+  [PHASE.HOLD]: "Nắm giữ",
+  [PHASE.SELL]: "BÁN",
+  [PHASE.OUT]: "Đứng ngoài",
+};
+
+/**
  * Pha của một mã — bốn pha LOẠI TRỪ NHAU, mã chưa có tín hiệu trả null.
  *
  * ⚠️ Vế SELL phải so NGÀY chứ không được suy từ `signal_sessions`: backend cố ý

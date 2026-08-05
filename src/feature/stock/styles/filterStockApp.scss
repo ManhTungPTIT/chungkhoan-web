@@ -360,15 +360,18 @@
     font-weight: 800;
   }
 
+  /* Màu badge đi theo PHA và trùng bảng màu của bốn thẻ thống kê phía trên, để
+     liếc một cái là nối được thẻ với dòng. */
   .badge {
     display: inline-block;
     min-width: 42px;
-    padding: 4px 6px;
+    padding: 4px 5px;
     border-radius: 6px;
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 700;
+    white-space: nowrap;
 
-    &--hold {
+    &--buy {
       background: #e8f9ee;
       color: var(--fa-up);
     }
@@ -376,7 +379,15 @@
       background: #ffe9ee;
       color: var(--fa-down);
     }
-    &--neutral {
+    &--hold {
+      background: #f0edff;
+      color: var(--fa-purple);
+    }
+    &--out {
+      background: #fff3dc;
+      color: #b45309;
+    }
+    &--none {
       background: #f1eff5;
       color: var(--fa-muted);
     }
@@ -387,25 +398,11 @@
     font-size: 10.5px;
   }
 
+  /* Chỉ còn số phiên — tên pha đã nằm trong badge cột bên trái. */
   .col-phase {
-    span {
-      display: block;
-      font-weight: 600;
-      font-size: 10.5px;
-    }
-
-    small {
-      display: block;
-      margin-top: 2px;
-      font-size: 9.5px;
-      color: var(--fa-muted);
-    }
-
-    .phase--buy { color: var(--fa-up); }
-    .phase--sell { color: var(--fa-down); }
-    .phase--hold { color: var(--fa-text-h); }
-    .phase--out { color: var(--fa-text-h); }
-    .phase--none { color: var(--fa-muted); }
+    font-size: 10.5px;
+    color: var(--fa-muted);
+    white-space: nowrap;
   }
 
   .col-pnl {
