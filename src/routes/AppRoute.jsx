@@ -10,6 +10,7 @@ import PrivateRoute from './PrivateRoute';
 import GuestRoute from './GuestRoute';
 import AdminPrivateRoute from './AdminPrivateRoute';
 import FilterStock from '../feature/stock/layouts/filterStock'
+import FilterStockApp from '../feature/stock/layouts/FilterStockApp'
 import InfoUser from '../feature/auth/user/layouts/InfoUser';
 import MainLayout from '../layouts/MainLayout';
 import AppLayout from '../layouts/AppLayout';
@@ -20,6 +21,11 @@ import { IS_APP } from '../feature/auth/untils/appClient';
 // Bản app dùng bottom tab, bản web dùng sidebar. Chọn ở tầng route để MainLayout
 // không phải mang thêm nhánh nào — xem layouts/AppLayout.jsx.
 const ProtectedLayout = IS_APP ? AppLayout : MainLayout;
+
+// Trang bộ lọc có HAI bản: bản dọc cho app (thẻ thống kê, bảng 6 cột gộp dòng)
+// và bản web sẵn có. Tách hẳn hai file theo cùng lý do như trên — đổi giao diện
+// app không có đường nào làm hỏng web đang chạy.
+const FilterPage = IS_APP ? FilterStockApp : FilterStock;
 
 // Lazy-load: echarts + các trang dùng echarts chỉ tải khi mở route,
 // không nằm trong bundle khởi động.
@@ -74,7 +80,7 @@ function AppRoute() {
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<TradingView />} />
           <Route path="/home" element={<HomePage />} />
-          <Route path="/chart/filter" element={<FilterStock />} />
+          <Route path="/chart/filter" element={<FilterPage />} />
           <Route path="/info" element={<InfoUser />} />
           <Route
             path="/chart/heatmap"

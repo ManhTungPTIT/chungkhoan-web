@@ -9,8 +9,17 @@ import { LuChevronsUpDown } from "react-icons/lu";
 import "../styles/filterStock.scss";
 import useSector from "../hooks/useSector";
 import useSectorSymbol from "../hooks/useSectorSymbol";
+import { useAutoPageSize } from "../hooks/useAutoPageSize";
 import { useVn100 } from "../../chart/hooks/useVn100";
 import { signalDisplay, isHolding } from "../../chart/untils/signalDisplay";
+import {
+  convertDay,
+  getPageNumbers,
+  sortRowsBySignal,
+} from "../untils/filterStockData";
+
+// `sortRowsBySignal` giữ re-export vì test cũ và các chỗ khác đang import từ đây.
+export { sortRowsBySignal };
 
 // Cấu hình cột header
 const COLUMNS = [
@@ -23,55 +32,7 @@ const COLUMNS = [
   { key: "tplus", label: "T+ (Ngày)" },
 ];
 
-const PAGE_SIZE = 6;
-
-// Trả về danh sách số trang hiển thị (tối đa `max` số, xoay quanh trang hiện tại)
-const getPageNumbers = (current, total, max = 5) => {
-  if (total <= max) return Array.from({ length: total }, (_, i) => i + 1);
-  let start = Math.max(1, current - Math.floor(max / 2));
-  let end = start + max - 1;
-  if (end > total) {
-    end = total;
-    start = end - max + 1;
-  }
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
-};
-
 const CATEGORIES = [{ name: "Tất cả", code: 1 }];
-
-const convertDay = (value) => {
-  const d = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(d.getTime())) return String(value);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = d.getFullYear();
-
-  return `${day}/${month}/${year}`;
-};
-
-function getSignalRank(row) {
-  if (isHolding(row)) return 1;
-  if (row?.signal === "buy") return 0;
-  if (row?.signal === "hold") return 1;
-  if (row?.signal === "sell") return 2;
-  return 3;
-}
-
-// T+ dùng để xếp thứ tự trong cùng nhóm tín hiệu; thiếu dữ liệu → đẩy xuống cuối nhóm
-function getSessionOrder(row) {
-  const value = row?.signal_sessions;
-  if (value == null) return Number.MAX_SAFE_INTEGER;
-  const n = Number(value);
-  return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
-}
-
-export function sortRowsBySignal(rows) {
-  return [...rows].sort(
-    (a, b) =>
-      getSignalRank(a) - getSignalRank(b) ||
-      getSessionOrder(a) - getSessionOrder(b),
-  );
-}
 
 function FilterStock() {
   const [category, setCategory] = useState(CATEGORIES[0].name);
@@ -79,8 +40,6 @@ function FilterStock() {
   const [openDropdown, setOpenDropdown] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-  // Số dòng/trang tự co theo chiều cao màn (tính ở effect bên dưới)
-  const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const dropdownRef = useRef(null);
   const tableRef = useRef(null);
 
@@ -129,38 +88,19 @@ function FilterStock() {
 
   const sortedRows = useMemo(() => sortRowsBySignal(rows), [rows]);
 
+  // Số dòng/trang tự co theo chiều cao màn. RESERVE 50 = thanh phân trang
+  // (20+38) + padding dưới (16).
+  const pageSize = useAutoPageSize(tableRef, {
+    reserve: 50,
+    deps: [sortedRows.length],
+  });
+
   const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize));
 
   // Khi đổi bộ lọc khiến số trang giảm, kéo trang hiện tại về trong khoảng hợp lệ
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
-
-  // Tính số dòng vừa khít chiều cao còn lại: đo từ đỉnh tbody tới đáy viewport,
-  // chừa chỗ cho thanh phân trang. Màn to → nhiều dòng, màn nhỏ → ít dòng.
-  useEffect(() => {
-    const el = tableRef.current;
-    if (!el) return;
-    const recompute = () => {
-      const tbody = el.querySelector("tbody");
-      if (!tbody) return;
-      const firstRow = tbody.querySelector("tr");
-      const rowH = firstRow?.getBoundingClientRect().height || 72;
-      const top = tbody.getBoundingClientRect().top;
-      const RESERVE = 50; // thanh phân trang (20+38) + padding dưới (16)
-      const avail = window.innerHeight - top - RESERVE;
-      const fit = Math.max(3, Math.floor(avail / rowH));
-      setPageSize((prev) => (prev !== fit ? fit : prev));
-    };
-    recompute();
-    const ro = new ResizeObserver(recompute);
-    ro.observe(el);
-    window.addEventListener("resize", recompute);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", recompute);
-    };
-  }, [sortedRows.length]);
 
   const pagedRows = sortedRows.slice((page - 1) * pageSize, page * pageSize);
   const pageNumbers = getPageNumbers(page, totalPages);
