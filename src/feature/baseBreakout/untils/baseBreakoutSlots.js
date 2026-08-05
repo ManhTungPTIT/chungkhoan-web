@@ -3,7 +3,7 @@
 //
 // Có HAI ảnh nền, không phải một ảnh co giãn:
 //   - desktop `base-breakout-bg.jpg`        1672×941  (ngang, 15 bong bóng)
-//   - mobile  `base-breakout-bg-mobile.png` 1080×1920 (dọc,   9 bong bóng)
+//   - mobile  `base-breakout-bg-mobile.png` 1080×1200 (dọc,   15 bong bóng)
 // Ảnh ngang ép vào bề ngang điện thoại thì chữ trong bong bóng nhỏ tới mức không
 // đọc nổi, buộc phải cuộn ngang — đúng thứ bản dọc sinh ra để tránh.
 //
@@ -54,6 +54,9 @@ function buildLayout({ id, image, width, height, bubbles, tiles, badge, fonts })
           x: pct((badge.x0 + badge.x1) / 2, width),
           y: pct((badge.y0 + badge.y1) / 2, height),
           w: pct(badge.x1 - badge.x0, width),
+          // Ảnh nền nào ĐÃ VẼ SẴN icon lịch/đồng hồ thì đặt `icons: false` —
+          // component bỏ icon React đi, nếu không sẽ có hai bộ icon chồng nhau.
+          icons: badge.icons !== false,
         }
       : null,
   };
@@ -61,102 +64,134 @@ function buildLayout({ id, image, width, height, bubbles, tiles, badge, fonts })
 
 // ─── Desktop: 1672×941, 15 bong bóng ───────────────────────────────────────
 //
-// Quả đầu tiên (xanh nhạt, ngoài cùng trái) phải đo RIÊNG: màu nhạt và vệt sáng
-// bóng giữa quả gần như trắng nên mask ngưỡng-bão-hoà bị thủng, phép dò chung bỏ
-// sót. Cách đo dùng được: quét theo HÀNG với luật màu riêng (g > r và g > b) rồi
-// lấy hàng rộng nhất — ra thân liền mạch y 567–639, rộng nhất 66px tại y=603.
-// (Lần đầu đo bằng khối liên thông ra 57px, tức HỤT 14%: chữ vẫn "vừa" theo số
-// đo nhưng thực tế chọc ra khỏi mép quả.)
+// Số đo dưới đây ứng với bản nền dải-tím (thay ngày 2026-08-05), KHÔNG dùng lại
+// được cho bản cũ: mọi quả bóng và cả hàng thẻ đều đã dịch chỗ.
+//
+// Đường MẶT NƯỚC (y 689–703) là màu lam bão hoà chạy suốt bề ngang nên nối các
+// quả bóng chạm nó thành MỘT khối liên thông (quả xanh dương giữa hình từng bị
+// đo ra bề rộng 1252px). Phải xoá dải đó khỏi mask trước khi dò khối.
+//
+// Quả đầu tiên (xanh nhạt, ngoài cùng trái) vẫn phải đo RIÊNG: màu nhạt và vệt
+// sáng giữa quả gần như trắng nên mask ngưỡng-bão-hoà bị thủng. Luật riêng dùng
+// được: quét theo HÀNG với g > r và g > b rồi lấy hàng rộng nhất — ra 68px tại
+// y=623.
 export const DESKTOP_LAYOUT = buildLayout({
   id: "desktop",
   image: "desktop",
   width: 1672,
   height: 941,
   bubbles: [
-    { cx: 182.5, cy: 603.0, w: 66 },
-    { cx: 337.2, cy: 479.9, w: 96 },
-    { cx: 405.6, cy: 617.1, w: 76 },
-    { cx: 500.2, cy: 351.5, w: 117 },
-    { cx: 565.0, cy: 549.9, w: 90 },
-    { cx: 679.1, cy: 582.3, w: 80 },
-    { cx: 746.8, cy: 419.9, w: 111 },
-    { cx: 925.4, cy: 347.1, w: 116 },
-    { cx: 932.3, cy: 587.0, w: 87 },
-    { cx: 1035.4, cy: 764.4, w: 80 },   // quả XÁM nằm dưới mặt nước
-    { cx: 1149.4, cy: 385.5, w: 102 },
-    { cx: 1204.6, cy: 593.6, w: 82 },
-    { cx: 1366.3, cy: 328.1, w: 140 },
-    { cx: 1384.5, cy: 596.2, w: 80 },
-    { cx: 1532.7, cy: 487.1, w: 94 },
+    { cx: 180.8, cy: 623.0, w: 68 },
+    { cx: 336.0, cy: 495.0, w: 95 },
+    { cx: 406.5, cy: 637.0, w: 76 },
+    { cx: 509.0, cy: 365.0, w: 117 },
+    { cx: 573.0, cy: 565.0, w: 91 },
+    { cx: 687.0, cy: 601.0, w: 83 },
+    { cx: 755.5, cy: 434.0, w: 110 },
+    { cx: 936.5, cy: 362.0, w: 118 },
+    { cx: 943.0, cy: 604.0, w: 85 },
+    { cx: 1044.0, cy: 785.0, w: 77 },   // quả XÁM nằm dưới mặt nước
+    { cx: 1161.5, cy: 399.0, w: 102 },
+    { cx: 1218.0, cy: 613.0, w: 83 },
+    { cx: 1384.0, cy: 332.0, w: 131 },
+    { cx: 1399.5, cy: 619.0, w: 80 },
+    { cx: 1546.5, cy: 502.0, w: 90 },
   ],
-  // Thẻ cao 125–224, icon tròn bên trái, nhãn bake ở dải 144–161 → số đặt ở 193
+  // Thẻ cao 152–256, icon tròn bên trái, nhãn bake ở dải 181–197 → số đặt ở 226
   // (giữa khoảng trống còn lại). x0 = mép phải icon, x1 = mép phải thẻ.
   tiles: [
-    { key: "count", x0: 113, x1: 255, y: 193, unit: null },
-    { key: "totalValue", x0: 359, x1: 487, y: 193, unit: "TỶ" },
-    { key: "avgBreakout", x0: 592, x1: 783, y: 193, unit: null },
-    { key: "avgLiquidity", x0: 887, x1: 1090, y: 193, unit: "LẦN TB 20P" },
-    { key: "strongFlow", x0: 1196, x1: 1362, y: 193, unit: "MÃ" },
+    { key: "count", x0: 114, x1: 261, y: 226, unit: null },
+    { key: "totalValue", x0: 375, x1: 507, y: 226, unit: "TỶ" },
+    { key: "avgBreakout", x0: 619, x1: 786, y: 226, unit: null },
+    { key: "avgLiquidity", x0: 902, x1: 1093, y: 226, unit: "LẦN TB 20P" },
+    { key: "strongFlow", x0: 1212, x1: 1377, y: 226, unit: "MÃ" },
   ],
-  // Đo bằng cách tìm đoạn chạy dài liền mạch màu tím: hình con bò bên cạnh cũng
-  // tím nhưng đứt quãng nên bị loại.
-  badge: { x0: 1486, x1: 1645, y0: 20, y1: 109 },
+  // Dải tím chạy suốt đầu hình (x 14–1656, y 11–98) đã VẼ SẴN icon lịch (x
+  // 1485–1505, y 33–52) và icon đồng hồ (x 1486–1504, y 61–80) xếp dọc. Ô chữ
+  // bắt đầu ngay sau icon và canh đúng hai tâm icon đó → `icons: false`.
+  badge: { x0: 1513, x1: 1652, y0: 33, y1: 80, icons: false },
   fonts: {
     // Sàn 0.9cqw: theo tỉ lệ thuần quả bé nhất ra cỡ chữ ~10px, không đọc nổi.
     minBubble: "0.9cqw",
     tileValue: "1.85cqw",
     tileUnit: "0.78cqw",
-    badge: "0.95cqw",
+    // 1.05cqw ≈ 17.6px, xấp xỉ chiều cao icon bake (20px) nên hai dòng chữ không
+    // bị lép so với icon. Đổi cỡ này thì phải đổi luôn `gap` của
+    // .base-breakout__badge--bare: hai dòng phải cách nhau đúng 28px.
+    badge: "1.05cqw",
+    // Khoảng cách hai dòng ngày/giờ, chọn để mỗi dòng ngang tâm icon bake.
+    badgeGap: "0.62cqw",
   },
 });
 
-// ─── Mobile: 1080×1920, 9 bong bóng ────────────────────────────────────────
+// ─── Mobile: 1080×1200, 15 bong bóng ───────────────────────────────────────
 //
-// Quả xanh-tím ngoài cùng trái bị phép dò chung TÁCH ĐÔI (màu nhạt, mask đứt
-// quãng) → đo riêng trong cửa sổ cục bộ: thân liền mạch từ y≈995 tới y≈1155,
-// rộng nhất 156px tại y=1075.
+// Bản nền dọc mới (thay 2026-08-05) KHÔNG còn là bản 1080×1920 với 9 quả to:
+// nó nhồi đúng 15 quả như bản ngang vào một dải cao ~350px, nên quả bé nhất chỉ
+// rộng 42px trên ảnh. Kèm theo đó là ô badge ngày/giờ (bản cũ không có) và hàng
+// thẻ 2 cột × 3 hàng đặt ở chỗ khác hẳn.
 //
-// Ảnh này KHÔNG có ô badge ngày/giờ, nên `badge: null` — component tự bỏ qua.
+// ⚠️ Bề ngang canvas dọc bám theo bề ngang máy, nên chữ trong bong bóng co theo
+// máy: xem `minBubble` bên dưới.
+//
+// Cũng như bản ngang, dải mặt nước (y 1019–1030) nối các quả chạm nó thành một
+// khối — phải xoá dải đó khỏi mask trước khi dò khối liên thông.
 export const MOBILE_LAYOUT = buildLayout({
   id: "mobile",
   image: "mobile",
   width: 1080,
-  height: 1920,
+  height: 1200,
   bubbles: [
-    { cx: 139.6, cy: 1061.2, w: 156 },
-    { cx: 263.8, cy: 1270.5, w: 100 },
-    { cx: 402.2, cy: 1064.8, w: 120 },
-    { cx: 404.7, cy: 1356.9, w: 99 },
-    { cx: 585.4, cy: 1211.5, w: 119 },
-    { cx: 692.9, cy: 1385.5, w: 90 },
-    { cx: 746.9, cy: 1072.6, w: 108 },
-    { cx: 863.0, cy: 1229.1, w: 104 },
-    { cx: 939.2, cy: 874.8, w: 188 },
+    { cx: 128.5, cy: 979.0, w: 42 },
+    { cx: 226.0, cy: 893.0, w: 59 },
+    { cx: 269.5, cy: 989.0, w: 48 },
+    { cx: 334.5, cy: 817.0, w: 74 },
+    { cx: 375.0, cy: 942.0, w: 57 },
+    { cx: 446.5, cy: 963.0, w: 52 },
+    { cx: 489.0, cy: 857.0, w: 69 },
+    { cx: 603.0, cy: 809.0, w: 73 },
+    { cx: 607.0, cy: 965.0, w: 53 },
+    { cx: 670.5, cy: 1079.0, w: 48 },   // quả XÁM nằm dưới mặt nước
+    { cx: 744.5, cy: 839.0, w: 64 },
+    { cx: 779.5, cy: 972.0, w: 52 },
+    { cx: 884.0, cy: 798.0, w: 83 },
+    { cx: 893.5, cy: 974.0, w: 50 },
+    { cx: 986.0, cy: 904.0, w: 57 },
   ],
-  // Thẻ xếp lưới 2 cột × 3 hàng. Vùng chữ: cột trái x 150–524, cột phải
-  // x 648–1022 (đều bắt đầu sau icon tròn). Mỗi HÀNG có mốc y riêng — nhãn bake
-  // kết thúc ở 283 / 425 / 567, đáy thẻ ở 352 / 494 / 636.
+  // Thẻ xếp lưới 2 cột × 3 hàng (ô thứ 6 là hộp CHÚ THÍCH, không có số). Ảnh
+  // sinh ra các thẻ KHÔNG bằng nhau — hàng 1 thụt vào trong, hai thẻ cùng hàng
+  // lệch nhau vài px — nên mỗi thẻ đo riêng thay vì suy ra từ một lưới đều.
+  // x0 = mép phải icon, x1 = mép phải thẻ, y = giữa khoảng trống dưới nhãn bake.
   tiles: [
-    { key: "count", x0: 150, x1: 524, y: 318, unit: null },
-    { key: "totalValue", x0: 648, x1: 1022, y: 318, unit: "TỶ" },
-    { key: "avgBreakout", x0: 150, x1: 524, y: 460, unit: null },
-    { key: "avgLiquidity", x0: 648, x1: 1022, y: 460, unit: "LẦN TB 20P" },
-    { key: "strongFlow", x0: 150, x1: 524, y: 602, unit: "MÃ" },
+    { key: "count", x0: 221, x1: 499, y: 257, unit: null },
+    { key: "totalValue", x0: 756, x1: 1005, y: 255, unit: "TỶ" },
+    { key: "avgBreakout", x0: 201, x1: 519, y: 461, unit: null },
+    { key: "avgLiquidity", x0: 709, x1: 1047, y: 456, unit: "LẦN TB 20P" },
+    { key: "strongFlow", x0: 206, x1: 521, y: 665, unit: "MÃ" },
   ],
-  badge: null,
+  // Dải tím đầu hình (x 15–1064, y 15–71) đã vẽ sẵn icon lịch (x 955–967,
+  // y 29–41) và đồng hồ (cùng x, y 47–59) — giống bản ngang, ô chữ nằm ngay sau
+  // icon nên `icons: false`.
+  badge: { x0: 975, x1: 1058, y0: 29, y1: 59, icons: false },
   fonts: {
-    // Sàn theo PX chứ không cqw: khung dọc hẹp nên 0.9cqw chỉ còn ~3.5px trên
-    // điện thoại — vô dụng làm sàn.
+    // Sàn theo PX chứ không cqw: khung dọc hẹp nên vài phần trăm cqw chỉ còn
+    // 2–3px trên điện thoại — vô dụng làm sàn.
     //
-    // 8px là mức LỚN NHẤT còn gọn trong quả bé nhất. Chốt bằng ảnh chụp chứ
-    // không bằng phép so bề rộng: bong bóng TRÒN nên dòng dưới cùng ("(2.85x)")
-    // nằm thấp hơn tâm, chỗ đó quả đã thóp lại. Chữ chiếm quá ~72% bề ngang lớn
-    // nhất là chọc ra mép dù số đo vẫn báo "vừa" — 9px đã lên 77%, 10px lên 86%.
-    minBubble: "8px",
-    // Khung hẹp nên cùng một cỡ chữ thật lại ứng với cqw lớn hơn nhiều.
+    // ⚠️ 3px là mức LỚN NHẤT còn gọn trong quả bé nhất (42/1080 = 3.9% bề ngang)
+    // khi canvas rộng ~370px, tức trên điện thoại thật: quả đó chỉ còn ~14px,
+    // mà "+3.87%" ở 5px đã rộng ~17px nên chọc hẳn ra ngoài mép quả.
+    //
+    // Đây là hệ quả TRỰC TIẾP của ảnh nền — 15 quả nhồi vào khung dọc thì không
+    // cỡ chữ nào vừa quả mà lại đọc được, nên đã CHỌN "vừa quả" (chữ ở mấy quả
+    // bé thành vệt mờ) thay vì "đọc được nhưng tràn". Muốn chữ to lại thì phải
+    // đổi ảnh (ít quả hơn / quả to hơn) chứ không phải chỉnh số ở đây; bản dọc
+    // cũ 9 quả to nên sàn 8px vẫn gọn.
+    minBubble: "3px",
     tileValue: "3.7cqw",
     tileUnit: "1.6cqw",
-    badge: "2cqw",
+    // Ô chữ chỉ rộng 83px trên ảnh → "04/08/2026" bắt buộc ≤ ~1.4cqw.
+    badge: "1.3cqw",
+    badgeGap: "0.37cqw",
   },
 });
 

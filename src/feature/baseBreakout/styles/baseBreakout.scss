@@ -89,8 +89,6 @@
   gap: 0.4cqw 0.45cqw;
   transform: translate(-50%, -50%);
   color: #fff;
-  /* Bản ngang dùng 0.95cqw chứ không 1.05: ở 1.05 dòng "04/08/2026" + icon rộng
-     140/146px của ô tím, chỉ chừa 3px mỗi bên — nhìn như chữ dính mép. */
   font-size: var(--bb-badge);
   font-weight: 750;
   line-height: 1;
@@ -98,6 +96,18 @@
   span{
     text-align: left;
   }
+}
+
+/* Nền ngang bản mới đã BAKE hai icon lịch/đồng hồ vào dải tím, xếp dọc cách nhau
+   28px (tâm y 42.5 và 70.5 trên ảnh 1672×941). Ở đây chỉ còn cột chữ, ép sát mép
+   trái ô để nằm ngay sau icon, và row-gap chọn sao cho khoảng cách hai dòng khớp
+   28px đó — dòng nào cũng phải ngang tâm icon của nó, lệch là nhìn thấy ngay. */
+.base-breakout__badge--bare {
+  grid-template-columns: auto;
+  justify-content: start;
+  /* Bản ngang: 28px pitch = 17.6px (dòng chữ, line-height 1) + 10.4px. Bản dọc
+     icon sát nhau hơn nên khoảng cách khác — khai theo layout. */
+  gap: var(--bb-badge-gap) 0;
 }
 
 .base-breakout__badge svg {

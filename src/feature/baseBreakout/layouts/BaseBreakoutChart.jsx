@@ -57,6 +57,7 @@ export default function BaseBreakoutChart() {
           "--bb-tile-value": layout.fonts.tileValue,
           "--bb-tile-unit": layout.fonts.tileUnit,
           "--bb-badge": layout.fonts.badge,
+          "--bb-badge-gap": layout.fonts.badgeGap,
         }}
       >
         {layout.tiles.map((tile) => (
@@ -72,19 +73,24 @@ export default function BaseBreakoutChart() {
 
         {/* Bốn con TRỰC TIẾP của một grid 2 cột (icon | chữ), không bọc mỗi dòng
             trong span: bọc lại thì hai dòng thành hai grid riêng và chữ ngày/giờ
-            không còn thẳng cột khi bề rộng icon lệch nhau. */}
+            không còn thẳng cột khi bề rộng icon lệch nhau.
+
+            Nền nào đã vẽ sẵn icon lịch/đồng hồ (`badge.icons === false`) thì chỉ
+            còn cột chữ — xem baseBreakoutSlots.js. */}
         {layout.badge && (
           <div
-            className="base-breakout__badge"
+            className={`base-breakout__badge${
+              layout.badge.icons ? "" : " base-breakout__badge--bare"
+            }`}
             style={{
               left: `${layout.badge.x}%`,
               top: `${layout.badge.y}%`,
               width: `${layout.badge.w}%`,
             }}
           >
-            <BsCalendar3 aria-hidden="true" />
+            {layout.badge.icons && <BsCalendar3 aria-hidden="true" />}
             <span>{badge.day}</span>
-            <BsClock aria-hidden="true" />
+            {layout.badge.icons && <BsClock aria-hidden="true" />}
             <span>{badge.time}</span>
           </div>
         )}

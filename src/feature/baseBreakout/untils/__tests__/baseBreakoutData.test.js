@@ -26,7 +26,7 @@ const byHeight = (bubbles) =>
 
 const LAYOUTS = [
   ["desktop", DESKTOP_LAYOUT, 15],
-  ["mobile", MOBILE_LAYOUT, 9],
+  ["mobile", MOBILE_LAYOUT, 15],
 ];
 
 describe.each(LAYOUTS)("layout %s", (name, layout, count) => {
@@ -69,13 +69,18 @@ describe.each(LAYOUTS)("layout %s", (name, layout, count) => {
 });
 
 describe("khác biệt giữa hai layout", () => {
-  it("bản dọc hiện ÍT mã hơn bản ngang — số chỗ do ảnh nền quyết", () => {
-    expect(MOBILE_LAYOUT.bubbles.length).toBeLessThan(DESKTOP_LAYOUT.bubbles.length);
+  // Bản dọc CŨ chỉ vẽ 9 quả nên hiện ít mã hơn; bản dọc hiện tại nhồi đủ 15 quả
+  // như bản ngang, nên bất biến còn lại là "số chỗ khớp số mã backend cắt sẵn".
+  it("cả hai bản đều có 15 chỗ — đúng số mã backend trả về", () => {
+    expect(DESKTOP_LAYOUT.bubbles).toHaveLength(15);
+    expect(MOBILE_LAYOUT.bubbles).toHaveLength(15);
   });
 
-  it("bản ngang có ô badge, bản dọc thì không (ảnh nền dọc không vẽ ô đó)", () => {
-    expect(DESKTOP_LAYOUT.badge).not.toBeNull();
-    expect(MOBILE_LAYOUT.badge).toBeNull();
+  it("cả hai ảnh nền đều vẽ sẵn icon lịch/đồng hồ nên badge chỉ còn chữ", () => {
+    for (const layout of [DESKTOP_LAYOUT, MOBILE_LAYOUT]) {
+      expect(layout.badge).not.toBeNull();
+      expect(layout.badge.icons).toBe(false);
+    }
   });
 
   it("hai ảnh nền khác tỉ lệ: ngang nằm, dọc đứng", () => {
@@ -94,7 +99,7 @@ describe("assignBubbles", () => {
     expect(byHeight(bubbles).slice(0, 3)).toEqual(["B", "C", "A"]);
   });
 
-  it("cắt theo SỐ CHỖ của layout — bản dọc bỏ bớt mã", () => {
+  it("cắt theo SỐ CHỖ của layout, thừa mã thì bỏ", () => {
     const rows = Array.from({ length: 20 }, (_, i) =>
       row(`S${i}`, 5 - i * 0.1, 100 - i),
     );
@@ -103,19 +108,19 @@ describe("assignBubbles", () => {
     const mobile = assignBubbles(rows, MOBILE_LAYOUT.bubbles).filter((b) => b.row);
 
     expect(desktop).toHaveLength(15);
-    expect(mobile).toHaveLength(9);
-    // Mã được CHỌN theo diem (rows đã sắp sẵn) → đúng S0..S8 trên bản dọc.
+    expect(mobile).toHaveLength(15);
+    // Mã được CHỌN theo diem (rows đã sắp sẵn) → đúng S0..S14, bỏ 5 mã cuối.
     expect(new Set(mobile.map((b) => b.symbol))).toEqual(
-      new Set(Array.from({ length: 9 }, (_, i) => `S${i}`)),
+      new Set(Array.from({ length: 15 }, (_, i) => `S${i}`)),
     );
   });
 
   it("thiếu mã thì bong bóng thừa để trống, không bịa dữ liệu", () => {
     const bubbles = assignBubbles([row("A", 2, 50), row("B", 3, 40)], MOBILE_LAYOUT.bubbles);
 
-    expect(bubbles).toHaveLength(9);
+    expect(bubbles).toHaveLength(15);
     expect(bubbles.filter((b) => b.row)).toHaveLength(2);
-    expect(bubbles.filter((b) => b.row === null)).toHaveLength(7);
+    expect(bubbles.filter((b) => b.row === null)).toHaveLength(13);
   });
 
   it("không có mã nào qua lọc → mọi chỗ trống, không ném lỗi", () => {

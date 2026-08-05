@@ -127,6 +127,53 @@ describe("withLabelFontSize", () => {
   });
 });
 
+// Payload mới mang giá + trần/sàn: màu ô và bộ đếm phải theo GIÁ THẬT, không
+// theo ngưỡng cứng ±6.5% (sai với HNX ±10% và UPCOM ±15%).
+const sampleWithPrice = [
+  {
+    group: "Bất động sản",
+    symbols: [
+      // LLM 05/08/2026: +13.45% nhưng chưa chạm trần → tăng giá, không phải trần.
+      { symbol: "LLM", change_pct: 13.45, market_cap: 5000, price: 32900, ref: 29000, ceiling: 33300, floor: 24700 },
+      // Kịch trần thật (giá = trần) dù chỉ +6.9%.
+      { symbol: "CEO", change_pct: 6.9, market_cap: 3000, price: 12400, ref: 11600, ceiling: 12400, floor: 10800 },
+    ],
+  },
+  {
+    group: "Ngân hàng",
+    symbols: [
+      // Chưa khớp lệnh → đứng giá.
+      { symbol: "SHB", change_pct: 0, market_cap: 100, price: 0, ref: 12000, ceiling: 12800, floor: 11200 },
+      // MHC: -6.86% nhưng chưa chạm sàn → giảm giá, không phải sàn.
+      { symbol: "MHC", change_pct: -6.86, market_cap: 800, price: 8010, ref: 8600, ceiling: 9200, floor: 8000 },
+    ],
+  },
+];
+
+describe("phân loại theo giá thật", () => {
+  it("màu ô theo giá vs trần/sàn, không theo ngưỡng ±6.5%", () => {
+    const [bds, bank] = buildTreemapData(sampleWithPrice);
+    expect(bds.children[0].itemStyle.color).toBe("#00d31f"); // LLM +13.45% chưa trần → xanh
+    expect(bds.children[1].itemStyle.color).toBe("#C026D3"); // CEO giá = trần → tím
+    expect(bank.children[0].itemStyle.color).toBe("#f6bd51"); // SHB chưa khớp → vàng
+    expect(bank.children[1].itemStyle.color).toBe("#ef2f2e"); // MHC -6.86% chưa sàn → đỏ
+  });
+
+  it("countBands đếm theo cùng luật với màu ô", () => {
+    expect(countBands(sampleWithPrice)).toEqual({
+      ceiling: 1,
+      up: 1,
+      ref: 1,
+      down: 1,
+      floor: 0,
+    });
+  });
+
+  it("payload cũ chỉ có change_pct vẫn phân loại được (fallback ±6.5%)", () => {
+    expect(countBands(sample)).toEqual({ ceiling: 1, up: 2, ref: 0, down: 0, floor: 0 });
+  });
+});
+
 describe("countBands", () => {
   it("đếm đúng 5 mức", () => {
     // VRE 6.93 >= CEILING → trần; VIC 6.15 và SHB 0.36 vẫn là "tăng giá"

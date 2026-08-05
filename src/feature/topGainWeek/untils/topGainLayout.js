@@ -37,9 +37,8 @@ export function buildTopGainView(rows) {
   const priceMax = safe.length ? Math.max(...prices) : 0;
   const pctMax = safe.length ? Math.max(0, ...pcts) : 0;
   const priceSpan = priceMax - priceMin;
-  // Trục % làm tròn LÊN bội số 5 để nhãn trục đẹp và bar khớp trục (T+2 ~ 15%,
-  // T+3 ~ 25%). Tối thiểu 5 để tránh chia 0 / trục quá dày khi % nhỏ.
-  const pctAxisMax = pctMax > 0 ? Math.max(5, Math.ceil(pctMax / 5) * 5) : 0;
+  // Truc % co dinh 0..50 de nhan truc chi hien 0/10/20/30/40/50.
+  const pctAxisMax = safe.length ? 50 : 0;
 
   const built = safe.map((r, i) => ({
     symbol: r.symbol,
@@ -50,8 +49,8 @@ export function buildTopGainView(rows) {
     valueBarPct: leftMax > 0 ? (values[i] / leftMax) * 100 : 0,
     // Vị trí điểm trên đường giá (0..100) theo min-max; mọi mã cùng giá → 50.
     priceLinePct: priceSpan > 0 ? ((prices[i] - priceMin) / priceSpan) * 100 : 50,
-    // Bề rộng bar xanh (0..100) theo trục đã làm tròn. % âm (hiếm) → 0.
-    pctBarPct: pctAxisMax > 0 ? Math.max(0, (pcts[i] / pctAxisMax) * 100) : 0,
+    // Bề rộng bar xanh (0..100) theo trục 0..50. % âm (hiếm) → 0.
+    pctBarPct: pctAxisMax > 0 ? Math.min(100, Math.max(0, (pcts[i] / pctAxisMax) * 100)) : 0,
   }));
 
   return { rows: built, leftMax, priceMin, priceMax, pctMax, pctAxisMax };

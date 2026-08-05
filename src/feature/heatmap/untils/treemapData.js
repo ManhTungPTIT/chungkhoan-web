@@ -1,4 +1,4 @@
-import { BANDS, bandForChange, colorForChange } from "./colorBands";
+import { BANDS, bandForRow, colorForRow } from "./colorBands";
 
 // market_cap thiếu/0/không hợp lệ → gán giá trị tối thiểu để ô vẫn hiện
 export const MIN_VALUE = 1;
@@ -35,7 +35,9 @@ export function buildTreemapData(apiData) {
             name: s.symbol,
             value: Number.isFinite(cap) && cap > 0 ? cap : MIN_VALUE,
             _pct: safePct,
-            itemStyle: { color: colorForChange(safePct) },
+            // Màu theo GIÁ so với trần/sàn thật (xem bandForRow) — `_pct` chỉ
+            // dùng cho nhãn hiển thị.
+            itemStyle: { color: colorForRow(s) },
           };
         });
       return { name: sector?.group ?? "", children };
@@ -84,6 +86,9 @@ export function withLabelFontSize(data, areaPx) {
 // NGUYÊN data API (không phải data treemap đã lọc) nhưng vẫn bỏ mã thiếu
 // `symbol` — cùng điều kiện lọc với buildTreemapData nên tổng 5 mức luôn khớp
 // số ô đang vẽ.
+//
+// Dùng CÙNG bandForRow với màu ô, và cùng luật với market_status_service ở BE →
+// chú giải này khớp chart "Bức tranh thị trường" cả về tổng lẫn từng nhóm.
 export function countBands(apiData) {
   const counts = Object.fromEntries(BANDS.map((b) => [b.id, 0]));
   if (!Array.isArray(apiData)) return counts;
@@ -91,7 +96,7 @@ export function countBands(apiData) {
     const symbols = Array.isArray(sector?.symbols) ? sector.symbols : [];
     for (const s of symbols) {
       if (!s || !s.symbol) continue;
-      counts[bandForChange(leafPct(s))] += 1;
+      counts[bandForRow(s)] += 1;
     }
   }
   return counts;

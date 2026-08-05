@@ -11,8 +11,6 @@ const num = (value) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-// Làm tròn LÊN mốc "đẹp" 1/2/5 × 10^k (0 → 0). Dùng cho trục % dòng tiền có
-// thang trải rộng.
 function niceCeil(v) {
   if (v <= 0) return 0;
   const pow = Math.pow(10, Math.floor(Math.log10(v)));
@@ -20,6 +18,7 @@ function niceCeil(v) {
   const m = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
   return m * pow;
 }
+
 
 // Mốc trục cột tím (giá trị khớp lệnh, Tỷ): 5 mốc đều từ 0 tới giá trị lớn nhất.
 //
@@ -47,8 +46,7 @@ export function buildTopGainView(rows) {
   const priceMax = safe.length ? Math.max(...prices) : 0;
   const pctMax = safe.length ? Math.max(0, ...pcts) : 0;
   const priceSpan = priceMax - priceMin;
-  // % dòng tiền trải rất rộng (vài % → vài nghìn %) → làm tròn LÊN mốc "đẹp"
-  // 1/2/5 × 10^k (vd 9,250 → 10,000; 22 → 50; 10 → 10) để trục dễ đọc mọi thang.
+  // Dong tien co the tang hang tram den hang nghin %, nen scale theo max du lieu.
   const pctAxisMax = niceCeil(pctMax);
 
   const built = safe.map((r, i) => ({
@@ -60,8 +58,8 @@ export function buildTopGainView(rows) {
     valueBarPct: leftMax > 0 ? (values[i] / leftMax) * 100 : 0,
     // Vị trí điểm trên đường giá (0..100) theo min-max; mọi mã cùng giá → 50.
     priceLinePct: priceSpan > 0 ? ((prices[i] - priceMin) / priceSpan) * 100 : 50,
-    // Bề rộng bar xanh (0..100) theo trục đã làm tròn. % âm (hiếm) → 0.
-    pctBarPct: pctAxisMax > 0 ? Math.max(0, (pcts[i] / pctAxisMax) * 100) : 0,
+    // Bề rộng bar xanh (0..100) theo trục dòng tiền động. % âm (hiếm) → 0.
+    pctBarPct: pctAxisMax > 0 ? Math.min(100, Math.max(0, (pcts[i] / pctAxisMax) * 100)) : 0,
   }));
 
   return { rows: built, leftMax, priceMin, priceMax, pctMax, pctAxisMax };

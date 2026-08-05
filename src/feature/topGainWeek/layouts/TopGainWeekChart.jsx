@@ -11,12 +11,9 @@ const fmt = (value, digits = 2) =>
 
 // Trục trái cố định (decorative, khớp mockup). Trục % và trục giá tính động.
 
-// Nhãn trục % (0..axisMax, bước 5) — khớp bar được scale theo pctAxisMax.
-function rightTicks(pctAxisMax) {
-  const max = pctAxisMax > 0 ? pctAxisMax : 15;
-  const ticks = [];
-  for (let t = 0; t <= max; t += 5) ticks.push(t);
-  return ticks;
+// Nhan truc % co dinh 0..50, buoc 10.
+function rightTicks() {
+  return [0, 15, 35, 45];
 }
 
 function buildLinePath(rows) {
@@ -42,7 +39,7 @@ function TopGainWeekChart() {
     const step = view.priceMax > 0 ? view.priceMax / 4 : 1;
     return [0, 1, 2, 3, 4].map((i) => Math.round(step * i));
   }, [view.priceMax]);
-  const rightAxisTicks = useMemo(() => rightTicks(view.pctAxisMax), [view.pctAxisMax]);
+  const rightAxisTicks = useMemo(() => rightTicks(), []);
   const leftAxisTicks = useMemo(() => leftTicks(view.leftMax), [view.leftMax]);
 
   return (

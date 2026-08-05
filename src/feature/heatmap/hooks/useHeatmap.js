@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-// API trả về mảng ngành: [{ group, icb_code, symbols:[{symbol, change_pct, market_cap}] }]
+// API trả về mảng ngành: [{ group, icb_code, symbols:[{ symbol, change_pct,
+// market_cap, price, ref, ceiling, floor }] }] — bốn field giá cuối để phân loại
+// 5 mức bảng giá theo trần/sàn THẬT (xem colorBands.bandForRow).
 // Chấp nhận cả dạng bọc { data: [...] } để khớp các endpoint khác trong dự án.
 const fetchHeatmap = async () => {
   const { data } = await axios.get(

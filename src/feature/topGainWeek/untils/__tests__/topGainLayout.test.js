@@ -25,7 +25,7 @@ describe("buildTopGainView", () => {
     expect(view.priceMin).toBe(9);
     expect(view.priceMax).toBe(400);
     expect(view.pctMax).toBe(10);
-    expect(view.pctAxisMax).toBe(10);
+    expect(view.pctAxisMax).toBe(50);
 
     // cột tím theo max 200
     expect(view.rows[0].valueBarPct).toBe(100);
@@ -33,19 +33,19 @@ describe("buildTopGainView", () => {
     // đường giá min-max: 400→100, 9→0
     expect(view.rows[0].priceLinePct).toBe(100);
     expect(view.rows[1].priceLinePct).toBe(0);
-    // cột % theo max 10
-    expect(view.rows[0].pctBarPct).toBe(100);
-    expect(view.rows[1].pctBarPct).toBe(50);
+    // cột % theo trục cố định 50
+    expect(view.rows[0].pctBarPct).toBe(20);
+    expect(view.rows[1].pctBarPct).toBe(10);
   });
 
-  it("trục % làm tròn lên bội số 5 (T+3 ~22% → 25), bar khớp trục", () => {
+  it("trục % cố định 0..50, bar khớp trục", () => {
     const view = buildTopGainView([
       { symbol: "A", gia_tri_khop_lenh: 1, gia_hien_tai: 20, pct_tang: 22.2 },
       { symbol: "B", gia_tri_khop_lenh: 1, gia_hien_tai: 20, pct_tang: 5 },
     ]);
-    expect(view.pctAxisMax).toBe(25);
-    expect(view.rows[0].pctBarPct).toBeCloseTo((22.2 / 25) * 100);
-    expect(view.rows[1].pctBarPct).toBe(20);
+    expect(view.pctAxisMax).toBe(50);
+    expect(view.rows[0].pctBarPct).toBeCloseTo((22.2 / 50) * 100);
+    expect(view.rows[1].pctBarPct).toBe(10);
   });
 
   it("mọi mã cùng giá → điểm đường giá ở giữa (50)", () => {

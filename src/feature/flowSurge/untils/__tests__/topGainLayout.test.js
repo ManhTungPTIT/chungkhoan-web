@@ -33,12 +33,12 @@ describe("buildTopGainView", () => {
     // đường giá min-max: 400→100, 9→0
     expect(view.rows[0].priceLinePct).toBe(100);
     expect(view.rows[1].priceLinePct).toBe(0);
-    // cột % theo max 10
+    // cột % theo trục dòng tiền động
     expect(view.rows[0].pctBarPct).toBe(100);
     expect(view.rows[1].pctBarPct).toBe(50);
   });
 
-  it("trục % dòng tiền làm tròn 1/2/5 (9,250% → 10,000), bar khớp trục", () => {
+  it("trục % dòng tiền làm tròn 1/2/5, bar khớp trục", () => {
     const view = buildTopGainView([
       { symbol: "A", gia_tri_khop_lenh: 1, gia_hien_tai: 20, pct_tang: 9250 },
       { symbol: "B", gia_tri_khop_lenh: 1, gia_hien_tai: 20, pct_tang: 100 },

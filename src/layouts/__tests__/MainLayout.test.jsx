@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import MainLayout from "../MainLayout";
 
 // Hồ sơ /user/me thay đổi theo từng test.
@@ -28,6 +28,15 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
+function MarketProbe() {
+  const location = useLocation();
+  return (
+    <div>
+      BIỂU ĐỒ GHÉP
+      <span data-testid="market-hash">{location.hash}</span>
+    </div>
+  );
+}
 function renderLayout() {
   return render(
     <MemoryRouter initialEntries={["/"]}>
@@ -35,7 +44,7 @@ function renderLayout() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<div>TRANG CHỦ</div>} />
           <Route path="/info" element={<div>TRANG THÔNG TIN</div>} />
-          <Route path="/chart/market" element={<div>BIỂU ĐỒ GHÉP</div>} />
+          <Route path="/chart/market" element={<MarketProbe />} />
         </Route>
       </Routes>
     </MemoryRouter>,
@@ -69,6 +78,7 @@ describe("MainLayout — mở cặp biểu đồ đầu tiên", () => {
     fireEvent.click(screen.getByText("Biểu đồ thị trường"));
 
     expect(screen.getByText("BIỂU ĐỒ GHÉP")).toBeTruthy();
+    expect(screen.getByTestId("market-hash").textContent).toBe("#power-map");
   });
 });
 describe("MainLayout — sidebar chỉ còn một mục biểu đồ", () => {
