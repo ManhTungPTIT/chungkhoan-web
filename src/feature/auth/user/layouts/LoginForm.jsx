@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF, FaApple } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { LoginUserService } from "../services/loginUserService";
-import { mapLoginError } from "../untils/loginError";
+import { mapLoginError, SUPERSEDED_NOTICE } from "../untils/loginError";
 
 export default function LoginForm({ onSwitchTab }) {
   const [account, setAccount] = useState("");
@@ -15,6 +15,13 @@ export default function LoginForm({ onSwitchTab }) {
   const [errors, setErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [popupMsg, setPopupMsg] = useState("");
+  // Đọc một lần lúc dựng: người dùng vừa bị đá thì tới đây kèm ?reason=superseded
+  // (xem untils/loginRedirect.js).
+  const [notice, setNotice] = useState(() =>
+    new URLSearchParams(window.location.search).get("reason") === "superseded"
+      ? SUPERSEDED_NOTICE
+      : "",
+  );
 
   const { login } = LoginUserService();
   const navigate = useNavigate();
@@ -51,6 +58,15 @@ export default function LoginForm({ onSwitchTab }) {
       <div className="auth-logo"></div>
       <h3 className="auth-welcome">Chào mừng trở lại!</h3>
       <p className="auth-welcome-sub">Đăng nhập để tiếp tục sử dụng LEOSTOCK</p>
+
+      {notice && (
+        <div className="auth-notice" role="status">
+          <span>{notice}</span>
+          <button type="button" onClick={() => setNotice("")} aria-label="Đóng thông báo">
+            ×
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="field-group">

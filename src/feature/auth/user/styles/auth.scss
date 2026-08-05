@@ -548,3 +548,31 @@ $line: rgba(255, 255, 255, 0.1);
     background: linear-gradient(135deg, $gold-1, $gold-2);
   }
 }
+
+/* Banner "bạn vừa bị đăng xuất vì đăng nhập nơi khác". Không dùng lại popup lỗi
+   đăng nhập vì tiêu đề của nó là "Đăng nhập thất bại" — ở đây chưa ai thất bại
+   cái gì cả. */
+.auth-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid #f0c36d;
+  border-radius: 0.5rem;
+  background: #fff8e6;
+  color: #6b4e12;
+  font-size: 0.86rem;
+  line-height: 1.35;
+
+  button {
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+}

@@ -7,6 +7,7 @@ import {
   clearTokens,
 } from "../admin/untils/tokenStorage";
 import { CLIENT_HEADERS, IS_APP, refreshRequestConfig } from "./appClient";
+import { loginRedirectPath } from "./loginRedirect";
 
 // Single axios instance for both user and admin. The refresh token rides in an
 // httpOnly cookie, so withCredentials must be on for it to be sent/received.
@@ -23,11 +24,8 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-const redirectToLogin = () => {
-  const path = window.location.pathname.startsWith("/admin")
-    ? "/admin/login"
-    : "/login";
-  window.location.href = path;
+const redirectToLogin = (code) => {
+  window.location.href = loginRedirectPath(window.location.pathname, code);
 };
 
 axiosClient.interceptors.request.use(
@@ -84,7 +82,9 @@ axiosClient.interceptors.response.use(
     } catch (err) {
       processQueue(err, null);
       clearTokens();
-      redirectToLogin();
+      // BE trả `code` để phân biệt "bị đá vì đăng nhập nơi khác" với lỗi phiên
+      // thường — màn login dựa vào đó để giải thích (xem loginRedirect.js).
+      redirectToLogin(err.response?.data?.code);
       return Promise.reject(err);
     } finally {
       isRefreshing = false;
