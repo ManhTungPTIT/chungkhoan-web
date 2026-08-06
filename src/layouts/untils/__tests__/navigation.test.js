@@ -45,6 +45,12 @@ describe("activeTabKey", () => {
     expect(activeTabKey("/chart/market/detail")).toBe("market");
   });
 
+  it("các màn con của trang tài khoản vẫn sáng tab Tài khoản", () => {
+    expect(activeTabKey("/info/profile")).toBe("account");
+    expect(activeTabKey("/info/password")).toBe("account");
+    expect(activeTabKey("/info/package")).toBe("account");
+  });
+
   it("đường dẫn không thuộc tab nào thì không tô sáng gì", () => {
     expect(activeTabKey("/chart/heatmap")).toBe(null);
     expect(activeTabKey("/login")).toBe(null);

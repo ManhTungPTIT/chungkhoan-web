@@ -1,202 +1,305 @@
-.filter-stock {
-  --filter-text: #6b6375;
-  --filter-text-h: #08060d;
-  --filter-bg: #fff;
-  --filter-border: #e5e4e7;
-  --filter-accent-bg: rgba(170, 59, 255, 0.1);
-  --filter-shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* Trang bộ lọc bản WEB (màn rộng). Bản app ở filterStockApp.scss.
+   Cùng bố cục, cùng bảng màu, khác cỡ chữ — nhưng cố ý KHÔNG dùng chung biến hay
+   khối nào với nó: cây thẻ đã chung rồi, style mà cũng chung thì chỉnh cỡ chữ cho
+   desktop là bản app lệch theo. */
+.filter-web {
+  --fw-text: #6b6375;
+  --fw-text-h: #17132a;
+  --fw-muted: #9a95a6;
+  --fw-border: #ece9f2;
+  --fw-bg: #fff;
+  --fw-purple: #6c2bd9;
+  --fw-purple-2: #8b3ff0;
+  --fw-up: #16a34a;
+  --fw-down: #e11d48;
+  --fw-orange: #f59e0b;
 
-  width: 100%;
-  margin: 0 auto;
-  padding: 16px;
   box-sizing: border-box;
-  text-align: left;
+  width: 100%;
+  padding: 16px;
   font-family: var(--sans);
-  color: var(--filter-text-h);
-  background: var(--filter-bg);
+  color: var(--fw-text-h);
+  background: var(--fw-bg);
+  text-align: left;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* ── Đầu trang ─────────────────────────────────────────────────────────── */
   &__header {
     display: flex;
-    align-items: baseline;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
+    gap: 16px;
     margin-bottom: 16px;
   }
 
   &__title {
     margin: 0;
     font-size: 24px;
-    font-weight: 700;
-    color: var(--filter-text-h);
+    font-weight: 800;
+    letter-spacing: -0.02em;
   }
 
   &__updated {
+    margin: 6px 0 0;
     font-size: 14px;
-    color: var(--filter-text);
-    white-space: nowrap;
+    color: var(--fw-muted);
+
+    span {
+      color: var(--fw-purple);
+      font-weight: 600;
+    }
   }
+
+  /* ── Danh mục + tìm kiếm ───────────────────────────────────────────────── */
   &__toolbar {
     display: flex;
     gap: 16px;
     margin-bottom: 16px;
   }
+
   &__dropdown {
     position: relative;
     flex: 0 0 320px;
-
-    .dropdown-trigger {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 12px 16px;
-      font-size: 15px;
-      color: var(--filter-text-h);
-      background: var(--filter-bg);
-      border: 1px solid var(--filter-border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: border-color 0.15s;
-
-      &.is-open {
-        border-color: #2f6bff;
-      }
-
-      .placeholder {
-        color: var(--filter-text-h);
-      }
-
-      .chevron {
-        flex-shrink: 0;
-        font-size: 18px;
-        color: var(--filter-text);
-        transition: transform 0.15s;
-      }
-
-      &.is-open .chevron {
-        transform: rotate(180deg);
-      }
-    }
-
-    .dropdown-menu {
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      right: 0;
-      z-index: 20;
-      max-height: 360px;
-      overflow-y: auto;
-      margin: 0;
-      padding: 6px;
-      list-style: none;
-      background: var(--filter-bg);
-      border: 1px solid var(--filter-border);
-      border-radius: 8px;
-      box-shadow: var(--filter-shadow);
-
-      &::-webkit-scrollbar {
-        width: 8px;
-      }
-      &::-webkit-scrollbar-thumb {
-        background-color: rgba(0, 0, 0, 0.25);
-        border-radius: 4px;
-      }
-    }
-
-    .dropdown-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 12px;
-      font-size: 15px;
-      color: var(--filter-text-h);
-      border-radius: 6px;
-      cursor: pointer;
-
-      &:hover {
-        background: var(--filter-accent-bg);
-      }
-
-      .dropdown-radio {
-        flex-shrink: 0;
-        width: 18px;
-        height: 18px;
-        border: 2px solid var(--filter-border);
-        border-radius: 50%;
-        position: relative;
-      }
-
-      &.is-active {
-        color: #2f6bff;
-
-        .dropdown-radio {
-          border-color: #2f6bff;
-
-          &::after {
-            content: "";
-            position: absolute;
-            inset: 3px;
-            background: #2f6bff;
-            border-radius: 50%;
-          }
-        }
-      }
-    }
+    min-width: 0;
   }
-  &__search {
-    flex: 1;
+
+  .dropdown-trigger {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    padding: 0 16px;
-    background: var(--filter-bg);
-    border: 1px solid var(--filter-border);
-    border-radius: 8px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 16px;
+    border: 1px solid var(--fw-border);
+    border-radius: 12px;
+    background: #fff;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s;
 
-    .search-icon {
+    &:hover,
+    &.is-open {
+      border-color: var(--fw-purple);
+    }
+
+    .dropdown-text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      small {
+        font-size: 12px;
+        color: var(--fw-muted);
+      }
+
+      strong {
+        font-size: 15px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .chevron {
       flex-shrink: 0;
       font-size: 18px;
-      color: var(--filter-text);
+      color: var(--fw-muted);
+      transition: transform 0.15s;
+    }
+
+    &.is-open .chevron {
+      transform: rotate(180deg);
+    }
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    max-height: 360px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border: 1px solid var(--fw-border);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 24px rgba(23, 19, 42, 0.12);
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.25);
+      border-radius: 4px;
+    }
+  }
+
+  .dropdown-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(108, 43, 217, 0.06);
+    }
+
+    &.is-active {
+      background: rgba(108, 43, 217, 0.08);
+      color: var(--fw-purple);
+      font-weight: 600;
+    }
+  }
+
+  &__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      font-size: 18px;
+      color: var(--fw-muted);
     }
 
     input {
-      flex: 1;
-      width: 0;
-      min-width: 0;
-      border: none;
-      outline: none;
-      background: transparent;
-      padding: 12px 0;
+      width: 100%;
+      padding: 14px 16px 14px 42px;
+      border: 1px solid var(--fw-border);
+      border-radius: 12px;
+      background: #fff;
+      font: inherit;
       font-size: 15px;
-      color: var(--filter-text-h);
+      color: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+
+      &:focus {
+        border-color: var(--fw-purple);
+      }
 
       &::placeholder {
-        color: var(--filter-text);
+        color: var(--fw-muted);
       }
     }
   }
-  &__table {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
 
+  /* ── Bốn thẻ thống kê ──────────────────────────────────────────────────── */
+  &__tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .tile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px 16px;
+    border: 1px solid var(--fw-border);
+    border-radius: 12px;
+
+    &__text {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    &__label {
+      font-size: 13px;
+      line-height: 1.3;
+      color: var(--fw-text);
+    }
+
+    &__value {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    &__icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      opacity: 0.85;
+    }
+
+    &--buy {
+      background: #f2fdf6;
+      .tile__value,
+      .tile__icon { color: var(--fw-up); }
+    }
+    &--sell {
+      background: #fff5f7;
+      .tile__value,
+      .tile__icon { color: var(--fw-down); }
+    }
+    &--hold {
+      background: #f5f4ff;
+      .tile__value,
+      .tile__icon { color: var(--fw-purple); }
+    }
+    &--out {
+      background: #fffaf0;
+      .tile__value,
+      .tile__icon { color: var(--fw-orange); }
+    }
+  }
+
+  /* ── Bảng ──────────────────────────────────────────────────────────────── */
+  &__table {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(23, 19, 42, 0.08);
+
+    /* ⚠️ Vô hiệu hoá style RÒ RỈ TOÀN CỤC: feature/chart/styles/panel.scss mở đầu
+       bằng selector `table {` TRẦN (không scope), đặt display:flex, width:clamp
+       và `tr { display: table; text-transform: uppercase; font-size: .85rem }`
+       cho MỌI bảng trong app. Không chặn lại thì cột vỡ và chữ bị viết hoa hết. */
     table {
+      display: table;
       width: 100%;
+      height: auto;
       border-collapse: collapse;
       table-layout: fixed;
     }
 
-    thead th {
-      text-align: center;
-      padding: 14px 12px;
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--filter-text-h);
-      border-bottom: 2px solid var(--filter-border);
-      white-space: nowrap;
+    thead { display: table-header-group; }
+    tbody { display: table-row-group; }
+
+    tr {
+      display: table-row;
+      width: auto;
+      text-transform: none;
+      font-size: inherit;
     }
+
+    th {
+      padding: 14px 12px;
+      background: linear-gradient(135deg, var(--fw-purple), var(--fw-purple-2));
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      line-height: 1.3;
+      vertical-align: middle;
+    }
+
     .th-cell {
       display: flex;
       align-items: center;
@@ -208,142 +311,357 @@
       }
     }
 
-    .th-sort,
-    .th-filter {
-      flex-shrink: 0;
-      font-size: 15px;
-      color: var(--filter-text);
-      opacity: 0.7;
+    .th-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 0;
+
+      /* Mỗi <em> LÀ một dòng đã thiết kế sẵn ("NGÀY BÁO" / "MUA / BÁN"), nên cấm
+         nó tự xuống dòng lần nữa — không thì tiêu đề hai dòng vỡ thành ba. */
+      em {
+        font-style: normal;
+        white-space: nowrap;
+      }
     }
 
-    tbody td {
-      text-align: center;
-      padding: 0 12px;
-      height: 72px;
+    td {
+      padding: 14px 12px;
+      border-bottom: 1px solid var(--fw-border);
       font-size: 15px;
-      color: var(--filter-text-h);
-      border-bottom: 1px solid var(--filter-border);
+      line-height: 1.3;
+      text-align: center;
       vertical-align: middle;
     }
 
-    .col-code {
-      font-weight: 700;
-      color: #2f6bff;
+    tbody tr:last-child td {
+      border-bottom: 0;
+    }
+
+    /* Cả dòng là vùng bấm — điều hướng sang biểu đồ của mã. */
+    tbody tr {
       cursor: pointer;
-    }
+      transition: background 0.12s;
 
-    .col-signal {
-      padding: 0;
-    }
-    .col-pnl {
-      font-weight: 600;
-
-      &--up {
-        color: #1fa463;
-      }
-      &--down {
-        color: #ff5b78;
-      }
-    }
-
-    .badge {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 72px;
-      font-size: 15px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: 0.5px;
-
-      &--hold {
-        background: #1fa463;
-      }
-      &--sell {
-        background: #ff5b78;
-      }
-      &--buy{
-        background: rgb(5, 33, 255);
-      }
-      &--neutral {
-        background: #9aa0a6;
+      &:hover {
+        background: rgba(108, 43, 217, 0.05);
       }
 
+      &:active {
+        background: rgba(108, 43, 217, 0.1);
+      }
     }
   }
+
+  .col-code {
+    text-align: left;
+    padding-left: 16px;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  /* Màu badge đi theo PHA và trùng bảng màu của bốn thẻ thống kê phía trên, để
+     liếc một cái là nối được thẻ với dòng. */
+  .badge {
+    display: inline-block;
+    min-width: 84px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+
+    &--buy {
+      background: #e8f9ee;
+      color: var(--fw-up);
+    }
+    &--sell {
+      background: #ffe9ee;
+      color: var(--fw-down);
+    }
+    &--hold {
+      background: #f0edff;
+      color: var(--fw-purple);
+    }
+    &--out {
+      background: #fff3dc;
+      color: #b45309;
+    }
+    &--none {
+      background: #f1eff5;
+      color: var(--fw-muted);
+    }
+  }
+
+  .col-date {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  /* Chỉ còn số phiên — tên pha đã nằm trong badge cột bên trái. */
+  .col-phase {
+    font-size: 14px;
+    color: var(--fw-muted);
+    white-space: nowrap;
+  }
+
+  .col-pnl {
+    font-size: 15px;
+    font-weight: 700;
+
+    &--up { color: var(--fw-up); }
+    &--down { color: var(--fw-down); }
+  }
+
+  .col-price {
+    strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    small {
+      display: block;
+      margin-top: 2px;
+      font-size: 14px;
+      color: var(--fw-muted);
+    }
+  }
+
+  /* ── Gợi ý + phân trang ────────────────────────────────────────────────── */
+  &__hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin: 12px 0 0;
+    font-size: 14px;
+    color: var(--fw-muted);
+  }
+
   &__pagination {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    margin-top: 20px;
+    margin-top: 12px;
+  }
 
-    .page-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 38px;
-      height: 38px;
-      padding: 0 6px;
-      font-size: 15px;
-      font-weight: 500;
-      color: #4361ee;
-      background: var(--filter-bg);
-      border: 1px solid var(--filter-border);
-      border-radius: 8px;
-      cursor: pointer;
-      transition:
-        background 0.15s,
-        border-color 0.15s;
+  .page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 10px;
+    border: 1px solid var(--fw-border);
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+    font-size: 15px;
+    color: var(--fw-text);
+    cursor: pointer;
+    transition: border-color 0.15s;
 
-      &:hover:not(:disabled):not(.is-active) {
-        border-color: #4361ee;
-      }
+    &:hover:not(:disabled):not(.is-active) {
+      border-color: var(--fw-purple);
+    }
 
-      &.is-active {
-        color: #fff;
-        background: #4361ee;
-        border-color: #4361ee;
-      }
+    &.is-active {
+      border-color: transparent;
+      background: var(--fw-purple);
+      color: #fff;
+      font-weight: 700;
+    }
 
-      &--arrow {
-        color: var(--filter-text);
-        font-size: 18px;
-      }
+    &--arrow {
+      font-size: 18px;
+    }
 
-      &:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
+    &:disabled {
+      opacity: 0.4;
+      cursor: default;
     }
   }
 
-  @media (max-width: 640px) {
+  /* Màn hẹp (cửa sổ web thu nhỏ): toolbar xuống cột, bốn thẻ xếp 2×2. */
+  @media (max-width: 860px) {
     &__toolbar {
       flex-direction: column;
     }
+
     &__dropdown {
       flex: 1 1 auto;
     }
-    &__table table {
-      min-width: 640px;
+
+    &__tiles {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Điện thoại: giữ mật độ thông tin giống bản app. Ở breakpoint này không xếp
+     bộ lọc thành một cột và cũng không chia các thẻ 2×2, vì sẽ đẩy bảng xuống
+     quá xa và làm giao diện web khác trải nghiệm trên app. */
+  @media (max-width: 600px) {
+    padding: 16px 12px 8px;
+
+    &__header {
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    &__title {
+      font-size: 20px;
+    }
+
+    &__updated {
+      margin-top: 4px;
+      font-size: 12px;
+    }
+
+    &__toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    &__dropdown {
+      min-width: 0;
+    }
+
+    .dropdown-trigger {
+      height: auto;
+      padding: 8px 12px;
+
+      .dropdown-text {
+        small {
+          font-size: 11px;
+        }
+
+        strong {
+          font-size: 14px;
+        }
+      }
+
+      .chevron {
+        font-size: 16px;
+      }
+    }
+
+    .dropdown-menu {
+      top: calc(100% + 4px);
+      max-height: 260px;
+      padding: 4px;
+    }
+
+    .dropdown-item {
+      padding: 10px 12px;
+      font-size: 14px;
+    }
+
+    &__search {
+      .search-icon {
+        left: 12px;
+        font-size: 16px;
+      }
+
+      input {
+        padding: 14px 12px 14px 36px;
+        font-size: 14px;
+      }
+    }
+
+    &__tiles {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .tile {
+      gap: 4px;
+      padding: 8px 6px;
+      border-radius: 10px;
+
+      &__label {
+        font-size: 9.5px;
+        line-height: 1.25;
+      }
+
+      &__value {
+        font-size: 18px;
+      }
+
+      &__icon {
+        width: 15px;
+        height: 15px;
+      }
     }
 
     &__table {
-      thead th {
-        padding: 12px 8px;
+      th {
+        padding: 8px 9px 8px 3px;
+        font-size: 8px;
+        letter-spacing: 0;
+        line-height: 1.25;
+      }
+
+      .th-cell--left {
+        padding-left: 4px;
+      }
+
+      td {
+        padding: 8px 3px;
+        font-size: 11px;
+      }
+    }
+
+    .col-code {
+      padding-left: 6px;
+      font-size: 12px;
+    }
+
+    .badge {
+      min-width: 42px;
+      padding: 4px 5px;
+      border-radius: 6px;
+      font-size: 9.5px;
+    }
+
+    .col-date,
+    .col-phase {
+      font-size: 10.5px;
+    }
+
+    .col-pnl {
+      font-size: 11px;
+    }
+
+    .col-price {
+      strong {
         font-size: 12px;
       }
 
-      tbody td {
-        padding: 0 8px;
-        font-size: 13px;
+      small {
+        font-size: 10.5px;
       }
+    }
 
-      .badge {
-        font-size: 13px;
-      }
+    &__hint {
+      margin-top: 10px;
+      font-size: 12px;
+    }
+
+    &__pagination {
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .page-btn {
+      min-width: 32px;
+      height: 32px;
+      padding: 0 8px;
+      font-size: 13px;
     }
   }
 }
-

@@ -1,8 +1,6 @@
-import { useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import BottomTabBar from "./components/BottomTabBar";
-import BotSheet from "./components/BotSheet";
 import "./styles/appNav.scss";
 
 /**
@@ -15,19 +13,13 @@ import "./styles/appNav.scss";
  * điều hướng app không có đường nào làm hỏng web.
  */
 function AppLayout() {
-  const [botSheetOpen, setBotSheetOpen] = useState(false);
-
   return (
     <div className="appLayout">
       <div className="appLayout-content">
         <Outlet />
       </div>
 
-      <BottomTabBar
-        botSheetOpen={botSheetOpen}
-        onBotClick={() => setBotSheetOpen((open) => !open)}
-      />
-      <BotSheet open={botSheetOpen} onClose={() => setBotSheetOpen(false)} />
+      <BottomTabBar />
     </div>
   );
 }

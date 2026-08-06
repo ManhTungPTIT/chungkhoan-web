@@ -6,7 +6,10 @@ import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
 import DataStatusBanner from "../chart/layouts/DataStatusBanner";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
+import BotPicker from "../chart/layouts/BotPicker";
 import TimelineStock from "../chart/layouts/TimelineStock";
+import { IS_APP } from "../auth/untils/appClient";
+import { isKnownBot, loadBot, saveBot } from "./untils/botPreference";
 import {
   signalGeneratorForBot,
   usesBackendPanelSignal,
@@ -171,11 +174,43 @@ function TradingView() {
     [dataPanel, chanelCode],
   );
 
-  // BOT chọn ở sidebar: /?bot=t (T+), /?bot=long (Dài hạn), mặc định trend.
+  // BOT chọn ở sidebar (web) hoặc nút trong thanh công cụ (app): /?bot=t (T+),
+  // /?bot=long (Dài hạn), mặc định trend.
+  //
+  // URL là nguồn sự thật, localStorage chỉ là trí nhớ giữa các lần mở. Màn này tự
+  // đắp `?bot=` khi URL thiếu, nên MỌI lối vào đều giữ đúng bot: tab Bot, bấm một
+  // dòng ở Bộ lọc (`/?symbol=X`), hay mở lại app. Đặt việc đắp ở đây chứ không ở
+  // thanh tab vì chỉ lối đầu đi qua thanh tab.
+  const botFromUrl = searchParams.get("bot");
+  const bot = isKnownBot(botFromUrl) ? botFromUrl : loadBot();
+
+  useEffect(() => {
+    if (isKnownBot(botFromUrl)) {
+      saveBot(botFromUrl);
+      return;
+    }
+    // `replace` để không thêm mục lịch sử — nếu không, bấm back một lần chỉ quay
+    // về chính trang này với URL cũ.
+    setSearchParams(
+      (params) => {
+        params.set("bot", bot);
+        return params;
+      },
+      { replace: true },
+    );
+  }, [botFromUrl, bot, setSearchParams]);
+
+  const selectBot = (value) => {
+    saveBot(value);
+    setSearchParams((params) => {
+      params.set("bot", value);
+      return params;
+    });
+  };
+
   // useMemo giữ reference 'signals' ổn định: nếu tính inline mỗi render sẽ tạo
   // mảng mới → useEffect khởi tạo chart (deps có signals) chạy lại → dispose()+
   // init() xoá sạch overlay đang vẽ. Chỉ đổi khi candles hoặc bot thay đổi.
-  const bot = searchParams.get("bot");
   const signals = useMemo(() => signalGeneratorForBot(bot)(candles), [candles, bot]);
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
@@ -332,6 +367,9 @@ function TradingView() {
               activeTimeline={activeTimeline}
               onSelect={onSelectTimeline}
             />
+            {/* Chỉ bản app: sidebar bản web đã hiện sẵn cả ba BOT nên thấy ngay
+                đang ở bot nào, thêm nút nữa là thừa. */}
+            {IS_APP && <BotPicker bot={bot} onChange={selectBot} />}
             <button
               type="button"
               className="draw-tool-trigger"

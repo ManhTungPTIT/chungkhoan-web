@@ -1,14 +1,20 @@
 // Đích điều hướng dùng chung cho sidebar (bản web) và bottom tab (bản app).
 //
-// Tách khỏi component vì hai nơi cùng cần đúng một hành vi: sidebar trong
-// MainLayout.jsx và BotSheet.jsx của bản app. Chép logic sang file thứ hai là bảo
-// đảm hai bên lệch nhau sau vài tháng.
+// `BOTS` dùng ở hai nơi: sidebar bản web (MainLayout.jsx) và nút đổi bot trong
+// thanh công cụ màn biểu đồ của bản app (feature/chart/layouts/BotPicker.jsx).
+// `botTargetPath` thì nay CHỈ sidebar web còn gọi — bản app đổi bot tại chỗ, không
+// điều hướng đi đâu.
 
-/** Ba loại BOT, thứ tự hiển thị đúng như sidebar bản web. */
+/**
+ * Ba loại BOT, thứ tự hiển thị đúng như sidebar bản web.
+ *
+ * `short` dành cho nút đổi bot trong thanh công cụ màn biểu đồ (bản app): nút chỉ
+ * rộng 78px ở 0.68rem nên "BOT Dài hạn" tràn. Sidebar web vẫn dùng `label`.
+ */
 export const BOTS = [
-  { value: "trend", label: "BOT Trend" },
-  { value: "t", label: "BOT T+" },
-  { value: "long", label: "BOT Dài hạn" },
+  { value: "trend", label: "BOT Trend", short: "Trend" },
+  { value: "t", label: "BOT T+", short: "T+" },
+  { value: "long", label: "BOT Dài hạn", short: "Dài hạn" },
 ];
 
 /**
@@ -50,6 +56,8 @@ export function activeTabKey(pathname) {
   if (pathname === "/chart/filter") return "filter";
   // startsWith: /chart/market còn có hash và các biến thể con.
   if (pathname.startsWith("/chart/market")) return "market";
-  if (pathname === "/info") return "account";
+  // startsWith: bản app tách trang tài khoản thành hub /info + các màn con /info/*, tab
+  // dưới phải sáng ở cả bốn đường dẫn đó.
+  if (pathname.startsWith("/info")) return "account";
   return null;
 }

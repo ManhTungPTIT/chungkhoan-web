@@ -163,27 +163,27 @@ describe("buildPowerData + đột biến dòng tiền", () => {
     expect(buildPowerData(board, { purpleN: 0, now: NOW })[0].surge).toBe(300);
   });
 
-  it("xếp trong cung theo điểm đột biến, không theo |pct|", () => {
+  it("xếp trong cung theo ĐỘ DÀI TIA, điểm đột biến không lấn được", () => {
     const board = [
       { symbol: "A", change_pct: 5, value: 50e9, avg_value_20: 25e9 }, // ratio 2
       { symbol: "B", change_pct: 9, value: 10e9, avg_value_20: 20e9 }, // ratio 0.5
     ];
     const out = buildPowerData(board, { purpleN: 0, now: NOW });
-    // B biên độ lớn hơn nhưng dòng tiền hụt → xếp sau
-    expect(out.map((d) => d.symbol)).toEqual(["A", "B"]);
+    // B dòng tiền hụt nhưng tia DÀI hơn → vẫn đứng trước.
+    expect(out.map((d) => d.symbol)).toEqual(["B", "A"]);
   });
 
-  it("áp đồng nhất cả cung ĐỎ: mã giảm kèm tiền đột biến xếp trước mã giảm sâu", () => {
+  it("áp đồng nhất cả cung ĐỎ: tia dài đứng trước dù dòng tiền yếu hơn", () => {
     const board = [
       { symbol: "R1", change_pct: -2, value: 60e9, avg_value_20: 20e9 }, // ratio 3
       { symbol: "R2", change_pct: -8, value: 5e9, avg_value_20: 5e9 }, // ratio 1
     ];
     const out = buildPowerData(board, { purpleN: 0, now: NOW });
     expect(out.map((d) => d.category)).toEqual(["red", "red"]);
-    expect(out.map((d) => d.symbol)).toEqual(["R1", "R2"]);
+    expect(out.map((d) => d.symbol)).toEqual(["R2", "R1"]);
   });
 
-  it("mã thiếu avg_value_20 xếp cuối cung dù |pct| lớn hơn", () => {
+  it("thiếu avg_value_20 KHÔNG bị đẩy xuống cuối cung — độ dài mới quyết định", () => {
     const board = [
       { symbol: "OK", change_pct: 1, value: 50e9, avg_value_20: 25e9 },
       { symbol: "NOAVG", change_pct: 9, value: 90e9 }, // |pct| và value đều lớn hơn
@@ -191,8 +191,19 @@ describe("buildPowerData + đột biến dòng tiền", () => {
     // purpleN 0 để cả hai cùng cung xanh — đo đúng thứ tự TRONG cung, không bị
     // thứ tự cung (xanh trước tím) lấn át.
     const out = buildPowerData(board, { purpleN: 0, now: NOW });
-    expect(out.map((d) => d.symbol)).toEqual(["OK", "NOAVG"]);
-    expect(out[1].surge).toBe(null);
+    expect(out.map((d) => d.symbol)).toEqual(["NOAVG", "OK"]);
+    expect(out[0].surge).toBe(null);
+  });
+
+  // Chỉ khi độ dài BẰNG NHAU thì điểm đột biến mới lên tiếng — cần một mốc để
+  // thứ tự không nhảy giữa các lần vẽ ở mã đứng giá / kịch trần.
+  it("hoà độ dài → mã đột biến mạnh hơn đứng trước", () => {
+    const board = [
+      { symbol: "WEAK", change_pct: 3, value: 10e9, avg_value_20: 20e9 }, // ratio 0.5
+      { symbol: "STRONG", change_pct: 3, value: 60e9, avg_value_20: 20e9 }, // ratio 3
+    ];
+    const out = buildPowerData(board, { purpleN: 0, now: NOW });
+    expect(out.map((d) => d.symbol)).toEqual(["STRONG", "WEAK"]);
   });
 
   it("mã thiếu avg_value_20 không vào tím", () => {

@@ -51,31 +51,6 @@
     }
   }
 
-  &__refresh {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-    padding: 8px 10px;
-    border: 1px solid #e3d8f7;
-    border-radius: 10px;
-    background: #fff;
-    color: var(--fa-purple);
-    font: inherit;
-    font-size: 11.5px;
-    font-weight: 600;
-    cursor: pointer;
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: default;
-    }
-
-    &.is-loading svg {
-      animation: filter-app-spin 0.9s linear infinite;
-    }
-  }
-
   /* ── Danh mục + tìm kiếm ───────────────────────────────────────────────── */
   &__toolbar {
     display: grid;
@@ -473,11 +448,5 @@
       opacity: 0.4;
       cursor: default;
     }
-  }
-}
-
-@keyframes filter-app-spin {
-  to {
-    transform: rotate(360deg);
   }
 }

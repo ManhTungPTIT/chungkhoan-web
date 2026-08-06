@@ -1,0 +1,66 @@
+/* Nút đổi BOT trong thanh công cụ màn biểu đồ (bản app).
+   Kích thước nút KHÔNG khai ở đây: `.bot-picker__trigger` đã được gộp vào nhóm
+   nút chung trong index.scss cùng `.draw-tool-trigger` / `.indicator-picker__trigger`
+   — khai lại ở đây là hai nguồn sự thật cho một con số. */
+.bot-picker {
+  position: relative;
+  z-index: 20;
+  color-scheme: light;
+}
+
+.bot-picker__trigger {
+  /* `.information` đặt text-transform: uppercase cho cả cây; nhãn bot là tiếng
+     Việt có dấu ("Dài hạn") nên phải trả lại chữ thường. */
+  text-transform: none;
+}
+
+.bot-picker__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: max-content;
+  min-width: 160px;
+  margin-top: 4px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid #e6e8ef;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.12);
+  text-align: left;
+  text-transform: none;
+  color-scheme: light;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    /* 2.5rem là vùng chạm đủ lớn để không bấm trượt trên điện thoại — cùng lý do
+       `.botsheet-item` cũ dùng 3rem, nhưng menu này neo dưới nút nên gọn hơn. */
+    min-height: 2.5rem;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: #1d2939;
+    font-family: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+    &.is-active {
+      background: #f5f3ff;
+      color: #6d28d9;
+      font-weight: 600;
+    }
+
+    svg {
+      flex-shrink: 0;
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+}

@@ -39,8 +39,8 @@ function byScoreDesc(a, b) {
 // - Còn lại: tăng → xanh, giảm → đỏ (0 coi như xanh).
 // - magnitude = |change_pct| (độ dài tia) — đột biến KHÔNG đổi độ dài tia.
 // - Sắp xếp quanh vòng tròn gom theo cung: green → purple → red, trong mỗi
-//   nhóm theo điểm đột biến giảm dần (áp đồng nhất cả 3 cung), hoà thì theo
-//   magnitude giảm dần.
+//   nhóm theo ĐỘ DÀI TIA giảm dần (áp đồng nhất cả 3 cung), hoà thì theo điểm
+//   đột biến giảm dần.
 export function buildPowerData(
   board,
   { topN = 40, purpleN = 10, now, useSurge = USE_SURGE } = {},
@@ -112,8 +112,13 @@ export function buildPowerData(
     if (order[a.category] !== order[b.category]) {
       return order[a.category] - order[b.category];
     }
-    const byScore = byScoreDesc(a, b);
-    if (byScore !== 0) return byScore;
-    return b.magnitude - a.magnitude;
+    // Trong mỗi cung: TIA DÀI TRƯỚC, luôn luôn. Bản trước xếp theo điểm đột biến
+    // rồi mới tới độ dài, nên tia trong cung lên xuống lộn xộn — nhìn không ra
+    // quy luật nào. Điểm đột biến vẫn quyết định mã nào VÀO cung tím, chỉ không
+    // còn quyết định thứ tự trong cung nữa.
+    if (b.magnitude !== a.magnitude) return b.magnitude - a.magnitude;
+    // Hoà độ dài thì mới tới điểm đột biến — hay xảy ra ở mã đứng giá (0%) và mã
+    // kịch trần/sàn, cần một mốc để thứ tự không nhảy giữa các lần vẽ.
+    return byScoreDesc(a, b);
   });
 }

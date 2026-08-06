@@ -20,6 +20,7 @@
 
 .timeline-stock__trigger,
 .draw-tool-trigger,
+.bot-picker__trigger,
 .indicator-picker__trigger {
   width: var(--chart-toolbar-button-width);
   height: var(--chart-toolbar-button-height);
@@ -677,6 +678,7 @@
 
   .timeline-stock__trigger,
   .draw-tool-trigger,
+  .bot-picker__trigger,
   .indicator-picker__trigger {
     width: var(--chart-toolbar-button-width);
     min-width: var(--chart-toolbar-button-width);

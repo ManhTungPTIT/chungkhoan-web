@@ -1,6 +1,7 @@
-// Phần tính toán dùng chung cho HAI bản trang bộ lọc (web `filterStock.jsx`,
-// app `FilterStockApp.jsx`). Tách ra đây vì chép đôi thì hai bản trôi khỏi nhau
-// mà không ai thấy — cùng một cột nhưng ra hai con số khác nhau.
+// Phần tính toán của trang bộ lọc (`layouts/FilterStockPage.jsx`, chung cho bản
+// web lẫn bản app). Tách khỏi component để test được mà không phải dựng cả cây
+// thẻ — và vì hồi hai bản còn là hai file, chép đôi đã làm chúng trôi khỏi nhau
+// mà không ai thấy: cùng một cột nhưng ra hai con số khác nhau.
 import { isHolding } from "../../chart/untils/signalDisplay";
 
 /** 2026-08-03 → "03/08/2026". Giá trị không parse được thì trả nguyên xi. */

@@ -1,0 +1,213 @@
+// ===== Hub tài khoản của bản app (danh sách + màn con) =====
+//
+// Khác infoUser.scss ở chỗ file này đọc token toàn cục (--bg/--text/--border) nên tự đổi
+// theo chế độ sáng/tối của máy, giống các màn còn lại của app. infoUser.scss thì cố định
+// theme sáng — xem ghi chú "Sáng/tối" ở cuối file.
+
+// Cam lấy từ logo sư tử. Khai riêng chứ không đụng --accent (tím) của toàn app: đây là
+// điểm nhấn của riêng khu vực tài khoản, đổi --accent là đổi luôn mọi màn khác.
+$accent: #f2652a;
+$radius: 12px;
+
+// `#root` trong index.css đặt text-align:center (thừa từ khung mẫu Vite) nên mọi thứ không
+// tự khai căn lề đều bị dồn vào giữa — kể cả nhãn của form. Đặt lại ở gốc hai khung này
+// thay vì sửa #root: đổi #root là đổi mọi trang, trong đó có bản web đang chạy.
+.acc,
+.acc-screen {
+  text-align: left;
+}
+
+.acc {
+  min-height: 100%;
+  padding: 1rem;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.acc-state {
+  padding: 1.5rem 0.25rem;
+  color: var(--text);
+  font-size: 0.9rem;
+
+  &--error {
+    color: #dc2626;
+  }
+}
+
+// ---------- Khối đầu trang ----------
+.acc-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem 0.25rem 1.25rem;
+}
+
+.acc-avatar {
+  flex: none;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: $accent;
+  color: #fff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  object-fit: cover;
+
+  &--img {
+    display: block;
+  }
+}
+
+.acc-head__text {
+  min-width: 0; // cho phép hai dòng dưới cắt bớt thay vì đẩy giãn khối cha
+}
+
+.acc-head__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+.acc-head__sub {
+  margin-top: 0.15rem;
+  font-size: 0.85rem;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ---------- Danh sách ----------
+.acc-list {
+  border: 1px solid var(--border);
+  border-radius: $radius;
+  overflow: hidden; // bo góc ăn cả vào dòng đầu/cuối
+  background: var(--bg);
+}
+
+.acc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  // 3.5rem = 56px: mốc tối thiểu cho vùng chạm trên di động.
+  min-height: 3.5rem;
+  padding: 0.75rem 1rem;
+  border: 0;
+  background: none;
+  color: var(--text-h);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  // Kẻ giữa các dòng, KHÔNG kẻ dưới dòng cuối — dùng + thay vì :not(:last-child) để đường
+  // kẻ luôn thuộc về dòng phía dưới, tránh cộng dồn viền khi ẩn bớt mục (admin).
+  & + & {
+    border-top: 1px solid var(--border);
+  }
+
+  &:active {
+    background: var(--code-bg);
+  }
+}
+
+.acc-row__icon {
+  flex: none;
+  font-size: 1.35rem;
+  color: var(--text);
+}
+
+.acc-row__label {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.acc-row__chevron {
+  flex: none;
+  font-size: 1.25rem;
+  color: var(--text);
+}
+
+// ---------- Đăng xuất ----------
+.acc-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 3.25rem;
+  margin-top: 1.25rem;
+  padding: 0 1rem;
+  border: 1px solid rgba(242, 101, 42, 0.28);
+  border-radius: $radius;
+  background: rgba(242, 101, 42, 0.08);
+  color: $accent;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+
+  svg {
+    font-size: 1.2rem;
+  }
+
+  &:active {
+    background: rgba(242, 101, 42, 0.16);
+  }
+}
+
+// ---------- Khung màn con ----------
+.acc-screen {
+  min-height: 100%;
+  background: var(--bg);
+}
+
+.acc-screen__bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.acc-screen__back {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-h);
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  &:active {
+    background: var(--code-bg);
+  }
+}
+
+.acc-screen__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-h);
+}
+
+// Sáng/tối: thân màn con là ProfileForm/PasswordForm/PackageForm, mà chúng ăn theo
+// infoUser.scss — file đó cố định theme sáng ($bg #f6f7fb). Nên khi máy ở chế độ tối,
+// thanh đầu và hub sẽ tối còn phần thân vẫn sáng. Muốn hết chênh thì phải chuyển
+// infoUser.scss sang dùng token, đụng cả bản web nên để thành việc riêng.
+.acc-screen__body {
+  min-height: 0; // .info-user đặt min-height:100%, ở đây không cần kéo dài thêm
+  padding: 1rem;
+}

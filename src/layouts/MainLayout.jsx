@@ -65,8 +65,9 @@ function MainLayout() {
     logout();
   };
 
-  // Đổi BOT nhưng GIỮ mã đang xem. Logic ở untils/navigation.js vì bottom sheet
-  // của bản app (components/BotSheet.jsx) cần đúng hành vi này.
+  // Đổi BOT nhưng GIỮ mã đang xem. Chỉ sidebar bản web còn dùng đường này: bản
+  // app đổi bot ngay trong màn biểu đồ nên không phải điều hướng đi đâu cả (xem
+  // feature/chart/layouts/BotPicker.jsx).
   const goToBot = (botValue) => {
     navigate(botTargetPath(location.search, botValue));
   };

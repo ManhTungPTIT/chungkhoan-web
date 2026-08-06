@@ -24,7 +24,7 @@ function renderApp(initialPath = "/") {
 describe("thanh tab", () => {
   it("hiện đúng bốn tab", () => {
     renderApp();
-    for (const label of ["Bot", "Bộ lọc", "Biểu đồ", "Tài khoản"]) {
+    for (const label of ["Trang chủ", "Bộ lọc", "Biểu đồ", "Tài khoản"]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
   });
@@ -40,6 +40,12 @@ describe("thanh tab", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Bộ lọc" }));
     expect(screen.getByText("BỘ LỌC")).toBeInTheDocument();
+
+    // Tab Trang chủ đi THẲNG vào màn biểu đồ. Bản trước nó mở một tấm trượt bắt chọn 1
+    // trong 3 bot; việc chọn bot nay nằm trong thanh công cụ của màn đó.
+    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
+    expect(screen.getByText("MÀN BIỂU ĐỒ NẾN")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Biểu đồ" }));
     expect(screen.getByText("BIỂU ĐỒ THỊ TRƯỜNG")).toBeInTheDocument();
@@ -58,47 +64,14 @@ describe("thanh tab", () => {
       "aria-current",
     );
   });
-});
 
-describe("bottom sheet chọn bot", () => {
-  it("không hiện trước khi bấm tab Bot", () => {
-    renderApp();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
-
-  it("bấm Bot thì hiện đủ ba loại bot", () => {
-    renderApp();
-    fireEvent.click(screen.getByRole("button", { name: "Bot" }));
-
-    expect(screen.getByRole("dialog", { name: "Chọn BOT" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "BOT Trend" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "BOT T+" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "BOT Dài hạn" })).toBeInTheDocument();
-  });
-
-  it("chọn bot thì đóng tấm trượt và giữ mã đang xem", () => {
-    renderApp("/?symbol=HPG&bot=trend");
-    fireEvent.click(screen.getByRole("button", { name: "Bot" }));
-    fireEvent.click(screen.getByRole("button", { name: "BOT T+" }));
-
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    // Điều hướng tới "/" giữ nguyên symbol — màn nến vẫn đứng ở mã cũ.
-    expect(screen.getByText("MÀN BIỂU ĐỒ NẾN")).toBeInTheDocument();
-  });
-
-  it("chạm ra ngoài thì đóng", () => {
-    renderApp();
-    fireEvent.click(screen.getByRole("button", { name: "Bot" }));
-
-    fireEvent.click(screen.getByRole("dialog").parentElement);
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
-
-  it("nhấn Escape thì đóng", () => {
-    renderApp();
-    fireEvent.click(screen.getByRole("button", { name: "Bot" }));
-
-    fireEvent.keyDown(document, { key: "Escape" });
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  // Tab Trang chủ cũng phải được đánh dấu như ba tab kia. Bản trước nó cố ý KHÔNG có
+  // aria-current vì bấm là mở hộp thoại chứ không điều hướng.
+  it("tô sáng tab Trang chủ khi đang ở màn biểu đồ", () => {
+    renderApp("/?symbol=HPG&bot=t");
+    expect(screen.getByRole("button", { name: "Trang chủ" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
   });
 });

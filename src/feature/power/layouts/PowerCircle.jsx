@@ -5,12 +5,34 @@ import { colorForCategory } from "../untils/powerData";
 
 const fmtPct = (pct) => `${pct >= 0 ? "+" : ""}${pct}%`;
 
+// Chỗ chừa cho VÀNH NHÃN MÃ vẽ bên ngoài đường tròn: `axisLabel.margin` 8 + bề
+// ngang chữ (mã 3–4 ký tự ở fontSize 10) ≈ 22. Thiếu khoản này thì nhãn ở hai
+// mép trái/phải bị cắt cụt.
+const LABEL_RING = 30;
+
+/**
+ * Bán kính ngoài tính bằng PX theo ô vẽ thật, thay cho phần trăm cố định.
+ *
+ * ECharts tính `radius: "72%"` theo **cạnh ngắn** của ô. Ô vẽ ở đây gần như không
+ * bao giờ vuông (desktop 1440×770, điện thoại 359×702), nên một con số phần trăm
+ * hợp cạnh này thì hụt cạnh kia: đo được dư 185px chiều dọc trên desktop và hơn
+ * 400px trên điện thoại. Tính theo px thì đường tròn luôn ăn hết cạnh ngắn, chỉ
+ * chừa lại vành nhãn.
+ */
+function outerRadiusPx(width, height) {
+  const half = Math.min(width, height) / 2;
+  // Sàn 40px để ô quá nhỏ (lúc đang dựng layout, width≈0) không ra bán kính âm.
+  return Math.max(40, half - LABEL_RING);
+}
+
 export default function PowerCircle({ data }) {
   const containerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const chart = echarts.init(containerRef.current);
+    const el = containerRef.current;
+    const chart = echarts.init(el);
+    const box = { width: el.clientWidth, height: el.clientHeight };
 
     const symbols = data.map((d) => d.symbol);
     // Màu tính một lần cho mỗi mã → dùng chung cho tia (bar) và nhãn mã,
@@ -36,9 +58,13 @@ export default function PowerCircle({ data }) {
           return lines.join("<br/>");
         },
       },
-      // center dọc 50%: mốc 54% trước đây là để né chỗ cho title vẽ trong canvas;
-      // title đã chuyển ra ngoài nên giữ 54% là vòng tròn lệch xuống dưới.
-      polar: { radius: ["4%", "72%"], center: ["50%", "50%"] },
+      // center 50%/50%: mốc lệch (54% cũ, rồi 42%) là để né title vẽ trong canvas
+      // và để bù phần dư; title đã chuyển ra ngoài, còn phần dư thì nay hết vì bán
+      // kính tính theo px. Lệch tâm chỉ dồn khoảng trắng về một phía chứ không bớt.
+      polar: {
+        radius: ["4%", outerRadiusPx(box.width, box.height)],
+        center: ["50%", "50%"],
+      },
       angleAxis: {
         type: "category",
         data: symbols,
@@ -92,8 +118,18 @@ export default function PowerCircle({ data }) {
     };
     chart.on("click", onClick);
 
-    const ro = new ResizeObserver(() => chart.resize());
-    ro.observe(containerRef.current);
+    // Bán kính là px nên PHẢI tính lại khi ô đổi kích thước — `chart.resize()` một
+    // mình chỉ kéo canvas, đường tròn vẫn giữ nguyên bán kính cũ.
+    const ro = new ResizeObserver(() => {
+      chart.resize();
+      chart.setOption({
+        polar: {
+          radius: ["4%", outerRadiusPx(el.clientWidth, el.clientHeight)],
+          center: ["50%", "50%"],
+        },
+      });
+    });
+    ro.observe(el);
 
     return () => {
       ro.disconnect();

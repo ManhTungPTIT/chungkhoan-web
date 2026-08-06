@@ -1242,8 +1242,8 @@
    then the T+ strength radar pairs with the potential T+ filter. */
 .market-chart-pair__panel#power-map {
   grid-column: 1 / -1;
-  height: clamp(42rem, calc(100dvh - 5.25rem), 58rem);
-  min-height: clamp(42rem, calc(100dvh - 5.25rem), 58rem);
+  height: clamp(38rem, calc(100dvh - 5.25rem), 55rem);
+  min-height: clamp(38rem, calc(100dvh - 5.25rem), 55rem);
   align-self: stretch;
 }
 

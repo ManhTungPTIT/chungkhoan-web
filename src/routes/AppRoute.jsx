@@ -9,9 +9,13 @@ import AuthPage from '../feature/auth/user/layouts/AuthPage';
 import PrivateRoute from './PrivateRoute';
 import GuestRoute from './GuestRoute';
 import AdminPrivateRoute from './AdminPrivateRoute';
-import FilterStock from '../feature/stock/layouts/filterStock'
-import FilterStockApp from '../feature/stock/layouts/FilterStockApp'
+import FilterStockPage from '../feature/stock/layouts/FilterStockPage'
 import InfoUser from '../feature/auth/user/layouts/InfoUser';
+import AccountMenu from '../feature/auth/user/layouts/AccountMenu';
+import AccountScreen from '../feature/auth/user/layouts/AccountScreen';
+import ProfileForm from '../feature/auth/user/components/ProfileForm';
+import PasswordForm from '../feature/auth/user/components/PasswordForm';
+import PackageForm from '../feature/auth/user/components/PackageForm';
 import MainLayout from '../layouts/MainLayout';
 import AppLayout from '../layouts/AppLayout';
 import HomePage from '../feature/homepage/layouts/HomePage'
@@ -22,10 +26,10 @@ import { IS_APP } from '../feature/auth/untils/appClient';
 // không phải mang thêm nhánh nào — xem layouts/AppLayout.jsx.
 const ProtectedLayout = IS_APP ? AppLayout : MainLayout;
 
-// Trang bộ lọc có HAI bản: bản dọc cho app (thẻ thống kê, bảng 6 cột gộp dòng)
-// và bản web sẵn có. Tách hẳn hai file theo cùng lý do như trên — đổi giao diện
-// app không có đường nào làm hỏng web đang chạy.
-const FilterPage = IS_APP ? FilterStockApp : FilterStock;
+// Trang bộ lọc dùng CHUNG một cây thẻ cho hai bản; `variant` chỉ đổi class gốc,
+// chỗ chừa dưới bảng và chữ gợi ý. Style thì vẫn tách hẳn hai file SCSS — xem
+// VARIANT trong FilterStockPage.jsx.
+const FILTER_VARIANT = IS_APP ? 'app' : 'web';
 
 // Lazy-load: echarts + các trang dùng echarts chỉ tải khi mở route,
 // không nằm trong bundle khởi động.
@@ -80,8 +84,41 @@ function AppRoute() {
         <Route element={<ProtectedLayout />}>
           <Route path="/" element={<TradingView />} />
           <Route path="/home" element={<HomePage />} />
-          <Route path="/chart/filter" element={<FilterPage />} />
-          <Route path="/info" element={<InfoUser />} />
+          <Route path="/chart/filter" element={<FilterStockPage variant={FILTER_VARIANT} />} />
+          {/* Tài khoản: bản app là hub danh sách + ba màn con thật (nút Back cứng của
+              Android lùi lịch sử WebView, nên có route con là Back tự về hub); bản web
+              vẫn là một trang ba tab. Thân của ba màn dùng chung component, không fork. */}
+          {IS_APP ? (
+            <>
+              <Route path="/info" element={<AccountMenu />} />
+              <Route
+                path="/info/profile"
+                element={
+                  <AccountScreen title="Thông tin cá nhân">
+                    <ProfileForm />
+                  </AccountScreen>
+                }
+              />
+              <Route
+                path="/info/password"
+                element={
+                  <AccountScreen title="Đổi mật khẩu">
+                    <PasswordForm />
+                  </AccountScreen>
+                }
+              />
+              <Route
+                path="/info/package"
+                element={
+                  <AccountScreen title="Gói đăng ký">
+                    <PackageForm />
+                  </AccountScreen>
+                }
+              />
+            </>
+          ) : (
+            <Route path="/info" element={<InfoUser />} />
+          )}
           <Route
             path="/chart/heatmap"
             element={
