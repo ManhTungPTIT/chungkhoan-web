@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FiMail, FiPhone, FiSave } from "react-icons/fi";
 
+import DeleteAccountButton from "./DeleteAccountButton";
 import { detectAccountType } from "../untils/accountType";
 import { persistStoredUser, readStoredUser } from "../untils/userStore";
 import { useAccountUser } from "../hooks/useAccountUser";
@@ -191,6 +192,9 @@ export default function ProfileForm() {
         {saved && <div className="iu-msg iu-msg--ok">Đã cập nhật thành công.</div>}
 
         <div className="iu-form__foot">
+          {/* Admin nằm ở collection Admin của BE, endpoint xóa chỉ tra User → luôn 404.
+              Ẩn hẳn thay vì để họ bấm rồi nhận lỗi khó hiểu. */}
+          {user?.role !== "admin" && <DeleteAccountButton />}
           <button type="submit" className="iu-btn">
             <FiSave /> Cập nhật
           </button>

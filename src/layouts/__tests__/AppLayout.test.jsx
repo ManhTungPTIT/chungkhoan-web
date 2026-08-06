@@ -4,7 +4,12 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 
 import AppLayout from "../AppLayout";
 
-afterEach(cleanup);
+// Dọn cả localStorage: ca "URL không có bot thì rơi về mặc định" đọc `loadBot()`,
+// mà loadBot đọc localStorage thật của jsdom — dùng chung cho mọi ca trong file.
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+});
 
 function renderApp(initialPath = "/") {
   return render(
@@ -41,12 +46,6 @@ describe("thanh tab", () => {
     fireEvent.click(screen.getByRole("button", { name: "Bộ lọc" }));
     expect(screen.getByText("BỘ LỌC")).toBeInTheDocument();
 
-    // Tab Trang chủ đi THẲNG vào màn biểu đồ. Bản trước nó mở một tấm trượt bắt chọn 1
-    // trong 3 bot; việc chọn bot nay nằm trong thanh công cụ của màn đó.
-    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
-    expect(screen.getByText("MÀN BIỂU ĐỒ NẾN")).toBeInTheDocument();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-
     fireEvent.click(screen.getByRole("button", { name: "Biểu đồ" }));
     expect(screen.getByText("BIỂU ĐỒ THỊ TRƯỜNG")).toBeInTheDocument();
 
@@ -65,13 +64,103 @@ describe("thanh tab", () => {
     );
   });
 
-  // Tab Trang chủ cũng phải được đánh dấu như ba tab kia. Bản trước nó cố ý KHÔNG có
-  // aria-current vì bấm là mở hộp thoại chứ không điều hướng.
+  // Tab Trang chủ tuy mở tấm trượt chứ không điều hướng ngay, nhưng "/" vẫn là đích
+  // thật của nó nên phải được đánh dấu như ba tab kia.
   it("tô sáng tab Trang chủ khi đang ở màn biểu đồ", () => {
     renderApp("/?symbol=HPG&bot=t");
     expect(screen.getByRole("button", { name: "Trang chủ" })).toHaveAttribute(
       "aria-current",
       "page",
     );
+  });
+});
+
+describe("bottom sheet chọn bot", () => {
+  it("không hiện trước khi bấm tab Trang chủ", () => {
+    renderApp();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("bấm Trang chủ thì hiện đủ ba loại bot", () => {
+    renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
+
+    expect(screen.getByRole("dialog", { name: "Chọn BOT" })).toBeInTheDocument();
+    for (const label of ["BOT Trend", "BOT T+", "BOT Dài hạn"]) {
+      expect(screen.getByRole("menuitemradio", { name: label })).toBeInTheDocument();
+    }
+  });
+
+  it("nút Trang chủ khai báo là nút mở hộp thoại", () => {
+    renderApp();
+    const tab = screen.getByRole("button", { name: "Trang chủ" });
+
+    expect(tab).toHaveAttribute("aria-haspopup", "dialog");
+    expect(tab).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(tab);
+    expect(tab).toHaveAttribute("aria-expanded", "true");
+  });
+
+  // Tấm trượt đè lên màn đang xem; chỉ khi CHỌN mới điều hướng. Đóng mà không chọn
+  // thì ở lại đúng chỗ cũ.
+  it("mở từ màn khác thì không rời màn đó", () => {
+    renderApp("/chart/filter");
+    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
+    expect(screen.getByText("BỘ LỌC")).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByText("BỘ LỌC")).toBeInTheDocument();
+  });
+
+  it("chọn bot thì đóng tấm trượt và giữ mã đang xem", () => {
+    renderApp("/?symbol=HPG&bot=trend");
+    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
+    fireEvent.click(screen.getByRole("menuitemradio", { name: "BOT T+" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    // Điều hướng tới "/" giữ nguyên symbol — màn nến vẫn đứng ở mã cũ.
+    expect(screen.getByText("MÀN BIỂU ĐỒ NẾN")).toBeInTheDocument();
+  });
+
+  // Bot đang xem đọc từ `?bot=` trên URL. Đây là thứ AppLayout phải tự lấy rồi
+  // truyền xuống — tấm trượt không tự biết.
+  it("đánh dấu đúng bot trên URL", () => {
+    renderApp("/?bot=long");
+    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
+
+    expect(
+      screen.getByRole("menuitemradio", { name: "BOT Dài hạn" }),
+    ).toHaveAttribute("aria-checked", "true");
+  });
+
+  // URL không có `?bot=` (vd đang ở Bộ lọc) → rơi về trí nhớ, mà trí nhớ rỗng
+  // trong jsdom → trend.
+  it("URL không có bot thì rơi về mặc định", () => {
+    renderApp("/chart/filter");
+    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
+
+    expect(
+      screen.getByRole("menuitemradio", { name: "BOT Trend" }),
+    ).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("chạm ra ngoài thì đóng", () => {
+    renderApp();
+    fireEvent.click(screen.getByRole("button", { name: "Trang chủ" }));
+
+    fireEvent.click(screen.getByRole("dialog").parentElement);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("bấm tab Trang chủ lần nữa thì đóng", () => {
+    renderApp();
+    const tab = screen.getByRole("button", { name: "Trang chủ" });
+
+    fireEvent.click(tab);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.click(tab);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

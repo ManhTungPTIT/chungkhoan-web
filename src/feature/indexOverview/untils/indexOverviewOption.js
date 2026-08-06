@@ -137,14 +137,26 @@ export const CHART_HEIGHT = 300;
  * trục chỉ là giàn giáo — không cần tròn tuyệt đối, đổi lại vạch 0 khớp nhau
  * (xem alignedAxisRange).
  */
-export function buildChartOption(indices, fmt) {
+export function buildChartOption(indices, fmt, width = 0) {
   const rows = Array.isArray(indices) ? indices : [];
   const s = buildBarSeries(rows);
   const range = alignedAxisRange(
     [...rows.map((r) => r.gia_tri_khop_lenh), ...rows.map((r) => r.diem_tang_giam)],
     rows.map((r) => r.pct),
   );
-  const barLabel = (formatter) => ({ show: true, position: "top", fontSize: 10, formatter });
+  // `width` là bề ngang container (px), TÙY CHỌN — không truyền thì hành vi y như
+  // cũ. Dưới 520px: legend gãy 2 dòng đè vào vùng vẽ (grid.top 46 không đủ) và
+  // nhãn cột của 12 cột × fontSize 10 dính nhau — nâng top, co chữ, ẩn nhãn đè.
+  const compact = width > 0 && width < 520;
+  const barLabel = (formatter) => ({
+    show: true,
+    position: "top",
+    fontSize: compact ? 8 : 10,
+    formatter,
+  });
+  // Nhãn đè nhau thì ẩn bớt thay vì chồng chữ ("-14,0,74%") — bảng dưới chart
+  // lặp lại đủ mọi con số nên không mất thông tin.
+  const labelLayout = compact ? { hideOverlap: true } : undefined;
 
   return {
     tooltip: {
@@ -161,8 +173,14 @@ export function buildChartOption(indices, fmt) {
         return [`<b>${list[0].name}</b>`, ...lines].join("<br/>");
       },
     },
-    legend: { top: 6, data: [LIQUIDITY_LABEL, DIEM_LABEL, PCT_LABEL] },
-    grid: GRID,
+    legend: {
+      top: 6,
+      data: [LIQUIDITY_LABEL, DIEM_LABEL, PCT_LABEL],
+      ...(compact
+        ? { itemWidth: 14, itemHeight: 8, itemGap: 8, textStyle: { fontSize: 10 } }
+        : {}),
+    },
+    grid: compact ? { ...GRID, top: 70 } : GRID,
     xAxis: {
       type: "category",
       data: s.categories,
@@ -194,6 +212,7 @@ export function buildChartOption(indices, fmt) {
         barMaxWidth: 40,
         data: s.thanhKhoanData,
         label: barLabel((p) => (p.value == null ? "" : fmt(p.value))),
+        labelLayout,
         itemStyle: { color: LIQUIDITY_COLOR },
       },
       {
@@ -203,6 +222,7 @@ export function buildChartOption(indices, fmt) {
         barMaxWidth: 40,
         data: s.diemData,
         label: barLabel((p) => fmt(p.value)),
+        labelLayout,
         // Màu thật nằm trên từng data item (tô theo dấu); thiếu itemStyle mức
         // SERIES thì chip legend lấy màu mặc định của ECharts — xanh dương /
         // vàng-lục, chẳng khớp cột nào trong chart.
@@ -215,6 +235,7 @@ export function buildChartOption(indices, fmt) {
         barMaxWidth: 40,
         data: s.pctData,
         label: barLabel((p) => (p.value == null ? "" : `${fmt(p.value)}%`)),
+        labelLayout,
         itemStyle: { color: PCT_POS_COLOR },
       },
     ],

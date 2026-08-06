@@ -1,0 +1,27 @@
+# SPA fallback cho Apache / LiteSpeed.
+#
+# Vì sao cần: CI build ra `dist/` rồi FTP lên host (xem .github/workflows). Đây là ứng
+# dụng một trang — chỉ có ĐÚNG MỘT file index.html thật, còn /legal/privacy, /home, /info…
+# đều do React Router dựng phía trình duyệt. Mở thẳng một đường dẫn con thì web server đi
+# tìm thư mục có thật, không thấy, và trả 404. Quy tắc dưới đây bảo nó: đường dẫn nào
+# không trỏ tới file/thư mục có thật thì trả index.html, để React Router tự định tuyến.
+#
+# Việc này KHÔNG chỉ để cho đẹp: Google Play mở thẳng URL chính sách quyền riêng tư để
+# duyệt app. URL đó trả 404 là hồ sơ bị từ chối.
+#
+# Vite chép nguyên thư mục `public/` sang `dist/` nên file này tự lên theo CI.
+#
+# ⚠️ Nếu host chạy nginx thì .htaccess KHÔNG có tác dụng — phải khai phía server:
+#     location / { try_files $uri $uri/ /index.html; }
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Đã là file hoặc thư mục có thật (JS, CSS, ảnh…) thì để nguyên.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Còn lại: giao cho ứng dụng React.
+  RewriteRule ^ index.html [L]
+</IfModule>

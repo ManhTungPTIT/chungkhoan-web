@@ -1,20 +1,15 @@
 // Đích điều hướng dùng chung cho sidebar (bản web) và bottom tab (bản app).
 //
-// `BOTS` dùng ở hai nơi: sidebar bản web (MainLayout.jsx) và nút đổi bot trong
-// thanh công cụ màn biểu đồ của bản app (feature/chart/layouts/BotPicker.jsx).
-// `botTargetPath` thì nay CHỈ sidebar web còn gọi — bản app đổi bot tại chỗ, không
-// điều hướng đi đâu.
+// `BOTS` dùng ở hai nơi: sidebar bản web (MainLayout.jsx) và tấm trượt chọn BOT
+// của bản app (layouts/components/BotSheet.jsx). Cả hai đều hiện `label` đầy đủ.
 
 /**
  * Ba loại BOT, thứ tự hiển thị đúng như sidebar bản web.
- *
- * `short` dành cho nút đổi bot trong thanh công cụ màn biểu đồ (bản app): nút chỉ
- * rộng 78px ở 0.68rem nên "BOT Dài hạn" tràn. Sidebar web vẫn dùng `label`.
  */
 export const BOTS = [
-  { value: "trend", label: "BOT Trend", short: "Trend" },
-  { value: "t", label: "BOT T+", short: "T+" },
-  { value: "long", label: "BOT Dài hạn", short: "Dài hạn" },
+  { value: "trend", label: "BOT Trend" },
+  { value: "t", label: "BOT T+" },
+  { value: "long", label: "BOT Dài hạn" },
 ];
 
 /**

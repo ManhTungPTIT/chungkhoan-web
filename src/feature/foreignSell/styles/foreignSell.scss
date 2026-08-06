@@ -38,3 +38,24 @@
   .foreign-sell__bar-row em { font-size: .68rem; min-width: 1.8rem; }
 }
 @media (max-width: 760px) { .foreign-sell { padding: .75rem; }.foreign-sell__card { padding: 1rem .75rem; }.foreign-sell__heading h1 { font-size: 1rem; }.foreign-sell__legend { justify-content: flex-start; } }
+// ── Bản điện thoại (≤480px): trục 2 mốc, mã gọn, 4 cột vừa khung 390px.
+// Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md
+@media (max-width: 480px) {
+  .foreign-sell__panel-titles,
+  .foreign-sell__axis-row,
+  .foreign-sell__plot {
+    grid-template-columns: minmax(6.2rem, 1.2fr) minmax(4rem, 1fr) minmax(3rem, 0.7fr) minmax(3rem, 0.7fr);
+    column-gap: 0.25rem;
+  }
+  .foreign-sell__panel-titles span { padding: 0.3rem 0.15rem; font-size: 0.48rem; }
+  // Trục đang là grid theo --axis-count: chuyển flex hai đầu, giấu mốc giữa.
+  .foreign-sell__axis { display: flex; justify-content: space-between; }
+  .foreign-sell__axis span:not(:first-child):not(:last-child) { display: none; }
+  .foreign-sell__axis span:first-child { text-align: left; }
+  .foreign-sell__axis span:last-child { text-align: right; }
+  .foreign-sell__axis--value { padding-left: 2.25rem; }
+  .foreign-sell__symbol { width: 2rem; flex: 0 0 2rem; gap: 0.1rem; font-size: 0.56rem; }
+  .foreign-sell__bar-row { gap: 0.25rem; }
+  .foreign-sell__bar-row em { min-width: 1.4rem; font-size: 0.5rem; }
+  .foreign-sell__price-label { font-size: 0.5rem; }
+}

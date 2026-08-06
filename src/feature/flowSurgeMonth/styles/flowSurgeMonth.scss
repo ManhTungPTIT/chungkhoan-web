@@ -134,3 +134,26 @@
   .flow-surge-month__panel-heads { grid-template-columns: minmax(3rem, 0.55fr) minmax(4rem, 1fr) minmax(0, 1.35fr) minmax(4rem, 1fr); column-gap: 0.3rem; }
   .flow-surge-month__panel-head { padding: 0.35rem 0.2rem; font-size: 0.54rem; }
 }
+
+// ── Bản điện thoại (≤480px): trục 2 mốc, badge mã gọn lại cho khỏi tràn cột bar.
+// Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md
+@media (max-width: 480px) {
+  // Trục đang là grid theo --axis-count: chuyển flex hai đầu, giấu mốc giữa —
+  // 5 mốc trong cột ~90px dính thành chuỗi, giữ ĐẦU/CUỐI là đủ đọc thang đo.
+  .flow-surge-month__axis { display: flex; justify-content: space-between; }
+  .flow-surge-month__axis span:not(:first-child):not(:last-child) { display: none; }
+  .flow-surge-month__axis span:first-child { text-align: left; }
+  .flow-surge-month__axis span:last-child { text-align: right; }
+  .flow-surge-month__axis-caption { padding-left: 0.3rem; font-size: 0.6rem; }
+  .flow-surge-month__symbol-row { padding: 0 0.3rem; }
+  .flow-surge-month__badge { gap: 0.2rem; font-size: 0.62rem; }
+  .flow-surge-month__badge svg { width: 0.9rem; height: 0.9rem; padding: 0.18rem; }
+  .flow-surge-month__bar-row { gap: 0.25rem; }
+  .flow-surge-month__bar-row em { flex-basis: 2.1rem; font-size: 0.52rem; }
+  .flow-surge-month__point em { font-size: 0.52rem; }
+  .flow-surge-month__summary-label, .flow-surge-month__summary-bar { font-size: 0.56rem; }
+}
+
+@media (max-width: 480px) {
+  .flow-surge-month__panel-head { padding: 0.3rem 0.15rem; font-size: 0.5rem; }
+}

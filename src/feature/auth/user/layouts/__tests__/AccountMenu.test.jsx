@@ -60,6 +60,17 @@ describe("AccountMenu", () => {
     expect(navigate).toHaveBeenCalledWith("/info/password");
   });
 
+  it("có lối vào hai văn bản pháp lý, kể cả với admin", () => {
+    meData.role = "admin";
+    renderMenu();
+
+    fireEvent.click(screen.getByRole("button", { name: /chính sách quyền riêng tư/i }));
+    expect(navigate).toHaveBeenCalledWith("/legal/privacy");
+
+    fireEvent.click(screen.getByRole("button", { name: /miễn trừ đầu tư/i }));
+    expect(navigate).toHaveBeenCalledWith("/legal/disclaimer");
+  });
+
   it("admin không thấy mục Gói đăng ký", () => {
     meData.role = "admin";
     renderMenu();

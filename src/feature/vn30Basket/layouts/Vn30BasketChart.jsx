@@ -38,6 +38,14 @@ const HEADERS = [
   { text: "% THAY ĐỔI", bg: "#eef0f3", color: "#3d4756" },
 ];
 
+// Màn hẹp: tiêu đề đầy đủ dài hơn grid (chỉ ~30% của <520px) nên ba cái đè lên
+// nhau — rút gọn chữ, giữ nguyên màu để vẫn nhận ra cột nào.
+const HEADERS_COMPACT = ["GT (Tỷ)", "GIÁ (Nghìn)", "%"];
+
+// Dưới ngưỡng này coi là màn hẹp (điện thoại / panel hẹp): chữ nhỏ lại, trục
+// thưa mốc, nhãn giá lật trái khi điểm sát mép phải.
+const COMPACT_W = 520;
+
 const AXIS_LABEL = { color: "#898781", fontSize: 8 };
 const SPLIT_LINE = { lineStyle: { color: "#eceae4" } };
 
@@ -68,6 +76,8 @@ function Vn30BasketChart() {
     const priceMax = priceAxisMax(rows);
     const pctMax = pctAxisMax(rows);
 
+    const render = () => {
+    const compact = (containerRef.current?.clientWidth ?? 0) < COMPACT_W;
     chart.setOption({
       grid: GRIDS.map((g) => ({
         top: GRID_TOP,
@@ -78,16 +88,16 @@ function Vn30BasketChart() {
       // Header từng cột: đặt title tại TÂM mỗi grid (left + w/2), textAlign center
       // nên luôn nằm giữa cột dù resize.
       title: HEADERS.map((h, i) => ({
-        text: h.text,
+        text: compact ? HEADERS_COMPACT[i] : h.text,
         left: `${GRIDS[i].left + GRIDS[i].w / 2}%`,
         top: 2,
         textAlign: "center",
         textStyle: {
           color: h.color,
-          fontSize: 9,
+          fontSize: compact ? 8 : 9,
           fontWeight: 700,
           backgroundColor: h.bg,
-          padding: [3, 5],
+          padding: compact ? [2, 3] : [3, 5],
           borderRadius: 3,
         },
       })),
@@ -105,13 +115,15 @@ function Vn30BasketChart() {
           ].join("<br/>");
         },
       },
+      // splitNumber 2 khi hẹp: 5 mốc fontSize 8 trong grid ~110px dính thành
+      // chuỗi "9001,200".
       xAxis: [
         {
           type: "value",
           gridIndex: 0,
           min: 0,
           max: valueMax,
-          splitNumber: 4,
+          splitNumber: compact ? 2 : 4,
           axisLabel: AXIS_LABEL,
           splitLine: SPLIT_LINE,
         },
@@ -120,7 +132,7 @@ function Vn30BasketChart() {
           gridIndex: 1,
           min: 0,
           max: priceMax,
-          splitNumber: 4,
+          splitNumber: compact ? 2 : 4,
           axisLabel: AXIS_LABEL,
           splitLine: SPLIT_LINE,
         },
@@ -129,7 +141,7 @@ function Vn30BasketChart() {
           gridIndex: 2,
           min: -pctMax,
           max: pctMax,
-          splitNumber: 4,
+          splitNumber: compact ? 2 : 4,
           axisLabel: { ...AXIS_LABEL, formatter: (v) => `${v}%` },
           splitLine: SPLIT_LINE,
         },
@@ -173,7 +185,14 @@ function Vn30BasketChart() {
             textBorderWidth: 2.5,
             formatter: (p) => (p.value > 0 ? fmtPrice(p.value) : ""),
           },
-          data: rows.map((r) => r.priceNghin),
+          // Điểm sát mép phải (VIC 218.8 khi trục max ~220) mà nhãn vẫn nằm bên
+          // phải thì tràn sang panel %, đè nhãn của nó. position phải đặt trên
+          // TỪNG điểm — dạng hàm ở cấp series bị ECharts bỏ qua (xem series %).
+          data: rows.map((r) =>
+            compact && r.priceNghin > 0.62 * priceMax
+              ? { value: r.priceNghin, label: { position: "left" } }
+              : r.priceNghin,
+          ),
         },
         {
           name: "% thay đổi",
@@ -205,8 +224,14 @@ function Vn30BasketChart() {
         },
       ],
     });
+    };
 
-    const ro = new ResizeObserver(() => chart.resize());
+    render();
+    // Render lại sau resize: nhánh compact phụ thuộc bề ngang container.
+    const ro = new ResizeObserver(() => {
+      chart.resize();
+      render();
+    });
     ro.observe(containerRef.current);
     return () => {
       ro.disconnect();

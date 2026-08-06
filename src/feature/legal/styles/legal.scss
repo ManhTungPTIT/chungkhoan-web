@@ -1,0 +1,93 @@
+// ===== Trang văn bản pháp lý (chính sách quyền riêng tư, miễn trừ đầu tư) =====
+//
+// Trang này mở được KHI CHƯA ĐĂNG NHẬP và nằm ngoài mọi layout (không sidebar web,
+// không bottom tab app), nên nó tự lo nền và chiều cao — không thừa hưởng của ai.
+$ink: #1f2937;
+$muted: #6b7280;
+$line: #e6e8ef;
+$bg: #f6f7fb;
+$surface: #fff;
+
+.legal {
+  min-height: 100vh;
+  background: $bg;
+  color: $ink;
+  font-family: sans-serif;
+
+  &__bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: $surface;
+    border-bottom: 1px solid $line;
+  }
+
+  &__back {
+    display: inline-flex;
+    padding: 0.35rem;
+    border: none;
+    background: transparent;
+    color: $ink;
+    font-size: 1.35rem;
+    cursor: pointer;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  &__body {
+    // Giới hạn bề rộng dòng: văn bản dài mà kéo hết màn hình rộng thì mắt lạc dòng.
+    // Trên app màn hẹp, `max-width` không có tác dụng gì — cùng một quy tắc cho cả hai.
+    max-width: 46rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.25rem 3rem;
+  }
+
+  &__effective {
+    margin: 0 0 1rem;
+    font-size: 0.8rem;
+    color: $muted;
+  }
+
+  &__intro {
+    margin: 0 0 1.75rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  &__section {
+    margin-bottom: 1.75rem;
+  }
+
+  &__heading {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  &__para {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  &__list {
+    margin: 0 0 0.75rem;
+    padding-left: 1.15rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    li {
+      margin-bottom: 0.4rem;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FiCreditCard, FiEdit3, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { IoCloseCircle, IoCheckmarkCircle } from "react-icons/io5";
+import { Link } from "react-router-dom";
 import { RegisterUserService } from "../services/registerUserService";
 import { buildAccountPayload } from "../untils/accountType";
 
@@ -235,6 +236,13 @@ export default function RegisterForm({ onSwitchTab }) {
           Đăng ký
         </button>
       </form>
+
+      {/* Hai route này công khai nên mở được ngay từ màn đăng ký, lúc chưa có tài khoản. */}
+      <p className="auth-legal">
+        Bằng việc đăng ký, bạn đồng ý với{" "}
+        <Link to="/legal/privacy">Chính sách quyền riêng tư</Link> và{" "}
+        <Link to="/legal/disclaimer">Miễn trừ đầu tư</Link>.
+      </p>
 
       <p className="auth-switch">
         Đã có tài khoản?{" "}

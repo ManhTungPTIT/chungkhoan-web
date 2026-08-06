@@ -6,9 +6,7 @@ import { PiFunnel } from "react-icons/pi";
 import TradingChart from "../chart/layouts/chart";
 import DataStatusBanner from "../chart/layouts/DataStatusBanner";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
-import BotPicker from "../chart/layouts/BotPicker";
 import TimelineStock from "../chart/layouts/TimelineStock";
-import { IS_APP } from "../auth/untils/appClient";
 import { isKnownBot, loadBot, saveBot } from "./untils/botPreference";
 import {
   signalGeneratorForBot,
@@ -200,14 +198,6 @@ function TradingView() {
     );
   }, [botFromUrl, bot, setSearchParams]);
 
-  const selectBot = (value) => {
-    saveBot(value);
-    setSearchParams((params) => {
-      params.set("bot", value);
-      return params;
-    });
-  };
-
   // useMemo giữ reference 'signals' ổn định: nếu tính inline mỗi render sẽ tạo
   // mảng mới → useEffect khởi tạo chart (deps có signals) chạy lại → dispose()+
   // init() xoá sạch overlay đang vẽ. Chỉ đổi khi candles hoặc bot thay đổi.
@@ -367,9 +357,6 @@ function TradingView() {
               activeTimeline={activeTimeline}
               onSelect={onSelectTimeline}
             />
-            {/* Chỉ bản app: sidebar bản web đã hiện sẵn cả ba BOT nên thấy ngay
-                đang ở bot nào, thêm nút nữa là thừa. */}
-            {IS_APP && <BotPicker bot={bot} onChange={selectBot} />}
             <button
               type="button"
               className="draw-tool-trigger"

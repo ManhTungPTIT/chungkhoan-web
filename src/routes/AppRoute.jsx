@@ -16,6 +16,8 @@ import AccountScreen from '../feature/auth/user/layouts/AccountScreen';
 import ProfileForm from '../feature/auth/user/components/ProfileForm';
 import PasswordForm from '../feature/auth/user/components/PasswordForm';
 import PackageForm from '../feature/auth/user/components/PackageForm';
+import PrivacyPolicyPage from '../feature/legal/layouts/PrivacyPolicyPage';
+import InvestmentDisclaimerPage from '../feature/legal/layouts/InvestmentDisclaimerPage';
 import MainLayout from '../layouts/MainLayout';
 import AppLayout from '../layouts/AppLayout';
 import HomePage from '../feature/homepage/layouts/HomePage'
@@ -68,6 +70,15 @@ function AppRoute() {
         <Route path="/login" element={<AuthPage initialTab="login" />} />
         <Route path="/register" element={<AuthPage initialTab="register" />} />
       </Route>
+
+      {/* Văn bản pháp lý — công khai, KHÔNG bọc guard nào. Trong GuestRoute thì người đã
+          đăng nhập bị đá đi, trong PrivateRoute thì người chưa đăng nhập bị đá đi, mà cả
+          hai đều phải đọc được. `/legal/privacy` còn là URL nộp cho Google Play: nó mở
+          bằng máy chưa đăng nhập, hỏng là bị từ chối duyệt.
+          Deep link tới đây chỉ chạy nếu web server trả index.html cho đường dẫn con —
+          xem public/.htaccess. */}
+      <Route path="/legal/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/legal/disclaimer" element={<InvestmentDisclaimerPage />} />
       <Route path="/admin" element={<AdminLogin />} />
       <Route path="/admin/login" element={<AdminLogin />} />
 

@@ -111,3 +111,22 @@
   .top-gain__chart { overflow-x: hidden; padding-inline: 0.4rem; }
   .top-gain__axis-row, .top-gain__plot { min-width: 0; }
 }
+
+// ── Bản điện thoại (≤480px): trục 2 mốc, badge mã gọn lại cho khỏi tràn cột bar.
+// Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md
+@media (max-width: 480px) {
+  // Trục đang là grid theo --axis-count: chuyển flex hai đầu, giấu mốc giữa —
+  // 5 mốc trong cột ~90px dính thành chuỗi, giữ ĐẦU/CUỐI là đủ đọc thang đo.
+  .top-gain__axis { display: flex; justify-content: space-between; }
+  .top-gain__axis span:not(:first-child):not(:last-child) { display: none; }
+  .top-gain__axis span:first-child { text-align: left; }
+  .top-gain__axis span:last-child { text-align: right; }
+  .top-gain__axis-caption { padding-left: 0.3rem; font-size: 0.6rem; }
+  .top-gain__symbol-row { padding: 0 0.3rem; }
+  .top-gain__badge { gap: 0.2rem; font-size: 0.62rem; }
+  .top-gain__badge svg { width: 0.9rem; height: 0.9rem; padding: 0.18rem; }
+  .top-gain__bar-row { gap: 0.25rem; }
+  .top-gain__bar-row em { flex-basis: 2.1rem; font-size: 0.52rem; }
+  .top-gain__point em { font-size: 0.52rem; }
+  .top-gain__summary-label, .top-gain__summary-bar { font-size: 0.56rem; }
+}

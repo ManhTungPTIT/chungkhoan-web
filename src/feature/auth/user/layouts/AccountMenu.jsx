@@ -1,6 +1,13 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FiChevronRight, FiKey, FiPackage, FiUser } from "react-icons/fi";
+import {
+  FiAlertCircle,
+  FiChevronRight,
+  FiKey,
+  FiPackage,
+  FiShield,
+  FiUser,
+} from "react-icons/fi";
 import { IoLogOutOutline } from "react-icons/io5";
 
 import { LoginUserService } from "../services/loginUserService";
@@ -26,6 +33,20 @@ const ITEMS = [
     path: "/info/package",
     // Admin không mua gói — giống hệt cách bản web ẩn tab này.
     hideForAdmin: true,
+  },
+  // Hai văn bản pháp lý. Route của chúng công khai (không guard) nên cùng đường dẫn này
+  // mở được từ trình duyệt ngoài — chính là URL nộp cho Google Play.
+  {
+    key: "privacy",
+    label: "Chính sách quyền riêng tư",
+    Icon: FiShield,
+    path: "/legal/privacy",
+  },
+  {
+    key: "disclaimer",
+    label: "Miễn trừ đầu tư",
+    Icon: FiAlertCircle,
+    path: "/legal/disclaimer",
   },
 ];
 

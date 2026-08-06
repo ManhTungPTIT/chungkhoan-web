@@ -22,9 +22,15 @@ function IndexChart({ indices }) {
   useEffect(() => {
     if (!ref.current) return undefined;
     const chart = echarts.init(ref.current);
-    chart.setOption(buildChartOption(indices, fmt));
+    // Truyền bề ngang container để option tự chọn nhánh compact (điện thoại) —
+    // và render lại sau resize vì nhánh đó phụ thuộc bề ngang.
+    const render = () => chart.setOption(buildChartOption(indices, fmt, ref.current?.clientWidth ?? 0));
+    render();
 
-    const onResize = () => chart.resize();
+    const onResize = () => {
+      chart.resize();
+      render();
+    };
     window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("resize", onResize);

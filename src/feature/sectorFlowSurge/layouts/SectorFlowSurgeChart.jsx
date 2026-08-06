@@ -128,7 +128,19 @@ function SectorFlowSurgeChart({ avgWindow = 20 }) {
                                                 {row.pctTang !== 0 && (
                                                     <em
                                                         className={isUp ? "sector-flow-surge__pct-label--up" : "sector-flow-surge__pct-label--down"}
-                                                        style={isUp ? { left: `calc(50% + ${half}% + 6px)` } : { right: `calc(50% + ${half}% + 6px)` }}
+                                                        // Thanh dài quá nửa cột thì nhãn hết chỗ phía ngoài (văng
+                                                        // khỏi cột, màn hẹp là tràn ngang cả chart) — lộn về phía
+                                                        // vạch 0, nửa bên kia luôn trống. Cùng khuôn lật nhãn giá
+                                                        // (is-flipped) của họ chart này.
+                                                        style={
+                                                            isUp
+                                                                ? half > 32
+                                                                    ? { right: "calc(50% + 4px)" }
+                                                                    : { left: `calc(50% + ${half}% + 6px)` }
+                                                                : half > 32
+                                                                    ? { left: "calc(50% + 4px)" }
+                                                                    : { right: `calc(50% + ${half}% + 6px)` }
+                                                        }
                                                     >
                                                         {fmt(row.pctTang, 2)}%
                                                     </em>

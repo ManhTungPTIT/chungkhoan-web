@@ -11,3 +11,13 @@ export function loginRedirectPath(pathname, code) {
   const base = String(pathname ?? "").startsWith("/admin") ? "/admin/login" : "/login";
   return code === SESSION_SUPERSEDED ? `${base}?reason=superseded` : base;
 }
+
+/**
+ * Rời hẳn app về màn đăng nhập, kèm `?reason=` để bên kia giải thích được vì sao.
+ *
+ * Tải lại trang thật (`location.href`) chứ không `navigate()`: phiên đã chết, mọi cache
+ * react-query và state trong bộ nhớ phải biến mất theo.
+ */
+export function goToLogin(reason) {
+  window.location.href = reason ? `/login?reason=${reason}` : "/login";
+}

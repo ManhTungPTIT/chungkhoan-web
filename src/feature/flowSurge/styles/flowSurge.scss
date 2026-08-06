@@ -122,3 +122,22 @@
   .flow-surge__bar-row { gap: 0.25rem; padding-inline: 0.1rem; }
   .flow-surge__bar-row em { flex-basis: 2.35rem; font-size: 0.58rem; }
 }
+
+// ── Bản điện thoại (≤480px): trục 2 mốc, badge mã gọn lại cho khỏi tràn cột bar.
+// Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md
+@media (max-width: 480px) {
+  // Trục đang là grid theo --axis-count: chuyển flex hai đầu, giấu mốc giữa —
+  // 5 mốc trong cột ~90px dính thành chuỗi, giữ ĐẦU/CUỐI là đủ đọc thang đo.
+  .flow-surge__axis { display: flex; justify-content: space-between; }
+  .flow-surge__axis span:not(:first-child):not(:last-child) { display: none; }
+  .flow-surge__axis span:first-child { text-align: left; }
+  .flow-surge__axis span:last-child { text-align: right; }
+  .flow-surge__axis-caption { padding-left: 0.3rem; font-size: 0.6rem; }
+  .flow-surge__symbol-row { padding: 0 0.3rem; }
+  .flow-surge__badge { gap: 0.2rem; font-size: 0.62rem; }
+  .flow-surge__badge svg { width: 0.9rem; height: 0.9rem; padding: 0.18rem; }
+  .flow-surge__bar-row { gap: 0.25rem; }
+  .flow-surge__bar-row em { flex-basis: 2.1rem; font-size: 0.52rem; }
+  .flow-surge__point em { font-size: 0.52rem; }
+  .flow-surge__summary-label, .flow-surge__summary-bar { font-size: 0.56rem; }
+}

@@ -479,6 +479,23 @@ $line: rgba(255, 255, 255, 0.1);
     }
   }
 
+  // Dòng "Bằng việc đăng ký, bạn đồng ý với …" dưới nút Đăng ký.
+  .auth-legal {
+    margin: 0.85rem 0 0;
+    text-align: center;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: $text-muted;
+    a {
+      color: $gold-2;
+      font-weight: 600;
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
   .auth-switch {
     margin: 0.95rem 0 0;
     text-align: center;

@@ -1282,3 +1282,40 @@
     min-height: 34rem;
   }
 }
+
+/* ── Bản điện thoại (≤480px): các override 2 lớp phía trên (bóp cột cho panel
+   nửa hàng) thắng media query trong file của từng chart vì specificity cao hơn —
+   nới lại cột mã ở đây cho badge đã co (0.62rem) không tràn.
+   Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md ── */
+@media (max-width: 480px) {
+  /* top-gain/t3 giữ nguyên cột 3.75rem của panel — đủ chỗ sẵn. Chỉ flow-surge
+     và top-gain-week (cột 2.5rem) là chật, nới lên 3.1rem. */
+  .market-chart-pair__panel--top-gain .top-gain-week__axis-row,
+  .market-chart-pair__panel--top-gain .top-gain-week__plot,
+  .market-chart-pair__panel--top-gain .flow-surge__axis-row,
+  .market-chart-pair__panel--top-gain .flow-surge__plot {
+    grid-template-columns:
+      minmax(3.1rem, 0.55fr)
+      minmax(4rem, 1fr)
+      minmax(0, 1.3fr)
+      minmax(4rem, 1fr);
+    column-gap: 0.25rem;
+  }
+
+  /* Font badge .86rem của panel đè font compact trong file từng chart (1 lớp
+     thua 2 lớp) — ép lại ở đây cho cùng specificity + thứ tự sau. */
+  .market-chart-pair__panel--top-gain .top-gain__badge,
+  .market-chart-pair__panel--top-gain .top-gain-t3__badge,
+  .market-chart-pair__panel--top-gain .top-gain-week__badge,
+  .market-chart-pair__panel--top-gain .flow-surge__badge {
+    font-size: 0.62rem;
+  }
+  .market-chart-pair__panel--top-gain .top-gain__badge svg,
+  .market-chart-pair__panel--top-gain .top-gain-t3__badge svg,
+  .market-chart-pair__panel--top-gain .top-gain-week__badge svg,
+  .market-chart-pair__panel--top-gain .flow-surge__badge svg {
+    width: 0.8rem;
+    height: 0.8rem;
+    padding: 0.12rem;
+  }
+}

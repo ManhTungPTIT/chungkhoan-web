@@ -270,3 +270,16 @@
   .top-value__heading h1 { font-size: 1rem; }
   .top-value__legend { justify-content: flex-start; }
 }
+// ── Bản điện thoại (≤480px): trục 2 mốc, mã gọn.
+// Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md
+@media (max-width: 480px) {
+  // 5 mốc trong cột hẹp dính thành chuỗi — giữ mốc ĐẦU/CUỐI là đủ đọc thang đo.
+  .top-value__axis { display: flex; justify-content: space-between; }
+  .top-value__axis span:not(:first-child):not(:last-child) { display: none; }
+  .top-value__axis span:first-child { text-align: left; }
+  .top-value__axis span:last-child { text-align: right; }
+  .top-value__symbol { width: 2rem; flex: 0 0 2rem; gap: 0.1rem; font-size: 0.56rem; }
+  .top-value__bar-row { gap: 0.25rem; }
+  .top-value__bar-row em { min-width: 1.4rem; font-size: 0.5rem; }
+  .top-value__price-label { font-size: 0.5rem; }
+}

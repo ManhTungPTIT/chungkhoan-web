@@ -5,7 +5,13 @@ import { FcGoogle } from "react-icons/fc";
 import { FaFacebookF, FaApple } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { LoginUserService } from "../services/loginUserService";
-import { mapLoginError, SUPERSEDED_NOTICE } from "../untils/loginError";
+import { DELETED_NOTICE, mapLoginError, SUPERSEDED_NOTICE } from "../untils/loginError";
+
+// Lý do bị đẩy về màn đăng nhập → câu giải thích. Đọc từ query `?reason=`.
+const NOTICE_BY_REASON = {
+  superseded: SUPERSEDED_NOTICE,
+  deleted: DELETED_NOTICE,
+};
 
 export default function LoginForm({ onSwitchTab }) {
   const [account, setAccount] = useState("");
@@ -15,12 +21,14 @@ export default function LoginForm({ onSwitchTab }) {
   const [errors, setErrors] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [popupMsg, setPopupMsg] = useState("");
-  // Đọc một lần lúc dựng: người dùng vừa bị đá thì tới đây kèm ?reason=superseded
-  // (xem untils/loginRedirect.js).
-  const [notice, setNotice] = useState(() =>
-    new URLSearchParams(window.location.search).get("reason") === "superseded"
-      ? SUPERSEDED_NOTICE
-      : "",
+  // Đọc một lần lúc dựng: bị đá vì đăng nhập nơi khác thì tới đây kèm ?reason=superseded
+  // (xem untils/loginRedirect.js), vừa tự xóa tài khoản thì ?reason=deleted
+  // (xem components/DeleteAccountSection.jsx).
+  const [notice, setNotice] = useState(
+    () =>
+      NOTICE_BY_REASON[
+        new URLSearchParams(window.location.search).get("reason")
+      ] ?? "",
   );
 
   const { login } = LoginUserService();

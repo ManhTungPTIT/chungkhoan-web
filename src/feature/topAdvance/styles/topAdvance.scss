@@ -215,3 +215,26 @@
   .top-advance__heading h1 { font-size: 1rem; }
   .top-advance__legend { justify-content: flex-start; }
 }
+
+// ── Bản điện thoại (≤480px): trục 2 mốc, mã gọn, 3 cột vừa khung 390px.
+// Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md
+@media (max-width: 480px) {
+  .top-advance__panel-titles,
+  .top-advance__axis-row,
+  .top-advance__plot {
+    grid-template-columns: minmax(6.8rem, 1.3fr) minmax(4.6rem, 1fr) minmax(4.6rem, 1fr);
+    column-gap: 0.25rem;
+  }
+  .top-advance__panel-titles span { padding: 0.3rem 0.15rem; font-size: 0.48rem; }
+  // 5 mốc trong cột ~90px dính thành chuỗi — giữ mốc ĐẦU/CUỐI là đủ đọc thang đo.
+  .top-advance__axis span:not(:first-child):not(:last-child) { display: none; }
+  .top-advance__axis span:first-child { text-align: left; }
+  .top-advance__axis span:last-child { text-align: right; }
+  .top-advance__axis--value { padding-left: 2.25rem; }
+  .top-advance__symbol { width: 2rem; flex: 0 0 2rem; gap: 0.1rem; font-size: 0.56rem; }
+  .top-advance__column::before { left: 2.25rem; }
+  .top-advance__bar-row { gap: 0.25rem; }
+  .top-advance__value-bars .top-advance__bar-row em { min-width: 1.4rem; font-size: 0.5rem; }
+  .top-advance__pct-bars .top-advance__bar-row em { min-width: 1.9rem; font-size: 0.5rem; }
+  .top-advance__price-label { font-size: 0.5rem; }
+}

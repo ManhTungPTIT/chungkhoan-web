@@ -290,3 +290,36 @@
   .sector-flow-surge__card { padding: 1rem .75rem; }
   .sector-flow-surge__legend { justify-content: flex-start; }
 }
+// ── Bản điện thoại (≤480px): trục 2 mốc, tên ngành gọn, 3 cột vừa khung 390px.
+// Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md
+@media (max-width: 480px) {
+  .sector-flow-surge__panel-titles,
+  .sector-flow-surge__axis-row,
+  .sector-flow-surge__plot {
+    grid-template-columns: minmax(6.2rem, 1.25fr) minmax(4rem, 0.95fr) minmax(4.6rem, 1.1fr);
+    column-gap: 0.25rem;
+  }
+  .sector-flow-surge__panel-titles span,
+  .sector-flow-surge__panel-titles-pct b { padding: 0.3rem 0.15rem; font-size: 0.48rem; }
+  // 5 mốc trong cột ~90px dính thành chuỗi — giữ mốc ĐẦU/CUỐI là đủ đọc thang đo.
+  .sector-flow-surge__axis span:not(:first-child):not(:last-child) { display: none; }
+  .sector-flow-surge__axis span:first-child { text-align: left; }
+  .sector-flow-surge__axis span:last-child { text-align: right; }
+  .sector-flow-surge__symbol { width: 4.4rem; flex: 0 0 4.4rem; gap: 0.1rem; font-size: 0.56rem; }
+  .sector-flow-surge__bar-row { gap: 0.25rem; }
+  .sector-flow-surge__bar-row em { min-width: 1.4rem; font-size: 0.5rem; }
+  .sector-flow-surge__price-label { font-size: 0.5rem; }
+}
+
+@media (max-width: 480px) {
+  // Cột không co được dưới min-content của hàng bên trong — thả sàn cho từng
+  // mảnh trong hàng thì tổng 3 cột mới nằm gọn trong 390px.
+  .sector-flow-surge__bar-row,
+  .sector-flow-surge__bar-track { min-width: 0; }
+  .sector-flow-surge__symbol { width: 3.8rem; flex: 0 0 3.8rem; }
+  .sector-flow-surge__bar-row em { min-width: 1.2rem; }
+}
+
+@media (max-width: 480px) {
+  .sector-flow-surge__pct-track em { font-size: 0.48rem; }
+}

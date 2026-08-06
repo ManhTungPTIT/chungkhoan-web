@@ -20,6 +20,12 @@ const AVG_PRICE_COLOR = "#e8b100";
 // vùng vẽ mà tính chỗ đặt nhãn.
 const GRID_LEFT = 176;
 const GRID_RIGHT = 56;
+// Màn hẹp (điện thoại): cột tên ngành 176px nuốt gần nửa khung 390px, vùng vẽ
+// còn ~158px nên nhãn của 3 series chen nhau quanh vạch 0. Compact: thu cột tên,
+// thưa mốc trục, ẩn nhãn đường giá TB (tooltip vẫn còn đủ số).
+const COMPACT_W = 520;
+const GRID_LEFT_COMPACT = 120;
+const GRID_RIGHT_COMPACT = 40;
 
 // Trục % ĐỐI XỨNG quanh 0, làm tròn lên bội số 5 — mốc 0% phải đứng yên một chỗ,
 // không nhảy theo dữ liệu từng phiên.
@@ -45,10 +51,14 @@ function SectorChangeChart() {
     if (!containerRef.current || rows.length === 0) return undefined;
     const chart = echarts.init(containerRef.current);
 
+    const isCompact = () => (containerRef.current?.clientWidth || 0) < COMPACT_W;
+    const gridLeft = () => (isCompact() ? GRID_LEFT_COMPACT : GRID_LEFT);
+    const gridRight = () => (isCompact() ? GRID_RIGHT_COMPACT : GRID_RIGHT);
+
     // Bề rộng vùng vẽ để tính né chồng nhãn; tính lại mỗi lần đổi kích thước vì
     // khoảng cách né phụ thuộc số pixel trên một đơn vị trục.
     const plotWidth = () =>
-      Math.max(0, (containerRef.current?.clientWidth || 0) - GRID_LEFT - GRID_RIGHT);
+      Math.max(0, (containerRef.current?.clientWidth || 0) - gridLeft() - gridRight());
 
     // Ba series chồng trên CÙNG một hàng, hai trục X: trục dưới là tiền (tỷ) cho
     // cột tím + đường giá trung bình, trục trên là % thay đổi cho cột xanh/đỏ.
@@ -60,10 +70,11 @@ function SectorChangeChart() {
     const render = () => {
       const axisMax = valueAxisMax(rows);
       const distances = valueLabelDistances(rows, plotWidth(), axisMax);
+      const compact = isCompact();
       chart.setOption({
       // Cột nhãn ngành đặt cố định bằng `left` thay vì containLabel — để nó tự co
       // thì tên ngành dài nuốt mất vùng vẽ.
-      grid: { top: 34, left: 176, right: 56, bottom: 34 },
+      grid: { top: 34, left: gridLeft(), right: gridRight(), bottom: 34 },
       tooltip: {
         trigger: "axis",
         axisPointer: { type: "shadow" },
@@ -83,7 +94,8 @@ function SectorChangeChart() {
           position: "bottom",
           min: 0,
           max: axisMax,
-          splitNumber: 10,
+          // 10 mốc trong vùng vẽ ~230px của điện thoại là dính chữ.
+          splitNumber: compact ? 4 : 10,
           axisLabel: { color: "#898781", fontSize: 9, formatter: (v) => fmtTy(v) },
           splitLine: { lineStyle: { color: "#eceae4" } },
         },
@@ -102,7 +114,13 @@ function SectorChangeChart() {
         data: rows.map((r) => r.shortLabel),
         axisTick: { show: false },
         axisLine: { lineStyle: { color: "#c3c2b7" } },
-        axisLabel: { color: "#3d4756", fontSize: 10 },
+        axisLabel: {
+          color: "#3d4756",
+          fontSize: compact ? 9 : 10,
+          // Cột tên compact hẹp hơn (120px) — tên dài cắt bớt, tên đầy đủ vẫn
+          // đọc được trong tooltip.
+          ...(compact ? { width: GRID_LEFT_COMPACT - 8, overflow: "truncate" } : {}),
+        },
       },
       series: [
         {
@@ -125,6 +143,9 @@ function SectorChangeChart() {
             textBorderWidth: 2.5,
             formatter: (p) => (p.value > 0 ? fmtTy(p.value) : ""),
           },
+          // Compact: vùng vẽ ~230px không đủ cho nhãn GT + nhãn % cùng chen quanh
+          // vạch 0 ở mọi hàng — nhãn nào đè thì ẩn, tooltip vẫn đủ số.
+          ...(compact ? { labelLayout: { hideOverlap: true } } : {}),
           data: rows.map((r, i) => ({
             value: r.valueTy,
             // Ngành giao dịch ít thì cột tím quá ngắn, nhãn của nó rơi trúng nhãn
@@ -142,6 +163,7 @@ function SectorChangeChart() {
           // từ mốc 0% ở giữa trục trên.
           barGap: "-100%",
           z: 2,
+          ...(compact ? { labelLayout: { hideOverlap: true } } : {}),
           label: {
             show: true,
             fontSize: 9,
@@ -173,7 +195,9 @@ function SectorChangeChart() {
           itemStyle: { color: "#fff", borderColor: AVG_PRICE_COLOR, borderWidth: 1.6 },
           lineStyle: { color: AVG_PRICE_COLOR, width: 1 },
           label: {
-            show: true,
+            // Compact TẮT nhãn giá TB: đây là nguồn chen chính quanh vạch 0
+            // ("34.3" + "-3.12%" dính thành "34.3.2%"); tooltip vẫn có đủ số.
+            show: !compact,
             position: "right",
             distance: 4,
             fontSize: 9,

@@ -27,6 +27,15 @@ vi.mock("../../hooks/useChangePassword", () => ({
   }),
 }));
 
+// ProfileForm kéo theo DeleteAccountSection → useMutation. Test này không dựng
+// QueryClientProvider nên phải mock, cùng lý do với useChangePassword ở trên.
+vi.mock("../../hooks/useDeleteAccount", () => ({
+  useDeleteAccount: () => ({
+    mutate: vi.fn(),
+    isPending: false,
+  }),
+}));
+
 beforeEach(() => {
   meData = {
     id: "user-1",

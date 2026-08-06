@@ -34,7 +34,13 @@ export default function ValueShareBarChart({
     if (!containerRef.current || !hasData) return undefined;
     const chart = echarts.init(containerRef.current);
 
-    chart.setOption({
+    const render = () => {
+      // Màn hẹp (điện thoại): 8 cột trên 390px là mỗi cột ~44px, nhãn fontSize 14
+      // đè sang cột kề — co chữ lại theo bề ngang container.
+      const compact = (containerRef.current?.clientWidth ?? 0) < 520;
+      const labelSize = compact ? 10 : 14;
+
+      chart.setOption({
       grid: { top: 52, left: 8, right: 8, bottom: 8, containLabel: true },
       tooltip: {
         trigger: "item",
@@ -52,24 +58,28 @@ export default function ValueShareBarChart({
         // thay vì chen sát nhau.
         axisLabel: {
           color: "#5c667a",
-          fontSize: 11,
+          fontSize: compact ? 9 : 11,
           interval: 0,
-          width: 72,
+          width: compact ? 42 : 72,
           overflow: "break",
-          lineHeight: 13,
+          lineHeight: compact ? 11 : 13,
         },
       },
       yAxis: {
         type: "value",
         name: "Tỷ đồng",
         nameTextStyle: { color: "#898781", fontSize: 11, align: "right" },
-        axisLabel: { color: "#898781", fontSize: 11, formatter: (v) => fmtTy(v) },
+        axisLabel: { color: "#898781", fontSize: compact ? 9 : 11, formatter: (v) => fmtTy(v) },
         splitLine: { lineStyle: { color: "#e1e0d9" } },
       },
       series: [
         {
           type: "bar",
-          barMaxWidth: 46,
+          barMaxWidth: compact ? 30 : 46,
+          // Lưới an toàn cuối: hai cột kề cùng cao thì nhãn vẫn có thể chạm nhau
+          // dù đã co chữ — ẩn nhãn đè thay vì để chồng; bảng dưới chart lặp lại
+          // đủ mọi con số nên không mất thông tin.
+          labelLayout: { hideOverlap: true },
           // Cả hai con số nằm TRÊN đầu cột: giá trị ở dòng trên, % ngay dưới nó.
           //
           // Đã thử đặt % vào TRONG cột như bản mẫu: hỏng khi biểu đồ có nhiều
@@ -77,25 +87,31 @@ export default function ValueShareBarChart({
           // cột thấp thì không nhét được chữ nên phải xử lý riêng, dẫn tới hai
           // kiểu bố cục lẫn lộn trong cùng một biểu đồ. Đặt hết lên trên thì mọi
           // cột giống nhau, không phụ thuộc chiều cao lẫn bề rộng cột.
-          label: { show: true, position: "top", fontWeight: 700, fontSize: 14 },
+          label: { show: true, position: "top", fontWeight: 700, fontSize: labelSize },
           data: bars.map((b) => ({
             value: b.ty,
             itemStyle: { color: b.color, borderRadius: [3, 3, 0, 0] },
             label: {
               formatter: `{v|${fmtTy(b.ty)}}\n{p|${b.pct}%}`,
-              lineHeight: 15,
+              lineHeight: compact ? 12 : 15,
               rich: {
-                v: { color: "#172033", fontWeight: 700, fontSize: 14 },
+                v: { color: "#172033", fontWeight: 700, fontSize: labelSize },
                 // % lấy màu của chính cột để vẫn nhận ra thuộc cột nào.
-                p: { color: b.color, fontWeight: 800, fontSize: 14 },
+                p: { color: b.color, fontWeight: 800, fontSize: labelSize },
               },
             },
           })),
         },
       ],
-    });
+      });
+    };
 
-    const ro = new ResizeObserver(() => chart.resize());
+    render();
+    // Render lại sau resize: nhánh compact phụ thuộc bề ngang container.
+    const ro = new ResizeObserver(() => {
+      chart.resize();
+      render();
+    });
     ro.observe(containerRef.current);
 
     return () => {

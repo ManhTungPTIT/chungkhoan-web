@@ -9,19 +9,16 @@ import { activeTabKey } from "../untils/navigation";
 // Dùng lại đúng bộ icon sidebar bản web đang dùng: không thêm dependency, và
 // người đã quen bản web nhận ra ngay từng mục.
 //
-// BỐN tab, bốn màn hình — kể cả tab "Bot". Bản trước nó không có `path` mà mở một
-// tấm trượt bắt chọn 1 trong 3 bot; ba bot không phải ba đích đến, chúng là ba
-// thuật toán chạy trên CÙNG màn "/". Việc đổi bot nay nằm trong thanh công cụ của
-// màn đó (feature/chart/layouts/BotPicker.jsx), còn bot đang chọn thì chính màn
-// đó nhớ lấy — thanh tab không cần biết bot là gì.
+// Tab "Trang chủ" không có `path` — bấm là mở tấm trượt chọn 1 trong 3 bot
+// (components/BotSheet.jsx), vì cả ba đều dẫn về "/" chỉ khác tham số `?bot=`.
 const TABS = [
-  { key: "bot", label: "Trang chủ", Icon: LuArrowUpNarrowWide, path: "/" },
+  { key: "bot", label: "Trang chủ", Icon: LuArrowUpNarrowWide },
   { key: "filter", label: "Bộ lọc", Icon: BsFunnel, path: "/chart/filter" },
   { key: "market", label: "Biểu đồ", Icon: MdStackedLineChart, path: "/chart/market" },
   { key: "account", label: "Tài khoản", Icon: FaUserCircle, path: "/info" },
 ];
 
-function BottomTabBar() {
+function BottomTabBar({ onBotClick, botSheetOpen = false }) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const active = activeTabKey(pathname);
@@ -30,14 +27,19 @@ function BottomTabBar() {
     <nav className="appnav" aria-label="Điều hướng chính">
       {TABS.map(({ key, label, Icon, path }) => {
         const isActive = key === active;
+        const opensSheet = !path;
 
         return (
           <button
             key={key}
             type="button"
             className={`appnav-item${isActive ? " is-active" : ""}`}
+            // Tab Trang chủ vẫn được đánh dấu như ba tab kia: nó mở tấm trượt chứ
+            // không điều hướng ngay, nhưng "/" đúng là đích của nó.
             aria-current={isActive ? "page" : undefined}
-            onClick={() => navigate(path)}
+            aria-haspopup={opensSheet ? "dialog" : undefined}
+            aria-expanded={opensSheet ? botSheetOpen : undefined}
+            onClick={() => (opensSheet ? onBotClick() : navigate(path))}
           >
             <Icon className="appnav-icon" aria-hidden="true" />
             <span className="appnav-label">{label}</span>

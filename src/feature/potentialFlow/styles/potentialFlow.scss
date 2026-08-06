@@ -128,3 +128,22 @@
   .potential-flow__plot { min-height: 32rem; }
   .potential-flow__footer { align-items: flex-start; flex-direction: column; }
 }
+
+// ── Bản điện thoại (≤480px): trục 2 mốc, badge mã gọn lại cho khỏi tràn cột bar.
+// Spec: docs/superpowers/specs/2026-08-06-mobile-chart-overlap-design.md
+@media (max-width: 480px) {
+  // Trục đang là grid theo --axis-count: chuyển flex hai đầu, giấu mốc giữa —
+  // 5 mốc trong cột ~90px dính thành chuỗi, giữ ĐẦU/CUỐI là đủ đọc thang đo.
+  .potential-flow__axis { display: flex; justify-content: space-between; }
+  .potential-flow__axis span:not(:first-child):not(:last-child) { display: none; }
+  .potential-flow__axis span:first-child { text-align: left; }
+  .potential-flow__axis span:last-child { text-align: right; }
+  .potential-flow__axis-caption { padding-left: 0.3rem; font-size: 0.6rem; }
+  .potential-flow__symbol-row { padding: 0 0.3rem; }
+  .potential-flow__badge { gap: 0.2rem; font-size: 0.62rem; }
+  .potential-flow__badge svg { width: 0.9rem; height: 0.9rem; padding: 0.18rem; }
+  .potential-flow__bar-row { gap: 0.25rem; }
+  .potential-flow__bar-row em { flex-basis: 2.1rem; font-size: 0.52rem; }
+  .potential-flow__point em { font-size: 0.52rem; }
+  .potential-flow__summary-label, .potential-flow__summary-bar { font-size: 0.56rem; }
+}
