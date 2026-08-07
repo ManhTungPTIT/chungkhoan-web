@@ -131,8 +131,8 @@ function toDateString(time) {
  *   long → SELL khi  close < MA20                       → chuyển sang flat
  *
  * Điều kiện vào/ra dùng giá ĐÓNG CỬA (close). Riêng `price` đính kèm để
- * HIỂN THỊ lấy giá thấp nhất của nến cho BUY (neo marker ở đáy) và giá cao
- * nhất cho SELL (neo marker ở đỉnh) — không ảnh hưởng logic phát tín hiệu.
+ * HIỂN THỊ lấy đáy THÂN nến min(open, close) cho BUY và đỉnh thân
+ * max(open, close) cho SELL — bỏ râu nến, không ảnh hưởng logic phát tín hiệu.
  *
  * Máy trạng thái đảm bảo tín hiệu xen kẽ buy → sell → buy, không bỏ sót
  * lệnh ra. Cần ít nhất 35 nến để vòng lặp chạy (k bắt đầu tại 34).
@@ -165,7 +165,7 @@ export function generateSignals(candles) {
           date: toDateString(candles[i].time),
           type: "buy",
           priceTarget: closePrice,
-          price: candles[i].low, // hiển thị: neo marker ở giá thấp nhất của nến
+          price: Math.min(candles[i].open, candles[i].close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });
         inLong = true;
       }
@@ -175,7 +175,7 @@ export function generateSignals(candles) {
         time: candles[i].time,
         date: toDateString(candles[i].time),
         type: "sell",
-        price: candles[i].high, // hiển thị: neo marker ở giá cao nhất của nến
+        price: Math.max(candles[i].open, candles[i].close), // hiển thị: neo marker ở đỉnh THÂN nến (bỏ râu)
       });
       inLong = false;
     }
@@ -238,7 +238,7 @@ export function generateSignalsT(candles) {
           date: toDateString(cur.time),
           type: "buy",
           priceTarget: cur.close,
-          price: cur.low, // hiển thị: neo marker ở giá thấp nhất của nến
+          price: Math.min(cur.open, cur.close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });
         inLong = true;
       }
@@ -257,7 +257,7 @@ export function generateSignalsT(candles) {
           time: cur.time,
           date: toDateString(cur.time),
           type: "sell",
-          price: cur.high, // hiển thị: neo marker ở giá cao nhất của nến
+          price: Math.max(cur.open, cur.close), // hiển thị: neo marker ở đỉnh THÂN nến (bỏ râu)
         });
         inLong = false;
       }
@@ -291,7 +291,7 @@ export function generateSignalsLong(candles) {
           date: toDateString(candles[i].time),
           type: "buy",
           priceTarget: closePrice,
-          price: candles[i].low, // hiển thị: neo marker ở giá thấp nhất của nến
+          price: Math.min(candles[i].open, candles[i].close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });
         inLong = true;
       }
@@ -301,7 +301,7 @@ export function generateSignalsLong(candles) {
         time: candles[i].time,
         date: toDateString(candles[i].time),
         type: "sell",
-        price: candles[i].high, // hiển thị: neo marker ở giá cao nhất của nến
+        price: Math.max(candles[i].open, candles[i].close), // hiển thị: neo marker ở đỉnh THÂN nến (bỏ râu)
       });
       inLong = false;
     }

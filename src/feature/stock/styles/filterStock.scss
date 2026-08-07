@@ -8,11 +8,23 @@
   --fw-muted: #9a95a6;
   --fw-border: #ece9f2;
   --fw-bg: #fff;
-  --fw-purple: #6c2bd9;
-  --fw-purple-2: #8b3ff0;
-  --fw-up: #16a34a;
+  // Tên biến giữ nguyên `--fw-purple` dù giá trị nay là XANH LÁ: nó là màu nhấn
+  // dùng ở 8 chỗ khác (dropdown, header bảng, phân trang), đổi tên là phải sửa
+  // cả 8. Ở bảng tín hiệu, biến này chính là màu pha "Đang nắm giữ".
+  --fw-purple: #16a34a;
+  --fw-purple-2: #2563eb;
+  // Từ khoá `blue` là #0000FF — chói và lệch tông hẳn với #e11d48 / #16a34a bên
+  // cạnh. #2563eb cùng độ đậm với hai màu kia nên ba badge đứng cạnh nhau đều nét.
+  --fw-up: #2563eb;
   --fw-down: #e11d48;
   --fw-orange: #f59e0b;
+  // Navy dùng cho header bảng và nút trang đang chọn. Trước là gradient
+  // xanh-lá→xanh-dương, nhưng gradient nằm ngay trên 4 thẻ thống kê đã đủ 4 màu
+  // → nền đặc trung tính để bảng không tranh chỗ với thẻ.
+  --fw-navy: #1c3c70;
+  // Nền sọc dòng chẵn. Cùng tông với --fw-navy nhưng gần như trắng, nên đọc ra
+  // ranh giới dòng mà không thành "bảng kẻ ô".
+  --fw-stripe: #f6f8fc;
 
   box-sizing: border-box;
   width: 100%;
@@ -87,9 +99,53 @@
       border-color: var(--fw-purple);
     }
 
+    /* Ô icon bo tròn bên trái. Hai dropdown mang hai màu khác nhau để phân biệt
+       được trục lọc ngay cả khi liếc nhanh — nhãn "Chọn danh mục"/"Chọn BOT" ở
+       cỡ 12px rất dễ trôi qua mắt. */
+    .dropdown-icon {
+      display: grid;
+      flex-shrink: 0;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      font-size: 19px;
+    }
+
+    /* Viền tĩnh cũng mang màu của ô icon. Đặt SAU khối `&:hover, &.is-open` ở
+       trên: cùng độ ưu tiên (0,2,0 vs 0,2,0) nên luật sau thắng, mà hover/open
+       phải thắng — vì vậy hai biến thể dưới đây chỉ khai `border-color` cho
+       trạng thái thường và lặp lại hover/open riêng. */
+    &--cate {
+      border-color: #d9d5f5;
+      .dropdown-icon {
+        color: #6c2bd9;
+        background: #eeebfb;
+      }
+      &:hover,
+      &.is-open {
+        border-color: #6c2bd9;
+      }
+    }
+
+    &--bot {
+      border-color: #bcd3f7;
+      .dropdown-icon {
+        color: var(--fw-up);
+        background: #e7effd;
+      }
+      &:hover,
+      &.is-open {
+        border-color: var(--fw-up);
+      }
+    }
+
     .dropdown-text {
       display: flex;
       flex-direction: column;
+      /* Nút là `space-between` với 3 con (icon / chữ / chevron). Không có
+         `flex: 1` thì chữ bị đẩy ra giữa, tách rời khỏi ô icon. */
+      flex: 1 1 auto;
       min-width: 0;
 
       small {
@@ -149,12 +205,13 @@
     font-size: 15px;
     cursor: pointer;
 
+    /* Tông cũ để lại rgba(108,43,217) — tím, nay lệch hẳn với màu nhấn xanh lá. */
     &:hover {
-      background: rgba(108, 43, 217, 0.06);
+      background: rgba(22, 163, 74, 0.06);
     }
 
     &.is-active {
-      background: rgba(108, 43, 217, 0.08);
+      background: rgba(22, 163, 74, 0.1);
       color: var(--fw-purple);
       font-weight: 600;
     }
@@ -232,15 +289,21 @@
       line-height: 1.2;
     }
 
+    /* Icon nằm trong ô TRẮNG bo tròn, nổi lên trên nền màu nhạt của thẻ.
+       `content-box` để `padding` cộng thêm vào 20px chứ không ăn vào trong —
+       không có nó thì icon co lại còn 2px. */
     &__icon {
+      box-sizing: content-box;
       flex-shrink: 0;
-      width: 22px;
-      height: 22px;
-      opacity: 0.85;
+      width: 20px;
+      height: 20px;
+      padding: 9px;
+      border-radius: 10px;
+      background: #fff;
     }
 
     &--buy {
-      background: #f2fdf6;
+      background: #f3f7ff;
       .tile__value,
       .tile__icon { color: var(--fw-up); }
     }
@@ -250,7 +313,7 @@
       .tile__icon { color: var(--fw-down); }
     }
     &--hold {
-      background: #f5f4ff;
+      background: #f2fdf6;
       .tile__value,
       .tile__icon { color: var(--fw-purple); }
     }
@@ -291,7 +354,7 @@
 
     th {
       padding: 14px 12px;
-      background: linear-gradient(135deg, var(--fw-purple), var(--fw-purple-2));
+      background: var(--fw-navy);
       color: #fff;
       font-size: 13px;
       font-weight: 700;
@@ -309,6 +372,15 @@
       &--left {
         justify-content: flex-start;
       }
+    }
+
+    /* Icon tiêu đề cột — thuần trang trí, hơi mờ để không át chữ. `flex-shrink`
+       vì `table-layout: fixed` bóp cột hẹp là icon méo trước khi chữ xuống dòng. */
+    .th-icon {
+      flex-shrink: 0;
+      width: 15px;
+      height: 15px;
+      opacity: 0.75;
     }
 
     .th-label {
@@ -343,12 +415,18 @@
       cursor: pointer;
       transition: background 0.12s;
 
+      /* Sọc phải đặt TRƯỚC hover: cùng độ ưu tiên thì luật sau thắng, để sau là
+         dòng chẵn không bao giờ sáng lên khi rê chuột. */
+      &:nth-child(even) {
+        background: var(--fw-stripe);
+      }
+
       &:hover {
-        background: rgba(108, 43, 217, 0.05);
+        background: rgba(28, 60, 112, 0.07);
       }
 
       &:active {
-        background: rgba(108, 43, 217, 0.1);
+        background: rgba(28, 60, 112, 0.12);
       }
     }
   }
@@ -372,7 +450,7 @@
     white-space: nowrap;
 
     &--buy {
-      background: #e8f9ee;
+      background: #e7effd;
       color: var(--fw-up);
     }
     &--sell {
@@ -380,7 +458,7 @@
       color: var(--fw-down);
     }
     &--hold {
-      background: #f0edff;
+      background: #e8f9ee;
       color: var(--fw-purple);
     }
     &--out {
@@ -464,12 +542,12 @@
     transition: border-color 0.15s;
 
     &:hover:not(:disabled):not(.is-active) {
-      border-color: var(--fw-purple);
+      border-color: var(--fw-navy);
     }
 
     &.is-active {
       border-color: transparent;
-      background: var(--fw-purple);
+      background: var(--fw-navy);
       color: #fff;
       font-weight: 700;
     }

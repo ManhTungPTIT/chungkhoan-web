@@ -943,12 +943,6 @@
   height: auto;
 }
 
-/* Cặp đầu tiên (bản đồ sức mạnh dòng tiền + radar sóng tăng T+) căng bằng chiều
-   cao nhau trong 1 hàng. */
-.market-chart-pair__panel--power,
-.market-chart-pair__panel--tplus {
-  align-self: stretch;
-}
 
 .market-chart-pair__panel--potential > .potential-flow,
 .market-chart-pair__panel--potential .potential-flow__card,
@@ -1241,7 +1235,7 @@
 /* Current MarketCharts layout: money-flow strength map owns the first viewport,
    then the T+ strength radar pairs with the potential T+ filter. */
 .market-chart-pair__panel#power-map {
-  grid-column: 1 / -1;
+  // grid-column: 1 / -1;
   height: clamp(38rem, calc(100dvh - 5.25rem), 55rem);
   min-height: clamp(38rem, calc(100dvh - 5.25rem), 55rem);
   align-self: stretch;

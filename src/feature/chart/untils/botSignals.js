@@ -28,3 +28,34 @@ export function signalGeneratorForBot(bot) {
 export function usesBackendPanelSignal(bot) {
   return signalGeneratorForBot(bot) === generateSignals;
 }
+
+/**
+ * Đắp lớp phủ tín hiệu của BOT đang chọn lên rows của /vn100.
+ *
+ * `/vn100` chỉ mang tín hiệu của BOT Trend (backend chỉ tính một thuật toán) nên
+ * bot khác phải lấy từ /signals?bot= rồi ghép vào đây theo mã.
+ *
+ * Đổi tên khoá về đúng shape `signal_*` mà mọi thứ đọc board đang nhận (Panel,
+ * sessionPhase, countPhases, pnlPct, sortRowsBySignal) — nhờ vậy không chỗ nào
+ * trong số đó phải biết tới khái niệm bot.
+ *
+ * Mã vắng trong lớp phủ (thiếu nến nền, hoặc T+ không suy được `open`) → mọi
+ * field tín hiệu về rỗng. KHÔNG được để lại số của Trend: màn hình sẽ hiện tín
+ * hiệu của bot này bằng dữ liệu của bot kia mà không ai biết.
+ */
+export function mergeBotSignals(rows, overlay, bot) {
+  if (bot === "trend") return rows;
+  const data = overlay || {};
+  return (rows || []).map((row) => {
+    const o = data[row?.symbol];
+    return {
+      ...row,
+      signal: o?.signal ?? null,
+      signal_date: o?.date ?? null,
+      signal_price: o?.price ?? null,
+      signal_sessions: o?.sessions ?? null,
+      signal_hold: o?.hold ?? false,
+      signal_stale: o?.stale ?? false,
+    };
+  });
+}

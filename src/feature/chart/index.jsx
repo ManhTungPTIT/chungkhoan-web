@@ -7,11 +7,13 @@ import TradingChart from "../chart/layouts/chart";
 import DataStatusBanner from "../chart/layouts/DataStatusBanner";
 import IndicatorPicker from "../chart/layouts/IndicatorPicker";
 import TimelineStock from "../chart/layouts/TimelineStock";
-import { isKnownBot, loadBot, saveBot } from "./untils/botPreference";
+import { useSelectedBot } from "./hooks/useSelectedBot";
 import {
+  mergeBotSignals,
   signalGeneratorForBot,
   usesBackendPanelSignal,
 } from "./untils/botSignals";
+import { useBotSignals } from "./hooks/useBotSignals";
 import {
   loadIndicatorState,
   normalizeIndicatorConfigs,
@@ -159,44 +161,30 @@ function TradingView() {
   // Mã đã cache (xem lại trong 5') → isFetching=false → không hiện overlay.
   const isLoadingSymbol =
     isFetching && (isPlaceholderData || candles.length === 0);
+  // BOT chọn ở sidebar (web) hoặc nút trong thanh công cụ (app): /?bot=t (T+),
+  // /?bot=long (Dài hạn), mặc định trend. Việc đọc URL + đắp `?bot=` khi thiếu
+  // nằm trong useSelectedBot — trang bộ lọc dùng CHUNG hook đó.
+  const bot = useSelectedBot();
+
   const { data: dataPanel = [] } = useVn100();
-  const selectedPanelRow = useMemo(
-    () =>
-      Array.isArray(dataPanel)
-        ? dataPanel.find(
-            (item) =>
-              String(item?.symbol ?? "").toUpperCase() ===
-              String(chanelCode ?? "").toUpperCase(),
-          )
-        : null,
-    [dataPanel, chanelCode],
+  // /vn100 chỉ mang tín hiệu của BOT Trend. Không đắp lớp phủ thì đổi sang T+ /
+  // Dài hạn mà CẢ BẢNG panel vẫn là số của Trend — cùng lỗi đã sửa ở trang bộ
+  // lọc. Trend thì hook không gọi mạng và merge trả nguyên mảng.
+  const { data: botOverlay } = useBotSignals(bot);
+  const panelRows = useMemo(
+    () => mergeBotSignals(Array.isArray(dataPanel) ? dataPanel : [], botOverlay, bot),
+    [dataPanel, botOverlay, bot],
   );
 
-  // BOT chọn ở sidebar (web) hoặc nút trong thanh công cụ (app): /?bot=t (T+),
-  // /?bot=long (Dài hạn), mặc định trend.
-  //
-  // URL là nguồn sự thật, localStorage chỉ là trí nhớ giữa các lần mở. Màn này tự
-  // đắp `?bot=` khi URL thiếu, nên MỌI lối vào đều giữ đúng bot: tab Bot, bấm một
-  // dòng ở Bộ lọc (`/?symbol=X`), hay mở lại app. Đặt việc đắp ở đây chứ không ở
-  // thanh tab vì chỉ lối đầu đi qua thanh tab.
-  const botFromUrl = searchParams.get("bot");
-  const bot = isKnownBot(botFromUrl) ? botFromUrl : loadBot();
-
-  useEffect(() => {
-    if (isKnownBot(botFromUrl)) {
-      saveBot(botFromUrl);
-      return;
-    }
-    // `replace` để không thêm mục lịch sử — nếu không, bấm back một lần chỉ quay
-    // về chính trang này với URL cũ.
-    setSearchParams(
-      (params) => {
-        params.set("bot", bot);
-        return params;
-      },
-      { replace: true },
-    );
-  }, [botFromUrl, bot, setSearchParams]);
+  const selectedPanelRow = useMemo(
+    () =>
+      panelRows.find(
+        (item) =>
+          String(item?.symbol ?? "").toUpperCase() ===
+          String(chanelCode ?? "").toUpperCase(),
+      ) ?? null,
+    [panelRows, chanelCode],
+  );
 
   // useMemo giữ reference 'signals' ổn định: nếu tính inline mỗi render sẽ tạo
   // mảng mới → useEffect khởi tạo chart (deps có signals) chạy lại → dispose()+
@@ -279,6 +267,7 @@ function TradingView() {
   const backendSignalType = usesBackendPanelSignal(bot)
     ? signalTypeFromBackend(selectedPanelRow?.signal)
     : null;
+    
   const signalType = backendSignalType ?? lastSignal?.type;
   const priceChange =
     backendSignalType && selectedPanelRow?.signal_price != null
@@ -512,7 +501,7 @@ function TradingView() {
       <div className="container_panel">
         <div className={`panel-slide ${openPanel ? "is-open" : ""}`}>
           <Panel
-            dataPanel={dataPanel}
+            dataPanel={panelRows}
             highlightedSymbol={chanelCode}
             onSelectSymbol={selectSymbol}
           />

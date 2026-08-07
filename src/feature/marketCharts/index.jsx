@@ -38,7 +38,8 @@ import BaseBreakoutChart from "../baseBreakout/layouts/BaseBreakoutChart";
 // gộp vào đây để tất cả nằm chung một mục "Biểu đồ thị trường". Route cũ
 // (/chart/heatmap, /chart/power, /home) vẫn giữ để không gãy link đã lưu.
 import HeatmapPage from "../heatmap";
-import PowerPage from "../power";
+import PowerPage from "../power/index";
+import PowerPageNormal from "../power/index1"
 import HomePage from "../homepage/layouts/HomePage";
 import ForeignTradingHistoryChart from "../foreignTrading/layouts/ForeignTradingChart";
 import "./styles/marketCharts.scss";
@@ -104,10 +105,17 @@ export default function MarketChartsPage() {
         {/* Bản đồ sức mạnh dòng tiền đứng riêng ở đầu trang và chiếm gần trọn viewport. */}
         <ChartSection
           id="power-map"
-          className="market-chart-pair__panel market-chart-pair__panel--wide market-chart-pair__panel--power"
+          className="market-chart-pair__panel market-chart-pair__panel--power"
           aria-label={MARKET_CHART_LABELS["power-map"]}
         >
           <PowerPage />
+        </ChartSection>
+        <ChartSection
+          id="power-map"
+          className="market-chart-pair__panel market-chart-pair__panel--power"
+          aria-label={MARKET_CHART_LABELS["power-map"]}
+        >
+          <PowerPageNormal />
         </ChartSection>
 
         <ChartSection

@@ -139,3 +139,9 @@ export function pnlPct(row) {
   if (!Number.isFinite(base) || !Number.isFinite(nowPrice) || base === 0) return null;
   return ((nowPrice - base) / base) * 100;
 }
+
+// Lớp phủ tín hiệu theo bot nay dùng chung cho CẢ trang bộ lọc lẫn Panel bên màn
+// biểu đồ, nên nó nằm ở `feature/chart/untils/botSignals.js` — cùng chỗ với bảng
+// ánh xạ bot → thuật toán. Re-export ở đây để trang bộ lọc vẫn lấy mọi thứ nó cần
+// từ một chỗ.
+export { mergeBotSignals } from "../../chart/untils/botSignals";

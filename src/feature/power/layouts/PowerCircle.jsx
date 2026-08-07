@@ -21,12 +21,12 @@ const GRID_COLOR = "#ccd2dc";
 
 // Bề ngang tia. 55% cũ làm các tia gần như dính nhau, che hết nan hoa của lưới nên
 // vòng tròn trông thành một khối đặc, thô. 36% để lộ lưới giữa các tia.
-const BAR_WIDTH = "36%";
+const BAR_WIDTH = "55%";
 
 // Phần bán kính thực dùng sau khi đã trừ vành nhãn. Ăn trọn cạnh ngắn (1.0) thì
 // đường tròn chạm sát mép trên/dưới của ô, trông chật và nhãn mã dính vào viền
 // khung. 0.82 chừa một vành trống quanh biểu đồ.
-const CIRCLE_SCALE = 0.82;
+const CIRCLE_SCALE = 1;
 
 /**
  * Bán kính ngoài tính bằng PX theo ô vẽ thật, thay cho phần trăm cố định.

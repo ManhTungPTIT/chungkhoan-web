@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   FiSearch,
   FiChevronDown,
@@ -10,19 +10,33 @@ import {
   FiTrendingDown,
   FiPieChart,
   FiEyeOff,
+  FiTag,
+  FiRadio,
+  FiCalendar,
+  FiBarChart2,
+  FiClock,
+  FiDollarSign,
+  FiGrid,
 } from "react-icons/fi";
+// Bộ `fi` không có icon robot nào — lấy từ `bs`, cùng gói react-icons và đã dùng
+// ở feature/marketCharts nên không thêm phụ thuộc mới.
+import { BsRobot } from "react-icons/bs";
 import "../styles/filterStock.scss";
 import "../styles/filterStockApp.scss";
 import useSector from "../hooks/useSector";
 import useSectorSymbol from "../hooks/useSectorSymbol";
 import { useAutoPageSize } from "../hooks/useAutoPageSize";
 import { useVn100 } from "../../chart/hooks/useVn100";
+import { useBotSignals } from "../../chart/hooks/useBotSignals";
+import { useSelectedBot } from "../../chart/hooks/useSelectedBot";
+import { BOTS } from "../../../layouts/untils/navigation";
 import {
   PHASE,
   PHASE_BADGE,
   convertDay,
   countPhases,
   getPageNumbers,
+  mergeBotSignals,
   pnlPct,
   sessionPhase,
   sortRowsBySignal,
@@ -60,13 +74,16 @@ export const VARIANT = {
 //
 // Không còn cờ `sortable`: icon sắp xếp đã bỏ khỏi header (bấm vào nó vốn chưa
 // sắp xếp được, chỉ vẽ ra cho giống ảnh mẫu). Thứ tự vẫn là `sortRowsBySignal`.
+//
+// `Icon` chỉ để trang trí — đặt `aria-hidden` lúc render, nếu không trình đọc màn
+// hình đọc thừa tên icon trước mỗi tiêu đề cột.
 const COLUMNS = [
-  { key: "symbol", label: ["MÃ"], width: "11%", align: "left" },
-  { key: "signal", label: ["TÍN HIỆU"], width: "21%" },
-  { key: "date", label: ["NGÀY BÁO", "MUA / BÁN"], width: "17%" },
-  { key: "phase", label: ["SỐ PHIÊN"], width: "15%" },
-  { key: "pnl", label: ["% LÃI / LỖ", "HIỆN TẠI"], width: "17%" },
-  { key: "price", label: ["GIÁ HIỆN TẠI", "GIÁ BÁO"], width: "19%" },
+  { key: "symbol", label: ["MÃ"], width: "11%", align: "left", Icon: FiTag },
+  { key: "signal", label: ["TÍN HIỆU"], width: "21%", Icon: FiRadio },
+  { key: "date", label: ["NGÀY BÁO", "MUA / BÁN"], width: "17%", Icon: FiCalendar },
+  { key: "phase", label: ["SỐ PHIÊN"], width: "15%", Icon: FiBarChart2 },
+  { key: "pnl", label: ["% LÃI / LỖ", "HIỆN TẠI"], width: "17%", Icon: FiClock },
+  { key: "price", label: ["GIÁ HIỆN TẠI", "GIÁ BÁO"], width: "19%", Icon: FiDollarSign },
 ];
 
 // Bốn thẻ thống kê — bốn pha LOẠI TRỪ NHAU, xem untils/filterStockData.js.
@@ -79,21 +96,44 @@ const TILES = [
 
 const ALL_CATEGORY = { name: "Tất cả danh mục", code: 1 };
 
+// Ngoài component: danh sách cố định, khai báo trong thân hàm thì mỗi lần render
+// lại sinh mảng mới, và `useState(LIST_BOT[0])` sẽ giữ một object khác object
+// đang nằm trong danh sách → so sánh `is-active` hỏng ngay từ lần render thứ hai.
+//
+// Danh sách BOT lấy thẳng từ `navigation.js` — cùng bảng mà sidebar bản web
+// đang dùng. Bảng cứng thứ hai ở đây từng là lý do dropdown không nối được vào
+// dữ liệu: id "1"/"2"/"3" của nó không nói được cho backend biết bot nào.
+
 function FilterStockPage({ variant = "web" }) {
   const { root, reserve, hint } = VARIANT[variant] ?? VARIANT.web;
 
   const [category, setCategory] = useState(ALL_CATEGORY.name);
   const [codeCate, setCodeCate] = useState(ALL_CATEGORY.code);
   const [openDropdown, setOpenDropdown] = useState(false);
+  // Trạng thái mở và vùng click của dropdown BOT phải TÁCH khỏi dropdown danh
+  // mục. Xài chung `openDropdown` thì bấm một nút bung cả hai menu; xài chung
+  // `dropdownRef` thì `.current` chỉ giữ được div gắn sau cùng, nên click vào
+  // menu kia bị tính là click ra ngoài — `mousedown` gỡ <li> trước khi `click`
+  // kịp chạy, chọn danh mục không ăn.
+  const [openBot, setOpenBot] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const dropdownRef = useRef(null);
+  const botRef = useRef(null);
   const tableRef = useRef(null);
   const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
+
+  // BOT là trạng thái của URL, không phải state cục bộ: vào từ màn biểu đồ hay
+  // từ link có sẵn đều phải ra đúng bot đó, và bấm back phải quay về bot trước.
+  const bot = useSelectedBot();
+  const botLabel = BOTS.find((b) => b.value === bot)?.label ?? BOTS[0].label;
 
   const { data: sector = [] } = useSector();
   const { data: symbols = [] } = useSectorSymbol(codeCate);
   const { data: dataPanel = [], dataUpdatedAt } = useVn100();
+  // Trend đã nằm sẵn trong /vn100 → hook tự bỏ qua request cho bot đó.
+  const { data: botOverlay } = useBotSignals(bot);
 
   const categories = useMemo(
     () => [ALL_CATEGORY, ...sector.map((item) => ({ name: item.group, code: item.icb_code }))],
@@ -104,6 +144,9 @@ function FilterStockPage({ variant = "web" }) {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpenDropdown(false);
+      }
+      if (botRef.current && !botRef.current.contains(e.target)) {
+        setOpenBot(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -124,7 +167,15 @@ function FilterStockPage({ variant = "web" }) {
     return list.filter((s) => s.symbol?.includes(keyword));
   }, [search, symbols, dataPanel, codeCate]);
 
-  const sortedRows = useMemo(() => sortRowsBySignal(rows), [rows]);
+  // Đắp tín hiệu của bot đang chọn TRƯỚC mọi thứ khác: từ đây trở xuống
+  // (sortRowsBySignal, countPhases, sessionPhase, pnlPct) không hàm nào biết tới
+  // khái niệm bot — chúng chỉ thấy đúng shape `signal_*` như trước.
+  const botRows = useMemo(
+    () => mergeBotSignals(rows, botOverlay, bot),
+    [rows, botOverlay, bot],
+  );
+
+  const sortedRows = useMemo(() => sortRowsBySignal(botRows), [botRows]);
 
   // Mốc "hôm nay" tính MỘT lần cho cả trang: thẻ thống kê và cột trạng thái phải
   // dùng chung mốc, nếu không thì đúng lúc qua nửa đêm hai chỗ nói khác nhau.
@@ -167,9 +218,12 @@ function FilterStockPage({ variant = "web" }) {
         <div className={`${root}__dropdown`} ref={dropdownRef}>
           <button
             type="button"
-            className={`dropdown-trigger ${openDropdown ? "is-open" : ""}`}
+            className={`dropdown-trigger dropdown-trigger--cate ${openDropdown ? "is-open" : ""}`}
             onClick={() => setOpenDropdown((v) => !v)}
           >
+            <span className="dropdown-icon" aria-hidden="true">
+              <FiGrid />
+            </span>
             <span className="dropdown-text">
               <small>Chọn danh mục</small>
               <strong>{category}</strong>
@@ -191,6 +245,53 @@ function FilterStockPage({ variant = "web" }) {
                   }}
                 >
                   <span>{item.name}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className={`${root}__dropdown`} ref={botRef}>
+          <button
+            type="button"
+            className={`dropdown-trigger dropdown-trigger--bot ${openBot ? "is-open" : ""}`}
+            onClick={() => setOpenBot((v) => !v)}
+          >
+            <span className="dropdown-icon" aria-hidden="true">
+              <BsRobot />
+            </span>
+            <span className="dropdown-text">
+              <small>Chọn BOT</small>
+              <strong>{botLabel}</strong>
+            </span>
+            <FiChevronDown className="chevron" />
+          </button>
+
+          {openBot && (
+            <ul className="dropdown-menu">
+              {BOTS.map((item) => (
+                <li
+                  key={item.value}
+                  className={`dropdown-item ${item.value === bot ? "is-active" : ""}`}
+                  // Không đụng `category`/`codeCate`: hai dropdown là hai trục
+                  // lọc riêng. Ghi vào URL chứ không vào state cục bộ để bot đi
+                  // theo người dùng sang màn biểu đồ (và ngược lại).
+                  //
+                  // CÓ setPage(1): đổi bot là đổi cả tập mã có tín hiệu, đứng
+                  // nguyên trang 7 của bot cũ thì rất dễ rơi vào trang trống.
+                  onClick={() => {
+                    setSearchParams(
+                      (params) => {
+                        params.set("bot", item.value);
+                        return params;
+                      },
+                      { replace: true },
+                    );
+                    setPage(1);
+                    setOpenBot(false);
+                  }}
+                >
+                  <span>{item.label}</span>
                 </li>
               ))}
             </ul>
@@ -235,6 +336,7 @@ function FilterStockPage({ variant = "web" }) {
               {COLUMNS.map((col) => (
                 <th key={col.key}>
                   <div className={`th-cell ${col.align === "left" ? "th-cell--left" : ""}`}>
+                    <col.Icon className="th-icon" aria-hidden="true" />
                     <span className="th-label">
                       {col.label.map((line) => (
                         <em key={line}>{line}</em>
