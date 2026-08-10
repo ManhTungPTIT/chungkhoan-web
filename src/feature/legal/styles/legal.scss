@@ -2,92 +2,272 @@
 //
 // Trang này mở được KHI CHƯA ĐĂNG NHẬP và nằm ngoài mọi layout (không sidebar web,
 // không bottom tab app), nên nó tự lo nền và chiều cao — không thừa hưởng của ai.
-$ink: #1f2937;
-$muted: #6b7280;
-$line: #e6e8ef;
-$bg: #f6f7fb;
-$surface: #fff;
+//
+// Tông màu bám `chart-header--navy` (components/chartHeader.scss) để trang pháp lý
+// trông cùng một sản phẩm với phần còn lại, dù nó đứng ngoài mọi layout.
+//
+// Màu khai báo bằng biến CSS chứ không phải biến SCSS: `.legal` là gốc của cả trang
+// nên biến sống được tới mọi phần tử con, và sau này muốn làm bản tối chỉ cần ghi đè
+// một khối biến thay vì sửa rải rác.
 
 .legal {
+  --lg-ink: #16202f;
+  --lg-body: #38445c;
+  --lg-muted: #6b7793;
+  --lg-line: #e6e9f2;
+  --lg-bg: #eef1f8;
+  --lg-surface: #fff;
+  --lg-accent: #243a9a;
+  --lg-accent-soft: #f2f5fd;
+  --lg-navy: linear-gradient(112deg, #162c74, #243a9a 55%, #60109e);
+
   min-height: 100vh;
-  background: $bg;
-  color: $ink;
-  font-family: sans-serif;
+  background: var(--lg-bg);
+  color: var(--lg-body);
+  font-family: var(--sans, system-ui, "Segoe UI", Roboto, sans-serif);
+  // Trang này nằm ngoài #root flex-column căn giữa của index.css — ép về trái để
+  // văn bản dài không bị canh giữa từng dòng.
+  text-align: left;
+}
 
-  &__bar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1rem;
-    background: $surface;
-    border-bottom: 1px solid $line;
+/* ── Thanh tiêu đề ────────────────────────────────────────────────── */
+
+.legal__bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--lg-navy);
+  // Không viền dưới: trên nền gradient nó thành một vệt bẩn. Đổ bóng nhẹ để khi
+  // cuộn, chữ trôi bên dưới vẫn tách bạch khỏi thanh.
+  box-shadow: 0 2px 12px rgba(12, 22, 58, 0.28);
+}
+
+.legal__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.22);
   }
 
-  &__back {
-    display: inline-flex;
-    padding: 0.35rem;
-    border: none;
-    background: transparent;
-    color: $ink;
-    font-size: 1.35rem;
-    cursor: pointer;
+  &:active {
+    transform: scale(0.94);
   }
 
-  &__title {
-    margin: 0;
-    font-size: 1.05rem;
-    font-weight: 700;
+  // Viền focus phải thấy được TRÊN NỀN NAVY — outline màu accent mặc định của
+  // trình duyệt gần như chìm hẳn ở đây.
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
   }
+}
 
-  &__body {
-    // Giới hạn bề rộng dòng: văn bản dài mà kéo hết màn hình rộng thì mắt lạc dòng.
-    // Trên app màn hẹp, `max-width` không có tác dụng gì — cùng một quy tắc cho cả hai.
-    max-width: 46rem;
-    margin: 0 auto;
-    padding: 1.5rem 1.25rem 3rem;
+.legal__title {
+  margin: 0;
+  min-width: 0;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  // Tiêu đề "Chính sách quyền riêng tư" vừa khít màn 360px; mã dài hơn (bản dịch,
+  // văn bản mới) thì cắt bằng ellipsis chứ không đẩy nút quay lại ra khỏi màn.
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ── Tờ văn bản ───────────────────────────────────────────────────── */
+
+.legal__body {
+  // Giới hạn bề rộng dòng: văn bản dài mà kéo hết màn hình rộng thì mắt lạc dòng.
+  // Trên app màn hẹp, `max-width` không có tác dụng gì — cùng một quy tắc cho cả hai.
+  max-width: 46rem;
+  margin: 1.5rem auto 3rem;
+  padding: 2rem 2.25rem 2.5rem;
+  border-radius: 1rem;
+  background: var(--lg-surface);
+  box-shadow:
+    0 1px 2px rgba(22, 32, 47, 0.04),
+    0 12px 32px rgba(22, 32, 47, 0.08);
+}
+
+.legal__effective {
+  display: inline-block;
+  margin: 0 0 1.25rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--lg-accent-soft);
+  color: var(--lg-accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.legal__intro {
+  margin: 0 0 2rem;
+  padding-left: 1rem;
+  // Vạch dọc thay cho khung kín: câu mở đầu cần nổi hơn thân bài nhưng không nên
+  // trông như một cảnh báo — khung kín + nền đậm sẽ đọc thành "chú ý quan trọng".
+  border-left: 3px solid var(--lg-accent);
+  color: var(--lg-ink);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+/* ── Mục ──────────────────────────────────────────────────────────── */
+
+.legal__section {
+  margin-bottom: 2rem;
+
+  &:last-child {
+    margin-bottom: 0;
   }
+}
 
-  &__effective {
-    margin: 0 0 1rem;
-    font-size: 0.8rem;
-    color: $muted;
+.legal__heading {
+  margin: 0 0 0.7rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--lg-line);
+  color: var(--lg-ink);
+  font-size: 1.02rem;
+  font-weight: 700;
+  line-height: 1.4;
+  // KHÔNG dùng ::before có `content` mang chữ để đánh số: số thứ tự đã nằm sẵn
+  // trong chuỗi tiêu đề (nội dung là dữ liệu), và chữ sinh bằng CSS còn lọt vào
+  // accessible name — test tra h2 theo đúng tên nên sẽ gãy.
+}
+
+.legal__para {
+  margin: 0 0 0.85rem;
+  font-size: 0.94rem;
+  line-height: 1.8;
+
+  &:last-child {
+    margin-bottom: 0;
   }
+}
 
-  &__intro {
-    margin: 0 0 1.75rem;
-    font-size: 0.95rem;
-    line-height: 1.7;
-  }
+/* ── Danh sách ────────────────────────────────────────────────────── */
 
-  &__section {
-    margin-bottom: 1.75rem;
-  }
+.legal__list {
+  margin: 0 0 0.85rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.94rem;
+  line-height: 1.8;
 
-  &__heading {
-    margin: 0 0 0.6rem;
-    font-size: 1rem;
-    font-weight: 700;
-  }
+  li {
+    position: relative;
+    margin-bottom: 0.55rem;
+    padding-left: 1.4rem;
 
-  &__para {
-    margin: 0 0 0.75rem;
-    font-size: 0.9rem;
-    line-height: 1.7;
     &:last-child {
       margin-bottom: 0;
     }
+
+    // Chấm tròn tự vẽ thay cho bullet mặc định: bullet của trình duyệt canh theo
+    // dòng đầu và to nhỏ theo font, nhìn lệch với dòng cao 1.8. `content: ""` —
+    // không mang chữ nên không lọt vào accessible name.
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0.25rem;
+      // Căn theo dòng chữ đầu tiên: 0.94rem × 1.8 ÷ 2 ≈ tâm dòng.
+      top: 0.72em;
+      width: 0.35rem;
+      height: 0.35rem;
+      border-radius: 50%;
+      background: var(--lg-accent);
+    }
+  }
+}
+
+/* ── Câu chốt ─────────────────────────────────────────────────────── */
+
+// `notes` là câu chốt của mục ("chúng tôi không bán dữ liệu", "xóa tài khoản là
+// xóa mềm") — thứ người đọc lướt vẫn phải thấy. Tô nền nhạt để nó không trôi lẫn
+// vào danh sách ngay phía trên.
+.legal__note {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border-left: 3px solid var(--lg-accent);
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: var(--lg-accent-soft);
+  color: var(--lg-ink);
+  font-size: 0.9rem;
+}
+
+/* ── Màn hẹp ──────────────────────────────────────────────────────── */
+
+// Mốc ghi bằng px CÓ CHỦ Ý: index.css đặt root font-size 18px (16px dưới 1024px),
+// nhưng `rem` trong media query luôn tính theo 16px gốc — viết 40rem ở đây thì người
+// đọc sau rất dễ tính thành 720px trong khi thực tế là 640px.
+@media (max-width: 640px) {
+  .legal__body {
+    // Tràn sát mép và bỏ bo góc: trên điện thoại, tờ giấy nổi có lề hai bên chỉ
+    // ăn mất bề ngang vốn đã hẹp, mà bề ngang là thứ văn bản dài cần nhất.
+    margin: 0;
+    padding: 1.5rem 1.15rem 2.5rem;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: calc(100vh - 3.85rem);
   }
 
-  &__list {
-    margin: 0 0 0.75rem;
-    padding-left: 1.15rem;
-    font-size: 0.9rem;
-    line-height: 1.7;
-    li {
-      margin-bottom: 0.4rem;
-    }
+  .legal__intro {
+    font-size: 0.96rem;
+  }
+}
+
+/* ── In / lưu PDF ─────────────────────────────────────────────────── */
+
+// Văn bản pháp lý hay bị in ra hoặc lưu PDF (nộp hồ sơ, lưu hồ sơ nội bộ). Mặc
+// định thanh navy ngốn mực và bóng đổ in ra thành vệt xám.
+@media print {
+  .legal {
+    background: #fff;
+  }
+
+  .legal__bar {
+    position: static;
+    background: #fff;
+    box-shadow: none;
+    border-bottom: 1px solid #000;
+  }
+
+  .legal__back {
+    display: none;
+  }
+
+  .legal__title {
+    color: #000;
+  }
+
+  .legal__body {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .legal__section {
+    // Không cắt một mục làm đôi giữa hai trang giấy.
+    break-inside: avoid;
   }
 }

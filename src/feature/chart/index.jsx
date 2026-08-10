@@ -193,8 +193,9 @@ function TradingView() {
   const infoRef = useRef(null);
   const [infoHeight, setInfoHeight] = useState(0);
 
-  // Chỉ báo: EMA + Volume bật sẵn; chuỗi activeKey truyền xuống chart để vẽ.
-  // VOL hiển thị ở pane dưới (thay MCDX cũ); MCDX nay thêm tùy ý qua picker.
+  // Chỉ báo: khách mới thấy MA(10,20) + MCDX (xem DEFAULT_ACTIVE_INDICATORS);
+  // khách đã có dữ liệu lưu thì giữ nguyên bộ của họ. Chuỗi activeKey truyền
+  // xuống chart để vẽ.
   const [indicatorState, setIndicatorState] = useState(() =>
     loadIndicatorState(),
   );
@@ -275,7 +276,15 @@ function TradingView() {
       : lastSignal
         ? lastSignal.price
         : "--";
-  const priceTarget = lastSignal ? lastSignal.priceTarget : "--";
+  // Làm tròn ở CHỖ HIỂN THỊ, generator vẫn trả số thô: MA20/MA10 ra số lẻ rất
+  // dài (40.233333333333334) chứ không sạch như giá đóng cửa.
+  //
+  // Kiểm tra bằng Number.isFinite thay vì `lastSignal ? ... : "--"` cũ: nhánh
+  // SELL không đẩy `priceTarget`, nên khi backend báo "buy" mà tín hiệu cuối FE
+  // tính ra là sell thì ô này từng render RỖNG TRƠN thay vì "--".
+  const priceTarget = Number.isFinite(Number(lastSignal?.priceTarget))
+    ? Number(lastSignal.priceTarget).toFixed(2)
+    : "--";
   const dayChange =
     backendSignalType && selectedPanelRow?.signal_date
       ? selectedPanelRow.signal_date
@@ -504,6 +513,7 @@ function TradingView() {
             dataPanel={panelRows}
             highlightedSymbol={chanelCode}
             onSelectSymbol={selectSymbol}
+            bot={bot}
           />
         </div>
       </div>

@@ -19,7 +19,10 @@ export const DISPLAY_SCOPES = [
 ];
 
 export const ALL_INDICATORS = [
-  { name: "MA", label: "MA — Trung bình động", pane: "candle_pane", dynamicParams: true, defaultParams: [5, 10, 20], params: [{ label: "Chu kỳ MA", defaultValue: 5, min: 1, max: 500 }] },
+  // lineColors: màu gắn với CHU KỲ (không phải vị trí) — MA10 đỏ / MA20 xanh lá
+  // theo quy ước giảm–tăng quen thuộc. Chu kỳ khách tự thêm vẫn phát theo
+  // LINE_COLORS. Đây là màu KHỞI ĐIỂM, khách đổi được trong hộp sửa chỉ báo.
+  { name: "MA", label: "MA — Trung bình động", pane: "candle_pane", dynamicParams: true, defaultParams: [10, 20], lineColors: { 10: "#EF5350", 20: "#26A69A" }, params: [{ label: "Chu kỳ MA", defaultValue: 5, min: 1, max: 500 }] },
   { name: "EMA", label: "EMA — TB động luỹ thừa", pane: "candle_pane", params: [{ label: "Nhanh", defaultValue: 10 }, { label: "Chậm", defaultValue: 20 }] },
   { name: "SMA", label: "SMA — TB động giản đơn", pane: "candle_pane", params: [{ label: "Chu kỳ", defaultValue: 12 }, { label: "M", defaultValue: 2 }] },
   { name: "BBI", label: "BBI — Bull & Bear Index", pane: "candle_pane", params: [{ label: "P1", defaultValue: 3 }, { label: "P2", defaultValue: 6 }, { label: "P3", defaultValue: 12 }, { label: "P4", defaultValue: 24 }] },
@@ -94,9 +97,11 @@ export const ALL_INDICATORS = [
   { name: "AO", label: "AO — Awesome Oscillator", pane: "sub", params: [{ label: "Fast", defaultValue: 5 }, { label: "Slow", defaultValue: 34 }], lines: [{ label: "AO" }] },
 ];
 
+// Màn hình đầu tiên của khách MỚI: 2 đường MA đè lên nến, MCDX ở pane dưới.
+// Chỉ áp cho khách chưa có dữ liệu lưu — xem loadIndicatorState.
 export const DEFAULT_ACTIVE_INDICATORS = {
-  EMA: true,
-  VOL: true,
+  MA: true,
+  MCDX: true,
 };
 
 export function getIndicatorDefinition(name) {
@@ -111,9 +116,15 @@ function getDefaultParams(indicator) {
 }
 
 function getDynamicLineDefinitions(indicator, params = getDefaultParams(indicator)) {
-  return params.map((period) => ({
-    label: `${indicator.name}${period}`,
-  }));
+  return params.map((period) => {
+    const color = indicator.lineColors?.[period];
+    return {
+      label: `${indicator.name}${period}`,
+      // Bỏ hẳn khoá khi chu kỳ không có màu riêng, để defaultLineStyle rơi về
+      // LINE_COLORS theo vị trí (`line.color ?? LINE_COLORS[...]`).
+      ...(color ? { color } : {}),
+    };
+  });
 }
 
 export function getIndicatorLineDefinitions(indicatorOrName, params) {
@@ -397,8 +408,15 @@ export function loadIndicatorState(storage) {
     );
     if (!stored) return fallback;
     const parsed = JSON.parse(stored);
+    // CỐ Ý không trộn với DEFAULT_ACTIVE_INDICATORS: khoá vắng trong dữ liệu cũ
+    // sẽ rơi vào mặc định, nên thêm chỉ báo mặc định mới là tự bật nó lên sau
+    // lưng khách đang dùng. Có dữ liệu lưu = dùng đúng bộ đó, kể cả bộ rỗng
+    // (khách tự tắt sạch). Đánh đổi: khách cũ không bao giờ nhận mặc định mới.
     return {
-      active: { ...DEFAULT_ACTIVE_INDICATORS, ...(parsed.active ?? {}) },
+      active:
+        parsed.active && typeof parsed.active === "object" && !Array.isArray(parsed.active)
+          ? { ...parsed.active }
+          : DEFAULT_ACTIVE_INDICATORS,
       configs: normalizeIndicatorConfigs(parsed.configs),
     };
   } catch {

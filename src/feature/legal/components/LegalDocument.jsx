@@ -61,9 +61,11 @@ export default function LegalDocument({ document }) {
             )}
 
             {/* Câu chốt đứng SAU danh sách. Tách khỏi `paragraphs` (luôn đứng trước)
-                vì thứ tự trong văn bản pháp lý là một phần của nghĩa. */}
+                vì thứ tự trong văn bản pháp lý là một phần của nghĩa.
+                GIỮ `legal__para`: test "câu chốt nằm sau danh sách" tra bằng
+                querySelector('.legal__para'). `legal__note` chỉ thêm phần nhìn. */}
             {section.notes?.map((text) => (
-              <p key={text} className="legal__para">
+              <p key={text} className="legal__para legal__note">
                 {text}
               </p>
             ))}

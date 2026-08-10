@@ -164,7 +164,12 @@ export function generateSignals(candles) {
           time: candles[i].time,
           date: toDateString(candles[i].time),
           type: "buy",
-          priceTarget: closePrice,
+          // "Chốt lãi / Cắt lỗ" = MA20 TẠI NẾN VÀO LỆNH, không phải giá đóng cửa.
+          // MA20 chính là ngưỡng thoát lệnh của bot này (xem nhánh else bên dưới:
+          // `closePrice < ma` là bán), nên đây là mức giá mà thủng xuống là bot
+          // báo ra. Cố tình đóng băng ở mốc vào lệnh — MA20 phiên hiện tại đã
+          // trôi đi thì con số này không đổi theo.
+          priceTarget: ma,
           price: Math.min(candles[i].open, candles[i].close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });
         inLong = true;
@@ -210,6 +215,11 @@ export function generateSignals(candles) {
  */
 export function generateSignalsT(candles) {
   const { histogram } = calcMACD(candles);
+  // MA10 KHÔNG tham gia luật mua/bán của bot này (luật là cấu trúc nến +
+  // histogram, xem `isBuy`/`isSell` bên dưới) — tính riêng chỉ để lấy mức
+  // "Chốt lãi / Cắt lỗ". Khác với BOT Trend, nơi MA20 vừa là ngưỡng thoát lệnh
+  // vừa là mức hiển thị.
+  const ma10 = calcSMA(candles, 10);
   const signals = [];
 
   let inLong = false;
@@ -237,7 +247,9 @@ export function generateSignalsT(candles) {
           time: cur.time,
           date: toDateString(cur.time),
           type: "buy",
-          priceTarget: cur.close,
+          // MA10 tại nến vào lệnh. `calcSMA(c, 10)[j]` ứng với `candles[9 + j]`
+          // nên nến i tra ở `i - 9`; vòng lặp bắt đầu từ 34 nên chỉ số luôn hợp lệ.
+          priceTarget: ma10[i - 9].value,
           price: Math.min(cur.open, cur.close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });
         inLong = true;
@@ -290,6 +302,9 @@ export function generateSignalsLong(candles) {
           time: candles[i].time,
           date: toDateString(candles[i].time),
           type: "buy",
+          // CỐ Ý giữ giá đóng cửa, không đổi sang MA50: Trend dùng MA20 và T+
+          // dùng MA10 là yêu cầu riêng cho hai bot đó. Đừng "thống nhất" chỗ này
+          // nếu không có yêu cầu mới.
           priceTarget: closePrice,
           price: Math.min(candles[i].open, candles[i].close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });

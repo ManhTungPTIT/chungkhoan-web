@@ -84,6 +84,7 @@ export default function LoginForm({ onSwitchTab }) {
               type="text"
               placeholder="Email, số điện thoại hoặc số tài khoản chứng khoán"
               value={account}
+              autoComplete="Tài khoản"
               onChange={(e) => {
                 setAccount(e.target.value);
                 if (errors.account) setErrors((p) => ({ ...p, account: false }));
@@ -100,6 +101,7 @@ export default function LoginForm({ onSwitchTab }) {
               type={showPassword ? "text" : "password"}
               placeholder="Mật khẩu"
               value={password}
+              autoComplete="Mật khẩu"
               onChange={(e) => {
                 setPassword(e.target.value);
                 if (errors.password) setErrors((p) => ({ ...p, password: false }));

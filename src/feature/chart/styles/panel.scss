@@ -1,8 +1,27 @@
-table {
-  // Sàn 150px để 4 cột không bị bóp; trần 260px tránh quá rộng trên desktop
+.panel-table {
+  // Keep the panel width on the wrapper so the title and table align.
   width: clamp(150px, 20vw, 260px);
-  // Cao bằng panel-slide + xếp dọc để tbody nhận phần cao còn lại và cuộn được
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-table__title {
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 8px 4px;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(90deg, #7c00ff 0%, #006dff 100%);
+}
+
+.panel-table table {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
 
@@ -153,18 +172,18 @@ table {
 }
 
 // ===== Mobile (<=768px) =====
-// Nới panel rộng hơn để cột không bị hẹp, đồng thời giảm cỡ chữ vừa vặn
 @media (max-width: 768px) {
-  table {
+  .panel-table {
     width: 46vw;
+  }
 
+  .panel-table table {
     thead tr th {
       font-size: 0.78rem;
     }
     tbody tr {
-      font-size: 0.72rem; 
+      font-size: 0.72rem;
     }
-    
   }
 }
 

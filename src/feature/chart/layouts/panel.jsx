@@ -12,6 +12,12 @@ function displaySignal(item) {
 // Thứ tự sắp xếp nhóm tín hiệu: BUY → HOLD → SELL → (trung tính).
 const SIGNAL_ORDER = { BUY: 0, HOLD: 1, SELL: 2, "—": 3 };
 
+const PANEL_TITLES = {
+  trend: "BỘ LỌC TREND",
+  t: "BỘ LỌC T+",
+  long: "BỘ LỌC DÀI HẠN",
+};
+
 function getSessionOrder(item) {
   const value = item?.signal_sessions;
   if (value == null) return Number.MAX_SAFE_INTEGER;
@@ -19,11 +25,12 @@ function getSessionOrder(item) {
   return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
 }
 
-function Panel({ dataPanel = [], highlightedSymbol = "", onSelectSymbol }) {
+function Panel({ dataPanel = [], highlightedSymbol = "", onSelectSymbol, bot = "trend" }) {
   const tbodyRef = useRef(null);
   const rowRefs = useRef(new Map());
   const timerRef = useRef(null);
   const normalizedHighlight = highlightedSymbol.trim().toUpperCase();
+  const panelTitle = PANEL_TITLES[bot] ?? PANEL_TITLES.trend;
   
   const handleScroll = useCallback(() => {
     const el = tbodyRef.current;
@@ -64,7 +71,9 @@ function Panel({ dataPanel = [], highlightedSymbol = "", onSelectSymbol }) {
   }, [normalizedHighlight, sortedPanel]);
 
   return (
-    <table>
+    <div className="panel-table">
+      <div className="panel-table__title">{panelTitle}</div>
+      <table>
       <thead>
         <tr>
           <th>
@@ -110,7 +119,8 @@ function Panel({ dataPanel = [], highlightedSymbol = "", onSelectSymbol }) {
           );
         })}
       </tbody>
-    </table>
+      </table>
+    </div>
   );
 }
 
