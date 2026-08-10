@@ -28,3 +28,10 @@ dist-ssr
 
 *.md
 docs/superpowers
+
+# Tests
+**/__tests__/
+**/_tests_/
+*.test.*
+*.spec.*
+coverage/
