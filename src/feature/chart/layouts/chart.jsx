@@ -204,11 +204,13 @@ function syncBbsIndicator(chart, signals) {
   );
 }
 
+// CỐ Ý bỏ `priceTarget` khỏi signature: không hình vẽ nào đọc nó (BBS chỉ dùng
+// time/type, overlay dùng time/price) nhưng nó là MA của nến cuối nên nhúc nhích
+// theo TỪNG TICK realtime — để trong signature thì mỗi tick lại tháo/tạo lại BBS
+// và toàn bộ overlay tín hiệu.
 function getSignalsSignature(signals = []) {
   return signals
-    .map((signal) =>
-      [signal?.time, signal?.type, signal?.price, signal?.priceTarget].join(":"),
-    )
+    .map((signal) => [signal?.time, signal?.type, signal?.price].join(":"))
     .join("|");
 }
 
