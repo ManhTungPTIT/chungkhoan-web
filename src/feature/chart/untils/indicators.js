@@ -123,6 +123,23 @@ function toDateString(time) {
 }
 
 /**
+ * Đưa mức "Chốt lãi / Cắt lỗ" của tín hiệu CUỐI CÙNG về MA của nến MỚI NHẤT.
+ *
+ * Con số trên thẻ phải trùng đường MA10/MA20 tại phiên hiện tại — đường MA chạy
+ * tiếp mỗi phiên nên giữ MA của nến signal thì càng để lâu càng lệch khỏi đường
+ * khách đang nhìn.
+ *
+ * Chỉ đụng tín hiệu cuối (= trạng thái hiện tại). Các tín hiệu cũ giữ nguyên MA
+ * tại nến của chúng nên lịch sử vẫn đọc đúng.
+ *
+ * `maSeries` là mảng do `calcSMA` sinh ra; phần tử cuối luôn ứng với nến cuối.
+ */
+function refreshLastSignalTarget(signals, maSeries) {
+  if (signals.length === 0 || maSeries.length === 0) return;
+  signals[signals.length - 1].priceTarget = maSeries[maSeries.length - 1].value;
+}
+
+/**
  * Tự động tính tín hiệu mua/bán bằng máy trạng thái flat/long.
  *
  * Bắt đầu ở trạng thái flat (đang ngoài). Tại mỗi nến k (k >= 34, đủ dữ
@@ -164,14 +181,11 @@ export function generateSignals(candles) {
           time: candles[i].time,
           date: toDateString(candles[i].time),
           type: "buy",
-          // "Chốt lãi / Cắt lỗ" = MA20 TẠI NẾN VÀO LỆNH, không phải giá đóng cửa
-          // và KHÔNG phải MA20 của phiên mới nhất. MA20 là ngưỡng thoát lệnh của
-          // bot này (nhánh else bên dưới: thủng MA20 là bán) nên đây là mức giá
-          // đã có hiệu lực từ lúc vào lệnh.
-          //
-          // `ma` = `ma20[i - 19].value` ứng đúng nến i, nên soi crosshair vào
-          // NẾN CÓ MARKER MUA trên chart sẽ đọc ra đúng con số này — đường MA20
-          // ở mép phải (phiên hôm nay) đã trôi đi thì lệch là ĐÚNG, không phải lỗi.
+          // "Chốt lãi / Cắt lỗ" = MA20, không phải giá đóng cửa: MA20 là ngưỡng
+          // thoát lệnh của bot này (nhánh else bên dưới: thủng MA20 là bán).
+          // Đây là MA20 tại nến vào lệnh, dùng cho các tín hiệu ĐÃ QUA; riêng
+          // tín hiệu cuối được kéo về MA20 phiên mới nhất — xem
+          // refreshLastSignalTarget ở cuối hàm.
           priceTarget: ma,
           price: Math.min(candles[i].open, candles[i].close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });
@@ -184,8 +198,8 @@ export function generateSignals(candles) {
         date: toDateString(candles[i].time),
         type: "sell",
         // Đang đứng ngoài thì mức đáng theo dõi là ngưỡng VÀO LẠI: luật mua của
-        // bot là close > MA20, nên MA20 TẠI NẾN BÁN chính là mức mà vượt lên là
-        // bot báo mua trở lại. Cùng nến, cùng chu kỳ với nhánh buy.
+        // bot là close > MA20 nên vượt lên MA20 là bot báo mua trở lại. Cùng
+        // chu kỳ, cùng cách làm mới như nhánh buy.
         priceTarget: ma,
         price: Math.max(candles[i].open, candles[i].close), // hiển thị: neo marker ở đỉnh THÂN nến (bỏ râu)
       });
@@ -193,6 +207,7 @@ export function generateSignals(candles) {
     }
   }
 
+  refreshLastSignalTarget(signals, ma20);
   return signals;
 }
 
@@ -254,8 +269,8 @@ export function generateSignalsT(candles) {
           time: cur.time,
           date: toDateString(cur.time),
           type: "buy",
-          // MA10 TẠI NẾN VÀO LỆNH, không phải MA10 phiên mới nhất — soi crosshair
-          // vào nến có marker mua sẽ đọc ra đúng con số này.
+          // MA10 tại nến vào lệnh, dùng cho các tín hiệu ĐÃ QUA; tín hiệu cuối
+          // được kéo về MA10 phiên mới nhất (refreshLastSignalTarget cuối hàm).
           // `calcSMA(c, 10)[j]` ứng với `candles[9 + j]` nên nến i tra ở `i - 9`;
           // vòng lặp bắt đầu từ 34 nên chỉ số luôn hợp lệ.
           priceTarget: ma10[i - 9].value,
@@ -278,7 +293,7 @@ export function generateSignalsT(candles) {
           time: cur.time,
           date: toDateString(cur.time),
           type: "sell",
-          // Mức theo dõi khi đứng ngoài — MA10 TẠI NẾN BÁN, cùng chu kỳ với
+          // Mức theo dõi khi đứng ngoài, cùng chu kỳ và cùng cách làm mới như
           // nhánh buy. MA10 vẫn KHÔNG tham gia luật bán (luật là cấu trúc nến +
           // histogram ở `isSell` ngay trên), chỉ dùng để hiển thị.
           priceTarget: ma10[i - 9].value,
@@ -289,6 +304,7 @@ export function generateSignalsT(candles) {
     }
   }
 
+  refreshLastSignalTarget(signals, ma10);
   return signals;
 }
 
