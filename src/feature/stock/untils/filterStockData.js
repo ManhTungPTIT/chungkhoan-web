@@ -111,6 +111,21 @@ export function sessionPhase(row, today = todayIso()) {
   return null;
 }
 
+/**
+ * Lọc theo pha — nguồn cho bộ lọc bấm vào bốn thẻ thống kê.
+ *
+ * `phase` rỗng (null/undefined/"") = không lọc, trả NGUYÊN mảng vào (không copy)
+ * để pipeline không sinh reference mới mỗi render khi chưa bật lọc.
+ *
+ * Mã chưa có tín hiệu (`sessionPhase` trả null) bị loại khỏi MỌI pha — chúng
+ * không thuộc pha nào, đúng như bốn thẻ đếm ở `countPhases`.
+ */
+export function filterRowsByPhase(rows, phase, today = todayIso()) {
+  const list = rows ?? [];
+  if (!phase) return list;
+  return list.filter((row) => sessionPhase(row, today) === phase);
+}
+
 /** Đếm số mã theo từng pha — nguồn cho bốn thẻ thống kê trên đầu trang. */
 export function countPhases(rows, today = todayIso()) {
   const counts = { [PHASE.BUY]: 0, [PHASE.HOLD]: 0, [PHASE.SELL]: 0, [PHASE.OUT]: 0 };

@@ -33,8 +33,10 @@ import { BOTS } from "../../../layouts/untils/navigation";
 import {
   PHASE,
   PHASE_BADGE,
+  PHASE_LABEL,
   convertDay,
   countPhases,
+  filterRowsByPhase,
   getPageNumbers,
   mergeBotSignals,
   pnlPct,
@@ -117,6 +119,12 @@ function FilterStockPage({ variant = "web" }) {
   // kịp chạy, chọn danh mục không ăn.
   const [openBot, setOpenBot] = useState(false);
   const [search, setSearch] = useState("");
+  // Pha đang lọc (bấm vào thẻ thống kê); null = xem tất cả.
+  //
+  // State CỤC BỘ chứ không ghi vào URL như `bot`: bot phải đi theo người dùng
+  // sang màn biểu đồ, còn pha chỉ có nghĩa trong trang này — giống `category`
+  // và `search`.
+  const [phaseFilter, setPhaseFilter] = useState(null);
   const [page, setPage] = useState(1);
   const dropdownRef = useRef(null);
   const botRef = useRef(null);
@@ -180,20 +188,27 @@ function FilterStockPage({ variant = "web" }) {
   // Mốc "hôm nay" tính MỘT lần cho cả trang: thẻ thống kê và cột trạng thái phải
   // dùng chung mốc, nếu không thì đúng lúc qua nửa đêm hai chỗ nói khác nhau.
   const today = useMemo(() => todayIso(), []);
+  // CỐ Ý đếm trên `sortedRows` (CHƯA lọc): đếm sau khi lọc thì bấm BUY xong ba
+  // thẻ kia về 0 và không còn bấm chuyển pha được nữa.
   const counts = useMemo(() => countPhases(sortedRows, today), [sortedRows, today]);
+
+  const visibleRows = useMemo(
+    () => filterRowsByPhase(sortedRows, phaseFilter, today),
+    [sortedRows, phaseFilter, today],
+  );
 
   const pageSize = useAutoPageSize(tableRef, {
     reserve,
-    deps: [sortedRows.length],
+    deps: [visibleRows.length],
   });
 
-  const totalPages = Math.max(1, Math.ceil(sortedRows.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(visibleRows.length / pageSize));
 
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
 
-  const pagedRows = sortedRows.slice((page - 1) * pageSize, page * pageSize);
+  const pagedRows = visibleRows.slice((page - 1) * pageSize, page * pageSize);
   const pageNumbers = getPageNumbers(page, totalPages);
 
   const updatedLabel = dataUpdatedAt
@@ -312,16 +327,31 @@ function FilterStockPage({ variant = "web" }) {
         </div>
       </div>
 
+      {/* Thẻ thống kê KIÊM bộ lọc: bấm để lọc theo pha, bấm lại để bỏ lọc.
+          <button> thật (không phải div có onClick) để bàn phím tab tới được và
+          `aria-pressed` báo đúng trạng thái bật/tắt cho trình đọc màn hình. */}
       <div className={`${root}__tiles`}>
-        {TILES.map(({ phase, label, tone, Icon }) => (
-          <div key={phase} className={`tile tile--${tone}`}>
-            <div className="tile__text">
-              <span className="tile__label">{label}</span>
-              <strong className="tile__value">{counts[phase]}</strong>
-            </div>
-            <Icon className="tile__icon" />
-          </div>
-        ))}
+        {TILES.map(({ phase, label, tone, Icon }) => {
+          const isActive = phaseFilter === phase;
+          return (
+            <button
+              type="button"
+              key={phase}
+              className={`tile tile--${tone} ${isActive ? "is-active" : ""}`}
+              aria-pressed={isActive}
+              onClick={() => {
+                setPhaseFilter(isActive ? null : phase);
+                setPage(1);
+              }}
+            >
+              <div className="tile__text">
+                <span className="tile__label">{label}</span>
+                <strong className="tile__value">{counts[phase]}</strong>
+              </div>
+              <Icon className="tile__icon" aria-hidden="true" />
+            </button>
+          );
+        })}
       </div>
 
       <div className={`${root}__table`} ref={tableRef}>
@@ -348,6 +378,15 @@ function FilterStockPage({ variant = "web" }) {
             </tr>
           </thead>
           <tbody>
+            {pagedRows.length === 0 && (
+              <tr className="row-empty">
+                <td colSpan={COLUMNS.length}>
+                  {phaseFilter
+                    ? `Không có mã nào ở pha "${PHASE_LABEL[phaseFilter]}"`
+                    : "Không có mã nào"}
+                </td>
+              </tr>
+            )}
             {pagedRows.map((s) => {
               const phase = sessionPhase(s, today);
               const pnl = pnlPct(s);

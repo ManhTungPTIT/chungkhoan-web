@@ -270,6 +270,22 @@
     padding: 14px 16px;
     border: 1px solid var(--fw-border);
     border-radius: 12px;
+    /* Là <button> nên phải gỡ mặc định của trình duyệt: nền xám, chữ căn giữa,
+       font hệ thống. `text-align: left` cho khối chữ bám trái như bản <div> cũ. */
+    width: 100%;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:hover { border-color: var(--fw-text-strong, #94a3b8); }
+
+    /* Đang lọc theo pha này — viền đậm + quầng nhẹ, KHÔNG đổi nền vì mỗi tone
+       đã có nền màu riêng ở dưới. Màu viền đặt trong từng tone (`&--buy` ...)
+       vì màu của tone chỉ gắn cho `__value`/`__icon`, `.tile` không mang nó. */
+    &.is-active {
+      box-shadow: 0 0 0 2px rgb(0 0 0 / 6%);
+    }
 
     &__text {
       display: flex;
@@ -306,21 +322,25 @@
       background: #f3f7ff;
       .tile__value,
       .tile__icon { color: var(--fw-up); }
+      &.is-active { border-color: var(--fw-up); }
     }
     &--sell {
       background: #fff5f7;
       .tile__value,
       .tile__icon { color: var(--fw-down); }
+      &.is-active { border-color: var(--fw-down); }
     }
     &--hold {
       background: #f2fdf6;
       .tile__value,
       .tile__icon { color: var(--fw-purple); }
+      &.is-active { border-color: var(--fw-purple); }
     }
     &--out {
       background: #fffaf0;
       .tile__value,
       .tile__icon { color: var(--fw-orange); }
+      &.is-active { border-color: var(--fw-orange); }
     }
   }
 
@@ -427,6 +447,21 @@
 
       &:active {
         background: rgba(28, 60, 112, 0.12);
+      }
+    }
+
+    /* Dòng trống khi bộ lọc pha không khớp mã nào. Ghi đè cả sọc lẫn hover của
+       `tbody tr` ở trên vì nó không phải dòng bấm được. */
+    tbody tr.row-empty,
+    tbody tr.row-empty:hover,
+    tbody tr.row-empty:nth-child(even) {
+      background: transparent;
+      cursor: default;
+
+      td {
+        padding: 28px 16px;
+        text-align: center;
+        color: var(--fw-text);
       }
     }
   }

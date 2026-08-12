@@ -186,6 +186,18 @@
     padding: 8px 6px;
     border: 1px solid var(--fa-border);
     border-radius: 10px;
+    /* Là <button> nên phải gỡ mặc định của trình duyệt (nền xám, chữ căn giữa,
+       font hệ thống). Không có hiệu ứng :hover — bản app dùng bằng ngón tay. */
+    width: 100%;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    /* Đang lọc theo pha này. Màu viền nằm trong từng tone bên dưới vì màu của
+       tone chỉ gắn cho `__value`/`__icon`, `.tile` không mang nó. */
+    &.is-active {
+      box-shadow: 0 0 0 2px rgb(0 0 0 / 6%);
+    }
 
     &__text {
       display: flex;
@@ -218,21 +230,25 @@
       background: #f3f7ff;
       .tile__value,
       .tile__icon { color: var(--fa-up); }
+      &.is-active { border-color: var(--fa-up); }
     }
     &--sell {
       background: #fff5f7;
       .tile__value,
       .tile__icon { color: var(--fa-down); }
+      &.is-active { border-color: var(--fa-down); }
     }
     &--hold {
       background: #f2fdf6;
       .tile__value,
       .tile__icon { color: var(--fa-purple); }
+      &.is-active { border-color: var(--fa-purple); }
     }
     &--out {
       background: #fffaf0;
       .tile__value,
       .tile__icon { color: var(--fa-orange); }
+      &.is-active { border-color: var(--fa-orange); }
     }
   }
 
@@ -346,6 +362,21 @@
 
       &:active {
         background: rgba(28, 60, 112, 0.1);
+      }
+    }
+
+    /* Dòng trống khi bộ lọc pha không khớp mã nào — ghi đè sọc/chạm của
+       `tbody tr` ở trên vì nó không phải dòng bấm được. */
+    tbody tr.row-empty,
+    tbody tr.row-empty:active,
+    tbody tr.row-empty:nth-child(even) {
+      background: transparent;
+      cursor: default;
+
+      td {
+        padding: 22px 6px;
+        text-align: center;
+        color: var(--fa-text);
       }
     }
   }
