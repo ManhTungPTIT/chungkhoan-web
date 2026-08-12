@@ -123,25 +123,6 @@ function toDateString(time) {
 }
 
 /**
- * Cập nhật mức "Chốt lãi / Cắt lỗ" của lệnh CÒN MỞ về MA của nến MỚI NHẤT.
- *
- * Ô này phải trùng với đường MA khách đang nhìn trên chart. Đường MA chạy tiếp
- * mỗi phiên, nên nếu giữ nguyên MA tại nến vào lệnh thì con số đứng yên còn
- * đường thì trôi đi — lệch dần và càng nắm lâu càng lệch to (đo được: MA10
- * đóng băng 111.55 trong khi đường MA10 hiện tại 297.55).
- *
- * `inLong === true` tương đương "tín hiệu cuối là buy" (máy trạng thái xen kẽ
- * buy → sell), tức vị thế còn mở. Các lệnh đã đóng KHÔNG bị đụng tới: chúng giữ
- * MA tại nến vào lệnh nên lịch sử tín hiệu vẫn đọc đúng.
- *
- * `maSeries` là mảng do `calcSMA` sinh ra; phần tử cuối luôn ứng với nến cuối.
- */
-function refreshOpenPositionTarget(signals, inLong, maSeries) {
-  if (!inLong || signals.length === 0 || maSeries.length === 0) return;
-  signals[signals.length - 1].priceTarget = maSeries[maSeries.length - 1].value;
-}
-
-/**
  * Tự động tính tín hiệu mua/bán bằng máy trạng thái flat/long.
  *
  * Bắt đầu ở trạng thái flat (đang ngoài). Tại mỗi nến k (k >= 34, đủ dữ
@@ -183,11 +164,14 @@ export function generateSignals(candles) {
           time: candles[i].time,
           date: toDateString(candles[i].time),
           type: "buy",
-          // "Chốt lãi / Cắt lỗ" = MA20, không phải giá đóng cửa: MA20 chính là
-          // ngưỡng thoát lệnh của bot này (xem nhánh else bên dưới, `closePrice
-          // < ma` là bán) nên đây là mức mà thủng xuống là bot báo ra.
-          // Ghi MA20 tại nến vào lệnh cho các lệnh ĐÃ ĐÓNG (giữ đúng lịch sử);
-          // lệnh còn mở được làm mới ở cuối hàm — xem ghi chú ở đó.
+          // "Chốt lãi / Cắt lỗ" = MA20 TẠI NẾN VÀO LỆNH, không phải giá đóng cửa
+          // và KHÔNG phải MA20 của phiên mới nhất. MA20 là ngưỡng thoát lệnh của
+          // bot này (nhánh else bên dưới: thủng MA20 là bán) nên đây là mức giá
+          // đã có hiệu lực từ lúc vào lệnh.
+          //
+          // `ma` = `ma20[i - 19].value` ứng đúng nến i, nên soi crosshair vào
+          // NẾN CÓ MARKER MUA trên chart sẽ đọc ra đúng con số này — đường MA20
+          // ở mép phải (phiên hôm nay) đã trôi đi thì lệch là ĐÚNG, không phải lỗi.
           priceTarget: ma,
           price: Math.min(candles[i].open, candles[i].close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });
@@ -199,13 +183,16 @@ export function generateSignals(candles) {
         time: candles[i].time,
         date: toDateString(candles[i].time),
         type: "sell",
+        // Đang đứng ngoài thì mức đáng theo dõi là ngưỡng VÀO LẠI: luật mua của
+        // bot là close > MA20, nên MA20 TẠI NẾN BÁN chính là mức mà vượt lên là
+        // bot báo mua trở lại. Cùng nến, cùng chu kỳ với nhánh buy.
+        priceTarget: ma,
         price: Math.max(candles[i].open, candles[i].close), // hiển thị: neo marker ở đỉnh THÂN nến (bỏ râu)
       });
       inLong = false;
     }
   }
 
-  refreshOpenPositionTarget(signals, inLong, ma20);
   return signals;
 }
 
@@ -267,9 +254,10 @@ export function generateSignalsT(candles) {
           time: cur.time,
           date: toDateString(cur.time),
           type: "buy",
-          // MA10 tại nến vào lệnh. `calcSMA(c, 10)[j]` ứng với `candles[9 + j]`
-          // nên nến i tra ở `i - 9`; vòng lặp bắt đầu từ 34 nên chỉ số luôn hợp lệ.
-          // Lệnh còn mở được làm mới về MA10 nến cuối ở cuối hàm.
+          // MA10 TẠI NẾN VÀO LỆNH, không phải MA10 phiên mới nhất — soi crosshair
+          // vào nến có marker mua sẽ đọc ra đúng con số này.
+          // `calcSMA(c, 10)[j]` ứng với `candles[9 + j]` nên nến i tra ở `i - 9`;
+          // vòng lặp bắt đầu từ 34 nên chỉ số luôn hợp lệ.
           priceTarget: ma10[i - 9].value,
           price: Math.min(cur.open, cur.close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
         });
@@ -290,6 +278,10 @@ export function generateSignalsT(candles) {
           time: cur.time,
           date: toDateString(cur.time),
           type: "sell",
+          // Mức theo dõi khi đứng ngoài — MA10 TẠI NẾN BÁN, cùng chu kỳ với
+          // nhánh buy. MA10 vẫn KHÔNG tham gia luật bán (luật là cấu trúc nến +
+          // histogram ở `isSell` ngay trên), chỉ dùng để hiển thị.
+          priceTarget: ma10[i - 9].value,
           price: Math.max(cur.open, cur.close), // hiển thị: neo marker ở đỉnh THÂN nến (bỏ râu)
         });
         inLong = false;
@@ -297,7 +289,6 @@ export function generateSignalsT(candles) {
     }
   }
 
-  refreshOpenPositionTarget(signals, inLong, ma10);
   return signals;
 }
 
@@ -338,6 +329,9 @@ export function generateSignalsLong(candles) {
         time: candles[i].time,
         date: toDateString(candles[i].time),
         type: "sell",
+        // Giữ đúng quy ước riêng của bot này: giá đóng cửa, KHÔNG phải MA50 —
+        // giống hệt nhánh buy ở trên.
+        priceTarget: closePrice,
         price: Math.max(candles[i].open, candles[i].close), // hiển thị: neo marker ở đỉnh THÂN nến (bỏ râu)
       });
       inLong = false;

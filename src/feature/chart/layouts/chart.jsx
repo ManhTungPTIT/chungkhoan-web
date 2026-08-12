@@ -205,9 +205,10 @@ function syncBbsIndicator(chart, signals) {
 }
 
 // CỐ Ý bỏ `priceTarget` khỏi signature: không hình vẽ nào đọc nó (BBS chỉ dùng
-// time/type, overlay dùng time/price) nhưng nó là MA của nến cuối nên nhúc nhích
-// theo TỪNG TICK realtime — để trong signature thì mỗi tick lại tháo/tạo lại BBS
-// và toàn bộ overlay tín hiệu.
+// time/type, overlay dùng time/price). Nó là MA tại nến vào lệnh, nên phiên vào
+// lệnh còn đang chạy thì nó nhúc nhích theo TỪNG TICK — để trong signature thì
+// mỗi tick lại tháo/tạo lại BBS và toàn bộ overlay tín hiệu, đúng thứ mà
+// signature này sinh ra để tránh.
 function getSignalsSignature(signals = []) {
   return signals
     .map((signal) => [signal?.time, signal?.type, signal?.price].join(":"))

@@ -425,10 +425,15 @@ function TradingView() {
                     </p>
                   </div>
                   <span className="signal-card__dot" aria-hidden="true" />
-                  {isBuySignal && (
+                  {/* Tiêu đề CỐ ĐỊNH "Chốt lãi / Cắt lỗ" ở cả hai trạng thái —
+                      theo yêu cầu, đừng đổi chữ theo mua/bán. Màu số chạy theo
+                      vùng của mã (COLORCODE): mã xanh số xanh, mã đỏ số đỏ. */}
+                  {priceTarget !== "--" && (
                     <div className="signal-card__metric signal-card__metric--exit">
                       <span>Chốt lãi / Cắt lỗ</span>
-                      <strong style={{ color: "red" }}>{priceTarget}</strong>
+                      <strong style={{ color: COLORCODE.color }}>
+                        {priceTarget}
+                      </strong>
                     </div>
                   )}
                   <div className="signal-card__metric signal-card__metric--change">

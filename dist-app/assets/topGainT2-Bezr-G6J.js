@@ -1,0 +1,1 @@
+import{t as e}from"./TopGainT2Chart-0cYHILbf.js";var t=e;export{t as default};
