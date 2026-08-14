@@ -50,8 +50,8 @@ export default function DeleteAccountButton() {
         // heartbeat 12s của useSessionGuard nhận 401 trước và đá về /login trơn — người
         // dùng mất luôn thông báo "đã xóa". Cũng vì phiên đã thu hồi nên không gọi
         // /auth/logout: chắc chắn lỗi, chỉ tốn một vòng mạng.
-        onSuccess: () => {
-          clearTokens();
+        onSuccess: async () => {
+          await clearTokens();
           goToLogin("deleted");
         },
         onError: (err) => {

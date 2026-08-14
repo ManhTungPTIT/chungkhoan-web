@@ -65,7 +65,7 @@ axiosClient.interceptors.response.use(
       // App: token đi trong body vì WebView chạy cross-origin, cookie không được gửi.
       // Bare axios (no interceptor) so a 401 from /refresh can't re-enter this
       // handler and deadlock the queue — it surfaces in the catch below instead.
-      const { body, headers } = refreshRequestConfig(getRefreshToken());
+      const { body, headers } = refreshRequestConfig(await getRefreshToken());
       const { data } = await axios.post(
         `${import.meta.env.VITE_NODEJS_API_URL}/auth/refresh`,
         body,
@@ -75,13 +75,13 @@ axiosClient.interceptors.response.use(
       // BE xoay vòng refresh token và coi token cũ dùng lại là bị đánh cắp (nó
       // thu hồi TOÀN BỘ phiên). Không ghi đè bản mới ở đây thì lần refresh kế
       // tiếp sẽ đá người dùng ra khỏi mọi thiết bị.
-      if (IS_APP && data.refreshToken) setRefreshToken(data.refreshToken);
+      if (IS_APP && data.refreshToken) await setRefreshToken(data.refreshToken);
       processQueue(null, data.accessToken);
       original.headers.Authorization = `Bearer ${data.accessToken}`;
       return axiosClient(original);
     } catch (err) {
       processQueue(err, null);
-      clearTokens();
+      await clearTokens();
       // BE trả `code` để phân biệt "bị đá vì đăng nhập nơi khác" với lỗi phiên
       // thường — màn login dựa vào đó để giải thích (xem loginRedirect.js).
       redirectToLogin(err.response?.data?.code);

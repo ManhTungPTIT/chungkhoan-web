@@ -1,20 +1,25 @@
 import loginAdminHook from "../hooks/loginAdminHook";
 import axiosClient from "../../untils/axiosClient";
-import { setTokens, clearTokens } from "../untils/tokenStorage";
+import { clearTokens, getRefreshToken, setTokens } from "../untils/tokenStorage";
+import { refreshRequestConfig } from "../../untils/appClient";
 
 export function LoginAdminService() {
   const login = async (data) => {
     const response = await loginAdminHook(data);
-     setTokens({ accessToken: response.data.accessToken });
+    await setTokens({
+      accessToken: response.data.accessToken,
+      refreshToken: response.data.refreshToken,
+    });
   };
 
   const logout = async () => {
     try {
-      await axiosClient.post("/auth/logout");
+      const { body } = refreshRequestConfig(await getRefreshToken());
+      await axiosClient.post("/auth/logout", body);
     } catch {
       // best-effort; clear locally regardless
     }
-    clearTokens();
+    await clearTokens();
     window.location.href = "/admin/login";
   };
 

@@ -42,7 +42,7 @@ export function useLogoutOnAreaSwitch() {
 
     // Chưa đăng nhập: chỉ dọn cho chắc, không chặn điều hướng.
     if (!getAccessToken()) {
-      clearTokens();
+      void clearTokens();
       return;
     }
 
@@ -61,7 +61,7 @@ export function useLogoutOnAreaSwitch() {
       } catch {
         // best-effort — vẫn xoá token cục bộ dù API lỗi.
       }
-      clearTokens();
+      await clearTokens();
       // Reload sang login của vùng MỚI để reset sạch state/cache, tránh race với
       // guard (PrivateRoute/AdminPrivateRoute đọc token ngay lúc mount).
       window.location.href = area === "admin" ? "/admin/login" : "/login";

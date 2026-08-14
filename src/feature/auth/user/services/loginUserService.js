@@ -14,7 +14,7 @@ export function LoginUserService() {
     const user = response.data.user ?? response.data.data?.user ?? null;
     // `refreshToken` chỉ có ở bản app — trên web nó nằm trong cookie httpOnly và
     // setTokens tự bỏ qua giá trị undefined này.
-    setTokens({
+    await setTokens({
       accessToken: response.data.accessToken,
       refreshToken: response.data.refreshToken,
       user,
@@ -26,12 +26,12 @@ export function LoginUserService() {
     try {
       // App phải gửi kèm refresh token để BE thu hồi đúng phiên; web thì BE đọc
       // từ cookie nên body là null.
-      const { body } = refreshRequestConfig(getRefreshToken());
+      const { body } = refreshRequestConfig(await getRefreshToken());
       await axiosClient.post("/auth/logout", body);
     } catch {
       // best-effort; clear locally regardless
     }
-    clearTokens();
+    await clearTokens();
     window.location.href = "/login";
   };
 

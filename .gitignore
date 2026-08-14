@@ -34,4 +34,6 @@ docs/superpowers
 **/_tests_/
 *.test.*
 *.spec.*
+!src/feature/auth/admin/untils/tokenStorage.spec.js
+!src/feature/auth/untils/secureStorage.spec.js
 coverage/
