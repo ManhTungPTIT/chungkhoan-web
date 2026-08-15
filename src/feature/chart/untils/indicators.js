@@ -45,6 +45,23 @@ export function calcSMA(candles, period) {
   }));
 }
 
+// WMA trọng số tuyến tính — out[j] ánh xạ tới values[period-1+j].
+// Phiên gần nhất trọng số `period`, xa nhất trọng số 1; mẫu số là tổng trọng số
+// period*(period+1)/2. Dùng cho biên độ (high-low) của BOT Dài hạn.
+export function wmaOf(values, period) {
+  if (values.length < period) return [];
+  const denom = (period * (period + 1)) / 2;
+  const out = [];
+  for (let i = period - 1; i < values.length; i++) {
+    let sum = 0;
+    for (let w = 0; w < period; w++) {
+      sum += values[i - period + 1 + w] * (w + 1);
+    }
+    out.push(sum / denom);
+  }
+  return out;
+}
+
 // MACD(12,26,9)
 // macdLine[j] → candles[25+j]
 // signal[j]   → candles[33+j]
