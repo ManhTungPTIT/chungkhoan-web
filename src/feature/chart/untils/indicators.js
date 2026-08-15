@@ -62,6 +62,65 @@ export function wmaOf(values, period) {
   return out;
 }
 
+// BOT Dài hạn (BOT TREND 2) — hằng số cứng, KHÔNG phơi ra IndicatorPicker.
+const NW_WMA_PERIOD = 10;
+const NW_K = 3;
+
+// Giá xác định xu hướng: trung bình của chính cây nến đó. Trùng công thức
+// "HA Close" nhưng KHÔNG đệ quy — không có HA open ở đây.
+const hacOf = (bar) => (bar.open + bar.high + bar.low + bar.close) / 4;
+
+/**
+ * Ngưỡng động NW của BOT TREND 2 — xem spec 2026-08-15-bot-trend2-nw-design.md.
+ *
+ * Trả mảng THẲNG HÀNG với `bars` (`null` cho 9 nến warm-up), khác quy ước lệch
+ * chỉ số của wmaOf/emaOf/smaOf ngay trên. Cố ý: `calc` của klinecharts đòi mảng
+ * cùng độ dài dataList, giống calcBBValues trong bbSignalIndicator.js.
+ *
+ * Chỉ đọc open/high/low/close nên chạy được trên CẢ `candles` của FE lẫn
+ * `dataList` của klinecharts — đừng thêm tham chiếu `time` vào đây.
+ *
+ * Trong xu hướng tăng NW chỉ đi ngang hoặc đi lên; xu hướng giảm thì ngược lại.
+ * Đó là nguồn gốc tính bám xu hướng: rung lắc nhỏ không kéo ngưỡng đi theo.
+ */
+export function calcNwTrend(bars) {
+  const out = new Array(bars.length).fill(null);
+  const wma = wmaOf(
+    bars.map((bar) => bar.high - bar.low),
+    NW_WMA_PERIOD,
+  );
+  if (wma.length === 0) return out;
+
+  const seed = NW_WMA_PERIOD - 1;
+  let trend = "down";
+  let nw = hacOf(bars[seed]) + NW_K * wma[0];
+  out[seed] = { nw, trend };
+
+  for (let i = seed + 1; i < bars.length; i++) {
+    const hac = hacOf(bars[i]);
+    const rev = NW_K * wma[i - seed];
+
+    if (trend === "up") {
+      // So sánh CHẶT: HAC == NW không lật trạng thái.
+      if (hac < nw) {
+        trend = "down";
+        nw = hac + rev;
+      } else {
+        nw = Math.max(nw, hac - rev);
+      }
+    } else if (hac > nw) {
+      trend = "up";
+      nw = hac - rev;
+    } else {
+      nw = Math.min(nw, hac + rev);
+    }
+
+    out[i] = { nw, trend };
+  }
+
+  return out;
+}
+
 // MACD(12,26,9)
 // macdLine[j] → candles[25+j]
 // signal[j]   → candles[33+j]
