@@ -78,6 +78,25 @@ describe("Android refresh-token storage", () => {
     expect(await tokens.getRefreshToken()).toBe("rotated-refresh");
   });
 
+  it("fails closed when secure storage cannot persist a rotated token", async () => {
+    // Ghi hỏng thì KHÔNG được giữ token cũ trong cache: kho bảo mật lúc đó không có gì,
+    // nên app tiếp tục chạy như đã đăng nhập là sai — tắt đi mở lại sẽ mất phiên mà không
+    // có dấu hiệu nào báo trước.
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const tokens = await loadTokenStorage();
+
+    await tokens.setRefreshToken("first-token", true);
+    expect(await tokens.getRefreshToken()).toBe("first-token");
+
+    secureStorage.setSecureValue.mockRejectedValue(new Error("KEYCHAIN_WRITE_FAILED"));
+
+    await expect(tokens.setRefreshToken("second-token", true)).rejects.toThrow(
+      "KEYCHAIN_WRITE_FAILED",
+    );
+    expect(await tokens.getRefreshToken()).toBeNull();
+    consoleError.mockRestore();
+  });
+
   it("fails closed when secure storage cannot be opened", async () => {
     localStorage.setItem("accessToken", "stale-access");
     localStorage.setItem("auth-storage", "stale-profile");

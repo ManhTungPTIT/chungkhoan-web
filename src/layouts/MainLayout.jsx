@@ -21,7 +21,9 @@ import { activePackageTitle } from "../feature/auth/user/untils/packageDisplay";
 import { GiLion } from "react-icons/gi";
 import { botTargetPath } from "./untils/navigation";
 import "../feature/chart/index.scss";
-import logo from "../assets/logo-auth.png"
+import logoIcon from "../assets/lion.png";
+import logoText from "../assets/text_logo.png";
+
 
 const MARKET_CHART_PATH = "/chart/market";
 
@@ -82,7 +84,8 @@ function MainLayout() {
       <div className={`mainSidebar${showSidebar ? " hidden" : ""}`}>
         <div className="ms-header">
           <div style={{ display: "flex", marginTop: "0.3rem" }}>
-            <img className="logo" src={logo} alt="ảnh logo" />
+            <img className="logo" src={logoIcon} alt="ảnh logo" />
+            <img className="logo" src={logoText} alt="Anh" />
           </div>
           <button onClick={() => setShowSidebar(!showSidebar)}>
             <GiHamburgerMenu />

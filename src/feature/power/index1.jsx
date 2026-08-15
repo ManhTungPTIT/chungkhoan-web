@@ -51,7 +51,7 @@ export default function PowerPageNormal() {
       <ChartHeader
         id="power-map-title"
         icon={<BsBullseye />}
-        title="BẢN ĐỒ SỨC MẠNH DÒNG TIỀN CƠ BẢN"
+        title="BẢN ĐỒ SỨC MẠNH DÒNG TIỀN"
         variant="navy"
         accent="#b06ae0"
         className="power-page__header"

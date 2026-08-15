@@ -103,16 +103,16 @@ export default function MarketChartsPage() {
           </p>
         )}
         {/* Bản đồ sức mạnh dòng tiền đứng riêng ở đầu trang và chiếm gần trọn viewport. */}
-        <ChartSection
+        {/* <ChartSection
           id="power-map"
           className="market-chart-pair__panel market-chart-pair__panel--power"
           aria-label={MARKET_CHART_LABELS["power-map"]}
         >
           <PowerPage />
-        </ChartSection>
+        </ChartSection> */}
         <ChartSection
           id="power-map"
-          className="market-chart-pair__panel market-chart-pair__panel--power"
+          className="market-chart-pair__panel market-chart-pair__panel--power market-chart-pair__panel--wide"
           aria-label={MARKET_CHART_LABELS["power-map"]}
         >
           <PowerPageNormal />

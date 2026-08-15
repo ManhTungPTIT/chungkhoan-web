@@ -1164,6 +1164,7 @@
    Chúng vốn là TRANG RIÊNG: root đặt `height: 100dvh` + `overflow: hidden` để
    chiếm trọn màn. Nhúng vào lưới panel thì phải gỡ hai thứ đó, nếu không mỗi
    bản đồ nuốt đúng một màn hình và nội dung tràn bị cắt cụt.                */
+   //Cách để một biểu đồ chiếm toàn màn hình
 .market-chart-pair__panel--wide {
   grid-column: 1 / -1;
 }

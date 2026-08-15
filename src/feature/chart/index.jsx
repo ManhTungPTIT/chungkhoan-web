@@ -450,7 +450,7 @@ function TradingView() {
                 <div className="signal-card__row signal-card__row--bottom">
                   <div className="signal-card__metric signal-card__metric--icon signal-card__metric--targets">
                     <FiTarget aria-hidden="true" />
-                    <span>{ isBuySignal ? "Mục tiêu dự kiến" : "Vùng đáy dự kiến"
+                    <span>{ isBuySignal ? "Mục tiêu dự kiến" : "Vùng có thể tạo đáy"
                       }</span>
                     <strong style={{ color: "purple" }}>
                       {target1} | {target2} | {target3}

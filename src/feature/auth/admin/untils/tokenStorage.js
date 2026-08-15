@@ -28,9 +28,10 @@ export const setAccessToken = (token) => {
 // không đọc được và cũng KHÔNG ĐƯỢC lưu lại — lưu là tự vứt bỏ đúng cái lợi của
 // httpOnly.
 //
-// Android app: refresh token dài hạn nằm trong Android Keystore qua plugin local.
-// `remember=false` chỉ giữ token trong RAM, tương đương session cũ nhưng không để
-// plaintext trong WebView storage. Web vẫn dùng cookie httpOnly và luôn trả null.
+// Bản app: refresh token dài hạn nằm trong kho bảo mật của hệ điều hành qua plugin
+// local — Keystore trên Android, Keychain trên iOS. `remember=false` chỉ giữ token
+// trong RAM, tương đương session cũ nhưng không để plaintext trong WebView storage.
+// Web vẫn dùng cookie httpOnly và luôn trả null.
 async function initializeAppRefreshToken() {
   const persistentLegacy = localStorage.getItem(REFRESH_KEY);
   const sessionLegacy = sessionStorage.getItem(REFRESH_KEY);
@@ -62,7 +63,7 @@ async function initializeAppRefreshToken() {
     localStorage.removeItem(ACCESS_KEY);
     sessionStorage.removeItem(ACCESS_KEY);
     localStorage.removeItem("auth-storage");
-    console.error("Không thể mở Android Keystore; cần đăng nhập lại.", error);
+    console.error("Không mở được kho bảo mật của thiết bị; cần đăng nhập lại.", error);
   }
 }
 
@@ -85,11 +86,23 @@ export const setRefreshToken = async (token, remember = refreshTokenRemembered) 
   await initializeTokenStorage();
   localStorage.removeItem(REFRESH_KEY);
   sessionStorage.removeItem(REFRESH_KEY);
-  if (remember) {
-    await setSecureValue(REFRESH_KEY, token);
-  } else {
-    await removeSecureValue(REFRESH_KEY);
+
+  // Fail closed, cùng lý lẽ với migration ở trên. Kho bảo mật ghi hỏng mà ta vẫn giữ token
+  // trong cache thì app chạy tiếp như đã đăng nhập, trong khi trên thiết bị không có gì —
+  // tắt đi mở lại là mất phiên, không dấu hiệu báo trước. Thà lộ lỗi ngay tại đây.
+  try {
+    if (remember) {
+      await setSecureValue(REFRESH_KEY, token);
+    } else {
+      await removeSecureValue(REFRESH_KEY);
+    }
+  } catch (error) {
+    refreshTokenCache = null;
+    refreshTokenRemembered = false;
+    console.error("Không ghi được refresh token vào kho bảo mật của thiết bị.", error);
+    throw error;
   }
+
   refreshTokenCache = token;
   refreshTokenRemembered = remember;
 };
@@ -133,7 +146,7 @@ export const clearTokens = async () => {
       await removeSecureValue(REFRESH_KEY);
     } catch (error) {
       // Token WebView đã bị xóa; báo lỗi nhưng không giữ người dùng ở màn cũ.
-      console.error("Không thể xóa refresh token khỏi Android Keystore.", error);
+      console.error("Không xoá được refresh token khỏi kho bảo mật của thiết bị.", error);
     }
   }
 };
