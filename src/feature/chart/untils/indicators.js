@@ -204,8 +204,8 @@ function toDateString(time) {
  *
  * Con số trên thẻ phải trùng đường tham chiếu tại phiên hiện tại — đường đó
  * chạy tiếp mỗi phiên nên giữ mức của nến signal thì càng để lâu càng lệch
- * khỏi đường khách đang nhìn. Dùng chung cho cả ba bot: MA10/MA20 cho BOT
- * Trend và T+, NW cho BOT Dài hạn.
+ * khỏi đường khách đang nhìn. Dùng chung cho cả ba bot: MA20 cho BOT Trend,
+ * MA10 cho BOT T+, NW cho BOT Dài hạn.
  *
  * Chỉ đụng tín hiệu cuối (= trạng thái hiện tại). Các tín hiệu cũ giữ nguyên
  * mức tại nến của chúng nên lịch sử vẫn đọc đúng.
