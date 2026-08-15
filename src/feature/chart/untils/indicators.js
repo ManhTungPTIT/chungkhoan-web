@@ -384,51 +384,50 @@ export function generateSignalsT(candles) {
   return signals;
 }
 
+/**
+ * BOT Dài hạn (BOT TREND 2) — bám xu hướng bằng ngưỡng động NW.
+ *
+ * Tín hiệu phát ở đúng nến mà `trend` của calcNwTrend đổi chiều:
+ *   down → up : MUA   (HAC cắt LÊN NW)
+ *   up → down : BÁN   (HAC cắt XUỐNG NW)
+ *
+ * Không cần kiểm tra "cắt" bằng hai nến: suốt một xu hướng giảm NW luôn nằm
+ * trên HAC theo cách dựng, nên việc lật trạng thái TỰ NÓ đã là cú cắt.
+ *
+ * `priceTarget` = NW SAU khi lật tại nến đó — mức NW vừa bị xuyên thủng thuộc
+ * về xu hướng đã kết thúc, mức mới mới là ngưỡng bảo vệ đi tiếp. Tín hiệu cuối
+ * được kéo về NW phiên mới nhất (refreshLastSignalTarget), cùng cách làm với
+ * MA20 của BOT Trend và MA10 của BOT T+.
+ *
+ * Máy trạng thái đảm bảo tín hiệu xen kẽ buy → sell → buy. Cần ít nhất 11 nến
+ * để có tín hiệu (10 nến cho WMA, nến thứ 11 mới lật được).
+ */
 export function generateSignalsLong(candles) {
-  const ma50 = calcSMA(candles, 50);
-  const { macdLine, signal } = calcMACD(candles);
+  const series = calcNwTrend(candles);
   const signals = [];
+  let prevTrend = null;
 
-  let inLong = false;
-
-  // Bắt đầu tại 49: MA50 cần đủ 50 nến (ma50[i-49] hợp lệ khi i>=49);
-  // MACD signal chỉ cần i>=33 nên 49 đã bao trùm.
-  for (let i = 49; i < candles.length; i++) {
-    const closePrice = candles[i].close;
-    const ma = ma50[i - 49].value;
-
-    const macd = macdLine[i - 25].value;
-    const sig = signal[i - 33].value;
-
-    if (!inLong) {
-      // Vào lệnh: giá trên MA50 VÀ MACD > Signal
-      if (closePrice > ma && macd > sig) {
-        signals.push({
-          time: candles[i].time,
-          date: toDateString(candles[i].time),
-          type: "buy",
-          // CỐ Ý giữ giá đóng cửa, không đổi sang MA50: Trend dùng MA20 và T+
-          // dùng MA10 là yêu cầu riêng cho hai bot đó. Đừng "thống nhất" chỗ này
-          // nếu không có yêu cầu mới.
-          priceTarget: closePrice,
-          price: Math.min(candles[i].open, candles[i].close), // hiển thị: neo marker ở đáy THÂN nến (bỏ râu)
-        });
-        inLong = true;
-      }
-    } else if (closePrice < ma && macd < sig) {
-      // Ra lệnh: giá thủng MA50
+  series.forEach((point, i) => {
+    if (!point) return;
+    if (prevTrend !== null && point.trend !== prevTrend) {
+      const isBuy = point.trend === "up";
       signals.push({
         time: candles[i].time,
         date: toDateString(candles[i].time),
-        type: "sell",
-        // Giữ đúng quy ước riêng của bot này: giá đóng cửa, KHÔNG phải MA50 —
-        // giống hệt nhánh buy ở trên.
-        priceTarget: closePrice,
-        price: Math.max(candles[i].open, candles[i].close), // hiển thị: neo marker ở đỉnh THÂN nến (bỏ râu)
+        type: isBuy ? "buy" : "sell",
+        priceTarget: point.nw,
+        // hiển thị: neo marker ở thân nến (bỏ râu) — cùng quy ước hai bot kia
+        price: isBuy
+          ? Math.min(candles[i].open, candles[i].close)
+          : Math.max(candles[i].open, candles[i].close),
       });
-      inLong = false;
     }
-  }
+    prevTrend = point.trend;
+  });
 
+  const nwSeries = series
+    .map((point, i) => (point ? { time: candles[i].time, value: point.nw } : null))
+    .filter(Boolean);
+  refreshLastSignalTarget(signals, nwSeries);
   return signals;
 }
