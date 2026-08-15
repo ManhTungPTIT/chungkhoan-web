@@ -199,16 +199,19 @@ function toDateString(time) {
 }
 
 /**
- * Đưa mức "Chốt lãi / Cắt lỗ" của tín hiệu CUỐI CÙNG về MA của nến MỚI NHẤT.
+ * Đưa mức "Chốt lãi / Cắt lỗ" của tín hiệu CUỐI CÙNG về mức tham chiếu của
+ * nến MỚI NHẤT.
  *
- * Con số trên thẻ phải trùng đường MA10/MA20 tại phiên hiện tại — đường MA chạy
- * tiếp mỗi phiên nên giữ MA của nến signal thì càng để lâu càng lệch khỏi đường
- * khách đang nhìn.
+ * Con số trên thẻ phải trùng đường tham chiếu tại phiên hiện tại — đường đó
+ * chạy tiếp mỗi phiên nên giữ mức của nến signal thì càng để lâu càng lệch
+ * khỏi đường khách đang nhìn. Dùng chung cho cả ba bot: MA10/MA20 cho BOT
+ * Trend và T+, NW cho BOT Dài hạn.
  *
- * Chỉ đụng tín hiệu cuối (= trạng thái hiện tại). Các tín hiệu cũ giữ nguyên MA
- * tại nến của chúng nên lịch sử vẫn đọc đúng.
+ * Chỉ đụng tín hiệu cuối (= trạng thái hiện tại). Các tín hiệu cũ giữ nguyên
+ * mức tại nến của chúng nên lịch sử vẫn đọc đúng.
  *
- * `maSeries` là mảng do `calcSMA` sinh ra; phần tử cuối luôn ứng với nến cuối.
+ * `maSeries` là mảng do `calcSMA` hoặc `calcNwTrend` (đã map sang `{ time,
+ * value }`) sinh ra; phần tử cuối luôn ứng với nến cuối.
  */
 function refreshLastSignalTarget(signals, maSeries) {
   if (signals.length === 0 || maSeries.length === 0) return;
