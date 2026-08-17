@@ -4,6 +4,8 @@ import { IoCloseCircle, IoCheckmarkCircle } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import { RegisterUserService } from "../services/registerUserService";
 import { buildAccountPayload } from "../untils/accountType";
+import logo from "../../../../assets/lion.png"
+import logoText from "../../../../assets/text_logo.png"
 
 export default function RegisterForm({ onSwitchTab }) {
   const [fullName, setFullName] = useState("");
@@ -94,7 +96,10 @@ export default function RegisterForm({ onSwitchTab }) {
 
   return (
     <>
-      <div className="auth-logo"></div>
+      <div className="auth-logo">
+        <img src= {logo} alt="ảnh" />
+        <img className="logoText" src={logoText} alt="Anh" />
+      </div>
       <h3 className="auth-welcome">Tạo tài khoản</h3>
       <p className="auth-welcome-sub">Đăng ký để bắt đầu cùng LEOSTOCK</p>
 

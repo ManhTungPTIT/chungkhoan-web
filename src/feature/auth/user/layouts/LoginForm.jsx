@@ -6,6 +6,8 @@ import { FaFacebookF, FaApple } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { LoginUserService } from "../services/loginUserService";
 import { DELETED_NOTICE, mapLoginError, SUPERSEDED_NOTICE } from "../untils/loginError";
+import logo from "../../../../assets/lion.png"
+import logoText from "../../../../assets/text_logo.png"
 
 // Lý do bị đẩy về màn đăng nhập → câu giải thích. Đọc từ query `?reason=`.
 const NOTICE_BY_REASON = {
@@ -63,7 +65,10 @@ export default function LoginForm({ onSwitchTab }) {
 
   return (
     <>
-      <div className="auth-logo"></div>
+      <div className="auth-logo">
+        <img src= {logo} alt="ảnh" />
+        <img className="logoText" src={logoText} alt="Anh" />
+      </div>
       <h3 className="auth-welcome">Chào mừng trở lại!</h3>
       <p className="auth-welcome-sub">Đăng nhập để tiếp tục sử dụng LEOSTOCK</p>
 

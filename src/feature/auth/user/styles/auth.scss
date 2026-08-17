@@ -169,12 +169,18 @@ $line: rgba(255, 255, 255, 0.1);
 
   .auth-logo{
     // clamp(min, ưa thích, max): mobile không bé hơn 200px, desktop tối đa 300px
-    width: clamp(200px, 60vw, 300px);
-    height: 5rem;
-    margin: 0 auto 0.5rem; // căn giữa trong card
-    mix-blend-mode: lighten;
-    background: url("../../../../assets/logo-auth.png") center / contain
-      no-repeat;
+    display: flex;
+    margin-right: 1rem;
+    img{
+      width: clamp(10px, 40vw, 300px);
+      height: 9rem;
+    }
+    .logoText{
+      margin-top: 1rem;
+       width: clamp(10px, 45vw, 300px);
+        height: 6rem;
+    }
+   
   }
   .auth-tabs {
     display: flex;
